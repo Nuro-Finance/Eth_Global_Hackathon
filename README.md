@@ -1,20 +1,34 @@
 # Nuro — ETHGlobal NY 2026
 
-**Nuro is a bank for AI agents** — a production dashboard (cards, agents, transactions, vault), not a hackathon template.
+**Nuro is a bank for AI agents** — cards, agent wallets, transactions, and vault in one dashboard.
 
 **One-liner:** Human verifies with World ID, executes a Uniswap swap on Base, and Arc splits one settlement into agent budget, card credit, and fee vault.
+
+This repo is the **production Nuro stack**, scoped for the ETHGlobal Reload journey. Internal ops surfaces (markets, arena, Plaid, MCP, admin diagnostics, external connectors) are disabled in this public build and return HTTP 410.
 
 ## Demo flow
 
 1. Log in
-2. Open **Agent Cards** or **My Card**
-3. **Reload** → enter amount (Base / ETH)
+2. **Home** → `/dashboard/home-responsive`
+3. **My Card** → `/dashboard/my-card-v2` → **Reload** (Base / ETH)
 4. **World ID** — owner attestation
 5. **Uniswap** — wallet signs swap on Base → Basescan tx hash
 6. **Arc** — settlement split on Arc testnet → Arc explorer tx hash
 7. Success screen — both hashes + split breakdown (70% agent / 25% card / 5% fee)
 
-Demo entry is **Cards → Reload** only.
+**ETHGlobal entry point:** Sidebar **My Card** → Reload. Alternate card UIs (`my-card`, `my-card-1`) and **My Wallet** remain in the app for development; they are not the primary judge path.
+
+## Sidebar (judge path)
+
+| Nav item | Route |
+|----------|--------|
+| Home | `/dashboard/home-responsive` |
+| My Card | `/dashboard/my-card-v2` |
+| Agent Cards | `/dashboard/agent-cards` |
+| Transactions | `/dashboard/transactions` |
+| Bank Vault | `/dashboard/vault` |
+| Agent Wallet | `/dashboard/agent-wallet` |
+| Settings | `/dashboard/settings` |
 
 ## Partners
 
@@ -27,7 +41,7 @@ Demo entry is **Cards → Reload** only.
 ## Architecture
 
 ```
-User (Cards → Reload)
+User (My Card v2 → Reload)
         │
         ▼
    World ID verify          ← human attestation
@@ -49,15 +63,16 @@ Uniswap runs on **Base (8453)**. Arc split runs on **Arc testnet (5042002)**. Tw
 | Integration | Location | Status |
 |-------------|----------|--------|
 | World ID gate | `WorldIdReloadGate.tsx`, `src/app/api/world/` | Wired — smoke test pending |
-| Uniswap / Base swap | `ReloadSwapFunds.tsx`, `/api/quote/*` | Scaffolded — smoke test pending |
-| Arc split | TBD (`scripts/` + contract) | Not built |
+| Uniswap / Base swap | `ReloadSwapFunds.tsx`, `/api/quote/*` | Wired — smoke test pending |
+| Arc split | Contract + scripts (see env) | Planned — configure `ARC_*` env vars |
 
 ## Local dev
 
 Requires [Doppler](https://doppler.com) project `nuro-ethglobal` / config `dev`.
 
 ```bash
-cd nuro-ethglobal-hackathon
+git clone https://github.com/Nuro-Finance/Eth_Global_Hackathon.git
+cd Eth_Global_Hackathon
 doppler setup --project nuro-ethglobal --config dev
 pnpm install
 pnpm dev        # Next.js → http://localhost:2800
@@ -89,8 +104,8 @@ Secrets stay in Doppler only — never commit `.env` files.
 
 ## Links
 
+- **Repo:** [github.com/Nuro-Finance/Eth_Global_Hackathon](https://github.com/Nuro-Finance/Eth_Global_Hackathon)
 - **Live demo:** [ethglobal.nuro.finance](https://ethglobal.nuro.finance) (when deployed)
-- **Branch:** `hackathon/ethglobal-ny-2026`
 
 ## License
 

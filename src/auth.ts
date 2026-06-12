@@ -59,41 +59,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         }
       },
     }),
- // Moltbook bot identity verification
-    Credentials({
-      id: "moltbook",
-      credentials: {
-        token: {},
-      },
-      async authorize(credentials) {
-        try {
-          const appKey = process.env.MOLTBOOK_APP_KEY
-          if (!appKey) return null
-
-          const res = await fetch("https://moltbook.com/api/v1/agents/verify-identity", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "X-Moltbook-App-Key": appKey,
-            },
-            body: JSON.stringify({ token: credentials.token }),
-          })
-          if (!res.ok) return null
-
-          const profile = await res.json()
- // Map Moltbook bot profile to next-auth user shape
-          return {
-            id: profile.id ?? profile.username,
-            name: profile.name ?? profile.username,
-            email: profile.email ?? `${profile.username}@moltbook.com`,
-            image: profile.avatar ?? null,
-            accessToken: credentials.token as string,
-          }
-        } catch {
-          return null
-        }
-      },
-    }),
   ],
   callbacks: {
     async jwt({ token, user, account }) {
@@ -133,7 +98,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           console.error("[auth.jwt] social-login fetch error", err)
         }
       } else if (user) {
- // Credentials / Moltbook path — authorize() already returned accessToken
+        // Credentials path — authorize() already returned accessToken
         token.accessToken = (user as any).accessToken
         token.name = user.name
         token.id = (user as any).id

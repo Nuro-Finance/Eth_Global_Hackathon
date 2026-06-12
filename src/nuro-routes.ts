@@ -23,6 +23,7 @@ import { reportError } from './error-reporter'
 import { NATIVE_TOKENS, getErc20Allowlist, findErc20, previewSwapQuote, ensureAllowlistFresh, forceRefreshAllowlist } from './swap'
 import { verifyIdToken, OAuthVerifyError } from './oauth-verify'
 import { normalizeKycStatus } from './lib/kyc-status'
+import { placePolymarketTrade, getAgentBalance } from './polymarket'
 import Anthropic from '@anthropic-ai/sdk'
 import {
   PERSONAS,
@@ -240,6 +241,24 @@ export function createNuroRouter(db: Pool): Router {
 
   const removedPublic = (_req: Request, res: Response) =>
     res.status(410).json({ error: 'Not available in this public build' })
+  const PUBLIC_DISABLED_PREFIXES = [
+    '/polymarket',
+    '/arena',
+    '/markets',
+    '/bots',
+    '/api/plaid',
+    '/admin/api',
+    '/mcp',
+    '/public/skill-health',
+  ]
+  router.use((req, res, next) => {
+    const p = req.path
+    if (PUBLIC_DISABLED_PREFIXES.some((prefix) => p === prefix || p.startsWith(`${prefix}/`))) {
+      return removedPublic(req, res)
+    }
+    next()
+  })
+
 
  // POST /auth/register (rate limited)
  //
@@ -2887,8 +2906,6 @@ export function createNuroRouter(db: Pool): Router {
  // Public version of /admin/api/skill-health for the sub-agents + neural
  // dashboards (both served as raw HTML from /public/ with no auth proxy).
  // Returns aggregate counts + health classification — no PII, no per-user data.
-  router.get("/public/skill-health", removedPublic)
-
  // ── GET /quote/swap ────────────────────────────────────────────────────────
  // Session 23 Thread D — FE live-quote preview. Hits 0x Aggregator v2 with
  // sellToken + amount, returns expected USDC output + worst-case min.
@@ -5563,18 +5580,734 @@ export function createNuroRouter(db: Pool): Router {
     }
   });
 
- // ── Removed internal product routes (public build) ───────────────────────
-  router.get('/polymarket/markets', removedPublic)
-  router.get('/arena/leaderboard', removedPublic)
-  router.get('/arena/stats', removedPublic)
-  router.get('/markets', removedPublic)
-  router.get('/markets/:id', removedPublic)
-  router.post('/markets', removedPublic)
-  router.post('/markets/:id/bet', removedPublic)
-  router.post('/markets/:id/resolve', removedPublic)
-  router.get('/markets/:id/positions', removedPublic)
-  router.post('/bots/submit', removedPublic)
-  router.get('/bots/submissions', removedPublic)
+ // ── Agents ──────────────────────────────────────────────────────────────────
+  router.post('/agents', requireAuth, async (req, res) => {
+    const userId = (req as any).user.id
+    const { name, type = 'polymarket', riskLimit = 100, cardId, strategy = {} } = req.body || {}
+    if (!name) return res.status(400).json({ error: 'name is required' })
+    try {
+      const id = randomUUID()
+      const walletAddress = generateAgentWalletAddr(id)
+
+     // Auto-link to user's primary card if no cardId specified
+      let linkedCardId = cardId || null
+      if (!linkedCardId) {
+        const primaryCard = await db.query(
+          'SELECT id FROM cards WHERE user_id = $1 AND is_active = true ORDER BY balance DESC LIMIT 1',
+          [userId]
+        )
+        if (primaryCard.rows.length) linkedCardId = primaryCard.rows[0].id
+      }
+     // Verify card belongs to user if provided
+      if (linkedCardId) {
+        const cardCheck = await db.query('SELECT id FROM cards WHERE id = $1 AND user_id = $2', [linkedCardId, userId])
+        if (!cardCheck.rows.length) linkedCardId = null
+      }
+
+     // Determine recommended funding based on risk level
+      const riskLabel = Number(riskLimit) <= 50 ? 'low' : Number(riskLimit) <= 100 ? 'medium' : 'high'
+      const recommendedFunding = riskLabel === 'low' ? 50 : riskLabel === 'medium' ? 150 : 300
+
+      await db.query(
+        `INSERT INTO agents (id, user_id, name, type, wallet_address, card_id, risk_limit, strategy)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+        [id, userId, name, type, walletAddress, linkedCardId, riskLimit, JSON.stringify(strategy)]
+      )
+
+     // Create notification about new agent
+      await db.query(
+        `INSERT INTO notifications (id, user_id, type, title, message, is_read, created_at)
+         VALUES (gen_random_uuid(), $1, 'system', $2, $3, false, now())`,
+        [userId, `Agent "${name}" deployed`, `Wallet: ${walletAddress.slice(0,6)}...${walletAddress.slice(-4)}. Fund with $${recommendedFunding}+ USDC on Polygon to activate trading.${linkedCardId ? ' Profits will settle to your linked card.' : ' Link a card in settings to receive profits.'}`]
+      )
+
+      const result = await db.query('SELECT * FROM agents WHERE id = $1', [id])
+      res.status(201).json({
+        ...result.rows[0],
+        linkedCard: linkedCardId ? true : false,
+        fundingRequired: true,
+        recommendedFunding,
+        fundingAddress: walletAddress,
+        fundingChain: 'Polygon',
+        fundingToken: 'USDC',
+        message: linkedCardId
+          ? `Agent deployed! Fund ${walletAddress.slice(0,6)}...${walletAddress.slice(-4)} with $${recommendedFunding}+ USDC on Polygon. Profits auto-settle to your card.`
+          : `Agent deployed but no card linked. Complete KYC and add a card to receive profits.`
+      })
+    } catch (err: any) {
+      console.error('[POST /agents]', err.message)
+      res.status(500).json({ error: 'Failed to create agent' })
+    }
+  })
+
+ // GET /agents — list user's agents
+  router.get('/agents', requireAuth, async (req, res) => {
+    const userId = (req as any).user.id
+    try {
+      const result = await db.query(
+        `SELECT a.*,
+          (SELECT COUNT(*) FROM agent_bets WHERE agent_id = a.id AND status = 'open') as open_bets,
+          (SELECT COUNT(*) FROM agent_bets WHERE agent_id = a.id) as total_bets
+         FROM agents a WHERE a.user_id = $1 ORDER BY a.created_at DESC`,
+        [userId]
+      )
+      res.json(result.rows)
+    } catch (err: any) {
+      console.error('[GET /agents]', err.message)
+      res.status(500).json({ error: 'Internal server error' })
+    }
+  })
+
+ // GET /agents/:id — agent detail with REAL wallet balance
+  router.get('/agents/:id', requireAuth, async (req, res) => {
+    const userId = (req as any).user.id
+    const id = String(req.params.id)
+    try {
+      const result = await db.query('SELECT * FROM agents WHERE id = $1 AND user_id = $2', [id, userId])
+      if (!result.rows.length) return res.status(404).json({ error: 'Agent not found' })
+      const agent = result.rows[0]
+     // Fetch real on-chain balance
+      const walletBalance = await getAgentBalance(id).catch(() => 0)
+      res.json({ ...agent, walletBalance, funded: walletBalance > 0.5 })
+    } catch (err: any) {
+      res.status(500).json({ error: 'Internal server error' })
+    }
+  })
+
+ // PATCH /agents/:id — update agent
+  router.patch('/agents/:id', requireAuth, async (req, res) => {
+    const userId = (req as any).user.id
+    const { id } = req.params
+    const { name, status, riskLimit, strategy, cardId } = req.body || {}
+    try {
+      const check = await db.query('SELECT id FROM agents WHERE id = $1 AND user_id = $2', [id, userId])
+      if (!check.rows.length) return res.status(404).json({ error: 'Agent not found' })
+      const updates: string[] = []; const values: any[] = []; let idx = 1
+      if (name !== undefined) { updates.push(`name = $${idx++}`); values.push(name) }
+      if (status !== undefined) { updates.push(`status = $${idx++}`); values.push(status) }
+      if (riskLimit !== undefined) { updates.push(`risk_limit = $${idx++}`); values.push(riskLimit) }
+      if (strategy !== undefined) { updates.push(`strategy = $${idx++}`); values.push(JSON.stringify(strategy)) }
+      if (cardId !== undefined) { updates.push(`card_id = $${idx++}`); values.push(cardId) }
+      if (!updates.length) return res.status(400).json({ error: 'No fields to update' })
+      updates.push(`updated_at = now()`)
+      values.push(id)
+      await db.query(`UPDATE agents SET ${updates.join(', ')} WHERE id = $${idx}`, values)
+      const result = await db.query('SELECT * FROM agents WHERE id = $1', [id])
+      res.json(result.rows[0])
+    } catch (err: any) {
+      res.status(500).json({ error: 'Internal server error' })
+    }
+  })
+
+ // DELETE /agents/:id — remove an agent and its bets
+  router.delete('/agents/:id', requireAuth, async (req, res) => {
+    const userId = (req as any).user.id
+    const { id } = req.params
+    try {
+      const check = await db.query('SELECT id, name FROM agents WHERE id = $1 AND user_id = $2', [id, userId])
+      if (!check.rows.length) return res.status(404).json({ error: 'Agent not found' })
+      await db.query('DELETE FROM agent_bets WHERE agent_id = $1', [id])
+      await db.query('DELETE FROM agents WHERE id = $1', [id])
+      res.json({ deleted: true, name: check.rows[0].name })
+    } catch (err: any) {
+      res.status(500).json({ error: 'Failed to delete agent' })
+    }
+  })
+
+ // POST /agents/:id/fund — enqueue a funding intent (Base vault → Polygon agent wallet).
+ // Sprint 2.3. Records intent only; sweepAgentFundings performs the CCTP bridge.
+ // While CONFIG.AGENT_FUNDING_OBSERVE_ONLY is true, the sweep marks the row
+ // 'skipped_observe_only' without moving USDC. Flip to false once Base→Polygon
+ // reverse CCTP lands to activate live.
+  router.post('/agents/:id/fund', requireAuth, async (req, res) => {
+    const userId = (req as any).user.id
+    const agentId = String(req.params.id)
+    const { amount } = req.body || {}
+
+    const amountNum = Number(amount)
+    if (!Number.isFinite(amountNum) || amountNum <= 0) {
+      return res.status(400).json({ error: 'amount must be a positive number (USDC)' })
+    }
+    if (amountNum > 10_000) {
+      return res.status(400).json({ error: 'amount exceeds $10,000 funding cap' })
+    }
+
+    const client = await db.connect()
+    try {
+     // Advisory lock on agent_id for the duration of the txn
+      await client.query(`BEGIN`)
+      await client.query(`SELECT pg_advisory_xact_lock(hashtext($1)::bigint)`, ['agent_' + agentId])
+
+      const agentRes = await client.query(
+        `SELECT id, user_id, status FROM agents WHERE id = $1 AND user_id = $2 FOR UPDATE`,
+        [agentId, userId]
+      )
+      if (!agentRes.rows.length) {
+        await client.query(`ROLLBACK`)
+        return res.status(404).json({ error: 'Agent not found' })
+      }
+      if (agentRes.rows[0].status === 'archived') {
+        await client.query(`ROLLBACK`)
+        return res.status(409).json({ error: 'Agent is archived' })
+      }
+
+      const fundingRes = await client.query(
+        `INSERT INTO agent_fundings (id, agent_id, user_id, amount, status, created_at)
+         VALUES (gen_random_uuid(), $1, $2, $3, 'pending', now())
+         RETURNING id, created_at`,
+        [agentId, userId, amountNum]
+      )
+
+     // If agent is 'draft', transition to 'funding' to reflect lifecycle
+      if (agentRes.rows[0].status === 'draft') {
+        await client.query(`UPDATE agents SET status = 'funding', updated_at = now() WHERE id = $1`, [agentId])
+      }
+
+      await client.query(`COMMIT`)
+
+      res.status(201).json({
+        id: fundingRes.rows[0].id,
+        agentId,
+        amount: amountNum,
+        status: 'pending',
+        createdAt: fundingRes.rows[0].created_at,
+        message: 'Funding intent recorded. Execution dispatch will bridge USDC Base→Polygon on the next cycle.',
+      })
+    } catch (err: any) {
+      try { await client.query(`ROLLBACK`) } catch { /* swallow */ }
+      console.error('[POST /agents/:id/fund]', err.message?.slice(0, 120))
+      res.status(500).json({ error: 'Failed to enqueue funding' })
+    } finally {
+      client.release()
+    }
+  })
+
+ // GET /agents/:id/fundings — list funding history for an agent
+  router.get('/agents/:id/fundings', requireAuth, async (req, res) => {
+    const userId = (req as any).user.id
+    const agentId = String(req.params.id)
+    try {
+     // Ownership check
+      const owner = await db.query('SELECT id FROM agents WHERE id = $1 AND user_id = $2', [agentId, userId])
+      if (!owner.rows.length) return res.status(404).json({ error: 'Agent not found' })
+
+      const rows = await db.query(
+        `SELECT id, amount, status, burn_tx_hash, mint_tx_hash, error_message,
+                attempt_count, completed_at, created_at
+         FROM agent_fundings WHERE agent_id = $1 ORDER BY created_at DESC LIMIT 50`,
+        [agentId]
+      )
+      res.json(rows.rows)
+    } catch (err: any) {
+      res.status(500).json({ error: 'Failed to fetch fundings' })
+    }
+  })
+
+ // GET /agents/:id/sweeps — list profit-sweep history for an agent
+  router.get('/agents/:id/sweeps', requireAuth, async (req, res) => {
+    const userId = (req as any).user.id
+    const agentId = String(req.params.id)
+    try {
+      const owner = await db.query('SELECT id FROM agents WHERE id = $1 AND user_id = $2', [agentId, userId])
+      if (!owner.rows.length) return res.status(404).json({ error: 'Agent not found' })
+
+      const rows = await db.query(
+        `SELECT id, amount, status, burn_tx_hash, mint_tx_hash, destination,
+                error_message, completed_at, created_at
+         FROM agent_profit_sweeps WHERE agent_id = $1 ORDER BY created_at DESC LIMIT 50`,
+        [agentId]
+      )
+      res.json(rows.rows)
+    } catch (err: any) {
+      res.status(500).json({ error: 'Failed to fetch sweeps' })
+    }
+  })
+
+ // POST /agents/:id/bets — place a REAL bet on Polymarket
+ // Attempts real CLOB trade first, falls back with clear instructions if it fails
+  router.post('/agents/:id/bets', requireAuth, async (req, res) => {
+    const userId = (req as any).user.id
+    const agentId = String(req.params.id)
+    const { marketId, tokenId, marketQuestion, outcome, amount, entryPrice } = req.body || {}
+    if (!marketId || !outcome || !amount) return res.status(400).json({ error: 'marketId, outcome, amount required' })
+    try {
+      const agent = await db.query('SELECT * FROM agents WHERE id = $1 AND user_id = $2', [agentId, userId])
+      if (!agent.rows.length) return res.status(404).json({ error: 'Agent not found' })
+      const a = agent.rows[0]
+      if (a.status !== 'active') return res.status(403).json({ error: 'Agent is not active' })
+      if (Number(amount) > Number(a.risk_limit)) return res.status(402).json({ error: 'Exceeds risk limit', limit: Number(a.risk_limit) })
+
+     // S34 Marathon 9 / A3: HELM-105 tx-cap on agent-initiated bet placement.
+     // Closes two pre-S34 gaps in one move:
+     //   1. Per-agent attribution — heimdall_events get tagged with the
+     //      agent's UUID (not the user's). The Detail panel's Security
+     //      tab now shows these as "direct agent attribution" rather
+     //      than the "account-level" fallback.
+     //   2. Missing platform-level cap on agent-driven bets — pre-S34
+     //      only the per-agent `risk_limit` column above gated this
+     //      path. Helm's HELM-105 alarm now fires symmetrically
+     //      with the /markets/:id/bet user-initiated site.
+     // Polymarket settles on Polygon (chainId 137); fromAddress is the
+     // agent's Polygon vault, toAddress carries the CTF tokenId for
+     // forensic linkage when available.
+      await enforceTxCap({
+        source: 'agent-bet-intent',
+        txKind: 'transfer',
+        valueUsd: Number(amount),
+        chainId: 137,
+        fromAddress: a.wallet_address,
+        toAddress: tokenId || 'polymarket-ctf',
+        agentId,
+      });
+
+     // Check real wallet balance first
+      const walletBalance = await getAgentBalance(agentId)
+
+     // Attempt REAL Polymarket trade
+      let tradeResult = null
+      let tradeStatus = 'queued' // Default: queued (not executed)
+      if (tokenId && walletBalance >= Number(amount)) {
+        tradeResult = await placePolymarketTrade(
+          agentId,
+          tokenId,
+          outcome === 'Yes' ? 'BUY' : 'BUY', // Both Yes and No are BUY on their respective tokens
+          Number(entryPrice) || 0.5,
+          Number(amount),
+        )
+        if (tradeResult.success) {
+          tradeStatus = 'open' // Real trade placed
+        }
+      }
+
+      const betId = randomUUID()
+      await db.query(
+        `INSERT INTO agent_bets (id, agent_id, user_id, market_id, market_question, outcome, amount, entry_price, status, tx_hash)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+        [betId, agentId, userId, marketId, marketQuestion || '', outcome, amount, entryPrice || 0, tradeStatus, tradeResult?.txHash || null]
+      )
+
+     // Only update invested if trade was real
+      if (tradeStatus === 'open') {
+        await db.query('UPDATE agents SET total_invested = total_invested + $1, updated_at = now() WHERE id = $2', [amount, agentId])
+      }
+
+      const result = await db.query('SELECT * FROM agent_bets WHERE id = $1', [betId])
+      const response: any = { ...result.rows[0], walletBalance }
+
+     // Add fallback message if trade wasn't executed
+      if (tradeStatus === 'queued') {
+        response.tradeExecuted = false
+        if (walletBalance < Number(amount)) {
+          response.fallback = `Insufficient funds: wallet has $${walletBalance.toFixed(2)}, need $${Number(amount).toFixed(2)}. Fund agent wallet ${a.wallet_address} with USDC on Polygon.`
+        } else if (tradeResult?.fallbackMessage) {
+          response.fallback = tradeResult.fallbackMessage
+        } else if (!tokenId) {
+          response.fallback = 'Token ID required for live execution. Market data may be incomplete.'
+        } else {
+          response.fallback = 'Trade queued but not executed. Check agent wallet funding on Polygon.'
+        }
+      } else {
+        response.tradeExecuted = true
+        response.orderId = tradeResult?.orderId
+      }
+
+      res.status(201).json(response)
+    } catch (err: any) {
+      console.error('[POST /agents/:id/bets]', err.message)
+      res.status(500).json({ error: 'Failed to place bet' })
+    }
+  })
+
+ // GET /agents/:id/bets — bet history
+  router.get('/agents/:id/bets', requireAuth, async (req, res) => {
+    const userId = (req as any).user.id
+    const agentId = req.params.id
+    try {
+      const check = await db.query('SELECT id FROM agents WHERE id = $1 AND user_id = $2', [agentId, userId])
+      if (!check.rows.length) return res.status(404).json({ error: 'Agent not found' })
+      const result = await db.query(
+        'SELECT * FROM agent_bets WHERE agent_id = $1 ORDER BY created_at DESC LIMIT 50',
+        [agentId]
+      )
+      res.json(result.rows)
+    } catch (err: any) {
+      res.status(500).json({ error: 'Internal server error' })
+    }
+  })
+
+ // GET /agents/:id/details — bundled snapshot for the user-facing Agent
+ // Detail panel (S34 Tier A — Agent Control Plane).
+  //
+ // Returns budget + reputation + recent counsel + heimdall events + ledger
+ // entries + recent bets + recent fundings, all in one round-trip. Mirrors
+ // the admin Mythos POV but with agent-ownership auth (user can only see
+ // their own agents) instead of admin-key auth.
+  //
+ // Empty arrays are expected for newly-deployed user agents — the
+ // budget/reputation/counsel infrastructure was originally built for
+ // system agents (Mythos, Huginn) and only populates for user agents
+ // when those features wire through. The FE shows graceful empty
+ // states rather than gating on data presence.
+  //
+ // Helm events filter is dual-keyed: events tagged with this agent's
+ // UUID (server-side agent attribution) AND events tagged with the user's
+ // ID (user-initiated bets/withdrawals that don't currently propagate
+ // agent_id). Future work will thread agent_id through bet placement so
+ // the dual-key falls away.
+  router.get('/agents/:id/details', requireAuth, async (req: any, res: any) => {
+    const userId = (req as any).user.id
+    const id = String(req.params.id)
+    try {
+     // Ownership check — fetch full agent row in one go.
+      const agentResult = await db.query(
+        'SELECT * FROM agents WHERE id = $1 AND user_id = $2',
+        [id, userId],
+      )
+      if (!agentResult.rows.length) {
+        return res.status(404).json({ error: 'Agent not found' })
+      }
+      const agent = agentResult.rows[0]
+
+     // Run every panel query in parallel. Each query is wrapped in
+     // .catch(() => ({ rows: [] })) so a missing table or transient
+     // failure produces a graceful empty list rather than a 500.
+      const noRows = { rows: [] as any[] }
+      const safeQuery = (sql: string, params: any[]) =>
+        db.query(sql, params).catch((err: any) => {
+          console.warn(
+            `[agents/details] sub-query failed (degrading): ${err?.message?.slice(0, 120)}`,
+          )
+          return noRows
+        })
+
+      const [
+        walletBalance,
+        budgetsRes,
+        repHeadRes,
+        repHistoryRes,
+        counselRes,
+        ledgerRes,
+        eventsRes,
+        betsRes,
+        fundingsRes,
+        settlementsRes,
+      ] = await Promise.all([
+        getAgentBalance(id).catch(() => 0),
+        safeQuery(
+          `SELECT period, usd_authority::text, usd_remaining::text,
+                  last_reset_at, note
+           FROM agent_budgets
+           WHERE agent_id = $1 AND active = true
+           ORDER BY period`,
+          [id],
+        ),
+        safeQuery(
+          `SELECT predictions_count_total, correct_count_total,
+                  score_avg_total::text, score_avg_30d::text,
+                  reputation_tier, risk_limit_multiplier::text,
+                  last_recomputed_at
+           FROM agent_reputation WHERE agent_id = $1`,
+          [id],
+        ),
+        safeQuery(
+          `SELECT snapshot_at, score_avg_total::text, reputation_tier,
+                  risk_limit_multiplier::text, predictions_count_total
+           FROM agent_reputation_history
+           WHERE agent_id = $1
+           ORDER BY snapshot_at ASC
+           LIMIT 60`,
+          [id],
+        ),
+        safeQuery(
+          `SELECT id, subject, context, occurred_at
+           FROM heimdall_events
+           WHERE agent_id = $1
+             AND context->>'kind' = 'huginn-counsel'
+           ORDER BY occurred_at DESC
+           LIMIT 20`,
+          [id],
+        ),
+        safeQuery(
+          `SELECT id, action, currency, chain_id, delta::text, description, occurred_at
+           FROM agent_budget_ledger
+           WHERE agent_id = $1
+           ORDER BY occurred_at DESC
+           LIMIT 20`,
+          [id],
+        ),
+       // Dual-keyed: agent_id matches THIS agent's UUID OR the owning
+       // user's ID. Filters out huginn-counsel kind because those go
+       // in the Counsel tab, not the generic Security tab.
+        safeQuery(
+          `SELECT id, rule_id, severity, action, subject, context, occurred_at, agent_id
+           FROM heimdall_events
+           WHERE agent_id IN ($1, $2)
+             AND COALESCE(context->>'kind', '') <> 'huginn-counsel'
+           ORDER BY occurred_at DESC
+           LIMIT 30`,
+          [id, userId],
+        ),
+        safeQuery(
+          `SELECT id, market_question, outcome, amount::text, entry_price::text,
+                  exit_price::text, profit::text, status, created_at
+           FROM agent_bets
+           WHERE agent_id = $1
+           ORDER BY created_at DESC
+           LIMIT 20`,
+          [id],
+        ),
+        safeQuery(
+          `SELECT id, amount::text, status, tx_hash, created_at
+           FROM agent_fundings
+           WHERE agent_id = $1
+           ORDER BY created_at DESC
+           LIMIT 10`,
+          [id],
+        ),
+        safeQuery(
+          `SELECT id, amount::text, status, tx_hash, created_at, completed_at
+           FROM card_settlements
+           WHERE metadata->>'agent_id' = $1
+           ORDER BY created_at DESC
+           LIMIT 10`,
+          [id],
+        ),
+      ])
+
+      res.json({
+        agent: {
+          ...agent,
+          walletBalance,
+          funded: walletBalance > 0.5,
+        },
+        fetchedAt: new Date().toISOString(),
+        budgets: budgetsRes.rows.map((r: any) => ({
+          period: r.period,
+          usdAuthority: Number(r.usd_authority) || 0,
+          usdRemaining: Number(r.usd_remaining) || 0,
+          lastResetAt: r.last_reset_at,
+          note: r.note,
+        })),
+        reputation: repHeadRes.rows[0]
+          ? {
+              predictionsCountTotal: Number(repHeadRes.rows[0].predictions_count_total) || 0,
+              correctCountTotal: Number(repHeadRes.rows[0].correct_count_total) || 0,
+              scoreAvgTotal: Number(repHeadRes.rows[0].score_avg_total) || 0,
+              scoreAvg30d: Number(repHeadRes.rows[0].score_avg_30d) || 0,
+              tier: repHeadRes.rows[0].reputation_tier,
+              riskLimitMultiplier: Number(repHeadRes.rows[0].risk_limit_multiplier) || 1,
+              lastRecomputedAt: repHeadRes.rows[0].last_recomputed_at,
+            }
+          : null,
+        reputationHistory: repHistoryRes.rows.map((r: any) => ({
+          snapshotAt: r.snapshot_at,
+          scoreAvgTotal: Number(r.score_avg_total) || 0,
+          tier: r.reputation_tier,
+          multiplier: Number(r.risk_limit_multiplier) || 1,
+          predictionsCount: Number(r.predictions_count_total) || 0,
+        })),
+        recentCounsel: counselRes.rows.map((r: any) => ({
+          id: r.id,
+          subject: r.subject,
+          context: r.context,
+          occurredAt: r.occurred_at,
+        })),
+        recentLedger: ledgerRes.rows.map((r: any) => ({
+          id: r.id,
+          action: r.action,
+          currency: r.currency,
+          chainId: r.chain_id,
+          delta: Number(r.delta) || 0,
+          description: r.description,
+          occurredAt: r.occurred_at,
+        })),
+        recentEvents: eventsRes.rows.map((r: any) => ({
+          id: r.id,
+          ruleId: r.rule_id,
+          severity: r.severity,
+          action: r.action,
+          subject: r.subject,
+          context: r.context,
+          occurredAt: r.occurred_at,
+         // Whether this event was tagged with the agent's own UUID
+         // (true = direct agent attribution) vs the user's ID (false =
+         // user-level event affecting the agent).
+          isDirectAgentAttribution: r.agent_id === id,
+        })),
+        recentBets: betsRes.rows.map((r: any) => ({
+          id: r.id,
+          marketQuestion: r.market_question,
+          outcome: r.outcome,
+          amount: Number(r.amount) || 0,
+          entryPrice: Number(r.entry_price) || 0,
+          exitPrice: r.exit_price != null ? Number(r.exit_price) : null,
+          profit: r.profit != null ? Number(r.profit) : null,
+          status: r.status,
+          createdAt: r.created_at,
+        })),
+        recentFundings: fundingsRes.rows.map((r: any) => ({
+          id: r.id,
+          amount: Number(r.amount) || 0,
+          status: r.status,
+          txHash: r.tx_hash,
+          createdAt: r.created_at,
+        })),
+        recentSettlements: settlementsRes.rows.map((r: any) => ({
+          id: r.id,
+          amount: Number(r.amount) || 0,
+          status: r.status,
+          txHash: r.tx_hash,
+          createdAt: r.created_at,
+          completedAt: r.completed_at,
+        })),
+      })
+    } catch (err: any) {
+      console.error('[agents/details]', err?.message?.slice(0, 200))
+      res.status(500).json({ error: 'Internal server error' })
+    }
+  })
+
+ // POST /agents/:id/settle — queue agent-profit → card settlement (KYC REQUIRED)
+  //
+ // S33 Tier 1 #5: previously this endpoint ZEROED total_profit and told
+ // the user "Profits deposited to card" — but no money moved. The user
+ // believed they had collected $X when in fact the agent's profit just
+ // disappeared. This was the canonical Intent-vs-Execution conflation
+ // (System Rule #1: "Intent Layer records intent. Execution Layer moves
+ // real money. Never conflate the two.")
+  //
+ // Fixed flow:
+ //   1. Validate KYC + agent + profit (intent layer — same as before)
+ //   2. INSERT a card_settlements row in 'pending' state with the agent's
+ //      profit amount + metadata pointing back to the agent. position_id
+ //      stays NULL (this isn't a market position).
+ //   3. DO NOT decrement total_profit yet — it stays accumulated until
+ //      the sweep actually moves money. This is the rollback safety net:
+ //      if the bridge fails, the user's profit is still visible.
+ //   4. Notification + response are EXPLICIT about pending state — no more
+ //      "deposited to card" lie.
+ //   5. (FOLLOW-UP) execution-dispatch sweepCardSettlements needs to
+ //      learn the agent code path: when metadata.agent_id is set, the
+ //      source vault is HD-derived from 'agent_' + agentId on POLYGON
+ //      (not user vault on Base), so the sweep must CCTP-bridge agent →
+ //      user vault first, THEN proceed with the standard fee+forward.
+ //      On success it decrements agents.total_profit by the settled
+ //      amount. Tracked as Tier 1 #5b in Pending Tasks.
+  router.post('/agents/:id/settle', requireAuth, async (req, res) => {
+    const userId = (req as any).user.id
+    const agentId = req.params.id
+    try {
+     // KYC gate — cannot convert crypto profits to fiat card without KYC
+      const userCheck = await db.query('SELECT kyc_status FROM users WHERE id = $1', [userId])
+      if (!userCheck.rows.length) return res.status(404).json({ error: 'User not found' })
+      if (userCheck.rows[0].kyc_status !== 'approved') {
+        return res.status(403).json({
+          error: 'KYC required to settle profits to card',
+          message: 'Complete identity verification before converting crypto gains to fiat. Your profits remain safe in your agent wallet.',
+          kycStatus: userCheck.rows[0].kyc_status
+        })
+      }
+
+      const agent = await db.query('SELECT * FROM agents WHERE id = $1 AND user_id = $2', [agentId, userId])
+      if (!agent.rows.length) return res.status(404).json({ error: 'Agent not found' })
+      const a = agent.rows[0]
+      if (!a.card_id) return res.status(400).json({ error: 'No settlement card linked' })
+      const profit = Number(a.total_profit)
+      if (profit <= 0) return res.status(400).json({ error: 'No profits to settle', profit })
+
+     // Idempotency guard: refuse if there's already a pending settlement
+     // for this agent. Otherwise rapid double-clicks queue duplicates.
+      const existingPending = await db.query(
+        `SELECT id FROM card_settlements
+          WHERE user_id = $1
+            AND status = 'pending'
+            AND metadata->>'agent_id' = $2
+          LIMIT 1`,
+        [userId, agentId],
+      )
+      if (existingPending.rows.length > 0) {
+        return res.status(409).json({
+          error: 'settlement_pending',
+          message: 'A settlement for this agent is already queued. Check back shortly.',
+          existingSettlementId: existingPending.rows[0].id,
+        })
+      }
+
+     // Insert a pending card_settlements row. Sweep cron picks it up.
+     // metadata.agent_id is the marker the sweep uses to know this row
+     // needs the agent code path (Polygon→Base bridge before fee+forward).
+      const settlementRes = await db.query(
+        `INSERT INTO card_settlements
+            (id, user_id, position_id, amount, destination, status, metadata, created_at)
+          VALUES (gen_random_uuid(), $1, NULL, $2, 'card', 'pending', $3, now())
+          RETURNING id, created_at`,
+        [
+          userId,
+          profit,
+          JSON.stringify({
+            agent_id: agentId,
+            agent_name: a.name,
+            card_id: a.card_id,
+            kind: 'agent-settle',
+           // Surfacing for the sweep: the source vault on Polygon needs
+           // CCTP-bridging to Base before forward can happen. Until that
+           // sweep branch lands, this row will be skipped (status stays
+           // 'pending' — no money lost, just delayed). Operator runs the
+           // bridge manually meanwhile.
+            polygon_bridge_required: true,
+          }),
+        ],
+      )
+      const settlementId = settlementRes.rows[0].id
+
+     // Audit trail — explicit settlement_intent record before any
+     // money attempts to move.
+      await db.query(
+        `INSERT INTO execution_log
+            (entity_type, entity_id, action, status, detail)
+          VALUES ($1, $2, $3, $4, $5)`,
+        [
+          'card_settlement',
+          settlementId,
+          'agent_settle_intent',
+          'pending',
+          JSON.stringify({
+            agentId,
+            userId,
+            profit,
+            cardId: a.card_id,
+            note:
+              'Pending Polygon→Base bridge of agent vault, then standard fee+forward sweep.',
+          }),
+        ],
+      ).catch(() => {})
+
+     // Notification — TRUTHFUL about pending state.
+      await db.query(
+        `INSERT INTO notifications (id, user_id, type, title, message, is_read, created_at)
+         VALUES (gen_random_uuid(), $1, 'transaction', $2, $3, false, now())`,
+        [
+          userId,
+          `Settlement queued for "${a.name}"`,
+          `$${profit.toFixed(2)} will arrive in your card after the on-chain bridge ` +
+            `(typically 5–15 min). You'll get another notification when funds land.`,
+        ],
+      )
+
+      res.status(202).json({
+        settlementId,
+        agentId,
+        amount: profit,
+        status: 'pending',
+        message:
+          'Settlement queued. Funds will arrive in your card after Polygon→Base ' +
+          'bridge + Issuer credit. Total profit not decremented until bridge completes.',
+      })
+    } catch (err: any) {
+      console.error('[POST /agents/:id/settle]', err.message)
+      res.status(500).json({ error: 'Settlement failed' })
+    }
+  })
 
  // ── x402 facilitator routes (S33 X5 Phase 1) ──────────────────────────────
  // Stands up /facilitator/{verify,settle,supported} for x402 clients to
@@ -5700,102 +6433,6 @@ export function createNuroRouter(db: Pool): Router {
       const out = await recordSpend(db, { agentId: targetId, deltaUsd, description, period, chainId, txHash })
       res.json({ ok: true, ...out })
     } catch (err: any) {
-      res.status(500).json({ error: err?.message?.slice(0, 200) || 'internal' })
-    }
-  })
-
- // ── Huginn counsel (S31 H2) ────────────────────────────────────────────────
- // POST /api/huginn/counsel — synchronous "should I?" gate. Caller passes
- // proposed action; Huginn runs the rule bank + records a prediction +
- // returns verdict. Authed; admin-only for now (callers are typically
- // server-side processes, not end-users). Self-call (Huginn calling
- // itself) is rejected to avoid recursion.
-  router.post('/api/huginn/counsel', requireAuthOrAdminKey, async (req: any, res: Response) => {
-    try {
-      const isAdminCaller = (req.user as any)?.role === 'admin'
-      if (!isAdminCaller) return res.status(403).json({ error: 'admin only for now' })
-      const body = req.body || {}
-      const proposerAgentId = String(body.proposerAgentId || '').trim()
-      const actionType = String(body.actionType || '').trim()
-      const actionSubject = String(body.actionSubject || '').trim()
-      if (!proposerAgentId || !actionType || !actionSubject) {
-        return res.status(400).json({ error: 'proposerAgentId, actionType, actionSubject required' })
-      }
-      if (proposerAgentId === 'huginn') {
-        return res.status(400).json({ error: 'Huginn cannot counsel itself' })
-      }
-      const { counsel } = await import('./huginn')
-      const result = await counsel(db, {
-        proposerAgentId,
-        actionType,
-        actionSubject,
-        valueUsd: typeof body.valueUsd === 'number' ? body.valueUsd : null,
-        chainId: typeof body.chainId === 'number' ? body.chainId : null,
-        reasoning: body.reasoning ?? null,
-        metadata: body.metadata ?? undefined,
-      })
-      res.json(result)
-    } catch (err: any) {
-      res.status(500).json({ error: err?.message?.slice(0, 200) || 'internal' })
-    }
-  })
-
-  router.get('/api/agents/:id/reputation', requireAuthOrAdminKey, async (_req, res: Response) => {
-    return res.status(410).json({ error: 'Reputation API removed from this build' })
-  })
-
- // ── POST /api/agents/:id/propose-action ────────────────────────────────────
- // Nuro counsel-on-action canonical path (S32).
- // Body: { actionType, actionSubject, prediction, valueUsd?, chainId?,
- // confidence?, horizonDays?, reasoning?, predictionType? }
- // Wraps recordPredictionWithCounsel() so any agent-initiated action
- // (proposed change, prediction commitment, etc.) gets a Huginn verdict
- // automatically + the verdict surfaces via heimdall_events for the
- // admin Nuro POV "recent counsel" panel.
- // Admin-only — callers should be server-side processes or operator.
-  router.post('/api/agents/:id/propose-action', requireAuthOrAdminKey, async (req: any, res: Response) => {
-    try {
-      const isAdminCaller = (req.user as any)?.role === 'admin'
-      if (!isAdminCaller) return res.status(403).json({ error: 'admin only' })
-
-      const proposerAgentId = String(req.params.id).trim()
-      if (!proposerAgentId) return res.status(400).json({ error: 'agentId path param required' })
-      if (proposerAgentId === 'huginn') {
-        return res.status(400).json({ error: 'Huginn cannot propose actions through this endpoint (would recurse on its own counsel)' })
-      }
-
-      const body = req.body || {}
-      const actionType = String(body.actionType || '').trim()
-      const actionSubject = String(body.actionSubject || '').trim()
-      if (!actionType || !actionSubject) {
-        return res.status(400).json({ error: 'actionType + actionSubject required' })
-      }
-
-      const { counsel } = await import('./huginn')
-      const counselResult = await counsel(db, {
-        proposerAgentId,
-        actionType,
-        actionSubject,
-        valueUsd: typeof body.valueUsd === 'number' ? body.valueUsd : null,
-        chainId: typeof body.chainId === 'number' ? body.chainId : null,
-        reasoning: typeof body.reasoning === 'string' ? body.reasoning : null,
-        metadata: body.metadata ?? undefined,
-      })
-
-      res.json({
-        predictionId: counselResult.predictionId,
-        counsel: {
-          verdict: counselResult.verdict,
-          confidence: counselResult.confidence,
-          signalsCount: counselResult.signals.length,
-          signals: counselResult.signals,
-          reasoning: counselResult.reasoning,
-          recommendedAlternative: counselResult.recommendedAlternative ?? null,
-          counselPredictionId: counselResult.predictionId,
-        },
-      })
-    } catch (err: any) {
-      console.error('[POST /api/agents/:id/propose-action] error:', err?.message)
       res.status(500).json({ error: err?.message?.slice(0, 200) || 'internal' })
     }
   })
@@ -6150,235 +6787,6 @@ export function createNuroRouter(db: Pool): Router {
       res.status(500).json({ error: err?.message?.slice(0, 200) || 'internal' })
     }
   })
-
- // ─── Plaid (removed from public build) ───────────────────────────────────
-  router.post('/api/plaid/link-token', removedPublic)
-  router.post('/api/plaid/exchange', removedPublic)
-  router.get('/api/plaid/accounts', removedPublic)
-  router.post('/api/plaid/refresh', removedPublic)
-  router.delete('/api/plaid/connection', removedPublic)
-
- // ─── Issuer TRANSACTION SYNC DIAGNOSTIC (S35 M11) ───────────────────────────
- // Why this exists: when a user reports "balance synced but transactions
- // didn't", the cron-path sync only logs counts (inserted/updated/skipped).
- // We need to see WHICH Issuer items got rejected and WHY. This endpoint runs a
- // forced full-pull sync with diagnostics on, returning per-item skip reasons
- // + truncated raw Issuer payloads. Admin-key gated — never expose externally.
-
-  router.post('/admin/api/issuer-tx-diagnose', removedPublic)
-
- // ─── EXTERNAL AGENT CONNECTORS (S35 M11 Days 4-6) ────────────────────────
- // The "attach external agent" pillar from /skills. Users register their
- // Claude / OpenAI / LangChain / custom agent and get back an API key +
- // webhook secret. Their agent then POSTs events to /api/connectors/event
- // with `Authorization: Bearer <api-key>` and we land them in heimdall_events
- // dual-tagged with connected_agent_id so existing dashboards pick them up.
-
- // List my connected agents.
-  router.get('/api/connectors/agent', requireAuth, async (req, res) => {
-    try {
-      const { listConnectedAgents } = await import('./connectors')
-      const agents = await listConnectedAgents(db, (req as any).user.id)
-      res.json({ agents })
-    } catch (e: any) {
-      res.status(500).json({ error: e?.message?.slice(0, 200) || 'internal' })
-    }
-  })
-
- // Get one of my connected agents (no API key — that's only shown at create
- // time and on rotate).
-  router.get('/api/connectors/agent/:id', requireAuth, async (req, res) => {
-    try {
-      const { getConnectedAgent } = await import('./connectors')
-      const agent = await getConnectedAgent(db, String(req.params.id), (req as any).user.id)
-      if (!agent) return res.status(404).json({ error: 'Agent not found' })
-      res.json({ agent })
-    } catch (e: any) {
-      res.status(500).json({ error: e?.message?.slice(0, 200) || 'internal' })
-    }
-  })
-
- // Register a new connected agent. Returns plaintext API key + webhook
- // secret ONCE. Caller MUST capture them — they're never recoverable.
-  router.post('/api/connectors/agent', requireAuth, async (req, res) => {
-    try {
-      const { createConnectedAgent } = await import('./connectors')
-      const result = await createConnectedAgent(db, {
-        ownerUserId: (req as any).user.id,
-        name: String(req.body?.name || ''),
-        description: req.body?.description ? String(req.body.description) : undefined,
-        agentType: req.body?.agentType,
-        webhookUrl: req.body?.webhookUrl ? String(req.body.webhookUrl) : undefined,
-        riskLimitUsd: req.body?.riskLimitUsd != null ? Number(req.body.riskLimitUsd) : undefined,
-        dailyCapUsd: req.body?.dailyCapUsd != null ? Number(req.body.dailyCapUsd) : undefined,
-        allowedMarkets: Array.isArray(req.body?.allowedMarkets) ? req.body.allowedMarkets : undefined,
-        capabilities: Array.isArray(req.body?.capabilities) ? req.body.capabilities : undefined,
-      })
-      res.status(201).json(result)
-    } catch (e: any) {
-      const msg = e?.message?.slice(0, 200) || 'internal'
-      const status = msg.includes('required') || msg.includes('too long') || msg.includes('must start') ? 400 : 500
-      res.status(status).json({ error: msg })
-    }
-  })
-
- // Update connector policy / metadata.
-  router.patch('/api/connectors/agent/:id', requireAuth, async (req, res) => {
-    try {
-      const { updateConnectedAgent } = await import('./connectors')
-      const updated = await updateConnectedAgent(db, String(req.params.id), (req as any).user.id, {
-        name: req.body?.name != null ? String(req.body.name) : undefined,
-        description: req.body?.description !== undefined
-          ? (req.body.description == null ? null : String(req.body.description))
-          : undefined,
-        webhookUrl: req.body?.webhookUrl !== undefined
-          ? (req.body.webhookUrl == null ? null : String(req.body.webhookUrl))
-          : undefined,
-        riskLimitUsd: req.body?.riskLimitUsd != null ? Number(req.body.riskLimitUsd) : undefined,
-        dailyCapUsd: req.body?.dailyCapUsd != null ? Number(req.body.dailyCapUsd) : undefined,
-        allowedMarkets: Array.isArray(req.body?.allowedMarkets) ? req.body.allowedMarkets : undefined,
-        capabilities: Array.isArray(req.body?.capabilities) ? req.body.capabilities : undefined,
-        status: req.body?.status,
-      })
-      if (!updated) return res.status(404).json({ error: 'Agent not found' })
-      res.json({ agent: updated })
-    } catch (e: any) {
-      res.status(500).json({ error: e?.message?.slice(0, 200) || 'internal' })
-    }
-  })
-
- // Rotate API key. Returns the NEW plaintext key (one-time view). Old key
- // stops working immediately — agents must re-authenticate.
-  router.post('/api/connectors/agent/:id/rotate-key', requireAuth, async (req, res) => {
-    try {
-      const { rotateApiKey } = await import('./connectors')
-      const out = await rotateApiKey(db, String(req.params.id), (req as any).user.id)
-      if (!out) return res.status(404).json({ error: 'Agent not found' })
-      res.json(out)
-    } catch (e: any) {
-      res.status(500).json({ error: e?.message?.slice(0, 200) || 'internal' })
-    }
-  })
-
- // Revoke (soft-delete: status=revoked).
-  router.delete('/api/connectors/agent/:id', requireAuth, async (req, res) => {
-    try {
-      const { revokeConnectedAgent } = await import('./connectors')
-      const ok = await revokeConnectedAgent(db, String(req.params.id), (req as any).user.id)
-      if (!ok) return res.status(404).json({ error: 'Agent not found' })
-      res.json({ ok: true })
-    } catch (e: any) {
-      res.status(500).json({ error: e?.message?.slice(0, 200) || 'internal' })
-    }
-  })
-
- // ── Event ingestion — auth via API key, NOT user JWT ─────────────────────
- // External agents authenticate with their api_key (Bearer token). We
- // resolve to a connected_agent row, then ingest the event into Helm
- // dual-tagged with connected_agent_id.
-
-  router.post('/api/connectors/event', async (req, res) => {
-    try {
-      const auth = String(req.headers.authorization || '')
-      const apiKey = auth.startsWith('Bearer ') ? auth.slice(7) : ''
-      if (!apiKey) return res.status(401).json({ error: 'Missing Bearer token' })
-
-      const { resolveByApiKey, ingestExternalEvent } = await import('./connectors')
-      const agent = await resolveByApiKey(db, apiKey)
-      if (!agent) return res.status(401).json({ error: 'Invalid or revoked API key' })
-      if (agent.status === 'paused') {
-        return res.status(403).json({ error: 'Agent paused — events not accepted' })
-      }
-
-      const subject = String(req.body?.subject || '').trim()
-      if (!subject) return res.status(400).json({ error: 'subject required' })
-
-      const result = await ingestExternalEvent(db, {
-        agent,
-        ruleId: req.body?.ruleId,
-        category: req.body?.category,
-        severity: req.body?.severity,
-        subject,
-        description: req.body?.description ? String(req.body.description) : undefined,
-        payload: req.body?.payload && typeof req.body.payload === 'object' ? req.body.payload : undefined,
-        dedupeKey: req.body?.dedupeKey ? String(req.body.dedupeKey).slice(0, 120) : undefined,
-      })
-      res.status(201).json(result)
-    } catch (e: any) {
-      res.status(500).json({ error: e?.message?.slice(0, 200) || 'internal' })
-    }
-  })
-
- // Event list for one agent — used by the FE detail page.
-  router.get('/api/connectors/agent/:id/events', requireAuth, async (req, res) => {
-    try {
-      const { getConnectedAgent } = await import('./connectors')
-      const agent = await getConnectedAgent(db, String(req.params.id), (req as any).user.id)
-      if (!agent) return res.status(404).json({ error: 'Agent not found' })
-
-      const limit = Math.min(Math.max(parseInt(String(req.query.limit || '50'), 10) || 50, 1), 250)
-      const evs = await db.query(
-        `SELECT id, rule_id, category, severity, subject, context, occurred_at
-         FROM heimdall_events
-         WHERE connected_agent_id = $1
-         ORDER BY occurred_at DESC
-         LIMIT $2`,
-        [agent.id, limit],
-      )
-      res.json({ events: evs.rows })
-    } catch (e: any) {
-      res.status(500).json({ error: e?.message?.slice(0, 200) || 'internal' })
-    }
-  })
-
- // Webhook-delivery history for one agent (Day-7 / external connector polish).
- // Pulled from execution_log so we don't need a new table. Each row reflects
- // one POST attempt to the agent's webhook_url with HTTP status + retry count.
-  router.get('/api/connectors/agent/:id/webhook-deliveries', requireAuth, async (req, res) => {
-    try {
-      const { getConnectedAgent } = await import('./connectors')
-      const agent = await getConnectedAgent(db, String(req.params.id), (req as any).user.id)
-      if (!agent) return res.status(404).json({ error: 'Agent not found' })
-
-      const limit = Math.min(Math.max(parseInt(String(req.query.limit || '50'), 10) || 50, 1), 200)
-      const r = await db.query(
-        `SELECT id, action AS event_type, status, detail, created_at
-         FROM execution_log
-         WHERE entity_type = 'connector_webhook' AND entity_id = $1
-         ORDER BY created_at DESC
-         LIMIT $2`,
-        [agent.id, limit],
-      )
-      res.json({
-        deliveries: r.rows.map((row) => {
-          let parsed: Record<string, unknown> | null = null
-          try { parsed = JSON.parse(row.detail) } catch { /* ignore */ }
-          return {
-            id: row.id,
-            eventType: row.event_type,
-            status: row.status,
-            createdAt: row.created_at,
-            httpStatus: parsed?.httpStatus ?? null,
-            attempts: parsed?.attempts ?? null,
-            detail: parsed?.detail ?? null,
-            subject: parsed?.subject ?? null,
-            eventId: parsed?.eventId ?? null,
-            ruleId: parsed?.ruleId ?? null,
-            decision: parsed?.decision ?? null,
-          }
-        }),
-      })
-    } catch (e: any) {
-      res.status(500).json({ error: e?.message?.slice(0, 200) || 'internal' })
-    }
-  })
-
- // ─── MCP (removed from public build) ─────────────────────────────────────
-  router.post('/mcp/auth/resolve', removedPublic)
-  router.post('/mcp/tools/dispatch', removedPublic)
-  router.post('/mcp/keys/generate', removedPublic)
-  router.get('/mcp/keys', removedPublic)
-  router.delete('/mcp/keys/:id', removedPublic)
 
   return router
 }
