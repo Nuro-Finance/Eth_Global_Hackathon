@@ -1,0 +1,198 @@
+/**
+ * Animations CSS - Custom keyframes and animation utilities
+ * Using Tailwind CSS v4 @theme directive for animation design tokens
+ */
+
+@theme {
+    /* Custom animations */
+    --animate-fade-in: fade-in 0.3s ease-out;
+    --animate-fade-out: fade-out 0.3s ease-out;
+    --animate-slide-in-up: slide-in-up 0.3s ease-out;
+    --animate-slide-in-down: slide-in-down 0.3s ease-out;
+    --animate-scale-in: scale-in 0.2s ease-out;
+    --animate-live-breathe: live-breathe 3.8s ease-in-out infinite;
+
+    @keyframes fade-in {
+        from {
+            opacity: 0;
+        }
+
+        to {
+            opacity: 1;
+        }
+    }
+
+    @keyframes fade-out {
+        from {
+            opacity: 1;
+        }
+
+        to {
+            opacity: 0;
+        }
+    }
+
+    @keyframes slide-in-up {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slide-in-down {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes scale-in {
+        from {
+            opacity: 0;
+            transform: scale(0.95);
+        }
+
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    @keyframes live-breathe {
+        0%,
+        100% {
+            transform: scale(1);
+            opacity: 0.72;
+        }
+
+        50% {
+            transform: scale(1.18);
+            opacity: 1;
+        }
+    }
+}
+
+/* Additional animation utilities */
+.animate-in {
+    animation-duration: 0.3s;
+    animation-timing-function: ease-out;
+    animation-fill-mode: forwards;
+}
+
+.animate-out {
+    animation-duration: 0.2s;
+    animation-timing-function: ease-in;
+    animation-fill-mode: forwards;
+}
+
+/*
+ * Portal modals: real opacity keyframes (Tailwind fade-in-0 / animate-in do not set animation-name).
+ * Shared by first-freeze notice + notifications “See all” full modal.
+ */
+@keyframes header-portal-modal-fade-in {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes header-portal-modal-fade-out {
+    from {
+        opacity: 1;
+    }
+
+    to {
+        opacity: 0;
+    }
+}
+
+.freeze-notice-dialog[data-state="open"],
+.notifications-full-dialog[data-state="open"] {
+    animation: header-portal-modal-fade-in 0.55s ease-out forwards !important;
+}
+
+.freeze-notice-dialog[data-state="closed"],
+.notifications-full-dialog[data-state="closed"] {
+    animation: header-portal-modal-fade-out 0.55s ease-in forwards !important;
+}
+
+/* Notifications “See all” backdrop — same timing as the panel */
+.notifications-modal-overlay[data-state="open"] {
+    animation: header-portal-modal-fade-in 0.55s ease-out forwards !important;
+}
+
+.notifications-modal-overlay[data-state="closed"] {
+    animation: header-portal-modal-fade-out 0.55s ease-in forwards !important;
+}
+
+/* Assistant chat — in-panel Radix confirm (disconnect, etc.): smooth overlay + card */
+.chat-panel-confirm-overlay[data-state="open"] {
+    animation: header-portal-modal-fade-in 0.42s cubic-bezier(0.33, 1, 0.68, 1) forwards !important;
+}
+
+.chat-panel-confirm-overlay[data-state="closed"] {
+    animation: header-portal-modal-fade-out 0.3s cubic-bezier(0.33, 1, 0.68, 1) forwards !important;
+}
+
+@keyframes chat-panel-confirm-content-in {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.96);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+@keyframes chat-panel-confirm-content-out {
+    from {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+
+    to {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.96);
+    }
+}
+
+.chat-panel-confirm-content[data-state="open"] {
+    animation: chat-panel-confirm-content-in 0.38s cubic-bezier(0.33, 1, 0.68, 1) forwards !important;
+}
+
+.chat-panel-confirm-content[data-state="closed"] {
+    animation: chat-panel-confirm-content-out 0.28s cubic-bezier(0.33, 1, 0.68, 1) forwards !important;
+}
+
+@keyframes candy-shimmer {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+.candy-shimmer {
+    background: linear-gradient(90deg, #846fff, #ff7a7a, #16e0a9, #846fff);
+    background-size: 200% 200%;
+    animation: candy-shimmer 1.5s infinite linear;
+}

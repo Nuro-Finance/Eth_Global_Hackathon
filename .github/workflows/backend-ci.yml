@@ -1,0 +1,32 @@
+name: Backend CI
+
+on:
+  push:
+    branches: [main, staging]
+  pull_request:
+    branches: [main, staging]
+
+jobs:
+  typecheck-and-test:
+    name: Typecheck + Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --prefer-offline --no-audit
+
+      - name: Verify all imports declared in package.json
+        run: node scripts/verify-deps.js
+
+      - name: Typecheck backend (tsconfig.backend.json)
+        run: npm run typecheck:backend
+
+      - name: Run unit tests (Vitest)
+        run: npm run test:backend

@@ -1,0 +1,100 @@
+{
+    "Common": {
+        "loading": "جاري التحميل...",
+        "error": "خطأ",
+        "success": "نجاح",
+        "cancel": "إلغاء",
+        "save": "حفظ",
+        "delete": "حذف",
+        "edit": "تعديل",
+        "view": "عرض",
+        "close": "إغلاق",
+        "showAll": "إظهار كل الودجات",
+        "hideAll": "إخفاء كل الودجات"
+    },
+    "Header": {
+        "dashboard": "لوحة التحكم",
+        "analytics": "التحليلات",
+        "transactions": "المعاملات",
+        "cards": "البطاقات",
+        "settings": "الإعدادات",
+        "search": "بحث",
+        "refresh": "تحديث",
+        "widgets": "الودجات",
+        "notifications": "الإشعارات",
+        "profile": "الملف الشخصي",
+        "logout": "تسجيل الخروج",
+        "menu": "القائمة",
+        "themeToggle": "تبديل النمط",
+        "themeLight": "فاتح",
+        "themeDark": "داكن",
+        "themeSystem": "النظام"
+    },
+    "Navigation": {
+        "dashboard": "لوحة التحكم",
+        "analytics": "التحليلات",
+        "transactions": "المعاملات",
+        "cards": "البطاقات",
+        "settings": "الإعدادات"
+    },
+    "Sidebar": {
+        "overview": "نظرة عامة",
+        "overviewTooltip": "نظرة عامة على لوحة التحكم",
+        "dashboard": "لوحة التحكم",
+        "dashboardTooltip": "نظرة عامة على لوحة التحكم",
+        "cards": "بطاقاتك",
+        "cardsTooltip": "إدارة بطاقاتك",
+        "myCards": "بطاقاتك",
+        "myCardsTooltip": "إدارة بطاقاتك",
+        "analytics": "التحليلات",
+        "analyticsTooltip": "عرض التحليلات",
+        "transactions": "المعاملات",
+        "transactionsTooltip": "تاريخ المعاملات",
+        "settings": "الإعدادات",
+        "settingsTooltip": "إعدادات الحساب",
+        "uiComponents": "مكونات واجهة المستخدم",
+        "uiComponentsTooltip": "استعراض مكونات واجهة المستخدم",
+        "sectionMain": "الرئيسية",
+        "sectionAdmin": "الإدارة",
+        "sectionDemos": "العروض",
+        "logout": "تسجيل الخروج"
+    },
+    "Footer": {
+        "by": "بواسطة"
+    },
+    "DateRange": {
+        "custom": "مخصص",
+        "today": "اليوم",
+        "yesterday": "أمس",
+        "last7Days": "آخر 7 أيام",
+        "last28Days": "آخر 28 يوماً",
+        "last30Days": "آخر 30 يوماً",
+        "thisMonth": "هذا الشهر",
+        "lastMonth": "الشهر الماضي",
+        "quickSelect": "اختيار سريع",
+        "from": "من",
+        "to": "إلى",
+        "selectDate": "اختر تاريخاً",
+        "daysSelected": "أيام محددة",
+        "cancel": "إلغاء",
+        "apply": "تطبيق"
+    },
+    "AreaChart": {
+        "revenue": "الإيرادات",
+        "expenses": "المصروفات",
+        "users": "المستخدمون",
+        "bars": "الأعمدة",
+        "downloadTooltip": "تحميل المخطط كصورة PNG",
+        "defaultFileName": "chart.png"
+    },
+    "ThemeColorSwitcher": {
+        "title": "ألوان السمة",
+        "description": "اختر سمة اللون المفضلة لديك",
+        "current": "الحالي",
+        "changeTheme": "تغيير لون السمة",
+        "selectTheme": "اختر سمة {theme}",
+        "performanceMode": "وضع الأداء",
+        "performanceDescription": "يقلل الرسوم المتحركة لأداء أفضل على الأجهزة البطيئة",
+        "demoWarning": "هذه ميزة تجريبية. ستبقى السمة بعد إعادة تحميل الصفحة."
+    }
+}

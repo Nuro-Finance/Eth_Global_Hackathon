@@ -1,0 +1,209 @@
+/**
+ * Global Styles - Main entry point
+ * Imports Tailwind CSS v4 and all modular style files
+ * 
+ * Structure:
+ * - tailwindcss: Core Tailwind CSS framework
+ * - theme.css: Default theme variables and color system
+ * - base.css: Core reset and foundational styles
+ * - fonts.css: Typography and RTL font support
+ * - animations.css: Custom keyframes and animation utilities
+ * - performance.css: Performance mode optimizations
+ * - theme.Ex-*.css: Theme extension files (for reference, applied via JS)
+ */
+
+/* Only scan app source — project logs (.specstory, etc.) are plain text and can contain
+   tokens like bg-[var(--color-bg-*)] that Tailwind would compile into invalid CSS. */
+@import "tailwindcss" source(none);
+@source "../**/*.js";
+@source "../**/*.jsx";
+@source "../**/*.ts";
+@source "../**/*.tsx";
+
+/* Tailwind `dark:` utilities — `.dark` on <html> (production theme) */
+@custom-variant dark (&:is(.dark *));
+
+/* Theme and Design Tokens */
+@import "./theme.css";
+
+/* Light Mode - ISOLATED: uses :root.light only */
+@import "./theme.light.css";
+
+/* Dark Mode - ISOLATED: uses :root.dark (flat gray + blue) */
+@import "./theme.dark.css";
+
+/* Base Styles */
+@import "./base.css";
+
+/* Base Styles */
+@import "./base.css";
+
+/* Tokenized Background Foundation */
+:root.dark,
+:root.dark body {
+    background-color: var(--color-bg-primary);
+    background: var(--color-bg-primary);
+}
+
+/* Typography */
+@import "./fonts.css";
+
+/* Animations */
+@import "./animations.css";
+
+/* Performance Optimizations */
+@import "./performance.css";
+
+/* 
+ * Theme Extensions (for reference - these are applied dynamically via ThemeColorProvider)
+ * Uncomment to include static theme classes:
+ * @import "./theme.Ex-blue.css";
+ * @import "./theme.Ex-cyan.css";
+ * @import "./theme.Ex-mono.css";
+ */
+
+/* --- Global Focus Reset --- */
+/* Removes the default browser focus ring globally but preserves it for keyboard navigation if desired */
+*:focus:not(:focus-visible) {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+*:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* --- Input Autofill Fix --- */
+/* Prevents browser autofill from forcing black text and light backgrounds in dark mode */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus,
+textarea:-webkit-autofill:active,
+select:-webkit-autofill,
+select:-webkit-autofill:hover,
+select:-webkit-autofill:focus,
+select:-webkit-autofill:active {
+    -webkit-text-fill-color: var(--color-text-primary) !important;
+    -webkit-box-shadow: 0 0 0px 1000px transparent inset !important;
+    transition: background-color 5000s ease-in-out 0s;
+    background-color: transparent !important;
+}
+
+
+/* ===== RTL SUPPORT ===== */
+html[dir="rtl"] {
+
+    /* Arrow Direction Support */
+    .lucide-chevron-left,
+    .lucide-chevron-right,
+    .lucide-arrow-left,
+    .lucide-arrow-right {
+        transform: scaleX(-1);
+    }
+
+    /* Don't flip vertical arrows */
+    .lucide-chevron-down,
+    .lucide-chevron-up {
+        transform: none;
+    }
+
+    /* Calendar navigation buttons */
+    .react-day-picker button[name="previous-month"] svg,
+    .react-day-picker button[name="next-month"] svg {
+        transform: scaleX(-1);
+    }
+
+    /* Sidebar toggle arrows */
+    .sidebar-toggle svg {
+        transform: scaleX(-1);
+    }
+
+    /* Table pagination arrows */
+    .pagination-prev svg,
+    .pagination-next svg {
+        transform: scaleX(-1);
+    }
+
+    /* Dropdown menu arrows */
+    .dropdown-submenu svg {
+        transform: scaleX(-1);
+    }
+
+    /* Generic arrow flipping for RTL */
+    [class*="arrow"]:not([class*="up"]):not([class*="down"]) {
+        transform: scaleX(-1);
+    }
+
+    [class*="chevron"]:not([class*="up"]):not([class*="down"]) {
+        transform: scaleX(-1);
+    }
+
+    /* Navigation buttons RTL */
+    button[aria-label*="Previous"] svg,
+    button[aria-label*="Next"] svg {
+        transform: scaleX(-1);
+    }
+
+    /* Custom RTL arrow classes */
+    .rtl-flip {
+        transform: scaleX(1);
+    }
+
+    /* Navigation arrows for calendar and components */
+    .rtl-nav-arrow {
+        transform: scaleX(-1);
+    }
+
+    /* Calendar specific RTL support */
+    .react-day-picker-chevron,
+    .rdp-chevron {
+        transform: scaleX(-1);
+    }
+
+    /* Ensure calendar navigation works correctly in RTL */
+    .rdp-nav_button_previous svg,
+    .rdp-nav_button_next svg {
+        transform: scaleX(-1);
+    }
+
+    /* Additional calendar month navigation */
+    [role="button"][aria-label*="Previous"] svg,
+    [role="button"][aria-label*="Next"] svg,
+    [role="button"][aria-label*="السابق"] svg,
+    [role="button"][aria-label*="التالي"] svg {
+        transform: scaleX(-1);
+    }
+}
+
+/* Custom RTL arrow classes - global scope */
+.rtl-flip {
+    transform: scaleX(-1);
+}
+
+/* Scrollbar Visibility Utilities */
+@layer utilities {
+    .no-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+    .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+
+    .mobile-nav-mask {
+        mask-image: linear-gradient(to right, transparent 0%, black 4%, black 96%, transparent 100%);
+        -webkit-mask-image: linear-gradient(to right, transparent 0%, black 4%, black 96%, transparent 100%);
+    }
+
+    @media (min-width: 640px) {
+        .mobile-nav-mask {
+            mask-image: none;
+            -webkit-mask-image: none;
+        }
+    }
+}

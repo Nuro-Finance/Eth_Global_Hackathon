@@ -1,0 +1,17 @@
+require('@rushstack/eslint-patch/modern-module-resolution');
+
+module.exports = {
+    root: true,
+    extends: ['eslint:recommended'],
+    parserOptions: {
+        ecmaVersion: 2022,
+        sourceType: 'module',
+    },
+    env: {
+        node: true,
+        es2022: true,
+    },
+    rules: {
+        'no-unused-vars': 'off',
+    },
+};

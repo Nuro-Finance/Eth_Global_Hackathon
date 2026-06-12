@@ -1,0 +1,21 @@
+/**
+ * Font Styles - Typography and RTL font support
+ */
+
+/* Arabic font override for RTL at body level */
+body[dir="rtl"],
+html[dir="rtl"] body {
+    font-family: var(--font-noto-arabic), "Noto Sans Arabic", sans-serif !important;
+}
+
+/* RTL Support */
+html[dir="rtl"] {
+    /* Arabic font for all elements - using Next.js font variable */
+    font-family: var(--font-noto-arabic), "Noto Sans Arabic", sans-serif !important;
+}
+
+html[dir="rtl"] *,
+html[dir="rtl"] body,
+html[dir="rtl"] body * {
+    font-family: var(--font-noto-arabic), "Noto Sans Arabic", sans-serif !important;
+}

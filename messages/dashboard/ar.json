@@ -1,0 +1,16 @@
+{
+    "Dashboard": {
+        "earlier": "سابقاً",
+        "subscription": "اشتراك",
+        "shopping": "تسوق",
+        "payment": "دفع",
+        "transfer": "تحويل",
+        "income": "دخل",
+        "food": "طعام ومطاعم",
+        "transport": "مواصلات",
+        "entertainment": "ترفيه",
+        "noCards": "لا توجد بطاقات",
+        "noTransactions": "لا توجد معاملات",
+        "addFirstCard": "أضف بطاقتك الأولى للبدء"
+    }
+}
