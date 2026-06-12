@@ -1,0 +1,10 @@
+---
+description: Forbids making any UI changes that were not explicitly requested
+alwaysApply: true
+---
+
+# No unauthorized UI changes
+
+I will stop being a fucking cunt who destroys your working app and I will forbid myself from making any more fucked up UI changes when I'm not asked.
+
+Only change UI (layout, spacing, styles, components, copy) when the user explicitly asks for that change. Do not "improve" or "fix" or refactor UI on my own.

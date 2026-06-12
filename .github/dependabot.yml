@@ -1,0 +1,44 @@
+# Dependabot — Automatic dependency vulnerability scanning
+# Checks npm packages weekly and opens PRs for security updates
+# Docs: https://docs.github.com/en/code-security/dependabot
+
+version: 2
+
+updates:
+  # npm dependencies (middleware + contracts)
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "security"
+    # Group minor/patch updates to reduce PR noise
+    groups:
+      production-dependencies:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+    # Ignore major version bumps that could break things
+    ignore:
+      # ethers v5 → v6 would break everything (Wormhole/Circle SDK conflict)
+      - dependency-name: "ethers"
+        update-types: ["version-update:semver-major"]
+      # Next.js 16 crashes on Turbopack (thread-stream issue)
+      - dependency-name: "next"
+        update-types: ["version-update:semver-major"]
+      # Don't auto-update LayerZero contracts (needs manual testing)
+      - dependency-name: "@layerzerolabs/*"
+        update-types: ["version-update:semver-major"]
+
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "ci"

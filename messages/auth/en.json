@@ -1,0 +1,35 @@
+{
+    "Hero": {
+        "title": "Nuro Finance",
+        "subtitle": "The neobank built for AI agents",
+        "analytics": "Agent Banking",
+        "analyticsDesc": "Programmable, auditable, and\nready to deploy",
+        "cardManagement": "Visa Spend Cards",
+        "cardManagementDesc": "Every agent and human. Spend anywhere, instantly.",
+        "tracking": "Autonomous Yield",
+        "trackingDesc": "Best on-chain yield across\n50+ DeFi protocols",
+        "enterDashboard": "Open Your Agent Bank"
+    },
+    "Login": {
+        "title": "Nuro Finance",
+        "subtitle": "Welcome back! Please sign in to continue",
+        "emailLabel": "Email Address",
+        "emailPlaceholder": "Enter your email",
+        "passwordLabel": "Password",
+        "passwordPlaceholder": "Enter your password",
+        "rememberMe": "Remember me",
+        "forgotPassword": "Forgot password?",
+        "signIn": "Sign In",
+        "signingIn": "Signing in...",
+        "orContinueWith": "Or",
+        "demoCredentials": "Demo credentials are pre-filled.",
+        "readyToExplore": "Ready to explore!",
+        "showPassword": "Show password",
+        "hidePassword": "Hide password",
+        "validation": {
+            "emailRequired": "Email is required",
+            "emailInvalid": "Please enter a valid email address",
+            "passwordMin": "Password must be at least 6 characters"
+        }
+    }
+}

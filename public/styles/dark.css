@@ -1,0 +1,717 @@
+/**
+ * Nuro / Dark ·shared design tokens for all public marketing surfaces.
+ *
+ * Reference: Chris's theme.dark.css (the dashboard theme) is the brand
+ * source-of-truth. This file extends it with marketing-specific tokens
+ * (display type sizes, hero patterns, code-window styling) so every public
+ * page (/agents, /skills, /contracts, future /pricing, etc.) uses one
+ * coherent visual system.
+ *
+ * Imported via <link rel="stylesheet" href="/styles/dark.css" />.
+ *
+ * Stack: Chris/Dark primary blue + locked text contrast tokens
+ * (Stripe/Linear/Vercel/Coinbase Developer consensus from S35 Day-3
+ * design research ·see Decision Journal entry).
+ */
+
+/* ─── Fonts ────────────────────────────────────────────────────────────
+ * Geist Sans + Geist Mono via Google Fonts. Free, MIT-licensed, the
+ * de-facto modern dev-tool typeface family. Matches what Vercel ships.
+ *
+ * S35 M11 Day-3 evening (perf): the Google Fonts <link> moved out of
+ * this file and into each HTML <head>. CSS @import is render-blocking
+ * AND serial ·the browser must download + parse this whole CSS file
+ * before it even sees the font URL. A direct <link> downloads in
+ * parallel with the CSS, saving ~150–300ms cold first-paint. The
+ * preconnect tags in each head still warm fonts.googleapis.com +
+ * fonts.gstatic.com TLS for both pathways.
+ * ─────────────────────────────────────────────────────────────────── */
+
+/* ─── Tokens (Chris/Dark full system) ──────────────────────────── */
+:root {
+  /* Backgrounds ·page → card → hover → pressed */
+  --bg-0: #0A0A0A;
+  --bg-1: #111111;
+  --bg-2: #161616;
+  --bg-3: #1C1C1C;
+  --bg-glass: rgba(255, 255, 255, 0.025);
+  --bg-glass-strong: rgba(255, 255, 255, 0.045);
+
+  /* Borders ·hairline / default / strong */
+  --border-subtle: rgba(255, 255, 255, 0.06);
+  --border-default: rgba(255, 255, 255, 0.10);
+  --border-strong: rgba(255, 255, 255, 0.18);
+
+  /* Text ·primary / secondary / muted / disabled (LOCKED for contrast) */
+  --fg-primary: #EDEDED;
+  --fg-secondary: #A1A1A1;
+  --fg-muted: #707070;
+  --fg-disabled: #4A4A4A;
+
+  /* Accents ·Chris's electric blue is brand primary. Teal is success/state. */
+  --accent: #0D90FF;
+  --accent-hover: #3DA6FF;
+  --accent-deep: #0A73CC;
+  --accent-glow: rgba(13, 144, 255, 0.18);
+  --accent-surface: rgba(13, 144, 255, 0.08);
+  --accent-border: rgba(13, 144, 255, 0.24);
+  --success: #00C08B;
+  --warning: #FFAB00;
+  --danger: #DE5555;
+
+  /* Radii */
+  --r-sm: 6px;
+  --r-md: 8px;
+  --r-lg: 12px;
+  --r-xl: 16px;
+  --r-2xl: 20px;
+
+  /* Shadows (dark-first ·only inset glows) */
+  --shadow-card: inset 0 0 0 1px var(--border-subtle), 0 4px 24px rgba(0,0,0,0.35);
+  --shadow-elev: inset 0 0 0 1px var(--border-default), 0 8px 32px rgba(0,0,0,0.5);
+  --shadow-cta: 0 0 0 1px var(--accent-border), 0 8px 24px var(--accent-glow);
+
+  /* Animation */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);   /* the modern "Linear" feel */
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --t-fast: 180ms;
+  --t-base: 240ms;
+  --t-slow: 400ms;
+}
+
+/* ─── Reset + base ─────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+body {
+  font-family: 'Geist', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.55;
+  color: var(--fg-primary);
+  background: var(--bg-0);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: 'cv11', 'ss01';  /* Geist's stylistic alternates */
+  overflow-x: hidden;
+}
+
+/* Atmospherics ·single subtle radial-glow underlay, no parallax circus */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background:
+    radial-gradient(ellipse 70% 50% at 50% 0%, rgba(13,144,255,0.06) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 60% at 100% 50%, rgba(0,192,139,0.03) 0%, transparent 60%),
+    var(--bg-0);
+}
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 220px 220px;
+}
+
+a { color: inherit; text-decoration: none; }
+img, svg { display: block; max-width: 100%; }
+code, pre {
+  font-family: 'Geist Mono', ui-monospace, 'JetBrains Mono', Menlo, Consolas, monospace;
+  font-size: 0.95em;
+}
+button { font-family: inherit; cursor: pointer; }
+
+/* Lucide icons ·uniform stroke-width override at 1.5px for the modern look */
+[data-lucide] { width: 20px; height: 20px; }
+.lucide { stroke-width: 1.5; }
+
+/* ─── Type scale ──────────────────────────────────────────────────── */
+.t-display {
+  font-size: clamp(40px, 5.5vw, 64px);
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+  font-weight: 600;
+}
+.t-h1 {
+  font-size: clamp(32px, 3.5vw, 48px);
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  font-weight: 600;
+}
+.t-h2 {
+  font-size: clamp(24px, 2.4vw, 32px);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  font-weight: 600;
+}
+.t-h3 {
+  font-size: 20px;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  font-weight: 600;
+}
+.t-lede {
+  font-size: 18px;
+  line-height: 1.55;
+  color: var(--fg-secondary);
+  font-weight: 400;
+}
+.t-body { font-size: 16px; line-height: 1.55; }
+.t-body-sm { font-size: 14px; line-height: 1.5; }
+.t-caption {
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--fg-secondary);
+  font-weight: 500;
+}
+.t-eyebrow {
+  font-family: 'Geist Mono', ui-monospace, monospace;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.t-mono {
+  font-family: 'Geist Mono', ui-monospace, monospace;
+  font-feature-settings: 'tnum';
+}
+
+/* Gradient-text utility ·for the ONE word in a hero we want to color-pop */
+.t-accent-gradient {
+  background: linear-gradient(135deg, var(--accent-hover) 0%, var(--success) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ─── Layout ───────────────────────────────────────────────────────── */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 32px;
+}
+@media (max-width: 720px) {
+  .container { padding: 0 20px; }
+}
+.section { padding: 96px 0; }
+.section-tight { padding: 64px 0; }
+@media (max-width: 720px) {
+  .section { padding: 64px 0; }
+  .section-tight { padding: 48px 0; }
+}
+
+/* ─── Top nav ──────────────────────────────────────────────────────── */
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(10, 10, 10, 0.7);
+  backdrop-filter: blur(24px) saturate(140%);
+  -webkit-backdrop-filter: blur(24px) saturate(140%);
+  border-bottom: 1px solid var(--border-subtle);
+}
+.nav-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 32px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--fg-primary);
+}
+.brand-mark {
+  width: 28px; height: 28px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--accent-hover) 0%, var(--accent-deep) 100%);
+  display: grid; place-items: center;
+  color: white;
+  font-weight: 700;
+  font-size: 14px;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.18), 0 4px 12px var(--accent-glow);
+}
+.nav-links {
+  display: flex;
+  gap: 32px;
+  align-items: center;
+}
+.nav-link {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--fg-secondary);
+  transition: color var(--t-fast) var(--ease-out);
+}
+.nav-link:hover { color: var(--fg-primary); }
+@media (max-width: 720px) {
+  .nav-links { gap: 16px; }
+  .nav-link:not(.nav-cta) { display: none; }
+}
+
+/* ─── Buttons ──────────────────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 18px;
+  border-radius: var(--r-md);
+  border: 1px solid transparent;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all var(--t-fast) var(--ease-out);
+  text-decoration: none;
+}
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn [data-lucide] { width: 16px; height: 16px; }
+
+.btn-lg { height: 48px; padding: 0 24px; font-size: 15px; }
+.btn-sm { height: 36px; padding: 0 14px; font-size: 13px; }
+
+.btn-primary {
+  background: var(--accent);
+  color: #001628;
+  box-shadow: var(--shadow-cta);
+  font-weight: 600;
+}
+.btn-primary:hover {
+  background: var(--accent-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 0 0 1px var(--accent-border), 0 12px 32px var(--accent-glow);
+}
+.btn-primary:active { transform: translateY(0); }
+
+.btn-secondary {
+  background: transparent;
+  border-color: var(--border-default);
+  color: var(--fg-primary);
+}
+.btn-secondary:hover {
+  background: var(--bg-2);
+  border-color: var(--border-strong);
+}
+
+.btn-tertiary {
+  background: transparent;
+  color: var(--fg-secondary);
+  padding: 0 8px;
+}
+.btn-tertiary:hover { color: var(--fg-primary); }
+.btn-tertiary:hover [data-lucide].arrow { transform: translateX(2px); }
+.btn-tertiary [data-lucide].arrow { transition: transform var(--t-fast) var(--ease-out); }
+
+.nav-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--fg-primary);
+  background: var(--bg-glass);
+  border: 1px solid var(--border-default);
+  border-radius: var(--r-md);
+  transition: all var(--t-fast) var(--ease-out);
+}
+.nav-cta:hover {
+  background: var(--bg-glass-strong);
+  border-color: var(--border-strong);
+}
+
+/* ─── Cards ────────────────────────────────────────────────────────── */
+.card {
+  background: var(--bg-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-lg);
+  transition: all var(--t-base) var(--ease-out);
+}
+.card-hover:hover {
+  border-color: var(--border-default);
+  transform: translateY(-2px);
+}
+.card-glass {
+  background: var(--bg-glass);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-lg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+/* Skill-tile pattern (terminal-feel) */
+.skill-tile {
+  display: block;
+  padding: 24px;
+  background: var(--bg-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-lg);
+  transition: all var(--t-base) var(--ease-out);
+  position: relative;
+  overflow: hidden;
+}
+.skill-tile:hover {
+  border-color: var(--border-default);
+  background: var(--bg-2);
+  transform: translateY(-2px);
+}
+.skill-tile::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at top right, var(--accent-glow), transparent 60%);
+  opacity: 0;
+  transition: opacity var(--t-base) var(--ease-out);
+  pointer-events: none;
+}
+.skill-tile:hover::before { opacity: 1; }
+.skill-tile-icon {
+  display: inline-flex;
+  width: 40px; height: 40px;
+  border-radius: var(--r-md);
+  background: var(--accent-surface);
+  border: 1px solid var(--accent-border);
+  color: var(--accent);
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+.skill-tile-id {
+  font-family: 'Geist Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--fg-muted);
+  margin-bottom: 6px;
+}
+.skill-tile-title {
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--fg-primary);
+  margin-bottom: 6px;
+}
+.skill-tile-desc {
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--fg-secondary);
+}
+
+/* ─── Eyebrow chip (live status indicator) ─────────────────────────── */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-family: 'Geist Mono', monospace;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: var(--accent-surface);
+  border: 1px solid var(--accent-border);
+}
+.chip::before {
+  content: '';
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+  animation: chip-pulse 2.4s ease-in-out infinite;
+}
+@keyframes chip-pulse {
+  0%, 100% { opacity: 0.55; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.15); }
+}
+
+/* ─── Code window (table-stakes pattern, used in every hero) ────────── */
+.code-window {
+  background: var(--bg-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-elev);
+}
+.code-window-header {
+  display: flex;
+  align-items: stretch;
+  background: var(--bg-2);
+  border-bottom: 1px solid var(--border-subtle);
+}
+.code-window-tabs {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.code-window-tabs::-webkit-scrollbar { display: none; }
+.code-tab {
+  font-family: 'Geist Mono', monospace;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--fg-muted);
+  background: transparent;
+  border: none;
+  padding: 12px 18px;
+  cursor: pointer;
+  position: relative;
+  white-space: nowrap;
+  transition: color var(--t-fast) var(--ease-out);
+}
+.code-tab:hover { color: var(--fg-secondary); }
+.code-tab.active { color: var(--fg-primary); }
+.code-tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px; left: 16px; right: 16px;
+  height: 2px;
+  background: var(--accent);
+}
+.code-window-actions {
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  border-left: 1px solid var(--border-subtle);
+}
+.copy-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  font-family: 'Geist Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--fg-secondary);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  transition: all var(--t-fast) var(--ease-out);
+}
+.copy-btn:hover { color: var(--fg-primary); background: var(--bg-3); }
+.copy-btn.copied { color: var(--success); }
+.copy-btn [data-lucide] { width: 14px; height: 14px; }
+
+.code-body {
+  padding: 24px 28px;
+  background: var(--bg-0);
+  font-family: 'Geist Mono', monospace;
+  font-size: 13px;
+  line-height: 1.65;
+  color: #d4d4d4;
+  overflow-x: auto;
+  min-height: 280px;
+}
+.code-body pre { white-space: pre; margin: 0; }
+
+/* Syntax tokens (Vercel/Shiki-like dark palette) */
+.tok-comment  { color: #707070; font-style: italic; }
+.tok-string   { color: #A8E89C; }
+.tok-keyword  { color: #C586E0; }
+.tok-fn       { color: #7CC4E8; }
+.tok-prop     { color: #79C0FF; }
+.tok-num      { color: #FFAB70; }
+.tok-flag     { color: #FFAB70; }
+.tok-punct    { color: #A1A1A1; }
+
+/* ─── Comparison table (modern, no aggressive red X) ───────────────── */
+.compare-wrap {
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  background: var(--bg-1);
+}
+.compare {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+.compare th, .compare td {
+  padding: 16px 20px;
+  text-align: left;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.compare th {
+  font-family: 'Geist Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+  background: var(--bg-2);
+}
+.compare th.col-us {
+  color: var(--accent);
+  background: var(--accent-surface);
+}
+.compare td { color: var(--fg-secondary); font-size: 14px; }
+.compare td:first-child {
+  color: var(--fg-primary);
+  font-weight: 500;
+}
+.compare td.col-us {
+  color: var(--fg-primary);
+  background: var(--accent-surface);
+  font-weight: 500;
+}
+.compare tbody tr:last-child td { border-bottom: none; }
+.compare .check {
+  display: inline-flex;
+  width: 20px; height: 20px;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+}
+.compare .dash {
+  display: inline-flex;
+  width: 20px; height: 20px;
+  align-items: center;
+  justify-content: center;
+  color: var(--fg-disabled);
+}
+
+/* ─── Footer ───────────────────────────────────────────────────────── */
+.footer {
+  padding: 48px 0 64px;
+  border-top: 1px solid var(--border-subtle);
+  text-align: center;
+  font-size: 13px;
+  color: var(--fg-muted);
+}
+.footer-links {
+  display: flex;
+  justify-content: center;
+  gap: 28px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.footer-links a {
+  color: var(--fg-secondary);
+  transition: color var(--t-fast) var(--ease-out);
+}
+.footer-links a:hover { color: var(--fg-primary); }
+
+/* ─── Subtle scroll-fade for sections ──────────────────────────────── */
+.fade-up {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity var(--t-slow) var(--ease-out), transform var(--t-slow) var(--ease-out);
+}
+.fade-up.in {
+  opacity: 1;
+  transform: none;
+}
+
+/* ─── Install command pill ──────────────────────────────────────────
+ * Shown in /skills + /agents hero blocks. Standardizes the
+ * `npm install -g @nuro-finance/cli` install path. Same component used
+ * by Stripe ('npm install stripe'), Vercel ('npm install vercel'),
+ * Resend ('npm install resend'). One-click copy + a $-prompt that
+ * makes the command unambiguous.
+ *
+ * Usage:
+ *   <div class="install-cmd">
+ *     <span class="install-prompt">$</span>
+ *     <code class="install-code">npm install -g @nuro-finance/cli</code>
+ *     <button class="install-copy" data-install-target>
+ *       <i data-lucide="copy"></i>
+ *       <span class="install-copy-label">Copy</span>
+ *     </button>
+ *   </div>
+ *
+ * The data-install-target attribute is wired up by a tiny IIFE in each
+ * page's <script> block (see agents/skills index.html). Copy state
+ * flips for 1500ms via data-state="copied" on the button.
+ */
+.install-cmd {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 32px;
+  padding: 14px 20px;
+  background: var(--bg-2);
+  border: 1px solid var(--accent-border);
+  border-radius: var(--r-lg);
+  font-family: 'Geist Mono', ui-monospace, monospace;
+  font-size: 15px;
+  max-width: 100%;
+  overflow: hidden;
+  box-shadow: 0 0 0 1px var(--accent-border), 0 8px 24px var(--accent-glow);
+}
+.install-prompt {
+  color: var(--accent);
+  user-select: none;
+  flex-shrink: 0;
+}
+.install-code {
+  color: var(--fg-primary);
+  flex: 1;
+  white-space: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.install-code::-webkit-scrollbar { display: none; }
+.install-copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-sm);
+  color: var(--fg-secondary);
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background var(--t-fast) var(--ease-out), color var(--t-fast) var(--ease-out);
+  flex-shrink: 0;
+}
+.install-copy:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--fg-primary);
+}
+.install-copy[data-state="copied"] {
+  color: var(--accent);
+  border-color: var(--accent-border);
+  background: var(--accent-surface);
+}
+.install-copy[data-state="copied"] .install-copy-label::after { content: 'd'; }
+.install-copy svg, .install-copy i { width: 14px; height: 14px; }
+.install-cmd-meta {
+  margin-top: 10px;
+  font-family: 'Geist', system-ui, sans-serif;
+  font-size: 12px;
+  color: var(--fg-muted);
+}
+.install-cmd-meta a {
+  color: var(--accent);
+  text-decoration: none;
+}
+.install-cmd-meta a:hover { text-decoration: underline; }
+
+/* Reduced motion respect */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -1,0 +1,190 @@
+/**
+ * Base styles - Core reset and foundational styles
+ * This file contains fundamental styling that applies across the entire application
+ */
+
+html {
+    height: 100%;
+    color-scheme: dark light;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+    scrollbar-gutter: stable;
+    overflow-anchor: none;
+}
+
+/* Force dark color scheme for native form controls in dark mode */
+[data-theme="dark"] {
+    color-scheme: dark;
+}
+
+[data-theme="dark"] select,
+[data-theme="dark"] option {
+    background-color: var(--color-bg-secondary);
+    color: var(--color-text-primary);
+}
+
+body {
+    font-family: var(--font-inter), Inter, system-ui, sans-serif;
+    background: var(--color-bg-tertiary);
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    overflow-x: hidden;
+}
+
+button {
+    cursor: pointer;
+}
+
+/* Scrollbars: slim (global). */
+::-webkit-scrollbar {
+    width: 3px;
+    height: 3px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+::-webkit-scrollbar-thumb:active {
+    background: rgba(255, 255, 255, 0.35);
+}
+
+/* Scrollable containers should inherit the thin style */
+.main-content-scroll,
+.scroll-fade-mask:not(.dashboard-main-scroll),
+.sidebar-scrollbar,
+.scrollbar-autohide:not(.dashboard-main-scroll) {
+    scrollbar-width: thin;
+    scrollbar-gutter: stable;
+}
+
+/* Dashboard: scrollport flush right; 32px pad on .dashboard-main-scroll-pad only */
+.dashboard-main-scroll {
+    box-sizing: border-box;
+    padding-right: 0 !important;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-gutter: auto !important;
+    scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+}
+
+.dashboard-main-scroll-pad {
+    box-sizing: border-box;
+    padding-right: 2rem;
+}
+
+.dashboard-main-scroll::-webkit-scrollbar {
+    width: 3px;
+}
+
+.dashboard-main-scroll::-webkit-scrollbar-track {
+    background: transparent;
+    margin: 0;
+}
+
+.dashboard-main-scroll::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+}
+
+.dashboard-main-scroll.scrollbar-autohide::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0);
+}
+
+.dashboard-main-scroll.scrollbar-autohide.is-scrolling::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.15);
+}
+
+/* Dashboard scroll column: no extra padding-right — outer wrapper already has pr from px-4,
+   and .main-content-gutter-x matches the nav-side inset (1rem gap + gutter). Extra pr here
+   doubled the far-right gutter vs the left-of-content margin. Scrollbar: scrollbar-gutter. */
+.main-content-scroll {
+    box-sizing: border-box;
+}
+
+/* Hide scrollbar utility */
+.scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}
+
+/* Auto-hide scrollbar: visible only while scrolling (not hover), 400ms ease-out when idle. */
+.scrollbar-autohide {
+    scrollbar-color: rgba(255, 255, 255, 0) transparent;
+}
+
+.scrollbar-autohide.is-scrolling {
+    scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+}
+
+.scrollbar-autohide::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0);
+    transition: background-color 0.4s ease-out;
+}
+
+.scrollbar-autohide.is-scrolling::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.15);
+    transition: background-color 0.15s ease-in;
+}
+
+/* Sidebar-specific scrollbar: slightly more visible but still thin */
+.sidebar-scrollbar {
+    scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+.sidebar-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* Chat-scroll: zero-chrome smooth scroll for chat conversation lists.
+   2026-05-29: replaces the default thin scrollbar pattern across all
+   chat surfaces (InlineCardChat, CardAgentChat, SelfLearnFeed). Native
+   scrollbars completely hidden — the chat reads as a clean glass surface
+   with smooth content-only motion. overscroll-behavior: contain prevents
+   the chat scroll from chaining to the parent page when reaching
+   start/end (no accidental page scrolls when the conversation maxes out).
+   scroll-behavior: smooth gives in-component navigation (scrollIntoView,
+   anchor links) a buttery feel. */
+.chat-scroll {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    scroll-behavior: smooth;
+    overscroll-behavior: contain;
+}
+
+.chat-scroll::-webkit-scrollbar {
+    display: none;
+}
+
+.logo * {
+    fill: var(--color-text-secondary) !important;
+}
+
+/* Ensure chart elements have no transitions that could interfere */
+svg,
+svg *,
+.recharts-wrapper,
+.recharts-wrapper *,
+.recharts-surface,
+.recharts-surface *,
+.recharts-area,
+.recharts-area *,
+.recharts-dot,
+.recharts-dot *,
+.recharts-active-dot,
+.recharts-active-dot * {
+    transition: none !important;
+}

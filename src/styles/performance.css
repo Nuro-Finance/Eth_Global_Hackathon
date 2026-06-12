@@ -1,0 +1,49 @@
+/**
+ * Performance CSS - Styles for performance mode
+ * When performance mode is enabled, heavy animations are disabled
+ */
+
+/* Performance mode - disable heavy animations */
+html.performance-mode * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+}
+
+/* Keep essential transitions even in performance mode */
+html.performance-mode .keep-transition {
+    transition-duration: 0.15s !important;
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* GPU acceleration hints for smooth animations */
+.gpu-accelerated {
+    transform: translateZ(0);
+    will-change: transform;
+    backface-visibility: hidden;
+}
+
+/* Contain paint for better performance */
+.contain-paint {
+    contain: paint;
+}
+
+.contain-layout {
+    contain: layout;
+}
+
+.contain-strict {
+    contain: strict;
+}

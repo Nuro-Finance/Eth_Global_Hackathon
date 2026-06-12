@@ -1,0 +1,2401 @@
+{
+  "nodes": [
+    {
+      "id": "Neural Net/Claude Memory/AFI Vision",
+      "label": "AFI Vision",
+      "group": "memory",
+      "readCount": 3,
+      "modifyCount": 2,
+      "skipCount": 0
+    },
+    {
+      "id": "Neural Net/Claude Memory/Architecture",
+      "label": "Architecture",
+      "group": "memory",
+      "readCount": 7,
+      "modifyCount": 4,
+      "skipCount": 0
+    },
+    {
+      "id": "Neural Net/Claude Memory/Memetropolis Intelligence",
+      "label": "Memetropolis Intelligence",
+      "group": "memory",
+      "readCount": 4,
+      "modifyCount": 2,
+      "skipCount": 0
+    },
+    {
+      "id": "Neural Net/Claude Memory/Session 17 Recap",
+      "label": "Session 17 Recap",
+      "group": "memory",
+      "readCount": 1,
+      "modifyCount": 0,
+      "skipCount": 0
+    },
+    {
+      "id": "Neural Net/Claude Memory/V2 Feature Set & Marathons",
+      "label": "V2 Feature Set & Marathons",
+      "group": "memory",
+      "readCount": 3,
+      "modifyCount": 2,
+      "skipCount": 0
+    },
+    {
+      "id": "Neural Net/Claude Memory/Accounts & Test Users",
+      "label": "Accounts & Test Users",
+      "group": "memory",
+      "readCount": 3,
+      "modifyCount": 2,
+      "skipCount": 0
+    },
+    {
+      "id": "AFI_Technical_White_Paper.pdf",
+      "label": "AFI_Technical_White_Paper.pdf",
+      "group": "other",
+      "readCount": 0,
+      "modifyCount": 1,
+      "skipCount": 0
+    },
+    {
+      "id": "Neural Net/Claude Memory/AFI_Technical_White_Paper.pdf",
+      "label": "AFI_Technical_White_Paper.pdf",
+      "group": "memory",
+      "readCount": 0,
+      "modifyCount": 1,
+      "skipCount": 0
+    },
+    {
+      "id": "Neural Net/Claude Memory/Frontend",
+      "label": "Frontend",
+      "group": "memory",
+      "readCount": 0,
+      "modifyCount": 0,
+      "skipCount": 2
+    },
+    {
+      "id": "Neural Net/Claude Memory/Database",
+      "label": "Database",
+      "group": "memory",
+      "readCount": 0,
+      "modifyCount": 0,
+      "skipCount": 1
+    },
+    {
+      "id": "Neural Net/Claude Memory/INDEX",
+      "label": "INDEX",
+      "group": "memory",
+      "readCount": 6,
+      "modifyCount": 4,
+      "skipCount": 0
+    },
+    {
+      "id": "Neural Net/Claude Memory/System Rules",
+      "label": "System Rules",
+      "group": "memory",
+      "readCount": 2,
+      "modifyCount": 2,
+      "skipCount": 0
+    },
+    {
+      "id": "Neural Net/Claude Memory/Pending Tasks",
+      "label": "Pending Tasks",
+      "group": "memory",
+      "readCount": 3,
+      "modifyCount": 2,
+      "skipCount": 0
+    },
+    {
+      "id": "Neural Net/Claude Memory/Deploy History",
+      "label": "Deploy History",
+      "group": "memory",
+      "readCount": 2,
+      "modifyCount": 2,
+      "skipCount": 0
+    },
+    {
+      "id": "Neural Net/Session_Logs/INDEX",
+      "label": "INDEX",
+      "group": "sessions",
+      "readCount": 0,
+      "modifyCount": 1,
+      "skipCount": 0
+    },
+    {
+      "id": "Neural Net/Deprecated/INDEX",
+      "label": "INDEX",
+      "group": "deprecated",
+      "readCount": 0,
+      "modifyCount": 1,
+      "skipCount": 0
+    },
+    {
+      "id": "Cashly_Source_Code/src/owens.ts",
+      "label": "owens.ts",
+      "group": "source",
+      "readCount": 1,
+      "modifyCount": 0,
+      "skipCount": 0
+    },
+    {
+      "id": "Cashly_Source_Code/src/config.ts",
+      "label": "config.ts",
+      "group": "source",
+      "readCount": 5,
+      "modifyCount": 2,
+      "skipCount": 0
+    },
+    {
+      "id": "Cashly_Source_Code/src/nuro-routes.ts",
+      "label": "nuro-routes.ts",
+      "group": "source",
+      "readCount": 6,
+      "modifyCount": 6,
+      "skipCount": 0
+    },
+    {
+      "id": "Cashly_Source_Code/src/execution-dispatch.ts",
+      "label": "execution-dispatch.ts",
+      "group": "source",
+      "readCount": 4,
+      "modifyCount": 2,
+      "skipCount": 0
+    },
+    {
+      "id": "Cashly_Source_Code/src/admin-console.ts",
+      "label": "admin-console.ts",
+      "group": "source",
+      "readCount": 3,
+      "modifyCount": 3,
+      "skipCount": 0
+    },
+    {
+      "id": "Cashly_Source_Code/src/issuers.ts",
+      "label": "issuers.ts",
+      "group": "source",
+      "readCount": 1,
+      "modifyCount": 1,
+      "skipCount": 0
+    },
+    {
+      "id": "Cashly_Source_Code/src/monitor.ts",
+      "label": "monitor.ts",
+      "group": "source",
+      "readCount": 8,
+      "modifyCount": 5,
+      "skipCount": 0
+    },
+    {
+      "id": "Cashly_Source_Code/src/index.ts",
+      "label": "index.ts",
+      "group": "source",
+      "readCount": 1,
+      "modifyCount": 1,
+      "skipCount": 0
+    },
+    {
+      "id": "Cashly_Source_Code/src/types.ts",
+      "label": "types.ts",
+      "group": "source",
+      "readCount": 0,
+      "modifyCount": 1,
+      "skipCount": 0
+    },
+    {
+      "id": "Cashly_Source_Code/src/error-reporter.ts",
+      "label": "error-reporter.ts",
+      "group": "source",
+      "readCount": 0,
+      "modifyCount": 1,
+      "skipCount": 0
+    },
+    {
+      "id": "Cashly_Source_Code/src/solana-bridge.ts",
+      "label": "solana-bridge.ts",
+      "group": "source",
+      "readCount": 2,
+      "modifyCount": 3,
+      "skipCount": 0
+    },
+    {
+      "id": "Cashly_Source_Code/src/bridge.ts",
+      "label": "bridge.ts",
+      "group": "source",
+      "readCount": 11,
+      "modifyCount": 6,
+      "skipCount": 1
+    },
+    {
+      "id": "Neural Net/Claude Memory/Bridge & Monitor",
+      "label": "Bridge & Monitor",
+      "group": "memory",
+      "readCount": 3,
+      "modifyCount": 0,
+      "skipCount": 0
+    },
+    {
+      "id": "Cashly_Source_Code/layerzero.config.ts",
+      "label": "layerzero.config.ts",
+      "group": "source",
+      "readCount": 4,
+      "modifyCount": 2,
+      "skipCount": 0
+    },
+    {
+      "id": "Cashly_Source_Code/src/nonce-manager.ts",
+      "label": "nonce-manager.ts",
+      "group": "source",
+      "readCount": 4,
+      "modifyCount": 3,
+      "skipCount": 0
+    },
+    {
+      "id": "Cashly_Source_Code/src/config/design-mode.ts",
+      "label": "design-mode.ts",
+      "group": "source",
+      "readCount": 2,
+      "modifyCount": 2,
+      "skipCount": 0
+    },
+    {
+      "id": "Cashly_Source_Code/src/features/dashboard/settings/components/CardsContent/index.tsx",
+      "label": "index.tsx",
+      "group": "source",
+      "readCount": 2,
+      "modifyCount": 2,
+      "skipCount": 0
+    },
+    {
+      "id": "Cashly_Source_Code/src/layouts/Sidebar/config/navigation.config.tsx",
+      "label": "navigation.config.tsx",
+      "group": "source",
+      "readCount": 2,
+      "modifyCount": 2,
+      "skipCount": 0
+    },
+    {
+      "id": "Cashly_Source_Code/src/layouts/Sidebar/SidebarProof.tsx",
+      "label": "SidebarProof.tsx",
+      "group": "source",
+      "readCount": 2,
+      "modifyCount": 2,
+      "skipCount": 0
+    },
+    {
+      "id": "Cashly_Source_Code/src/app/[locale]/dashboard/layout.tsx",
+      "label": "layout.tsx",
+      "group": "source",
+      "readCount": 2,
+      "modifyCount": 2,
+      "skipCount": 0
+    },
+    {
+      "id": "60+ frontend files (Tier 1+2 from Chris)",
+      "label": "60+ frontend files (Tier 1+2 from Chris)",
+      "group": "other",
+      "readCount": 0,
+      "modifyCount": 1,
+      "skipCount": 0
+    },
+    {
+      "id": "Cashly_Source_Code/src/providers/ThemeContext.tsx",
+      "label": "ThemeContext.tsx",
+      "group": "source",
+      "readCount": 0,
+      "modifyCount": 1,
+      "skipCount": 0
+    },
+    {
+      "id": "Cashly_Source_Code/src/layouts/Header/components/ThemeToggle/index.tsx",
+      "label": "index.tsx",
+      "group": "source",
+      "readCount": 0,
+      "modifyCount": 1,
+      "skipCount": 0
+    },
+    {
+      "id": "Cashly_Source_Code/src/app/api/withdrawals/[id]/route.ts",
+      "label": "route.ts",
+      "group": "source",
+      "readCount": 0,
+      "modifyCount": 1,
+      "skipCount": 0
+    },
+    {
+      "id": "Cashly_Source_Code/src/migrations/021_agent_fundings_and_sweeps.sql",
+      "label": "021_agent_fundings_and_sweeps.sql",
+      "group": "source",
+      "readCount": 2,
+      "modifyCount": 2,
+      "skipCount": 0
+    },
+    {
+      "id": "Cashly_Source_Code/src/migrations/010_agents.sql",
+      "label": "010_agents.sql",
+      "group": "source",
+      "readCount": 1,
+      "modifyCount": 0,
+      "skipCount": 0
+    },
+    {
+      "id": "Cashly_Source_Code/package.json",
+      "label": "package.json",
+      "group": "source",
+      "readCount": 3,
+      "modifyCount": 2,
+      "skipCount": 0
+    },
+    {
+      "id": "Cashly_Source_Code/src/migrations/022_agent_bets_settlement_columns.sql",
+      "label": "022_agent_bets_settlement_columns.sql",
+      "group": "source",
+      "readCount": 0,
+      "modifyCount": 1,
+      "skipCount": 0
+    },
+    {
+      "id": "Neural Net/memory/tech_afi_vps_schema_reality.md",
+      "label": "tech_afi_vps_schema_reality.md",
+      "group": "other",
+      "readCount": 0,
+      "modifyCount": 1,
+      "skipCount": 0
+    },
+    {
+      "id": "Cashly_Source_Code/.claude/skills/gate-check/gates.yaml",
+      "label": "gates.yaml",
+      "group": "source",
+      "readCount": 1,
+      "modifyCount": 0,
+      "skipCount": 0
+    },
+    {
+      "id": "git log --oneline --since='7 days ago' origin/Build_Branch",
+      "label": "Build_Branch",
+      "group": "other",
+      "readCount": 1,
+      "modifyCount": 0,
+      "skipCount": 0
+    },
+    {
+      "id": "Neural Net/Audits/2026-04-17_gate-audit.md",
+      "label": "2026-04-17_gate-audit.md",
+      "group": "other",
+      "readCount": 0,
+      "modifyCount": 1,
+      "skipCount": 0
+    },
+    {
+      "id": "Cashly_Source_Code/src/features/dashboard/my-card-1/components/ReloadFlow.tsx",
+      "label": "ReloadFlow.tsx",
+      "group": "source",
+      "readCount": 1,
+      "modifyCount": 0,
+      "skipCount": 0
+    },
+    {
+      "id": "Neural Net/Claude Memory/Memetropolis Intelligence.md",
+      "label": "Memetropolis Intelligence.md",
+      "group": "memory",
+      "readCount": 1,
+      "modifyCount": 0,
+      "skipCount": 0
+    },
+    {
+      "id": "Neural Net/Claude Memory/Accounts & Test Users.md",
+      "label": "Accounts & Test Users.md",
+      "group": "memory",
+      "readCount": 1,
+      "modifyCount": 0,
+      "skipCount": 0
+    },
+    {
+      "id": "Cashly_Source_Code/src/monitor.ts (derive-from-users + 2 dedup time windows + 1 inflight window)",
+      "label": "monitor.ts (derive-from-users + 2 dedup time windows + 1 inflight window)",
+      "group": "source",
+      "readCount": 0,
+      "modifyCount": 1,
+      "skipCount": 0
+    },
+    {
+      "id": "Cashly_Source_Code/src/nonce-manager.ts (Base publicnode URL typo fix)",
+      "label": "nonce-manager.ts (Base publicnode URL typo fix)",
+      "group": "source",
+      "readCount": 0,
+      "modifyCount": 1,
+      "skipCount": 0
+    },
+    {
+      "id": "Cashly_Source_Code/src/bridge.ts (reverse CCTP param + cctpBaseToPolygon helper)",
+      "label": "bridge.ts (reverse CCTP param + cctpBaseToPolygon helper)",
+      "group": "source",
+      "readCount": 0,
+      "modifyCount": 1,
+      "skipCount": 0
+    },
+    {
+      "id": "Cashly_Source_Code/src/features/dashboard/my-card-1/components/ReloadFlow.tsx (QRCode empty-string guards + vault/direct toggle)",
+      "label": "direct toggle)",
+      "group": "source",
+      "readCount": 0,
+      "modifyCount": 1,
+      "skipCount": 0
+    },
+    {
+      "id": "Cashly_Source_Code/scripts/audit-schema.sql (schema drift detector)",
+      "label": "audit-schema.sql (schema drift detector)",
+      "group": "source",
+      "readCount": 0,
+      "modifyCount": 1,
+      "skipCount": 0
+    },
+    {
+      "id": "Cashly_Source_Code/src/migrations/023_schema_migrations_tracking.sql (new)",
+      "label": "023_schema_migrations_tracking.sql (new)",
+      "group": "source",
+      "readCount": 0,
+      "modifyCount": 1,
+      "skipCount": 0
+    },
+    {
+      "id": "Cashly_Source_Code/.claude/skills/gate-check/gates.yaml (schema-integrity + agent-profit-sweep-live + agent-funding-live gates)",
+      "label": "gates.yaml (schema-integrity + agent-profit-sweep-live + agent-funding-live gates)",
+      "group": "source",
+      "readCount": 0,
+      "modifyCount": 1,
+      "skipCount": 0
+    },
+    {
+      "id": "Neural Net/Investor Prep/2026-04-17_Meeting/* (11 prep docs)",
+      "label": "* (11 prep docs)",
+      "group": "other",
+      "readCount": 0,
+      "modifyCount": 1,
+      "skipCount": 0
+    },
+    {
+      "id": "Neural Net/Sub-Agents/ (scaffold with INDEX + conflict-resolution + orchestrator + 2 new agent docs + D3 generator)",
+      "label": " (scaffold with INDEX + conflict-resolution + orchestrator + 2 new agent docs + D3 generator)",
+      "group": "other",
+      "readCount": 0,
+      "modifyCount": 1,
+      "skipCount": 0
+    },
+    {
+      "id": "Neural Net/Audits/2026-04-17_gate-audit.md (first manual audit artifact)",
+      "label": "2026-04-17_gate-audit.md (first manual audit artifact)",
+      "group": "other",
+      "readCount": 0,
+      "modifyCount": 1,
+      "skipCount": 0
+    },
+    {
+      "id": "Neural Net/Claude Memory/INDEX.md",
+      "label": "INDEX.md",
+      "group": "memory",
+      "readCount": 1,
+      "modifyCount": 0,
+      "skipCount": 0
+    },
+    {
+      "id": "Neural Net/Claude Memory/Pending Tasks.md",
+      "label": "Pending Tasks.md",
+      "group": "memory",
+      "readCount": 1,
+      "modifyCount": 0,
+      "skipCount": 0
+    },
+    {
+      "id": "Neural Net/Claude Memory/V2 Feature Set & Marathons.md",
+      "label": "V2 Feature Set & Marathons.md",
+      "group": "memory",
+      "readCount": 1,
+      "modifyCount": 0,
+      "skipCount": 0
+    },
+    {
+      "id": "Neural Net/Decision Journal/2026-04-17_004.md (prior session live-debug context)",
+      "label": "2026-04-17_004.md (prior session live-debug context)",
+      "group": "decisions",
+      "readCount": 1,
+      "modifyCount": 0,
+      "skipCount": 0
+    },
+    {
+      "id": "Cashly_Source_Code/src/monitor.ts (DECIMALS_BY_CHAIN map, getChainDecimals helper, pollChain decimals fix, seedLastSeenFromDb decimals fix)",
+      "label": "monitor.ts (DECIMALS_BY_CHAIN map, getChainDecimals helper, pollChain decimals fix, seedLastSeenFromDb decimals fix)",
+      "group": "source",
+      "readCount": 0,
+      "modifyCount": 1,
+      "skipCount": 0
+    },
+    {
+      "id": "Cashly_Source_Code/src/bridge.ts (scale forwardAmount source→Arb 6-dec inside LZ two-hop path)",
+      "label": "bridge.ts (scale forwardAmount source→Arb 6-dec inside LZ two-hop path)",
+      "group": "source",
+      "readCount": 0,
+      "modifyCount": 1,
+      "skipCount": 0
+    },
+    {
+      "id": "Cashly_Source_Code/scripts/manual-sweep-arb-to-base.ts (new — recovers stranded $0.04 from Arb deployer)",
+      "label": "manual-sweep-arb-to-base.ts (new — recovers stranded $0.04 from Arb deployer)",
+      "group": "source",
+      "readCount": 0,
+      "modifyCount": 1,
+      "skipCount": 0
+    },
+    {
+      "id": "Cashly_Source_Code/next.config.js",
+      "label": "next.config.js",
+      "group": "source",
+      "readCount": 1,
+      "modifyCount": 0,
+      "skipCount": 0
+    },
+    {
+      "id": "Cashly_Source_Code/postcss.config.mjs",
+      "label": "postcss.config.mjs",
+      "group": "source",
+      "readCount": 1,
+      "modifyCount": 0,
+      "skipCount": 0
+    },
+    {
+      "id": "Cashly_Source_Code/tailwind.config.mjs",
+      "label": "tailwind.config.mjs",
+      "group": "source",
+      "readCount": 1,
+      "modifyCount": 0,
+      "skipCount": 0
+    },
+    {
+      "id": "Cashly_Source_Code/.husky/pre-push",
+      "label": "pre-push",
+      "group": "source",
+      "readCount": 1,
+      "modifyCount": 0,
+      "skipCount": 0
+    },
+    {
+      "id": "Cashly_Source_Code/.github/workflows/backend-ci.yml",
+      "label": "backend-ci.yml",
+      "group": "source",
+      "readCount": 1,
+      "modifyCount": 0,
+      "skipCount": 0
+    },
+    {
+      "id": "git show 9ff7a04:yarn.lock (pre-migration)",
+      "label": "git show 9ff7a04:yarn.lock (pre-migration)",
+      "group": "other",
+      "readCount": 1,
+      "modifyCount": 0,
+      "skipCount": 0
+    },
+    {
+      "id": "Cashly_Source_Code/src/app, components, features, hooks, providers, layouts, store, lib, services, i18n, auth.ts, middleware.ts (via Explore agent)",
+      "label": "app, components, features, hooks, providers, layouts, store, lib, services, i18n, auth.ts, middleware.ts (via Explore agent)",
+      "group": "source",
+      "readCount": 1,
+      "modifyCount": 0,
+      "skipCount": 0
+    },
+    {
+      "id": "Cashly_Source_Code/package.json (42 new dependencies + 9 new devDependencies)",
+      "label": "package.json (42 new dependencies + 9 new devDependencies)",
+      "group": "source",
+      "readCount": 0,
+      "modifyCount": 1,
+      "skipCount": 0
+    },
+    {
+      "id": "Cashly_Source_Code/scripts/verify-deps.js (new — dep-verification gate)",
+      "label": "verify-deps.js (new — dep-verification gate)",
+      "group": "source",
+      "readCount": 0,
+      "modifyCount": 1,
+      "skipCount": 0
+    },
+    {
+      "id": "Cashly_Source_Code/scripts/extract-yarn-versions.js (new — one-shot tool)",
+      "label": "extract-yarn-versions.js (new — one-shot tool)",
+      "group": "source",
+      "readCount": 0,
+      "modifyCount": 1,
+      "skipCount": 0
+    },
+    {
+      "id": "Cashly_Source_Code/.husky/pre-push (added verify-deps as Gate 1)",
+      "label": "pre-push (added verify-deps as Gate 1)",
+      "group": "source",
+      "readCount": 0,
+      "modifyCount": 1,
+      "skipCount": 0
+    },
+    {
+      "id": "Cashly_Source_Code/.github/workflows/backend-ci.yml (added verify-deps step)",
+      "label": "backend-ci.yml (added verify-deps step)",
+      "group": "source",
+      "readCount": 0,
+      "modifyCount": 1,
+      "skipCount": 0
+    },
+    {
+      "id": "Research-only, no files modified. Research agent returned ranked picks.",
+      "label": "Research-only, no files modified. Research agent returned ranked picks.",
+      "group": "other",
+      "readCount": 1,
+      "modifyCount": 0,
+      "skipCount": 0
+    },
+    {
+      "id": "Neural Net/Decision Journal/2026-04-17_007.md (this file)",
+      "label": "2026-04-17_007.md (this file)",
+      "group": "decisions",
+      "readCount": 0,
+      "modifyCount": 1,
+      "skipCount": 0
+    },
+    {
+      "id": "Cashly_Source_Code/src/middleware.ts",
+      "label": "middleware.ts",
+      "group": "source",
+      "readCount": 1,
+      "modifyCount": 0,
+      "skipCount": 0
+    },
+    {
+      "id": "C:/Users/Richa/.claude/settings.json",
+      "label": "settings.json",
+      "group": "other",
+      "readCount": 1,
+      "modifyCount": 0,
+      "skipCount": 0
+    },
+    {
+      "id": "Cashly_Source_Code/src/admin-console.ts (Monitor Skips panel + /admin/api/monitor-skips endpoint + column widening polish)",
+      "label": "monitor-skips endpoint + column widening polish)",
+      "group": "source",
+      "readCount": 0,
+      "modifyCount": 1,
+      "skipCount": 0
+    },
+    {
+      "id": "Cashly_Source_Code/src/index.ts (SIGTERM/SIGINT graceful-shutdown handler marking in-flight txs failed_restart)",
+      "label": "SIGINT graceful-shutdown handler marking in-flight txs failed_restart)",
+      "group": "source",
+      "readCount": 0,
+      "modifyCount": 1,
+      "skipCount": 0
+    },
+    {
+      "id": "Cashly_Source_Code/src/monitor.ts (boot-time reconciler warning on failed_restart rows)",
+      "label": "monitor.ts (boot-time reconciler warning on failed_restart rows)",
+      "group": "source",
+      "readCount": 0,
+      "modifyCount": 1,
+      "skipCount": 0
+    },
+    {
+      "id": "Cashly_Source_Code/src/lib/dedup.ts (handle failed_restart status as stale-retry)",
+      "label": "dedup.ts (handle failed_restart status as stale-retry)",
+      "group": "source",
+      "readCount": 0,
+      "modifyCount": 1,
+      "skipCount": 0
+    },
+    {
+      "id": "C:/Users/Richa/.claude/settings.json (Stop hook auto-pause polling + SessionStart vps-health + PostToolUse /auditor on git push + PreToolUse /gate-check on .env edits + /gate-check on AGENT_*=false flips)",
+      "label": "gate-check on AGENT_*=false flips)",
+      "group": "other",
+      "readCount": 0,
+      "modifyCount": 1,
+      "skipCount": 0
+    },
+    {
+      "id": "~/.claude.json (rotated github MCP with fresh PAT; confirmed all 3 MCPs ✓ Connected)",
+      "label": ".claude.json (rotated github MCP with fresh PAT; confirmed all 3 MCPs ✓ Connected)",
+      "group": "other",
+      "readCount": 0,
+      "modifyCount": 1,
+      "skipCount": 0
+    },
+    {
+      "id": "Cashly_Source_Code/.claude/skills/deployer/SKILL.md (added npm ci as mandatory BE step, Session 22 lesson)",
+      "label": "SKILL.md (added npm ci as mandatory BE step, Session 22 lesson)",
+      "group": "source",
+      "readCount": 0,
+      "modifyCount": 1,
+      "skipCount": 0
+    },
+    {
+      "id": "Neural Net/Sub-Agents/on-demand/*.md (9 remaining skill docs: issuer, issuer-status, auditor, balances, sync, agent, jwt, market, vps-health) + INDEX updates + hook-wiring-plan",
+      "label": "*.md (9 remaining skill docs: issuer, issuer-status, auditor, balances, sync, agent, jwt, market, vps-health) + INDEX updates + hook-wiring-plan",
+      "group": "other",
+      "readCount": 0,
+      "modifyCount": 1,
+      "skipCount": 0
+    }
+  ],
+  "links": [
+    {
+      "source": "Neural Net/Claude Memory/AFI Vision",
+      "target": "Neural Net/Claude Memory/Architecture",
+      "weight": 3
+    },
+    {
+      "source": "Neural Net/Claude Memory/Architecture",
+      "target": "Neural Net/Claude Memory/Memetropolis Intelligence",
+      "weight": 1
+    },
+    {
+      "source": "Neural Net/Claude Memory/Memetropolis Intelligence",
+      "target": "Neural Net/Claude Memory/Session 17 Recap",
+      "weight": 1
+    },
+    {
+      "source": "Neural Net/Claude Memory/Session 17 Recap",
+      "target": "Neural Net/Claude Memory/V2 Feature Set & Marathons",
+      "weight": 1
+    },
+    {
+      "source": "Neural Net/Claude Memory/V2 Feature Set & Marathons",
+      "target": "Neural Net/Claude Memory/Accounts & Test Users",
+      "weight": 1
+    },
+    {
+      "source": "Neural Net/Claude Memory/Accounts & Test Users",
+      "target": "AFI_Technical_White_Paper.pdf",
+      "weight": 1
+    },
+    {
+      "source": "AFI_Technical_White_Paper.pdf",
+      "target": "Neural Net/Claude Memory/AFI_Technical_White_Paper.pdf",
+      "weight": 1
+    },
+    {
+      "source": "Neural Net/Claude Memory/INDEX",
+      "target": "Neural Net/Claude Memory/Architecture",
+      "weight": 2
+    },
+    {
+      "source": "Neural Net/Claude Memory/AFI Vision",
+      "target": "Neural Net/Claude Memory/System Rules",
+      "weight": 2
+    },
+    {
+      "source": "Neural Net/Claude Memory/System Rules",
+      "target": "Neural Net/Claude Memory/V2 Feature Set & Marathons",
+      "weight": 2
+    },
+    {
+      "source": "Neural Net/Claude Memory/V2 Feature Set & Marathons",
+      "target": "Neural Net/Claude Memory/Memetropolis Intelligence",
+      "weight": 2
+    },
+    {
+      "source": "Neural Net/Claude Memory/Memetropolis Intelligence",
+      "target": "Neural Net/Claude Memory/Pending Tasks",
+      "weight": 2
+    },
+    {
+      "source": "Neural Net/Claude Memory/Pending Tasks",
+      "target": "Neural Net/Claude Memory/Deploy History",
+      "weight": 2
+    },
+    {
+      "source": "Neural Net/Claude Memory/Deploy History",
+      "target": "Neural Net/Claude Memory/INDEX",
+      "weight": 1
+    },
+    {
+      "source": "Neural Net/Claude Memory/Deploy History",
+      "target": "Neural Net/Session_Logs/INDEX",
+      "weight": 1
+    },
+    {
+      "source": "Neural Net/Session_Logs/INDEX",
+      "target": "Neural Net/Deprecated/INDEX",
+      "weight": 1
+    },
+    {
+      "source": "Neural Net/Claude Memory/Architecture",
+      "target": "Neural Net/Claude Memory/Accounts & Test Users",
+      "weight": 2
+    },
+    {
+      "source": "Neural Net/Claude Memory/Accounts & Test Users",
+      "target": "Neural Net/Claude Memory/INDEX",
+      "weight": 2
+    },
+    {
+      "source": "Neural Net/Claude Memory/INDEX",
+      "target": "Cashly_Source_Code/src/owens.ts",
+      "weight": 1
+    },
+    {
+      "source": "Cashly_Source_Code/src/owens.ts",
+      "target": "Cashly_Source_Code/src/config.ts",
+      "weight": 1
+    },
+    {
+      "source": "Cashly_Source_Code/src/config.ts",
+      "target": "Cashly_Source_Code/src/nuro-routes.ts",
+      "weight": 2
+    },
+    {
+      "source": "Cashly_Source_Code/src/nuro-routes.ts",
+      "target": "Cashly_Source_Code/src/execution-dispatch.ts",
+      "weight": 2
+    },
+    {
+      "source": "Cashly_Source_Code/src/execution-dispatch.ts",
+      "target": "Cashly_Source_Code/src/admin-console.ts",
+      "weight": 1
+    },
+    {
+      "source": "Cashly_Source_Code/src/admin-console.ts",
+      "target": "Cashly_Source_Code/src/issuers.ts",
+      "weight": 1
+    },
+    {
+      "source": "Cashly_Source_Code/src/issuers.ts",
+      "target": "Cashly_Source_Code/src/config.ts",
+      "weight": 2
+    },
+    {
+      "source": "Cashly_Source_Code/src/execution-dispatch.ts",
+      "target": "Cashly_Source_Code/src/monitor.ts",
+      "weight": 1
+    },
+    {
+      "source": "Cashly_Source_Code/src/monitor.ts",
+      "target": "Cashly_Source_Code/src/index.ts",
+      "weight": 2
+    },
+    {
+      "source": "Cashly_Source_Code/src/index.ts",
+      "target": "Cashly_Source_Code/src/admin-console.ts",
+      "weight": 1
+    },
+    {
+      "source": "Cashly_Source_Code/src/admin-console.ts",
+      "target": "Cashly_Source_Code/src/types.ts",
+      "weight": 1
+    },
+    {
+      "source": "Cashly_Source_Code/src/types.ts",
+      "target": "Cashly_Source_Code/src/error-reporter.ts",
+      "weight": 1
+    },
+    {
+      "source": "Cashly_Source_Code/src/error-reporter.ts",
+      "target": "Cashly_Source_Code/src/solana-bridge.ts",
+      "weight": 1
+    },
+    {
+      "source": "Cashly_Source_Code/src/solana-bridge.ts",
+      "target": "Neural Net/Claude Memory/Architecture",
+      "weight": 1
+    },
+    {
+      "source": "Neural Net/Claude Memory/Architecture",
+      "target": "Neural Net/Claude Memory/Bridge & Monitor",
+      "weight": 2
+    },
+    {
+      "source": "Neural Net/Claude Memory/Bridge & Monitor",
+      "target": "Neural Net/Claude Memory/Memetropolis Intelligence",
+      "weight": 1
+    },
+    {
+      "source": "Neural Net/Claude Memory/Memetropolis Intelligence",
+      "target": "Cashly_Source_Code/src/bridge.ts",
+      "weight": 1
+    },
+    {
+      "source": "Cashly_Source_Code/src/bridge.ts",
+      "target": "Cashly_Source_Code/layerzero.config.ts",
+      "weight": 4
+    },
+    {
+      "source": "Cashly_Source_Code/src/bridge.ts",
+      "target": "Cashly_Source_Code/src/nonce-manager.ts",
+      "weight": 4
+    },
+    {
+      "source": "Neural Net/Claude Memory/Bridge & Monitor",
+      "target": "Cashly_Source_Code/src/bridge.ts",
+      "weight": 2
+    },
+    {
+      "source": "Cashly_Source_Code/layerzero.config.ts",
+      "target": "Cashly_Source_Code/src/nonce-manager.ts",
+      "weight": 1
+    },
+    {
+      "source": "Neural Net/Claude Memory/INDEX",
+      "target": "Neural Net/Claude Memory/Pending Tasks",
+      "weight": 1
+    },
+    {
+      "source": "Neural Net/Claude Memory/Pending Tasks",
+      "target": "Cashly_Source_Code/src/bridge.ts",
+      "weight": 1
+    },
+    {
+      "source": "Cashly_Source_Code/src/bridge.ts",
+      "target": "Cashly_Source_Code/src/monitor.ts",
+      "weight": 3
+    },
+    {
+      "source": "Cashly_Source_Code/src/monitor.ts",
+      "target": "Cashly_Source_Code/src/config.ts",
+      "weight": 2
+    },
+    {
+      "source": "Cashly_Source_Code/src/monitor.ts",
+      "target": "Cashly_Source_Code/src/admin-console.ts",
+      "weight": 2
+    },
+    {
+      "source": "Neural Net/Claude Memory/Bridge & Monitor",
+      "target": "Cashly_Source_Code/layerzero.config.ts",
+      "weight": 1
+    },
+    {
+      "source": "Cashly_Source_Code/src/bridge.ts",
+      "target": "Cashly_Source_Code/src/bridge.ts",
+      "weight": 1
+    },
+    {
+      "source": "Neural Net/Claude Memory/INDEX",
+      "target": "Cashly_Source_Code/src/config/design-mode.ts",
+      "weight": 1
+    },
+    {
+      "source": "Cashly_Source_Code/src/config/design-mode.ts",
+      "target": "Cashly_Source_Code/src/features/dashboard/settings/components/CardsContent/index.tsx",
+      "weight": 2
+    },
+    {
+      "source": "Cashly_Source_Code/src/features/dashboard/settings/components/CardsContent/index.tsx",
+      "target": "Cashly_Source_Code/src/layouts/Sidebar/config/navigation.config.tsx",
+      "weight": 2
+    },
+    {
+      "source": "Cashly_Source_Code/src/layouts/Sidebar/config/navigation.config.tsx",
+      "target": "Cashly_Source_Code/src/layouts/Sidebar/SidebarProof.tsx",
+      "weight": 2
+    },
+    {
+      "source": "Cashly_Source_Code/src/layouts/Sidebar/SidebarProof.tsx",
+      "target": "Cashly_Source_Code/src/app/[locale]/dashboard/layout.tsx",
+      "weight": 2
+    },
+    {
+      "source": "Cashly_Source_Code/src/app/[locale]/dashboard/layout.tsx",
+      "target": "60+ frontend files (Tier 1+2 from Chris)",
+      "weight": 1
+    },
+    {
+      "source": "60+ frontend files (Tier 1+2 from Chris)",
+      "target": "Cashly_Source_Code/src/config/design-mode.ts",
+      "weight": 1
+    },
+    {
+      "source": "Cashly_Source_Code/src/app/[locale]/dashboard/layout.tsx",
+      "target": "Cashly_Source_Code/src/providers/ThemeContext.tsx",
+      "weight": 1
+    },
+    {
+      "source": "Cashly_Source_Code/src/providers/ThemeContext.tsx",
+      "target": "Cashly_Source_Code/src/layouts/Header/components/ThemeToggle/index.tsx",
+      "weight": 1
+    },
+    {
+      "source": "Cashly_Source_Code/src/nuro-routes.ts",
+      "target": "Cashly_Source_Code/src/nonce-manager.ts",
+      "weight": 1
+    },
+    {
+      "source": "Cashly_Source_Code/src/nonce-manager.ts",
+      "target": "Cashly_Source_Code/src/monitor.ts",
+      "weight": 2
+    },
+    {
+      "source": "Cashly_Source_Code/src/bridge.ts",
+      "target": "Cashly_Source_Code/src/nuro-routes.ts",
+      "weight": 1
+    },
+    {
+      "source": "Cashly_Source_Code/src/nuro-routes.ts",
+      "target": "Cashly_Source_Code/src/app/api/withdrawals/[id]/route.ts",
+      "weight": 1
+    },
+    {
+      "source": "Cashly_Source_Code/src/solana-bridge.ts",
+      "target": "Cashly_Source_Code/src/nuro-routes.ts",
+      "weight": 2
+    },
+    {
+      "source": "Cashly_Source_Code/src/nuro-routes.ts",
+      "target": "Cashly_Source_Code/src/monitor.ts",
+      "weight": 2
+    },
+    {
+      "source": "Cashly_Source_Code/src/monitor.ts",
+      "target": "Cashly_Source_Code/src/solana-bridge.ts",
+      "weight": 1
+    },
+    {
+      "source": "Cashly_Source_Code/src/execution-dispatch.ts",
+      "target": "Cashly_Source_Code/src/migrations/021_agent_fundings_and_sweeps.sql",
+      "weight": 1
+    },
+    {
+      "source": "Cashly_Source_Code/src/migrations/021_agent_fundings_and_sweeps.sql",
+      "target": "Cashly_Source_Code/src/migrations/010_agents.sql",
+      "weight": 1
+    },
+    {
+      "source": "Cashly_Source_Code/src/migrations/010_agents.sql",
+      "target": "Cashly_Source_Code/package.json",
+      "weight": 1
+    },
+    {
+      "source": "Cashly_Source_Code/package.json",
+      "target": "Cashly_Source_Code/src/migrations/021_agent_fundings_and_sweeps.sql",
+      "weight": 1
+    },
+    {
+      "source": "Cashly_Source_Code/src/migrations/021_agent_fundings_and_sweeps.sql",
+      "target": "Cashly_Source_Code/src/migrations/022_agent_bets_settlement_columns.sql",
+      "weight": 1
+    },
+    {
+      "source": "Cashly_Source_Code/src/migrations/022_agent_bets_settlement_columns.sql",
+      "target": "Cashly_Source_Code/package.json",
+      "weight": 1
+    },
+    {
+      "source": "Cashly_Source_Code/package.json",
+      "target": "Neural Net/memory/tech_afi_vps_schema_reality.md",
+      "weight": 1
+    },
+    {
+      "source": "Cashly_Source_Code/.claude/skills/gate-check/gates.yaml",
+      "target": "Cashly_Source_Code/src/execution-dispatch.ts",
+      "weight": 1
+    },
+    {
+      "source": "Cashly_Source_Code/src/execution-dispatch.ts",
+      "target": "Cashly_Source_Code/src/config.ts",
+      "weight": 1
+    },
+    {
+      "source": "Cashly_Source_Code/src/config.ts",
+      "target": "git log --oneline --since='7 days ago' origin/Build_Branch",
+      "weight": 1
+    },
+    {
+      "source": "git log --oneline --since='7 days ago' origin/Build_Branch",
+      "target": "Neural Net/Audits/2026-04-17_gate-audit.md",
+      "weight": 1
+    },
+    {
+      "source": "Cashly_Source_Code/src/bridge.ts",
+      "target": "Cashly_Source_Code/src/features/dashboard/my-card-1/components/ReloadFlow.tsx",
+      "weight": 1
+    },
+    {
+      "source": "Cashly_Source_Code/src/features/dashboard/my-card-1/components/ReloadFlow.tsx",
+      "target": "Neural Net/Claude Memory/Memetropolis Intelligence.md",
+      "weight": 1
+    },
+    {
+      "source": "Neural Net/Claude Memory/Memetropolis Intelligence.md",
+      "target": "Neural Net/Claude Memory/Accounts & Test Users.md",
+      "weight": 1
+    },
+    {
+      "source": "Neural Net/Claude Memory/Accounts & Test Users.md",
+      "target": "Cashly_Source_Code/src/monitor.ts (derive-from-users + 2 dedup time windows + 1 inflight window)",
+      "weight": 1
+    },
+    {
+      "source": "Cashly_Source_Code/src/monitor.ts (derive-from-users + 2 dedup time windows + 1 inflight window)",
+      "target": "Cashly_Source_Code/src/nonce-manager.ts (Base publicnode URL typo fix)",
+      "weight": 1
+    },
+    {
+      "source": "Cashly_Source_Code/src/nonce-manager.ts (Base publicnode URL typo fix)",
+      "target": "Cashly_Source_Code/src/bridge.ts (reverse CCTP param + cctpBaseToPolygon helper)",
+      "weight": 1
+    },
+    {
+      "source": "Cashly_Source_Code/src/bridge.ts (reverse CCTP param + cctpBaseToPolygon helper)",
+      "target": "Cashly_Source_Code/src/features/dashboard/my-card-1/components/ReloadFlow.tsx (QRCode empty-string guards + vault/direct toggle)",
+      "weight": 1
+    },
+    {
+      "source": "Cashly_Source_Code/src/features/dashboard/my-card-1/components/ReloadFlow.tsx (QRCode empty-string guards + vault/direct toggle)",
+      "target": "Cashly_Source_Code/scripts/audit-schema.sql (schema drift detector)",
+      "weight": 1
+    },
+    {
+      "source": "Cashly_Source_Code/scripts/audit-schema.sql (schema drift detector)",
+      "target": "Cashly_Source_Code/src/migrations/023_schema_migrations_tracking.sql (new)",
+      "weight": 1
+    },
+    {
+      "source": "Cashly_Source_Code/src/migrations/023_schema_migrations_tracking.sql (new)",
+      "target": "Cashly_Source_Code/.claude/skills/gate-check/gates.yaml (schema-integrity + agent-profit-sweep-live + agent-funding-live gates)",
+      "weight": 1
+    },
+    {
+      "source": "Cashly_Source_Code/.claude/skills/gate-check/gates.yaml (schema-integrity + agent-profit-sweep-live + agent-funding-live gates)",
+      "target": "Neural Net/Investor Prep/2026-04-17_Meeting/* (11 prep docs)",
+      "weight": 1
+    },
+    {
+      "source": "Neural Net/Investor Prep/2026-04-17_Meeting/* (11 prep docs)",
+      "target": "Neural Net/Sub-Agents/ (scaffold with INDEX + conflict-resolution + orchestrator + 2 new agent docs + D3 generator)",
+      "weight": 1
+    },
+    {
+      "source": "Neural Net/Sub-Agents/ (scaffold with INDEX + conflict-resolution + orchestrator + 2 new agent docs + D3 generator)",
+      "target": "Neural Net/Audits/2026-04-17_gate-audit.md (first manual audit artifact)",
+      "weight": 1
+    },
+    {
+      "source": "Cashly_Source_Code/src/bridge.ts",
+      "target": "Cashly_Source_Code/src/issuers.ts",
+      "weight": 1
+    },
+    {
+      "source": "Cashly_Source_Code/src/config.ts",
+      "target": "Neural Net/Claude Memory/INDEX.md",
+      "weight": 1
+    },
+    {
+      "source": "Neural Net/Claude Memory/INDEX.md",
+      "target": "Neural Net/Claude Memory/Pending Tasks.md",
+      "weight": 1
+    },
+    {
+      "source": "Neural Net/Claude Memory/Pending Tasks.md",
+      "target": "Neural Net/Claude Memory/V2 Feature Set & Marathons.md",
+      "weight": 1
+    },
+    {
+      "source": "Neural Net/Claude Memory/V2 Feature Set & Marathons.md",
+      "target": "Neural Net/Decision Journal/2026-04-17_004.md (prior session live-debug context)",
+      "weight": 1
+    },
+    {
+      "source": "Neural Net/Decision Journal/2026-04-17_004.md (prior session live-debug context)",
+      "target": "Cashly_Source_Code/src/monitor.ts (DECIMALS_BY_CHAIN map, getChainDecimals helper, pollChain decimals fix, seedLastSeenFromDb decimals fix)",
+      "weight": 1
+    },
+    {
+      "source": "Cashly_Source_Code/src/monitor.ts (DECIMALS_BY_CHAIN map, getChainDecimals helper, pollChain decimals fix, seedLastSeenFromDb decimals fix)",
+      "target": "Cashly_Source_Code/src/bridge.ts (scale forwardAmount source→Arb 6-dec inside LZ two-hop path)",
+      "weight": 1
+    },
+    {
+      "source": "Cashly_Source_Code/src/bridge.ts (scale forwardAmount source→Arb 6-dec inside LZ two-hop path)",
+      "target": "Cashly_Source_Code/scripts/manual-sweep-arb-to-base.ts (new — recovers stranded $0.04 from Arb deployer)",
+      "weight": 1
+    },
+    {
+      "source": "Cashly_Source_Code/package.json",
+      "target": "Cashly_Source_Code/next.config.js",
+      "weight": 1
+    },
+    {
+      "source": "Cashly_Source_Code/next.config.js",
+      "target": "Cashly_Source_Code/postcss.config.mjs",
+      "weight": 1
+    },
+    {
+      "source": "Cashly_Source_Code/postcss.config.mjs",
+      "target": "Cashly_Source_Code/tailwind.config.mjs",
+      "weight": 1
+    },
+    {
+      "source": "Cashly_Source_Code/tailwind.config.mjs",
+      "target": "Cashly_Source_Code/.husky/pre-push",
+      "weight": 1
+    },
+    {
+      "source": "Cashly_Source_Code/.husky/pre-push",
+      "target": "Cashly_Source_Code/.github/workflows/backend-ci.yml",
+      "weight": 1
+    },
+    {
+      "source": "Cashly_Source_Code/.github/workflows/backend-ci.yml",
+      "target": "git show 9ff7a04:yarn.lock (pre-migration)",
+      "weight": 1
+    },
+    {
+      "source": "git show 9ff7a04:yarn.lock (pre-migration)",
+      "target": "Cashly_Source_Code/src/app, components, features, hooks, providers, layouts, store, lib, services, i18n, auth.ts, middleware.ts (via Explore agent)",
+      "weight": 1
+    },
+    {
+      "source": "Cashly_Source_Code/src/app, components, features, hooks, providers, layouts, store, lib, services, i18n, auth.ts, middleware.ts (via Explore agent)",
+      "target": "Cashly_Source_Code/package.json (42 new dependencies + 9 new devDependencies)",
+      "weight": 1
+    },
+    {
+      "source": "Cashly_Source_Code/package.json (42 new dependencies + 9 new devDependencies)",
+      "target": "Cashly_Source_Code/scripts/verify-deps.js (new — dep-verification gate)",
+      "weight": 1
+    },
+    {
+      "source": "Cashly_Source_Code/scripts/verify-deps.js (new — dep-verification gate)",
+      "target": "Cashly_Source_Code/scripts/extract-yarn-versions.js (new — one-shot tool)",
+      "weight": 1
+    },
+    {
+      "source": "Cashly_Source_Code/scripts/extract-yarn-versions.js (new — one-shot tool)",
+      "target": "Cashly_Source_Code/.husky/pre-push (added verify-deps as Gate 1)",
+      "weight": 1
+    },
+    {
+      "source": "Cashly_Source_Code/.husky/pre-push (added verify-deps as Gate 1)",
+      "target": "Cashly_Source_Code/.github/workflows/backend-ci.yml (added verify-deps step)",
+      "weight": 1
+    },
+    {
+      "source": "Research-only, no files modified. Research agent returned ranked picks.",
+      "target": "Neural Net/Decision Journal/2026-04-17_007.md (this file)",
+      "weight": 1
+    },
+    {
+      "source": "Cashly_Source_Code/src/index.ts",
+      "target": "Cashly_Source_Code/src/middleware.ts",
+      "weight": 1
+    },
+    {
+      "source": "Cashly_Source_Code/src/middleware.ts",
+      "target": "C:/Users/Richa/.claude/settings.json",
+      "weight": 1
+    },
+    {
+      "source": "C:/Users/Richa/.claude/settings.json",
+      "target": "Cashly_Source_Code/src/admin-console.ts (Monitor Skips panel + /admin/api/monitor-skips endpoint + column widening polish)",
+      "weight": 1
+    },
+    {
+      "source": "Cashly_Source_Code/src/admin-console.ts (Monitor Skips panel + /admin/api/monitor-skips endpoint + column widening polish)",
+      "target": "Cashly_Source_Code/src/index.ts (SIGTERM/SIGINT graceful-shutdown handler marking in-flight txs failed_restart)",
+      "weight": 1
+    },
+    {
+      "source": "Cashly_Source_Code/src/index.ts (SIGTERM/SIGINT graceful-shutdown handler marking in-flight txs failed_restart)",
+      "target": "Cashly_Source_Code/src/monitor.ts (boot-time reconciler warning on failed_restart rows)",
+      "weight": 1
+    },
+    {
+      "source": "Cashly_Source_Code/src/monitor.ts (boot-time reconciler warning on failed_restart rows)",
+      "target": "Cashly_Source_Code/src/lib/dedup.ts (handle failed_restart status as stale-retry)",
+      "weight": 1
+    },
+    {
+      "source": "Cashly_Source_Code/src/lib/dedup.ts (handle failed_restart status as stale-retry)",
+      "target": "C:/Users/Richa/.claude/settings.json (Stop hook auto-pause polling + SessionStart vps-health + PostToolUse /auditor on git push + PreToolUse /gate-check on .env edits + /gate-check on AGENT_*=false flips)",
+      "weight": 1
+    },
+    {
+      "source": "C:/Users/Richa/.claude/settings.json (Stop hook auto-pause polling + SessionStart vps-health + PostToolUse /auditor on git push + PreToolUse /gate-check on .env edits + /gate-check on AGENT_*=false flips)",
+      "target": "~/.claude.json (rotated github MCP with fresh PAT; confirmed all 3 MCPs ✓ Connected)",
+      "weight": 1
+    },
+    {
+      "source": "~/.claude.json (rotated github MCP with fresh PAT; confirmed all 3 MCPs ✓ Connected)",
+      "target": "Cashly_Source_Code/.claude/skills/deployer/SKILL.md (added npm ci as mandatory BE step, Session 22 lesson)",
+      "weight": 1
+    },
+    {
+      "source": "Cashly_Source_Code/.claude/skills/deployer/SKILL.md (added npm ci as mandatory BE step, Session 22 lesson)",
+      "target": "Neural Net/Sub-Agents/on-demand/*.md (9 remaining skill docs: issuer, issuer-status, auditor, balances, sync, agent, jwt, market, vps-health) + INDEX updates + hook-wiring-plan",
+      "weight": 1
+    }
+  ],
+  "decisions": [
+    {
+      "id": "2026-04-13_001",
+      "session": 18,
+      "date": "2026-04-13",
+      "time": "09:15",
+      "query": "Generate AFI Technical White Paper",
+      "decision_path": "read AFI Vision → read Architecture → read Memetropolis Intelligence → read Session 17 Recap → compile 13-section PDF via reportlab",
+      "confidence": 0.95,
+      "outcome": "success",
+      "duration_minutes": 45,
+      "steps": [
+        {
+          "node": "Neural Net/Claude Memory/AFI Vision",
+          "type": "read",
+          "step": 1
+        },
+        {
+          "node": "Neural Net/Claude Memory/Architecture",
+          "type": "read",
+          "step": 2
+        },
+        {
+          "node": "Neural Net/Claude Memory/Memetropolis Intelligence",
+          "type": "read",
+          "step": 3
+        },
+        {
+          "node": "Neural Net/Claude Memory/Session 17 Recap",
+          "type": "read",
+          "step": 4
+        },
+        {
+          "node": "Neural Net/Claude Memory/V2 Feature Set & Marathons",
+          "type": "read",
+          "step": 5
+        },
+        {
+          "node": "Neural Net/Claude Memory/Accounts & Test Users",
+          "type": "read",
+          "step": 6
+        },
+        {
+          "node": "AFI_Technical_White_Paper.pdf",
+          "type": "modify",
+          "step": 7
+        },
+        {
+          "node": "Neural Net/Claude Memory/AFI_Technical_White_Paper.pdf",
+          "type": "modify",
+          "step": 8
+        }
+      ]
+    },
+    {
+      "id": "2026-04-13_002",
+      "session": 18,
+      "date": "2026-04-13",
+      "time": "10:30",
+      "query": "Fix Neural Net backlinks — graph shows orphan nodes",
+      "decision_path": "audit all 133 files → identify orphans → add bidirectional wikilinks to 15 core files → create Session_Logs INDEX → create hierarchical Deprecated indexes",
+      "confidence": 0.9,
+      "outcome": "success",
+      "duration_minutes": 60,
+      "steps": [
+        {
+          "node": "Neural Net/Claude Memory/INDEX",
+          "type": "read",
+          "step": 1
+        },
+        {
+          "node": "Neural Net/Claude Memory/Architecture",
+          "type": "read",
+          "step": 2
+        },
+        {
+          "node": "Neural Net/Claude Memory/AFI Vision",
+          "type": "read",
+          "step": 3
+        },
+        {
+          "node": "Neural Net/Claude Memory/System Rules",
+          "type": "read",
+          "step": 4
+        },
+        {
+          "node": "Neural Net/Claude Memory/V2 Feature Set & Marathons",
+          "type": "read",
+          "step": 5
+        },
+        {
+          "node": "Neural Net/Claude Memory/Memetropolis Intelligence",
+          "type": "read",
+          "step": 6
+        },
+        {
+          "node": "Neural Net/Claude Memory/Pending Tasks",
+          "type": "read",
+          "step": 7
+        },
+        {
+          "node": "Neural Net/Claude Memory/Deploy History",
+          "type": "read",
+          "step": 8
+        },
+        {
+          "node": "Neural Net/Claude Memory/INDEX",
+          "type": "modify",
+          "step": 9
+        },
+        {
+          "node": "Neural Net/Claude Memory/Architecture",
+          "type": "modify",
+          "step": 10
+        },
+        {
+          "node": "Neural Net/Claude Memory/AFI Vision",
+          "type": "modify",
+          "step": 11
+        },
+        {
+          "node": "Neural Net/Claude Memory/System Rules",
+          "type": "modify",
+          "step": 12
+        },
+        {
+          "node": "Neural Net/Claude Memory/V2 Feature Set & Marathons",
+          "type": "modify",
+          "step": 13
+        },
+        {
+          "node": "Neural Net/Claude Memory/Memetropolis Intelligence",
+          "type": "modify",
+          "step": 14
+        },
+        {
+          "node": "Neural Net/Claude Memory/Pending Tasks",
+          "type": "modify",
+          "step": 15
+        },
+        {
+          "node": "Neural Net/Claude Memory/Deploy History",
+          "type": "modify",
+          "step": 16
+        },
+        {
+          "node": "Neural Net/Session_Logs/INDEX",
+          "type": "modify",
+          "step": 17
+        },
+        {
+          "node": "Neural Net/Deprecated/INDEX",
+          "type": "modify",
+          "step": 18
+        }
+      ]
+    },
+    {
+      "id": "2026-04-13_003",
+      "session": 18,
+      "date": "2026-04-13",
+      "time": "12:00",
+      "query": "Rename Owen to Issuer across entire codebase",
+      "decision_path": "impact scan (298 occurrences) → rename issuers.ts → bulk sed replacements across 16 files → DB migration 012 → update skills → update Neural Net docs → regenerate white paper",
+      "confidence": 0.92,
+      "outcome": "success",
+      "duration_minutes": 90,
+      "steps": [
+        {
+          "node": "Neural Net/Claude Memory/Architecture",
+          "type": "read",
+          "step": 1
+        },
+        {
+          "node": "Neural Net/Claude Memory/Accounts & Test Users",
+          "type": "read",
+          "step": 2
+        },
+        {
+          "node": "Neural Net/Claude Memory/INDEX",
+          "type": "read",
+          "step": 3
+        },
+        {
+          "node": "Cashly_Source_Code/src/owens.ts",
+          "type": "read",
+          "step": 4
+        },
+        {
+          "node": "Cashly_Source_Code/src/config.ts",
+          "type": "read",
+          "step": 5
+        },
+        {
+          "node": "Cashly_Source_Code/src/nuro-routes.ts",
+          "type": "read",
+          "step": 6
+        },
+        {
+          "node": "Cashly_Source_Code/src/execution-dispatch.ts",
+          "type": "read",
+          "step": 7
+        },
+        {
+          "node": "Cashly_Source_Code/src/admin-console.ts",
+          "type": "read",
+          "step": 8
+        },
+        {
+          "node": "Cashly_Source_Code/src/issuers.ts",
+          "type": "modify",
+          "step": 9
+        },
+        {
+          "node": "Cashly_Source_Code/src/config.ts",
+          "type": "modify",
+          "step": 10
+        },
+        {
+          "node": "Cashly_Source_Code/src/nuro-routes.ts",
+          "type": "modify",
+          "step": 11
+        },
+        {
+          "node": "Cashly_Source_Code/src/execution-dispatch.ts",
+          "type": "modify",
+          "step": 12
+        },
+        {
+          "node": "Cashly_Source_Code/src/monitor.ts",
+          "type": "modify",
+          "step": 13
+        },
+        {
+          "node": "Cashly_Source_Code/src/index.ts",
+          "type": "modify",
+          "step": 14
+        },
+        {
+          "node": "Cashly_Source_Code/src/admin-console.ts",
+          "type": "modify",
+          "step": 15
+        },
+        {
+          "node": "Cashly_Source_Code/src/types.ts",
+          "type": "modify",
+          "step": 16
+        },
+        {
+          "node": "Cashly_Source_Code/src/error-reporter.ts",
+          "type": "modify",
+          "step": 17
+        },
+        {
+          "node": "Cashly_Source_Code/src/solana-bridge.ts",
+          "type": "modify",
+          "step": 18
+        },
+        {
+          "node": "Neural Net/Claude Memory/Architecture",
+          "type": "modify",
+          "step": 19
+        },
+        {
+          "node": "Neural Net/Claude Memory/Accounts & Test Users",
+          "type": "modify",
+          "step": 20
+        },
+        {
+          "node": "Neural Net/Claude Memory/INDEX",
+          "type": "modify",
+          "step": 21
+        }
+      ]
+    },
+    {
+      "id": "2026-04-13_004",
+      "session": 18,
+      "date": "2026-04-13",
+      "time": "22:30",
+      "query": "Debug LayerZero 2-hop quoteSend revert on zkSync",
+      "decision_path": "identify error 0x6780cfaf → decode as InvalidWorkerId(0) → check DVN existence → found deadDVN → overcomplicated → need to check if OTHER projects successfully use LZ on zkSync",
+      "confidence": 0.4,
+      "outcome": "partial",
+      "duration_minutes": 90,
+      "steps": [
+        {
+          "node": "Neural Net/Claude Memory/Architecture",
+          "type": "read",
+          "step": 1
+        },
+        {
+          "node": "Neural Net/Claude Memory/Bridge & Monitor",
+          "type": "read",
+          "step": 2
+        },
+        {
+          "node": "Neural Net/Claude Memory/Memetropolis Intelligence",
+          "type": "read",
+          "step": 3
+        },
+        {
+          "node": "Cashly_Source_Code/src/bridge.ts",
+          "type": "read",
+          "step": 4
+        },
+        {
+          "node": "Cashly_Source_Code/layerzero.config.ts",
+          "type": "read",
+          "step": 5
+        },
+        {
+          "node": "Cashly_Source_Code/src/bridge.ts",
+          "type": "modify",
+          "step": 6
+        },
+        {
+          "node": "Cashly_Source_Code/src/nonce-manager.ts",
+          "type": "modify",
+          "step": 7
+        }
+      ]
+    },
+    {
+      "id": "2026-04-13_005",
+      "session": 18,
+      "date": "2026-04-13",
+      "time": "23:45",
+      "query": "Debug and fix LayerZero 2-hop bridge (zkSync → Arbitrum → Base)",
+      "decision_path": "detect deposit → fee sweep → approve OFT → quoteSend reverts InvalidWorkerId(0) → wrong DVN address → fix DVN → still fails → wrong options length 0x0011 vs 0x0021 → FIX → quoteSend SUCCESS → LZ send → DVN verified → executor delivers → Arb adapter had 0 USDC → fund adapter → DELIVERED",
+      "confidence": 0.3,
+      "outcome": "success",
+      "duration_minutes": 240,
+      "steps": [
+        {
+          "node": "Neural Net/Claude Memory/Architecture",
+          "type": "read",
+          "step": 1
+        },
+        {
+          "node": "Neural Net/Claude Memory/Bridge & Monitor",
+          "type": "read",
+          "step": 2
+        },
+        {
+          "node": "Cashly_Source_Code/src/bridge.ts",
+          "type": "read",
+          "step": 3
+        },
+        {
+          "node": "Cashly_Source_Code/layerzero.config.ts",
+          "type": "read",
+          "step": 4
+        },
+        {
+          "node": "Cashly_Source_Code/src/nonce-manager.ts",
+          "type": "read",
+          "step": 5
+        },
+        {
+          "node": "Cashly_Source_Code/src/bridge.ts",
+          "type": "modify",
+          "step": 6
+        },
+        {
+          "node": "Cashly_Source_Code/src/nonce-manager.ts",
+          "type": "modify",
+          "step": 7
+        }
+      ]
+    },
+    {
+      "id": "2026-04-13_006",
+      "session": 19,
+      "date": "2026-04-13",
+      "time": "09:30",
+      "query": "Wire HyperEVM CCTP into bridge system",
+      "decision_path": "research HyperEVM CCTP support → confirmed domain 19, chain 999 → already in bridge.ts CCTP_CHAIN_MAP → missing from monitor.ts CHAINS → add to monitor → add block explorer link",
+      "confidence": 95,
+      "outcome": "success",
+      "steps": [
+        {
+          "node": "Neural Net/Claude Memory/INDEX",
+          "type": "read",
+          "step": 1
+        },
+        {
+          "node": "Neural Net/Claude Memory/Pending Tasks",
+          "type": "read",
+          "step": 2
+        },
+        {
+          "node": "Cashly_Source_Code/src/bridge.ts",
+          "type": "read",
+          "step": 3
+        },
+        {
+          "node": "Cashly_Source_Code/src/monitor.ts",
+          "type": "read",
+          "step": 4
+        },
+        {
+          "node": "Cashly_Source_Code/src/config.ts",
+          "type": "read",
+          "step": 5
+        },
+        {
+          "node": "Cashly_Source_Code/src/monitor.ts",
+          "type": "modify",
+          "step": 6
+        },
+        {
+          "node": "Cashly_Source_Code/src/admin-console.ts",
+          "type": "modify",
+          "step": 7
+        }
+      ]
+    },
+    {
+      "id": "2026-04-13_007",
+      "session": 19,
+      "date": "2026-04-13",
+      "time": "09:45",
+      "query": "Wire remaining LZ chains (Celo, Gnosis, BSC) with correct DVN addresses",
+      "decision_path": "fetch DVN addresses from LZ metadata API → discover Gnosis uses UNIQUE infra (standard addresses are EOAs!) → discover BSC uses unique ReceiveUln302 + Executor → create LZ_INFRA registry with per-chain addresses → add 6 bidirectional connections → refactor existing connections to use LZ_INFRA constants",
+      "confidence": 90,
+      "outcome": "success",
+      "steps": [
+        {
+          "node": "Cashly_Source_Code/layerzero.config.ts",
+          "type": "read",
+          "step": 1
+        },
+        {
+          "node": "Cashly_Source_Code/src/bridge.ts",
+          "type": "read",
+          "step": 2
+        },
+        {
+          "node": "Neural Net/Claude Memory/Bridge & Monitor",
+          "type": "read",
+          "step": 3
+        },
+        {
+          "node": "Cashly_Source_Code/layerzero.config.ts",
+          "type": "modify",
+          "step": 4
+        }
+      ]
+    },
+    {
+      "id": "2026-04-13_008",
+      "session": 19,
+      "date": "2026-04-13",
+      "time": "10:00",
+      "query": "Fix waitForArbUsdc timeout — monitor quits before LZ delivery arrives",
+      "decision_path": "identified 300s (5min) timeout → LZ delivery takes 10-20min depending on DVN verification → increased to 1200s (20min) → added progressive logging with elapsed/remaining timer → changed poll interval from 5s to 10s to reduce RPC calls",
+      "confidence": 98,
+      "outcome": "success",
+      "steps": [
+        {
+          "node": "Cashly_Source_Code/src/bridge.ts",
+          "type": "read",
+          "step": 1
+        },
+        {
+          "node": "Cashly_Source_Code/src/bridge.ts",
+          "type": "modify",
+          "step": 2
+        }
+      ]
+    },
+    {
+      "id": "2026-04-14_001",
+      "session": 19,
+      "date": "2026-04-14",
+      "time": "14:00",
+      "query": "Integrate Chris's frontend design files without destroying backend",
+      "decision_path": "unzip Chris's files → diff 155 modified + 17 new → categorize Tier 1 (new, safe), Tier 2 (UI updates), Tier 3 (conflicts) → Tier 3 audit: ALL stale, zero new design → copy Tier 1+2 only → skip all backend-touching files → DESIGN_MODE was true (bypassing auth!) → disable it → wire Settings Cards to real API",
+      "confidence": 85,
+      "outcome": "success",
+      "steps": [
+        {
+          "node": "Neural Net/Claude Memory/INDEX",
+          "type": "read",
+          "step": 1
+        },
+        {
+          "node": "Cashly_Source_Code/src/config/design-mode.ts",
+          "type": "read",
+          "step": 2
+        },
+        {
+          "node": "Cashly_Source_Code/src/features/dashboard/settings/components/CardsContent/index.tsx",
+          "type": "read",
+          "step": 3
+        },
+        {
+          "node": "Cashly_Source_Code/src/layouts/Sidebar/config/navigation.config.tsx",
+          "type": "read",
+          "step": 4
+        },
+        {
+          "node": "Cashly_Source_Code/src/layouts/Sidebar/SidebarProof.tsx",
+          "type": "read",
+          "step": 5
+        },
+        {
+          "node": "Cashly_Source_Code/src/app/[locale]/dashboard/layout.tsx",
+          "type": "read",
+          "step": 6
+        },
+        {
+          "node": "60+ frontend files (Tier 1+2 from Chris)",
+          "type": "modify",
+          "step": 7
+        },
+        {
+          "node": "Cashly_Source_Code/src/config/design-mode.ts",
+          "type": "modify",
+          "step": 8
+        },
+        {
+          "node": "Cashly_Source_Code/src/features/dashboard/settings/components/CardsContent/index.tsx",
+          "type": "modify",
+          "step": 9
+        },
+        {
+          "node": "Cashly_Source_Code/src/layouts/Sidebar/config/navigation.config.tsx",
+          "type": "modify",
+          "step": 10
+        },
+        {
+          "node": "Cashly_Source_Code/src/layouts/Sidebar/SidebarProof.tsx",
+          "type": "modify",
+          "step": 11
+        },
+        {
+          "node": "Cashly_Source_Code/src/app/[locale]/dashboard/layout.tsx",
+          "type": "modify",
+          "step": 12
+        },
+        {
+          "node": "Cashly_Source_Code/src/providers/ThemeContext.tsx",
+          "type": "modify",
+          "step": 13
+        },
+        {
+          "node": "Cashly_Source_Code/src/layouts/Header/components/ThemeToggle/index.tsx",
+          "type": "modify",
+          "step": 14
+        }
+      ]
+    },
+    {
+      "id": "2026-04-14_002",
+      "session": 19,
+      "date": "2026-04-14",
+      "time": "12:00",
+      "query": "Fix withdrawal system — execute on-chain, prevent double-spend, add cancellation",
+      "decision_path": "audit POST /withdrawals → intent-only, no execution → add deployer wallet USDC transfer on Base → add estimateGas + 30% buffer → discover concurrent withdrawal race condition → add SELECT...FOR UPDATE atomic lock → add rate limiting (1/5min) → add DELETE /withdrawals/:id cancellation → sanitize error messages",
+      "confidence": 95,
+      "outcome": "success",
+      "steps": [
+        {
+          "node": "Cashly_Source_Code/src/nuro-routes.ts",
+          "type": "read",
+          "step": 1
+        },
+        {
+          "node": "Cashly_Source_Code/src/nonce-manager.ts",
+          "type": "read",
+          "step": 2
+        },
+        {
+          "node": "Cashly_Source_Code/src/monitor.ts",
+          "type": "read",
+          "step": 3
+        },
+        {
+          "node": "Cashly_Source_Code/src/bridge.ts",
+          "type": "read",
+          "step": 4
+        },
+        {
+          "node": "Cashly_Source_Code/src/nuro-routes.ts",
+          "type": "modify",
+          "step": 5
+        },
+        {
+          "node": "Cashly_Source_Code/src/app/api/withdrawals/[id]/route.ts",
+          "type": "modify",
+          "step": 6
+        }
+      ]
+    },
+    {
+      "id": "2026-04-14_003",
+      "session": 19,
+      "date": "2026-04-14",
+      "time": "11:00",
+      "query": "Fix Solana shared deposit address — all users getting same address",
+      "decision_path": "vault audit → discover generateSolanaDepositAddress() uses CONFIG.SOLANA_PRIVATE_KEY alone (no userId) → all users share ONE address → add SHA-512(masterKey + userId) per-user derivation → update deposit-addresses endpoint → add sweep step in solanaBridgeAndForward → backwards compatible (no userId = master wallet)",
+      "confidence": 95,
+      "outcome": "success",
+      "steps": [
+        {
+          "node": "Cashly_Source_Code/src/solana-bridge.ts",
+          "type": "read",
+          "step": 1
+        },
+        {
+          "node": "Cashly_Source_Code/src/nuro-routes.ts",
+          "type": "read",
+          "step": 2
+        },
+        {
+          "node": "Cashly_Source_Code/src/monitor.ts",
+          "type": "read",
+          "step": 3
+        },
+        {
+          "node": "Cashly_Source_Code/src/solana-bridge.ts",
+          "type": "modify",
+          "step": 4
+        },
+        {
+          "node": "Cashly_Source_Code/src/nuro-routes.ts",
+          "type": "modify",
+          "step": 5
+        },
+        {
+          "node": "Cashly_Source_Code/src/monitor.ts",
+          "type": "modify",
+          "step": 6
+        }
+      ]
+    },
+    {
+      "id": "2026-04-17_001",
+      "session": 21,
+      "date": "2026-04-17",
+      "time": "02:50",
+      "query": "Deploy Sprint 2.3 backend to VPS",
+      "decision_path": "git pull aborted (VPS had uncommitted package.json/yarn.lock) → stash + pull → tsx missing (crash loop, 19 restarts) → add tsx to runtime deps → migration 021 failed (agents.id is UUID not VARCHAR on prod) → fix FK types → deploy succeeded but reconcile throws (agent_bets.pnl column missing) → migration 022 adds settlement columns idempotently → reconcile success, last_reconciled_at populated",
+      "confidence": 95,
+      "outcome": "success",
+      "steps": [
+        {
+          "node": "Cashly_Source_Code/src/execution-dispatch.ts",
+          "type": "read",
+          "step": 1
+        },
+        {
+          "node": "Cashly_Source_Code/src/migrations/021_agent_fundings_and_sweeps.sql",
+          "type": "read",
+          "step": 2
+        },
+        {
+          "node": "Cashly_Source_Code/src/migrations/010_agents.sql",
+          "type": "read",
+          "step": 3
+        },
+        {
+          "node": "Cashly_Source_Code/package.json",
+          "type": "read",
+          "step": 4
+        },
+        {
+          "node": "Cashly_Source_Code/src/migrations/021_agent_fundings_and_sweeps.sql",
+          "type": "modify",
+          "step": 5
+        },
+        {
+          "node": "Cashly_Source_Code/src/migrations/022_agent_bets_settlement_columns.sql",
+          "type": "modify",
+          "step": 6
+        },
+        {
+          "node": "Cashly_Source_Code/package.json",
+          "type": "modify",
+          "step": 7
+        },
+        {
+          "node": "Neural Net/memory/tech_afi_vps_schema_reality.md",
+          "type": "modify",
+          "step": 8
+        }
+      ]
+    },
+    {
+      "id": "2026-04-17_003",
+      "session": 21.5,
+      "date": "2026-04-17",
+      "time": "13:30",
+      "query": "Manual run of gate-completeness-audit — prove the scheduled sub-agent output format + establish baseline",
+      "decision_path": "scheduled task won't fire until Sunday 2026-04-19 → produce first artifact manually today → covers the last 7 days (2026-04-10 → 2026-04-17) → scan ~40 commits → identify 12 risky additions → cross-reference gates.yaml → 10 gated + 2 findings (both LOW-SEV read-only/DB-only) → overall health healthy",
+      "confidence": 92,
+      "outcome": "success",
+      "steps": [
+        {
+          "node": "Cashly_Source_Code/.claude/skills/gate-check/gates.yaml",
+          "type": "read",
+          "step": 1
+        },
+        {
+          "node": "Cashly_Source_Code/src/execution-dispatch.ts",
+          "type": "read",
+          "step": 2
+        },
+        {
+          "node": "Cashly_Source_Code/src/config.ts",
+          "type": "read",
+          "step": 3
+        },
+        {
+          "node": "git log --oneline --since='7 days ago' origin/Build_Branch",
+          "type": "read",
+          "step": 4
+        },
+        {
+          "node": "Neural Net/Audits/2026-04-17_gate-audit.md",
+          "type": "modify",
+          "step": 5
+        }
+      ]
+    },
+    {
+      "id": "2026-04-17_004",
+      "session": 21,
+      "date": "2026-04-17",
+      "time": "17:10",
+      "query": "Live deposit pipeline under investor-day pressure — debug and harden in one session",
+      "decision_path": "baseline working (38 past txs on 6 chains) → user $0.10 Base deposit silently dropped → discovered monitor only polled cached deposit_addresses (not derived) → fix: derive from users table → deploy 768fbd1 → next $0.25 detected but bridge fails NETWORK_ERROR → discovered Base publicnode URL typo ('base-mainnet-rpc' vs 'base-rpc') → fix + deploy fe5c5ef → bridge succeeds (tx 0xe45af020) → repeat $0.10 test silently skipped → discovered processDeposit dedup had no time window → fix + deploy 8289573 → repeat same-amount test STILL skipped → discovered pollChain inflight check ALSO had no time window (separate dedup layer) → fix + deploy 2c3f213 → $0.17 (aggregated $0.10+$0.07) bridged successfully → admin panel 38→41 on-chain txs, volume $6.33→$6.75",
+      "confidence": 90,
+      "outcome": "success",
+      "steps": [
+        {
+          "node": "Cashly_Source_Code/src/monitor.ts",
+          "type": "read",
+          "step": 1
+        },
+        {
+          "node": "Cashly_Source_Code/src/nonce-manager.ts",
+          "type": "read",
+          "step": 2
+        },
+        {
+          "node": "Cashly_Source_Code/src/bridge.ts",
+          "type": "read",
+          "step": 3
+        },
+        {
+          "node": "Cashly_Source_Code/src/features/dashboard/my-card-1/components/ReloadFlow.tsx",
+          "type": "read",
+          "step": 4
+        },
+        {
+          "node": "Neural Net/Claude Memory/Memetropolis Intelligence.md",
+          "type": "read",
+          "step": 5
+        },
+        {
+          "node": "Neural Net/Claude Memory/Accounts & Test Users.md",
+          "type": "read",
+          "step": 6
+        },
+        {
+          "node": "Cashly_Source_Code/src/monitor.ts (derive-from-users + 2 dedup time windows + 1 inflight window)",
+          "type": "modify",
+          "step": 7
+        },
+        {
+          "node": "Cashly_Source_Code/src/nonce-manager.ts (Base publicnode URL typo fix)",
+          "type": "modify",
+          "step": 8
+        },
+        {
+          "node": "Cashly_Source_Code/src/bridge.ts (reverse CCTP param + cctpBaseToPolygon helper)",
+          "type": "modify",
+          "step": 9
+        },
+        {
+          "node": "Cashly_Source_Code/src/features/dashboard/my-card-1/components/ReloadFlow.tsx (QRCode empty-string guards + vault/direct toggle)",
+          "type": "modify",
+          "step": 10
+        },
+        {
+          "node": "Cashly_Source_Code/scripts/audit-schema.sql (schema drift detector)",
+          "type": "modify",
+          "step": 11
+        },
+        {
+          "node": "Cashly_Source_Code/src/migrations/023_schema_migrations_tracking.sql (new)",
+          "type": "modify",
+          "step": 12
+        },
+        {
+          "node": "Cashly_Source_Code/.claude/skills/gate-check/gates.yaml (schema-integrity + agent-profit-sweep-live + agent-funding-live gates)",
+          "type": "modify",
+          "step": 13
+        },
+        {
+          "node": "Neural Net/Investor Prep/2026-04-17_Meeting/* (11 prep docs)",
+          "type": "modify",
+          "step": 14
+        },
+        {
+          "node": "Neural Net/Sub-Agents/ (scaffold with INDEX + conflict-resolution + orchestrator + 2 new agent docs + D3 generator)",
+          "type": "modify",
+          "step": 15
+        },
+        {
+          "node": "Neural Net/Audits/2026-04-17_gate-audit.md (first manual audit artifact)",
+          "type": "modify",
+          "step": 16
+        }
+      ]
+    },
+    {
+      "id": "2026-04-17_005",
+      "session": 22,
+      "date": "2026-04-17",
+      "time": "18:00",
+      "query": "Diagnose $40,000,000,000 BSC pending transaction on admin console and fix the underlying bug",
+      "decision_path": "boot → scanned admin console → flagged $40B BSC row as suspected decimals-parse bug → read monitor.ts pollChain:200 → confirmed hardcoded `decimals = 6` applied to all 23 chains → read bridge.ts and identified second decimals bug in waitForArbUsdc → SSH-investigate: psql query confirmed DB row (user_id 72459d0e, user_wallet 0x75Aa3B70…, amount=40000000000, fee=2000000000, pending) → on-chain BSC check confirmed USDC decimals=18 (Binance-Peg), real balance 2e15 ($0.002 remaining from original $0.04 deposit) → math reconciled: BSC raw 4e16 formatted with 6-dec hardcode = '40000000000.0' → Arb deployer balance check showed $0.03801 (= 38010 raw 6-dec) → conclusion: LZ OFT hop SUCCEEDED, bridge stuck in waitForArbUsdc waiting for impossible 3.8e16 target → patched monitor.ts (DECIMALS_BY_CHAIN map + getChainDecimals helper used by pollChain and seedLastSeenFromDb) + bridge.ts (scale forwardAmount to Arb's 6-dec before waitForArbUsdc and cctpArbitrumToBase) + scripts/manual-sweep-arb-to-base.ts → pre-push gate passed (75 unit tests) → pushed 918c105 → VPS git pull blocked by dirty tree (POLL_INTERVAL_MS sed-edit for 60s active polling — 3rd time this session-class friction) → stash/pull/pop/restart succeeded → BUT mid-restart, new $2B pending BSC row appeared from same deposit address dust (monitor lastSeen reset, detected $0.002 dust as new deposit) → OLD code re-triggered cascade before restart → NEW code deployed but sweep script blocked by Arb deployer out-of-gas (have 0.0000046 ETH, want 0.000154 ETH) → user paused session to nap before fund+sweep completion",
+      "confidence": 95,
+      "outcome": "partial",
+      "steps": [
+        {
+          "node": "Cashly_Source_Code/src/monitor.ts",
+          "type": "read",
+          "step": 1
+        },
+        {
+          "node": "Cashly_Source_Code/src/bridge.ts",
+          "type": "read",
+          "step": 2
+        },
+        {
+          "node": "Cashly_Source_Code/src/issuers.ts",
+          "type": "read",
+          "step": 3
+        },
+        {
+          "node": "Cashly_Source_Code/src/config.ts",
+          "type": "read",
+          "step": 4
+        },
+        {
+          "node": "Neural Net/Claude Memory/INDEX.md",
+          "type": "read",
+          "step": 5
+        },
+        {
+          "node": "Neural Net/Claude Memory/Pending Tasks.md",
+          "type": "read",
+          "step": 6
+        },
+        {
+          "node": "Neural Net/Claude Memory/V2 Feature Set & Marathons.md",
+          "type": "read",
+          "step": 7
+        },
+        {
+          "node": "Neural Net/Decision Journal/2026-04-17_004.md (prior session live-debug context)",
+          "type": "read",
+          "step": 8
+        },
+        {
+          "node": "Cashly_Source_Code/src/monitor.ts (DECIMALS_BY_CHAIN map, getChainDecimals helper, pollChain decimals fix, seedLastSeenFromDb decimals fix)",
+          "type": "modify",
+          "step": 9
+        },
+        {
+          "node": "Cashly_Source_Code/src/bridge.ts (scale forwardAmount source→Arb 6-dec inside LZ two-hop path)",
+          "type": "modify",
+          "step": 10
+        },
+        {
+          "node": "Cashly_Source_Code/scripts/manual-sweep-arb-to-base.ts (new — recovers stranded $0.04 from Arb deployer)",
+          "type": "modify",
+          "step": 11
+        }
+      ]
+    },
+    {
+      "id": "2026-04-17_006",
+      "session": 22,
+      "date": "2026-04-17",
+      "time": "19:30",
+      "query": "Investigate why FE rebuild fails with 'Cannot find package next-intl' and fix the underlying package.json / migration bug permanently",
+      "decision_path": "FE rebuild attempt post-yarn→npm migration → `./node_modules/.bin/next` missing → `npm install --no-save next@15.5.14 react react-dom` as quick test → build advanced then died on next-intl missing → root-cause investigation via package.json + git history → discovered package.json has NEVER declared next/react/react-dom/next-intl/35+ other FE packages in any of Object.keys(package.json) → yarn.lock (pre-c578c18) HAD them because Yarn Berry v4 tolerates undeclared deps if they appear in the lockfile → npm strict-purge after migration exposed the latent bug → spawned Explore agent to inventory all external imports across src/{app,components,features,hooks,providers,layouts,store,lib,services,i18n} + config files → 41 runtime packages + 9 build-time packages identified → versions extracted from git-historical yarn.lock via scripts/extract-yarn-versions.js (block-parser handles aggregate keys) → package.json updated with proper dependencies/devDependencies split → built verify-deps.js gate: scans every .ts/.tsx/.js/.jsx + next.config.js + postcss.config.mjs + tailwind.config.mjs for external imports, cross-checks declared in package.json → wired into .husky/pre-push AND .github/workflows/backend-ci.yml so the failure mode is impossible to reintroduce locally OR server-side → local verify-deps run passed: 54/54 declared",
+      "confidence": 95,
+      "outcome": "partial",
+      "steps": [
+        {
+          "node": "Cashly_Source_Code/package.json",
+          "type": "read",
+          "step": 1
+        },
+        {
+          "node": "Cashly_Source_Code/next.config.js",
+          "type": "read",
+          "step": 2
+        },
+        {
+          "node": "Cashly_Source_Code/postcss.config.mjs",
+          "type": "read",
+          "step": 3
+        },
+        {
+          "node": "Cashly_Source_Code/tailwind.config.mjs",
+          "type": "read",
+          "step": 4
+        },
+        {
+          "node": "Cashly_Source_Code/.husky/pre-push",
+          "type": "read",
+          "step": 5
+        },
+        {
+          "node": "Cashly_Source_Code/.github/workflows/backend-ci.yml",
+          "type": "read",
+          "step": 6
+        },
+        {
+          "node": "git show 9ff7a04:yarn.lock (pre-migration)",
+          "type": "read",
+          "step": 7
+        },
+        {
+          "node": "Cashly_Source_Code/src/app, components, features, hooks, providers, layouts, store, lib, services, i18n, auth.ts, middleware.ts (via Explore agent)",
+          "type": "read",
+          "step": 8
+        },
+        {
+          "node": "Cashly_Source_Code/package.json (42 new dependencies + 9 new devDependencies)",
+          "type": "modify",
+          "step": 9
+        },
+        {
+          "node": "Cashly_Source_Code/scripts/verify-deps.js (new — dep-verification gate)",
+          "type": "modify",
+          "step": 10
+        },
+        {
+          "node": "Cashly_Source_Code/scripts/extract-yarn-versions.js (new — one-shot tool)",
+          "type": "modify",
+          "step": 11
+        },
+        {
+          "node": "Cashly_Source_Code/.husky/pre-push (added verify-deps as Gate 1)",
+          "type": "modify",
+          "step": 12
+        },
+        {
+          "node": "Cashly_Source_Code/.github/workflows/backend-ci.yml (added verify-deps step)",
+          "type": "modify",
+          "step": 13
+        }
+      ]
+    },
+    {
+      "id": "2026-04-17_007",
+      "session": 22,
+      "date": "2026-04-17",
+      "time": "23:55",
+      "query": "Scout high-value Claude Code skills and npm libraries to adopt — ranked by AFI-specific ROI and integration cost",
+      "decision_path": "Session 22 Hour 3 — after shipping Sprint 6.1 (silent-skip telemetry), 6.2 (dedup consolidation), and 6.3 (POLL_INTERVAL_MS env + DECIMALS_BY_CHAIN registry + dirty-tree gate + /deployer skill rewrite), spawned a claude-code-guide research agent to inventory high-value additions across two axes (Claude Code skills + npm libs). Constrained scope to picks that: (a) address pain points we hit live tonight, (b) skip anything Richard already has, (c) exclude anything requiring >1 day to integrate in a pre-investor sprint.",
+      "confidence": 85,
+      "outcome": "success",
+      "steps": [
+        {
+          "node": "Research-only, no files modified. Research agent returned ranked picks.",
+          "type": "read",
+          "step": 1
+        },
+        {
+          "node": "Neural Net/Decision Journal/2026-04-17_007.md (this file)",
+          "type": "modify",
+          "step": 2
+        }
+      ]
+    },
+    {
+      "id": "2026-04-18_001",
+      "session": 22,
+      "date": "2026-04-18",
+      "time": "00:30",
+      "query": "Wrap-up hour — complete Options A/B/C in parallel: finish hook wiring, ship Sprint 6.4 mid-restart safety, debug MCPs",
+      "decision_path": "After Session 22's main wrap (10 commits, Marathon 6 Sprints 6.1/6.2/6.3 shipped) Richard had another hour. Three tracks: A) wire remaining hooks (/auditor, /gate-check, /balances), B) Sprint 6.4 graceful-shutdown safety, C) debug MCP postgres+github. Executed in parallel: SSH key auth established (Windows → VPS passwordless), 2 automation hooks live (Stop auto-pause polling + SessionStart vps-health check) from earlier in session, added 2 more hooks for /auditor on git push + /gate-check on .env edits via agent hook type. Sprint 6.4 added SIGTERM handler in index.ts that marks pending txs older than 30s as failed_restart, boot-time reconciler in monitor.ts that warns on incomplete bridges, dedup.ts handles failed_restart as stale-retry-eligible. MCP debug: rotated fresh GitHub PAT via claude mcp remove+add, verified SSH tunnel alive, all 3 MCPs (postgres/filesystem/github) confirmed ✓ Connected.",
+      "confidence": 95,
+      "outcome": "success",
+      "steps": [
+        {
+          "node": "Cashly_Source_Code/src/admin-console.ts",
+          "type": "read",
+          "step": 1
+        },
+        {
+          "node": "Cashly_Source_Code/src/monitor.ts",
+          "type": "read",
+          "step": 2
+        },
+        {
+          "node": "Cashly_Source_Code/src/index.ts",
+          "type": "read",
+          "step": 3
+        },
+        {
+          "node": "Cashly_Source_Code/src/middleware.ts",
+          "type": "read",
+          "step": 4
+        },
+        {
+          "node": "C:/Users/Richa/.claude/settings.json",
+          "type": "read",
+          "step": 5
+        },
+        {
+          "node": "Cashly_Source_Code/src/admin-console.ts (Monitor Skips panel + /admin/api/monitor-skips endpoint + column widening polish)",
+          "type": "modify",
+          "step": 6
+        },
+        {
+          "node": "Cashly_Source_Code/src/index.ts (SIGTERM/SIGINT graceful-shutdown handler marking in-flight txs failed_restart)",
+          "type": "modify",
+          "step": 7
+        },
+        {
+          "node": "Cashly_Source_Code/src/monitor.ts (boot-time reconciler warning on failed_restart rows)",
+          "type": "modify",
+          "step": 8
+        },
+        {
+          "node": "Cashly_Source_Code/src/lib/dedup.ts (handle failed_restart status as stale-retry)",
+          "type": "modify",
+          "step": 9
+        },
+        {
+          "node": "C:/Users/Richa/.claude/settings.json (Stop hook auto-pause polling + SessionStart vps-health + PostToolUse /auditor on git push + PreToolUse /gate-check on .env edits + /gate-check on AGENT_*=false flips)",
+          "type": "modify",
+          "step": 10
+        },
+        {
+          "node": "~/.claude.json (rotated github MCP with fresh PAT; confirmed all 3 MCPs ✓ Connected)",
+          "type": "modify",
+          "step": 11
+        },
+        {
+          "node": "Cashly_Source_Code/.claude/skills/deployer/SKILL.md (added npm ci as mandatory BE step, Session 22 lesson)",
+          "type": "modify",
+          "step": 12
+        },
+        {
+          "node": "Neural Net/Sub-Agents/on-demand/*.md (9 remaining skill docs: issuer, issuer-status, auditor, balances, sync, agent, jwt, market, vps-health) + INDEX updates + hook-wiring-plan",
+          "type": "modify",
+          "step": 13
+        }
+      ]
+    }
+  ],
+  "meta": {
+    "totalDecisions": 18,
+    "sessions": [
+      18,
+      19,
+      21,
+      21.5,
+      22
+    ],
+    "exportedAt": "2026-04-22T00:28:47.925Z"
+  }
+}

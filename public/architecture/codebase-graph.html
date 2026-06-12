@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nuro Neural Net — Codebase Graph</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<style>
+  :root {
+    --bg-0:        #050510;
+    --bg-1:        #0a0a1c;
+    --line:        #1a1a3a;
+    --text-0:      #e8e8f0;
+    --text-1:      #9090b0;
+    --text-2:      #5a5a78;
+    --accent:      #16e0a9;
+    --accent-warm: #f5a623;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    height: 100%;
+    background: radial-gradient(ellipse at center, #0e0e22 0%, var(--bg-0) 70%);
+    color: var(--text-0);
+    font-family: 'Inter', system-ui, sans-serif;
+    overflow: hidden;
+    font-size: 13px;
+    line-height: 1.45;
+  }
+  .app {
+    display: grid;
+    grid-template-columns: 240px 1fr 320px;
+    grid-template-rows: 56px 1fr;
+    height: 100vh;
+    width: 100vw;
+  }
+  header {
+    grid-column: 1 / -1;
+    display: flex; align-items: center;
+    padding: 0 20px;
+    border-bottom: 1px solid var(--line);
+    background: rgba(10, 10, 28, 0.82);
+    backdrop-filter: blur(18px);
+    z-index: 10;
+    gap: 18px;
+  }
+  .brand { font-size: 14px; font-weight: 700; color: var(--accent); letter-spacing: 0.02em; }
+  .brand .sub { color: var(--text-1); font-weight: 400; margin-left: 8px; font-size: 12px; }
+  .stats { display: flex; gap: 14px; margin-left: auto; color: var(--text-1); font-family: 'JetBrains Mono', monospace; font-size: 11px; }
+  .stats b { color: var(--accent); font-weight: 600; }
+  .search { position: relative; }
+  .search input {
+    width: 240px;
+    padding: 7px 12px 7px 30px;
+    background: rgba(10, 10, 28, 0.7);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    color: var(--text-0);
+    font-size: 12px; outline: none;
+    transition: border-color 0.15s;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .search input:focus { border-color: var(--accent); }
+  .search::before { content: "⌕"; position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--text-2); font-size: 12px; }
+  aside.left, aside.right {
+    background: rgba(8, 8, 18, 0.9);
+    backdrop-filter: blur(8px);
+    overflow-y: auto;
+    padding: 16px;
+  }
+  aside.left  { border-right: 1px solid var(--line); }
+  aside.right { border-left: 1px solid var(--line); }
+  aside h3 { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-2); margin-bottom: 10px; font-weight: 600; }
+  aside .legend-row {
+    display: flex; align-items: center; gap: 9px;
+    padding: 5px 7px; border-radius: 4px; cursor: pointer;
+    font-size: 12px; transition: background 0.12s;
+    color: var(--text-0); user-select: none;
+  }
+  aside .legend-row:hover { background: rgba(255, 255, 255, 0.04); }
+  aside .legend-row.muted { opacity: 0.35; }
+  .swatch { width: 11px; height: 11px; border-radius: 2px; flex-shrink: 0; box-shadow: 0 0 8px currentColor; }
+  .legend-count { margin-left: auto; color: var(--text-2); font-family: 'JetBrains Mono', monospace; font-size: 10px; }
+  .inspector-empty { color: var(--text-2); text-align: center; padding: 60px 20px; font-size: 12px; }
+  .inspector-empty span { display: block; margin-top: 8px; color: var(--text-1); font-size: 11px; }
+  .ins-title { font-size: 13px; font-weight: 600; color: var(--text-0); margin-bottom: 4px; word-break: break-word; }
+  .ins-path { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-1); margin-bottom: 12px; word-break: break-all; }
+  .ins-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+  .ins-stat { background: rgba(255, 255, 255, 0.03); border: 1px solid var(--line); border-radius: 6px; padding: 10px 12px; }
+  .ins-stat .v { font-size: 18px; font-weight: 600; color: var(--accent); font-family: 'JetBrains Mono', monospace; }
+  .ins-stat .l { font-size: 9px; text-transform: uppercase; color: var(--text-2); letter-spacing: 0.06em; margin-top: 2px; }
+  .ins-section { margin-bottom: 14px; }
+  .ins-section h4 { font-size: 10px; text-transform: uppercase; color: var(--text-2); margin-bottom: 6px; letter-spacing: 0.06em; font-weight: 600; }
+  .ins-list { display: flex; flex-direction: column; gap: 3px; max-height: 220px; overflow-y: auto; }
+  .ins-list .row {
+    padding: 5px 8px; border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    color: var(--text-1); cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.12s;
+    display: flex; align-items: center; gap: 7px;
+    word-break: break-word;
+  }
+  .ins-list .row:hover { background: rgba(255, 255, 255, 0.04); color: var(--text-0); border-color: var(--line); }
+  .ins-list .row .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  main { position: relative; overflow: hidden; }
+  svg.graph { width: 100%; height: 100%; display: block; background: transparent; cursor: grab; }
+  svg.graph:active { cursor: grabbing; }
+  .node-circle { cursor: pointer; transition: stroke-width 0.15s; }
+  .node-circle.faded { opacity: 0.1; }
+  .node-circle.highlighted { stroke: #fff; stroke-width: 2px; }
+  .link { fill: none; pointer-events: none; }
+  .link.faded { opacity: 0.04; }
+  .link.highlighted { opacity: 0.95 !important; }
+  .label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    fill: var(--text-1);
+    pointer-events: none;
+    text-anchor: middle;
+    paint-order: stroke;
+    stroke: var(--bg-0);
+    stroke-width: 3px;
+  }
+  .label.bright { fill: var(--text-0); font-weight: 600; }
+  .label.faded { opacity: 0.06; }
+  .controls {
+    position: absolute;
+    bottom: 16px; right: 16px;
+    display: flex; gap: 6px; z-index: 20;
+  }
+  .ctrl-btn {
+    background: rgba(15, 15, 30, 0.85);
+    backdrop-filter: blur(6px);
+    border: 1px solid var(--line);
+    border-radius: 5px;
+    padding: 7px 12px;
+    color: var(--text-1); cursor: pointer;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    transition: all 0.12s;
+  }
+  .ctrl-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .help-banner {
+    position: absolute;
+    top: 16px; left: 50%;
+    transform: translateX(-50%);
+    background: rgba(15, 15, 30, 0.85);
+    backdrop-filter: blur(6px);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 8px 14px;
+    font-size: 11px;
+    color: var(--text-1);
+    z-index: 20;
+    transition: opacity 0.4s;
+  }
+  .help-banner kbd {
+    font-family: 'JetBrains Mono', monospace;
+    background: rgba(255, 255, 255, 0.06);
+    padding: 1px 5px;
+    border-radius: 3px;
+    color: var(--accent);
+    font-size: 10px;
+  }
+  .help-banner.hidden { opacity: 0; pointer-events: none; }
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--line); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: #2a2a4a; }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="brand">⚡ Nuro Neural Net <span class="sub">/ codebase graph</span></div>
+    <div class="search"><input id="search" type="text" placeholder="Search nodes…" autocomplete="off" /></div>
+    <div class="stats">
+      <span><b id="stat-nodes">0</b> nodes</span>
+      <span><b id="stat-edges">0</b> edges</span>
+      <span><b id="stat-groups">0</b> groups</span>
+      <span><b id="stat-loc">0</b> KB src</span>
+    </div>
+  </header>
+  <aside class="left"><h3>Node groups</h3><div id="legend"></div></aside>
+  <main>
+    <svg class="graph" id="graph"></svg>
+    <div class="help-banner" id="help">
+      Drag to pan · Scroll to zoom · <kbd>Click</kbd> a node to inspect · Node size = file size + connections · Edge color = larger node dominates
+    </div>
+    <div class="controls">
+      <button class="ctrl-btn" onclick="resetView()">⟲ Reset</button>
+      <button class="ctrl-btn" onclick="toggleLabels()">▤ Labels</button>
+      <button class="ctrl-btn" onclick="reheat()">⚡ Reheat</button>
+    </div>
+  </main>
+  <aside class="right">
+    <div id="inspector">
+      <div class="inspector-empty">Select a node<span>Click any point in the graph to see its connections, dependents, and dependencies.</span></div>
+    </div>
+  </aside>
+</div>
+
+<script>
+// ──────────────────────────────────────────────────────────────────────────
+// DESIGN — per Richard's reference images:
+//   - Node size = f(file size + connection count)
+//   - Edge thickness = f(connection count)
+//   - Edge color = gradient from src→tgt color, weighted by node size
+//     (the LARGER node dominates the line color proportionally to its
+//     share of the combined node mass — "if A is 180% of B, A's color
+//     fills ~64% of the line")
+//   - Tight physics so the network reads as a WEB, not a star field.
+// ──────────────────────────────────────────────────────────────────────────
+
+const GROUP_COLORS = {
+  features:       '#16e0a9',
+  'next-app':     '#f5a623',
+  components:     '#5dd4ff',
+  layouts:        '#c770f0',
+  'growth-agent': '#ff66c4',
+  lib:            '#4dd0e1',
+  'core-be':      '#ff6b6b',
+  heimdall:       '#ff8c42',
+  providers:      '#9b8cff',
+  hooks:          '#b8e986',
+  i18n:           '#ffd166',
+  sandbox:        '#b88968',
+  tests:          '#66ff8c',
+  scanners:       '#c0392b',
+  'agent-bus':    '#7986cb',
+  config:         '#95a5a6',
+  huginn:         '#d4af37',
+  other:          '#5a5a78',
+};
+
+const SVG = d3.select('#graph');
+const W = () => window.innerWidth - 240 - 320;
+const H = () => window.innerHeight - 56;
+
+const root = SVG.append('g').attr('class', 'root');
+const linksLayer = root.append('g').attr('class', 'links');
+const nodesLayer = root.append('g').attr('class', 'nodes');
+const labelsLayer = root.append('g').attr('class', 'labels');
+
+// Defs — one per-edge linearGradient (size-weighted dominance) + glow filters
+const defs = SVG.append('defs');
+defs.append('filter')
+  .attr('id', 'soft-glow')
+  .attr('x', '-50%').attr('y', '-50%')
+  .attr('width', '200%').attr('height', '200%')
+  .html('<feGaussianBlur stdDeviation="4" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>');
+defs.append('filter')
+  .attr('id', 'hot-glow')
+  .attr('x', '-50%').attr('y', '-50%')
+  .attr('width', '200%').attr('height', '200%')
+  .html('<feGaussianBlur stdDeviation="9" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>');
+
+let simulation, nodeSel, linkSel, labelSel;
+let nodes = [], links = [], adjacency = new Map();
+let activeGroups = new Set();
+let labelsVisible = true;
+let selectedNode = null;
+let zoom = null;
+
+fetch('codebase-graph.json')
+  .then(r => r.json())
+  .then(data => {
+    // Compute mass = file size in KB, capped + log-scaled. Combine with
+    // degree for the visual weight "this node MATTERS".
+    nodes = data.nodes.map(n => {
+      const sizeKB = (n.sizeBytes || 0) / 1024;
+      const mass = Math.max(0.5, Math.sqrt(sizeKB) + Math.sqrt(n.degree || 0) * 0.6);
+      return {
+        id: n.id,
+        label: n.label || n.id.split('/').pop(),
+        group: n.group || 'other',
+        fullPath: n.fullPath || n.id,
+        degree: n.degree || 0,
+        sizeBytes: n.sizeBytes || 0,
+        sizeKB,
+        mass,
+        x: W() / 2 + (Math.random() - 0.5) * 100,
+        y: H() / 2 + (Math.random() - 0.5) * 100,
+      };
+    });
+    const idIndex = new Map(nodes.map(n => [n.id, n]));
+    links = (data.links || data.edges || [])
+      .map(l => {
+        const s = typeof l.source === 'string' ? idIndex.get(l.source) : l.source;
+        const t = typeof l.target === 'string' ? idIndex.get(l.target) : l.target;
+        if (!s || !t) return null;
+        return { source: s, target: t };
+      })
+      .filter(Boolean);
+
+    nodes.forEach(n => adjacency.set(n.id, new Set()));
+    links.forEach(l => {
+      adjacency.get(l.source.id).add(l.target.id);
+      adjacency.get(l.target.id).add(l.source.id);
+    });
+
+    // Per-edge weight = SUM of endpoint degrees. Was MIN — too
+    // conservative; min(1,X) = 1 dominated, almost every edge hit the
+    // minimum width. Sum gives 16× variance and faithfully expresses
+    // "the join between two heavily-connected nodes is itself heavy".
+    // Plus a small file-size kick so two big files connecting register
+    // visually even when their degree count happens to be small.
+    links.forEach((l, i) => {
+      l.idx = i;
+      l.weight = (l.source.degree + l.target.degree)
+                 + Math.sqrt((l.source.sizeKB || 0) + (l.target.sizeKB || 0)) * 0.4;
+      // Size-weighted dominance for edge color. Larger-mass node owns
+      // the bulk of the gradient.
+      const total = (l.source.mass || 0) + (l.target.mass || 0);
+      l.sourceShare = total > 0 ? (l.source.mass / total) : 0.5;
+    });
+
+    // Stats
+    const totalKB = nodes.reduce((s, n) => s + n.sizeKB, 0);
+    document.getElementById('stat-nodes').textContent = nodes.length.toLocaleString();
+    document.getElementById('stat-edges').textContent = links.length.toLocaleString();
+    document.getElementById('stat-groups').textContent = new Set(nodes.map(n => n.group)).size;
+    document.getElementById('stat-loc').textContent = totalKB.toFixed(0);
+
+    buildGradientDefs();
+    buildLegend();
+    buildGraph();
+    setupInteractions();
+    setTimeout(() => document.getElementById('help')?.classList.add('hidden'), 8000);
+  })
+  .catch(err => {
+    console.error('Failed to load graph data:', err);
+    document.querySelector('main').innerHTML +=
+      '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#ff6b6b;font-family:JetBrains Mono;font-size:13px;">Failed to load codebase-graph.json</div>';
+  });
+
+// ──────────────────────────────────────────────────────────────────────────
+// GRADIENT DEFS — one linearGradient per edge with stops biased by the
+// size-mass ratio. If source mass = 80% of total, the gradient fills 80%
+// with sourceColor before transitioning to targetColor.
+// ──────────────────────────────────────────────────────────────────────────
+function buildGradientDefs() {
+  const grad = defs.selectAll('linearGradient.edge-grad')
+    .data(links)
+    .join('linearGradient')
+      .attr('class', 'edge-grad')
+      .attr('id', d => 'eg' + d.idx)
+      .attr('gradientUnits', 'userSpaceOnUse');
+  grad.html(d => {
+    const sc = GROUP_COLORS[d.source.group] || '#888';
+    const tc = GROUP_COLORS[d.target.group] || '#888';
+    // Bias the transition point. Source share 0.5 = midpoint; 0.8 =
+    // source dominates, target color only appears in the last 20%.
+    const tPct = Math.round(d.sourceShare * 100);
+    return (
+      '<stop offset="0%" stop-color="' + sc + '"/>' +
+      '<stop offset="' + Math.max(5, tPct - 10) + '%" stop-color="' + sc + '" stop-opacity="0.95"/>' +
+      '<stop offset="' + Math.min(95, tPct + 10) + '%" stop-color="' + tc + '" stop-opacity="0.95"/>' +
+      '<stop offset="100%" stop-color="' + tc + '"/>'
+    );
+  });
+}
+
+function buildLegend() {
+  const groupCounts = {};
+  nodes.forEach(n => { groupCounts[n.group] = (groupCounts[n.group] || 0) + 1; });
+  const sortedGroups = Object.entries(groupCounts).sort((a, b) => b[1] - a[1]);
+  activeGroups = new Set(sortedGroups.map(g => g[0]));
+  const legend = d3.select('#legend');
+  legend.selectAll('*').remove();
+  sortedGroups.forEach(([g, count]) => {
+    const color = GROUP_COLORS[g] || '#888';
+    const row = legend.append('div')
+      .attr('class', 'legend-row')
+      .attr('data-group', g)
+      .on('click', function() {
+        if (activeGroups.has(g)) activeGroups.delete(g);
+        else activeGroups.add(g);
+        d3.select(this).classed('muted', !activeGroups.has(g));
+        applyFilters();
+      });
+    row.append('div').attr('class', 'swatch').style('background', color).style('color', color);
+    row.append('div').text(g);
+    row.append('div').attr('class', 'legend-count').text(count);
+  });
+}
+
+function buildGraph() {
+  const maxMass = d3.max(nodes, n => n.mass) || 1;
+  const maxWeight = d3.max(links, l => l.weight) || 1;
+  const radiusScale = d3.scaleSqrt().domain([0, maxMass]).range([2.2, 18]);
+  // WIDE stroke range so thick wires actually look thick. sqrt-scale
+  // compresses the long tail (the 1-2 hottest edges don't dwarf the
+  // mid-range; you SEE the 10th-percentile and the 95th differ).
+  const widthScale = d3.scaleSqrt().domain([1, maxWeight]).range([0.45, 6.5]);
+  // Heavy edges also get higher opacity — visually "the busy connections
+  // glow brighter". Light edges fade toward background.
+  const opacityScale = d3.scaleSqrt().domain([1, maxWeight]).range([0.32, 0.92]);
+
+  // Curved edges with a moderate arc — too straight = directory-tree
+  // feel; too curved = noisy at high density. 0.85x distance gives a
+  // gentle bow that still reads as web.
+  const linkPath = (d) => {
+    const dx = d.target.x - d.source.x;
+    const dy = d.target.y - d.source.y;
+    const dr = Math.sqrt(dx * dx + dy * dy) * 0.85;
+    return 'M' + d.source.x + ',' + d.source.y + 'A' + dr + ',' + dr + ' 0 0,1 ' + d.target.x + ',' + d.target.y;
+  };
+
+  // Links — gradient stroke with size-weighted dominance, opacity bumped
+  // to 0.55 so the WEB IS VISIBLE at full graph scale (this was the main
+  // failure mode in v1 — edges at 0.32 disappeared into the bg).
+  linkSel = linksLayer.selectAll('path.link')
+    .data(links)
+    .join('path')
+      .attr('class', 'link')
+      .attr('stroke', d => 'url(#eg' + d.idx + ')')
+      .attr('stroke-width', d => widthScale(d.weight))
+      .attr('stroke-opacity', d => opacityScale(d.weight))
+      .attr('stroke-linecap', 'round');
+
+  // Nodes — radius scales with mass (file-size + connection-count).
+  // Hot nodes (mass > 4) get the soft glow halo; super-hot (>7) get the
+  // big halo. Matches the bright hub bursts in the reference brain.
+  nodeSel = nodesLayer.selectAll('circle.node-circle')
+    .data(nodes)
+    .join('circle')
+      .attr('class', 'node-circle')
+      .attr('r', d => radiusScale(d.mass))
+      .attr('fill', d => GROUP_COLORS[d.group] || '#888')
+      .attr('stroke', d => d3.color(GROUP_COLORS[d.group] || '#888').brighter(0.4))
+      .attr('stroke-width', 0.8)
+      .attr('fill-opacity', 0.92)
+      .attr('filter', d => d.mass > 7 ? 'url(#hot-glow)' : (d.mass > 4 ? 'url(#soft-glow)' : null))
+      .on('click', (e, d) => { e.stopPropagation(); selectNode(d); })
+      .on('mouseover', (e, d) => highlight(d))
+      .on('mouseout', () => clearHighlight());
+
+  // Labels — only top-mass nodes (architecturally important files).
+  // ≥5 mass keeps the canvas readable; bright-class for ≥9.
+  labelSel = labelsLayer.selectAll('text.label')
+    .data(nodes.filter(n => n.mass >= 5))
+    .join('text')
+      .attr('class', d => 'label' + (d.mass >= 9 ? ' bright' : ''))
+      .text(d => d.label.length > 22 ? d.label.slice(0, 20) + '…' : d.label);
+
+  // ── PHYSICS — TIGHT, per Richard's "spread WAYYYY too far out" feedback.
+  // Original was charge -110, link distance 60+. New tuning compresses
+  // the layout by ~3× so the web is dense, edges visible, hubs cluster
+  // tightly. alphaDecay raised so it settles fast on first paint.
+  // S35 ONE-PASS tune (Richard, ~04:30 EDT 2026-04-27):
+  //   1. base link distance 18 → 14 — tightens global spread between
+  //      sub-clusters (features ↔ heimdall ↔ next-app drift).
+  //   2. charge gains a degree term — high-degree hubs (helm/index.ts
+  //      re-exports ~16 modules, growth-agent root, etc.) push their own
+  //      children outward harder, breaking up the dense central blob.
+  //   No brain-shape iteration — that path stays buried (DJ 2026-04-26_004).
+  simulation = d3.forceSimulation(nodes)
+    .force('link', d3.forceLink(links)
+      .id(d => d.id)
+      .distance(d => 14 + Math.sqrt(d.weight) * 3)
+      .strength(d => 0.85 / (1 + Math.min(d.source.degree, d.target.degree) / 12)))
+    .force('charge', d3.forceManyBody()
+      .strength(d => -22 - radiusScale(d.mass) * 4 - Math.min(d.degree || 0, 25) * 1.4)
+      .distanceMax(380))
+    .force('center', d3.forceCenter(W() / 2, H() / 2).strength(0.14))
+    .force('collide', d3.forceCollide()
+      .radius(d => radiusScale(d.mass) + 0.6)
+      .strength(0.9))
+    // Cluster — same-group cohesion. Stronger now (0.025 vs 0.012) so
+    // architectural layers clump visibly.
+    .force('cluster', alpha => {
+      const centroids = {};
+      nodes.forEach(n => {
+        const c = centroids[n.group] = centroids[n.group] || { x: 0, y: 0, n: 0 };
+        c.x += n.x; c.y += n.y; c.n += 1;
+      });
+      Object.values(centroids).forEach(c => { c.x /= c.n; c.y /= c.n; });
+      nodes.forEach(n => {
+        const c = centroids[n.group];
+        n.vx += (c.x - n.x) * 0.025 * alpha;
+        n.vy += (c.y - n.y) * 0.025 * alpha;
+      });
+    })
+    .alphaDecay(0.022)
+    .on('tick', () => {
+      // Update gradient endpoints so colors flow source→target on screen
+      defs.selectAll('linearGradient.edge-grad')
+        .attr('x1', d => d.source.x).attr('y1', d => d.source.y)
+        .attr('x2', d => d.target.x).attr('y2', d => d.target.y);
+      linkSel.attr('d', linkPath);
+      nodeSel.attr('cx', d => d.x).attr('cy', d => d.y);
+      labelSel.attr('x', d => d.x).attr('y', d => d.y - radiusScale(d.mass) - 4);
+    });
+
+  zoom = d3.zoom()
+    .scaleExtent([0.15, 6])
+    .on('zoom', e => root.attr('transform', e.transform));
+  SVG.call(zoom).on('dblclick.zoom', null);
+  SVG.on('click', clearSelection);
+
+  nodeSel.call(d3.drag()
+    .on('start', (e, d) => {
+      if (!e.active) simulation.alphaTarget(0.25).restart();
+      d.fx = d.x; d.fy = d.y;
+    })
+    .on('drag', (e, d) => { d.fx = e.x; d.fy = e.y; })
+    .on('end', (e, d) => {
+      if (!e.active) simulation.alphaTarget(0);
+      d.fx = null; d.fy = null;
+    }));
+}
+
+function setupInteractions() {
+  document.getElementById('search').addEventListener('input', e => {
+    const q = e.target.value.trim().toLowerCase();
+    if (!q) {
+      nodeSel.classed('faded', false).classed('highlighted', false);
+      linkSel.classed('faded', false).classed('highlighted', false);
+      labelSel.classed('faded', false);
+      return;
+    }
+    const matches = new Set(nodes.filter(n =>
+      n.label.toLowerCase().includes(q) || n.id.toLowerCase().includes(q)
+    ).map(n => n.id));
+    nodeSel.classed('faded', d => !matches.has(d.id))
+           .classed('highlighted', d => matches.has(d.id));
+    linkSel.classed('faded', d => !matches.has(d.source.id) && !matches.has(d.target.id));
+    labelSel.classed('faded', d => !matches.has(d.id));
+  });
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      clearSelection();
+      const s = document.getElementById('search');
+      s.value = ''; s.dispatchEvent(new Event('input'));
+    }
+  });
+}
+
+function highlight(node) {
+  if (selectedNode) return;
+  const neighbors = adjacency.get(node.id) || new Set();
+  neighbors.add(node.id);
+  nodeSel.classed('faded', d => !neighbors.has(d.id))
+         .classed('highlighted', d => d.id === node.id);
+  linkSel.classed('highlighted', d => d.source.id === node.id || d.target.id === node.id)
+         .classed('faded', d => d.source.id !== node.id && d.target.id !== node.id);
+  labelSel.classed('faded', d => !neighbors.has(d.id));
+}
+function clearHighlight() {
+  if (selectedNode) return;
+  nodeSel.classed('faded', false).classed('highlighted', false);
+  linkSel.classed('faded', false).classed('highlighted', false);
+  labelSel.classed('faded', false);
+}
+
+function selectNode(node) {
+  selectedNode = node;
+  const neighbors = adjacency.get(node.id) || new Set();
+  neighbors.add(node.id);
+  nodeSel.classed('faded', d => !neighbors.has(d.id))
+         .classed('highlighted', d => d.id === node.id);
+  linkSel.classed('highlighted', d => d.source.id === node.id || d.target.id === node.id)
+         .classed('faded', d => d.source.id !== node.id && d.target.id !== node.id);
+  labelSel.classed('faded', d => !neighbors.has(d.id));
+  renderInspector(node);
+}
+function clearSelection() {
+  selectedNode = null;
+  nodeSel.classed('faded', false).classed('highlighted', false);
+  linkSel.classed('faded', false).classed('highlighted', false);
+  labelSel.classed('faded', false);
+  document.getElementById('inspector').innerHTML =
+    '<div class="inspector-empty">Select a node<span>Click any point in the graph to see its connections, dependents, and dependencies.</span></div>';
+}
+
+function renderInspector(node) {
+  const ins = document.getElementById('inspector');
+  const out = links.filter(l => l.source.id === node.id).map(l => l.target);
+  const inn = links.filter(l => l.target.id === node.id).map(l => l.source);
+  const groupColor = GROUP_COLORS[node.group] || '#888';
+  const sizeKB = node.sizeKB.toFixed(node.sizeKB < 10 ? 1 : 0);
+  const escId = (s) => String(s).replace(/'/g, '&#39;').replace(/"/g, '&quot;');
+  const listHtml = (arr, empty) => arr.length === 0
+    ? '<div class="row" style="opacity:0.5;">' + empty + '</div>'
+    : arr.map(n => {
+      const c = GROUP_COLORS[n.group] || '#888';
+      return '<div class="row" data-id="' + escId(n.id) + '">' +
+        '<div class="dot" style="background:' + c + ';box-shadow:0 0 6px ' + c + ';"></div>' +
+        '<span>' + n.label + '</span>' +
+        '</div>';
+    }).join('');
+
+  ins.innerHTML =
+    '<div class="ins-title" style="color:' + groupColor + '">' + node.label + '</div>' +
+    '<div class="ins-path">' + node.fullPath + '</div>' +
+    '<div class="ins-grid">' +
+      '<div class="ins-stat"><div class="v">' + out.length + '</div><div class="l">Imports</div></div>' +
+      '<div class="ins-stat"><div class="v">' + inn.length + '</div><div class="l">Imported by</div></div>' +
+      '<div class="ins-stat"><div class="v">' + sizeKB + '</div><div class="l">KB on disk</div></div>' +
+      '<div class="ins-stat"><div class="v">' + node.mass.toFixed(1) + '</div><div class="l">Mass</div></div>' +
+    '</div>' +
+    '<div class="ins-section"><h4>Group</h4>' +
+      '<div class="row" style="padding:5px 8px;font-size:11px;">' +
+        '<div class="dot" style="background:' + groupColor + ';box-shadow:0 0 8px ' + groupColor + ';width:8px;height:8px;"></div>' +
+        '<span style="color:' + groupColor + ';font-weight:600">' + node.group + '</span>' +
+      '</div>' +
+    '</div>' +
+    '<div class="ins-section"><h4>Dependencies (' + out.length + ')</h4>' +
+      '<div class="ins-list">' + listHtml(out, 'No outgoing imports') + '</div>' +
+    '</div>' +
+    '<div class="ins-section"><h4>Dependents (' + inn.length + ')</h4>' +
+      '<div class="ins-list">' + listHtml(inn, 'No incoming imports') + '</div>' +
+    '</div>';
+
+  ins.querySelectorAll('.ins-list .row[data-id]').forEach(row => {
+    row.addEventListener('click', () => {
+      const id = row.getAttribute('data-id');
+      const n = nodes.find(x => x.id === id);
+      if (n) selectNode(n);
+    });
+  });
+}
+
+function applyFilters() {
+  nodeSel.style('display', d => activeGroups.has(d.group) ? null : 'none');
+  linkSel.style('display', d =>
+    (activeGroups.has(d.source.group) && activeGroups.has(d.target.group)) ? null : 'none');
+  labelSel.style('display', d => activeGroups.has(d.group) ? null : 'none');
+}
+
+function resetView() { SVG.transition().duration(700).call(zoom.transform, d3.zoomIdentity); }
+function toggleLabels() { labelsVisible = !labelsVisible; labelSel.style('opacity', labelsVisible ? null : 0); }
+function reheat() {
+  if (!simulation) return;
+  simulation.alpha(0.5).restart();
+  setTimeout(() => simulation.alphaTarget(0), 1500);
+}
+
+window.addEventListener('resize', () => {
+  if (!simulation) return;
+  simulation.force('center', d3.forceCenter(W() / 2, H() / 2).strength(0.14));
+  simulation.alpha(0.2).restart();
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mythos Neural Net — Decision Visualization</title>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #050510; color: #e0e0e0; font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; overflow: hidden; }
+
+  #graph { width: 100vw; height: 100vh; position: absolute; top: 0; left: 0; }
+
+  /* Ambient background glow */
+  body::before {
+    content: ''; position: fixed; top: 50%; left: 50%;
+    width: 800px; height: 800px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(22,224,169,0.03) 0%, transparent 70%);
+    transform: translate(-50%, -50%); pointer-events: none; z-index: 0;
+  }
+
+  .controls {
+    position: fixed; top: 20px; left: 20px; z-index: 100;
+    background: rgba(10, 10, 20, 0.85); border: 1px solid rgba(22,224,169,0.15);
+    border-radius: 16px; padding: 20px; min-width: 300px;
+    backdrop-filter: blur(20px); box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  }
+  .controls h1 {
+    font-size: 18px; color: #16e0a9; margin-bottom: 4px;
+    letter-spacing: 1px; font-weight: 600;
+  }
+  .controls .subtitle { font-size: 10px; color: #555; margin-bottom: 12px; letter-spacing: 2px; text-transform: uppercase; }
+  .controls .stat { font-size: 11px; color: #666; margin: 2px 0; }
+  .controls .stat span { color: #16e0a9; font-weight: 600; }
+
+  .section-label {
+    font-size: 9px; color: #444; margin: 14px 0 6px; letter-spacing: 2px;
+    text-transform: uppercase; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 10px;
+  }
+
+  .playback { display: flex; gap: 6px; align-items: center; margin: 8px 0; flex-wrap: wrap; }
+  .playback button {
+    background: rgba(22,224,169,0.15); color: #16e0a9; border: 1px solid rgba(22,224,169,0.3);
+    padding: 6px 16px; border-radius: 20px; font-size: 11px; cursor: pointer;
+    font-weight: 600; font-family: inherit; transition: all 0.3s;
+  }
+  .playback button:hover { background: rgba(22,224,169,0.3); }
+  .playback button.active { background: #16e0a9; color: #050510; border-color: #16e0a9; }
+  .playback select, .playback input[type="range"] {
+    background: rgba(255,255,255,0.05); color: #aaa; border: 1px solid rgba(255,255,255,0.1);
+    padding: 4px 8px; border-radius: 8px; font-size: 10px; font-family: inherit;
+  }
+  .playback select { max-width: 200px; }
+
+  .decision-info {
+    position: fixed; bottom: 20px; left: 20px; right: 20px; z-index: 100;
+    background: rgba(10, 10, 20, 0.9); border: 1px solid rgba(22,224,169,0.2);
+    border-radius: 16px; padding: 20px; max-width: 600px;
+    backdrop-filter: blur(20px); box-shadow: 0 -4px 24px rgba(0,0,0,0.3);
+    display: none; transition: all 0.4s ease;
+  }
+  .decision-info h3 { font-size: 14px; color: #fff; margin-bottom: 6px; font-weight: 600; }
+  .decision-info .path { font-size: 11px; color: #16e0a9; margin: 6px 0; opacity: 0.8; line-height: 1.5; }
+  .decision-info .meta { font-size: 10px; color: #555; margin-top: 8px; }
+  .decision-info .step-indicator {
+    display: inline-block; background: rgba(22,224,169,0.2); color: #16e0a9;
+    padding: 2px 10px; border-radius: 10px; font-size: 10px; font-weight: 600;
+  }
+
+  .legend {
+    position: fixed; top: 20px; right: 20px; z-index: 100;
+    background: rgba(10, 10, 20, 0.85); border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px; padding: 16px;
+    backdrop-filter: blur(20px); box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  }
+  .legend-item { display: flex; align-items: center; gap: 10px; margin: 5px 0; font-size: 10px; color: #777; }
+  .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .legend-section { font-size: 8px; color: #444; margin-top: 10px; letter-spacing: 1px; text-transform: uppercase; }
+</style>
+</head>
+<body>
+
+<svg id="graph"></svg>
+
+<div class="controls">
+  <h1>Mythos</h1>
+  <div class="subtitle">Neural Net Decision Map</div>
+  <div class="stat">Nodes <span id="stat-nodes">0</span> &middot; Links <span id="stat-links">0</span> &middot; Decisions <span id="stat-decisions">0</span></div>
+
+  <div class="section-label">Playback</div>
+  <div class="playback">
+    <button id="btn-play">&#9654; Play</button>
+    <button id="btn-pause" style="display:none;">&#10074;&#10074; Pause</button>
+    <button id="btn-reset">&#8634; Reset</button>
+  </div>
+  <div class="playback">
+    <select id="select-decision"></select>
+  </div>
+  <div class="playback">
+    <span style="font-size:9px;color:#555;">Speed</span>
+    <input type="range" id="speed" min="300" max="2500" value="1000" style="width:100px;">
+    <span id="speed-label" style="font-size:9px;color:#555;">1.0s</span>
+  </div>
+  <div class="playback">
+    <span style="font-size:9px;color:#555;">Session</span>
+    <select id="select-session"><option value="all">All</option></select>
+  </div>
+</div>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:#16e0a9;"></div> Memory</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#00bcd4;"></div> Source</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#f5a623;"></div> Sessions</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#5b8def;"></div> Schema</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#666;"></div> Other</div>
+  <div class="legend-section">Activation</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#16e0a9;box-shadow:0 0 8px #16e0a9;"></div> Read</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#ff6b6b;box-shadow:0 0 8px #ff6b6b;"></div> Modified</div>
+</div>
+
+<div class="decision-info" id="decision-info">
+  <h3 id="di-query"></h3>
+  <div class="path" id="di-path"></div>
+  <div class="meta">
+    <span class="step-indicator" id="di-step">-</span>
+    &nbsp;&middot;&nbsp;
+    <span id="di-confidence"></span> &middot;
+    <span id="di-outcome"></span> &middot;
+    <span id="di-duration"></span>
+  </div>
+</div>
+
+<script>
+const COLORS = {
+  memory: '#16e0a9', source: '#00bcd4', sessions: '#f5a623',
+  schema: '#5b8def', decisions: '#a855f7', deprecated: '#333', other: '#555',
+};
+const FIRE_READ = '#16e0a9';
+const FIRE_MODIFY = '#ff6b6b';
+const DIM_OPACITY = 0.15;
+const AMBIENT_OPACITY = 0.4;
+
+async function loadData() {
+  try { return await (await fetch('decisions.json')).json(); }
+  catch { return { nodes: [], links: [], decisions: [], meta: { totalDecisions: 0, sessions: [] } }; }
+}
+
+loadData().then(data => {
+  if (!data.nodes.length) {
+    document.body.innerHTML = '<div style="padding:60px;color:#16e0a9;font-size:16px;text-align:center;">Run <code style="background:#1a1a2e;padding:4px 8px;border-radius:4px;">node export-decisions.js</code> first</div>';
+    return;
+  }
+
+  // Stats
+  document.getElementById('stat-nodes').textContent = data.nodes.length;
+  document.getElementById('stat-links').textContent = data.links.length;
+  document.getElementById('stat-decisions').textContent = data.meta.totalDecisions;
+
+  // Selectors
+  const selDec = document.getElementById('select-decision');
+  data.decisions.forEach((d, i) => {
+    const o = document.createElement('option'); o.value = i;
+    o.textContent = `${d.query.slice(0, 50)}`;
+    selDec.appendChild(o);
+  });
+  const selSes = document.getElementById('select-session');
+  data.meta.sessions.forEach(s => {
+    const o = document.createElement('option'); o.value = s; o.textContent = `Session ${s}`;
+    selSes.appendChild(o);
+  });
+
+  // ── D3 Setup ─────────────────────────────────────────────────────────────
+
+  const W = window.innerWidth, H = window.innerHeight;
+  const svg = d3.select('#graph').attr('width', W).attr('height', H);
+
+  // Defs
+  const defs = svg.append('defs');
+
+  // Radial glow filter
+  const glowFilter = defs.append('filter').attr('id', 'nodeGlow').attr('x', '-100%').attr('y', '-100%').attr('width', '300%').attr('height', '300%');
+  glowFilter.append('feGaussianBlur').attr('in', 'SourceGraphic').attr('stdDeviation', '6').attr('result', 'blur');
+  glowFilter.append('feColorMatrix').attr('in', 'blur').attr('type', 'saturate').attr('values', '2');
+  const glowMerge = glowFilter.append('feMerge');
+  glowMerge.append('feMergeNode').attr('in', 'blur');
+  glowMerge.append('feMergeNode').attr('in', 'SourceGraphic');
+
+  // Soft ambient glow
+  const ambientFilter = defs.append('filter').attr('id', 'ambientGlow').attr('x', '-50%').attr('y', '-50%').attr('width', '200%').attr('height', '200%');
+  ambientFilter.append('feGaussianBlur').attr('stdDeviation', '3').attr('result', 'blur');
+  const ambMerge = ambientFilter.append('feMerge');
+  ambMerge.append('feMergeNode').attr('in', 'blur');
+  ambMerge.append('feMergeNode').attr('in', 'SourceGraphic');
+
+  const g = svg.append('g');
+
+  // Zoom
+  svg.call(d3.zoom().scaleExtent([0.15, 6]).on('zoom', e => g.attr('transform', e.transform)));
+
+  // Scales
+  const maxAccess = Math.max(...data.nodes.map(n => n.readCount + n.modifyCount), 1);
+  const nodeR = d3.scaleLinear().domain([0, maxAccess]).range([3, 16]);
+
+  // Simulation — organic layout
+  const sim = d3.forceSimulation(data.nodes)
+    .force('link', d3.forceLink(data.links).id(d => d.id).distance(60).strength(d => Math.min(d.weight * 0.2, 0.8)))
+    .force('charge', d3.forceManyBody().strength(-80).distanceMax(300))
+    .force('center', d3.forceCenter(W / 2, H / 2).strength(0.05))
+    .force('collision', d3.forceCollide().radius(d => nodeR(d.readCount + d.modifyCount) + 6))
+    .force('x', d3.forceX(W / 2).strength(0.02))
+    .force('y', d3.forceY(H / 2).strength(0.02))
+    .alphaDecay(0.01)
+    .velocityDecay(0.4);
+
+  // ── Links — organic curved connections ───────────────────────────────────
+
+  const linkGroup = g.append('g');
+  const link = linkGroup.selectAll('path')
+    .data(data.links).join('path')
+    .attr('fill', 'none')
+    .attr('stroke', 'rgba(22,224,169,0.06)')
+    .attr('stroke-width', d => Math.min(d.weight * 0.8, 3))
+    .attr('stroke-linecap', 'round');
+
+  // ── Nodes — glowing orbs ─────────────────────────────────────────────────
+
+  const nodeGroup = g.append('g');
+
+  // Ambient halo behind each node
+  const halo = nodeGroup.selectAll('circle.halo')
+    .data(data.nodes).join('circle')
+    .attr('class', 'halo')
+    .attr('r', d => nodeR(d.readCount + d.modifyCount) * 2.5)
+    .attr('fill', d => COLORS[d.group] || '#555')
+    .attr('fill-opacity', 0.03)
+    .style('filter', 'url(#ambientGlow)');
+
+  // Main node
+  const node = nodeGroup.selectAll('circle.node')
+    .data(data.nodes).join('circle')
+    .attr('class', 'node')
+    .attr('r', d => nodeR(d.readCount + d.modifyCount))
+    .attr('fill', d => COLORS[d.group] || '#555')
+    .attr('fill-opacity', AMBIENT_OPACITY)
+    .attr('stroke', d => COLORS[d.group] || '#555')
+    .attr('stroke-width', 0.5)
+    .attr('stroke-opacity', 0.2)
+    .call(d3.drag()
+      .on('start', (e, d) => { if (!e.active) sim.alphaTarget(0.1).restart(); d.fx = d.x; d.fy = d.y; })
+      .on('drag', (e, d) => { d.fx = e.x; d.fy = e.y; })
+      .on('end', (e, d) => { if (!e.active) sim.alphaTarget(0); d.fx = null; d.fy = null; })
+    );
+
+  // Labels — only show for larger nodes
+  const label = nodeGroup.selectAll('text')
+    .data(data.nodes).join('text')
+    .text(d => d.label)
+    .attr('text-anchor', 'middle')
+    .attr('dominant-baseline', 'middle')
+    .attr('dy', d => nodeR(d.readCount + d.modifyCount) + 14)
+    .attr('fill', '#444')
+    .attr('font-size', d => nodeR(d.readCount + d.modifyCount) > 6 ? '9px' : '0px')
+    .attr('font-family', 'Inter, system-ui, sans-serif')
+    .attr('pointer-events', 'none');
+
+  // Hover
+  node.on('mouseover', (e, d) => {
+    d3.select(e.currentTarget).transition().duration(200)
+      .attr('fill-opacity', 0.9).attr('stroke-width', 1.5).attr('stroke-opacity', 0.6);
+    label.filter(l => l.id === d.id).attr('fill', '#ccc').attr('font-size', '11px');
+    // Show connected links
+    link.filter(l => l.source.id === d.id || l.target.id === d.id)
+      .transition().duration(200).attr('stroke', COLORS[d.group]).attr('stroke-opacity', 0.3);
+  }).on('mouseout', (e, d) => {
+    if (!d._firing) {
+      d3.select(e.currentTarget).transition().duration(400)
+        .attr('fill-opacity', AMBIENT_OPACITY).attr('stroke-width', 0.5).attr('stroke-opacity', 0.2);
+    }
+    label.filter(l => l.id === d.id)
+      .attr('fill', '#444').attr('font-size', nodeR(d.readCount + d.modifyCount) > 6 ? '9px' : '0px');
+    link.filter(l => l.source.id === d.id || l.target.id === d.id)
+      .transition().duration(400).attr('stroke', 'rgba(22,224,169,0.06)');
+  });
+
+  // ── Tick — curved links ──────────────────────────────────────────────────
+
+  sim.on('tick', () => {
+    // Curved links using quadratic bezier
+    link.attr('d', d => {
+      const dx = d.target.x - d.source.x;
+      const dy = d.target.y - d.source.y;
+      const dr = Math.sqrt(dx * dx + dy * dy) * 1.5;
+      return `M${d.source.x},${d.source.y}A${dr},${dr} 0 0,1 ${d.target.x},${d.target.y}`;
+    });
+
+    node.attr('cx', d => d.x).attr('cy', d => d.y);
+    halo.attr('cx', d => d.x).attr('cy', d => d.y);
+    label.attr('x', d => d.x).attr('y', d => d.y);
+  });
+
+  // ── Playback ─────────────────────────────────────────────────────────────
+
+  let playInterval = null;
+  let currentStep = 0;
+  let paused = false;
+  const infoPanel = document.getElementById('decision-info');
+
+  function resetGraph() {
+    currentStep = 0; paused = false;
+    if (playInterval) { clearInterval(playInterval); playInterval = null; }
+    infoPanel.style.display = 'none';
+    document.getElementById('btn-play').style.display = '';
+    document.getElementById('btn-play').textContent = '\u25B6 Play';
+    document.getElementById('btn-play').classList.remove('active');
+    document.getElementById('btn-pause').style.display = 'none';
+
+    // Smooth reset all nodes
+    node.transition().duration(800).ease(d3.easeCubicOut)
+      .attr('fill', d => COLORS[d.group] || '#555')
+      .attr('fill-opacity', AMBIENT_OPACITY)
+      .attr('stroke-width', 0.5).attr('stroke-opacity', 0.2)
+      .attr('r', d => nodeR(d.readCount + d.modifyCount))
+      .style('filter', null);
+
+    halo.transition().duration(800).ease(d3.easeCubicOut)
+      .attr('fill-opacity', 0.03).attr('r', d => nodeR(d.readCount + d.modifyCount) * 2.5);
+
+    link.transition().duration(800)
+      .attr('stroke', 'rgba(22,224,169,0.06)').attr('stroke-width', d => Math.min(d.weight * 0.8, 3));
+
+    label.transition().duration(800)
+      .attr('fill', '#444').attr('font-size', d => nodeR(d.readCount + d.modifyCount) > 6 ? '9px' : '0px');
+
+    data.nodes.forEach(n => n._firing = false);
+  }
+
+  function fireNode(nodeId, type, stepNum, totalSteps) {
+    const color = type === 'modify' ? FIRE_MODIFY : FIRE_READ;
+    const intensity = 0.6 + (stepNum / totalSteps) * 0.4; // Builds intensity
+
+    // Dim non-active nodes slightly
+    node.filter(d => d.id !== nodeId && !d._firing)
+      .transition().duration(300).attr('fill-opacity', DIM_OPACITY);
+
+    // Fire the target node
+    node.filter(d => d.id === nodeId)
+      .each(d => d._firing = true)
+      .transition().duration(400).ease(d3.easeElasticOut.amplitude(1.2).period(0.4))
+      .attr('fill', color)
+      .attr('fill-opacity', intensity)
+      .attr('stroke', color)
+      .attr('stroke-width', 2)
+      .attr('stroke-opacity', 0.8)
+      .attr('r', d => nodeR(d.readCount + d.modifyCount) * 1.8)
+      .style('filter', 'url(#nodeGlow)');
+
+    // Expand halo
+    halo.filter(d => d.id === nodeId)
+      .transition().duration(600).ease(d3.easeCubicOut)
+      .attr('fill', color).attr('fill-opacity', 0.08)
+      .attr('r', d => nodeR(d.readCount + d.modifyCount) * 4);
+
+    // Show label
+    label.filter(d => d.id === nodeId)
+      .transition().duration(300)
+      .attr('fill', '#fff').attr('font-size', '11px');
+
+    // Pulse connected links
+    link.filter(d => d.source.id === nodeId || d.target.id === nodeId)
+      .transition().duration(400)
+      .attr('stroke', color).attr('stroke-opacity', 0.4)
+      .attr('stroke-width', d => Math.min(d.weight + 2, 6));
+  }
+
+  function playDecision(idx) {
+    resetGraph();
+    const decision = data.decisions[idx];
+    if (!decision || !decision.steps.length) return;
+
+    infoPanel.style.display = 'block';
+    document.getElementById('di-query').textContent = decision.query;
+    document.getElementById('di-path').textContent = decision.decision_path;
+    document.getElementById('di-confidence').textContent = `${(decision.confidence * 100).toFixed(0)}% confidence`;
+    document.getElementById('di-outcome').textContent = decision.outcome;
+    document.getElementById('di-duration').textContent = `${decision.duration_minutes}min`;
+
+    document.getElementById('btn-play').style.display = 'none';
+    document.getElementById('btn-pause').style.display = '';
+
+    const speed = parseInt(document.getElementById('speed').value);
+    currentStep = 0;
+
+    // Dim all nodes first
+    setTimeout(() => {
+      node.transition().duration(400).attr('fill-opacity', DIM_OPACITY);
+    }, 100);
+
+    playInterval = setInterval(() => {
+      if (paused) return;
+      if (currentStep >= decision.steps.length) {
+        clearInterval(playInterval); playInterval = null;
+        document.getElementById('btn-pause').style.display = 'none';
+        document.getElementById('btn-play').style.display = '';
+        document.getElementById('btn-play').textContent = '\u2714 Done';
+        document.getElementById('btn-play').classList.add('active');
+        document.getElementById('di-step').textContent = `Complete (${decision.steps.length} steps)`;
+        return;
+      }
+
+      const step = decision.steps[currentStep];
+      const stepLabel = step.type === 'modify' ? 'WRITE' : 'READ';
+      document.getElementById('di-step').textContent = `${stepLabel} ${currentStep + 1}/${decision.steps.length}: ${step.node.split('/').pop()}`;
+      fireNode(step.node, step.type, currentStep, decision.steps.length);
+      currentStep++;
+    }, speed);
+  }
+
+  // Controls
+  document.getElementById('btn-play').onclick = () => playDecision(parseInt(selDec.value));
+  document.getElementById('btn-pause').onclick = () => {
+    paused = !paused;
+    document.getElementById('btn-pause').textContent = paused ? '\u25B6 Resume' : '\u23F8 Pause';
+  };
+  document.getElementById('btn-reset').onclick = resetGraph;
+  selDec.onchange = () => playDecision(parseInt(selDec.value));
+  document.getElementById('speed').oninput = e => {
+    document.getElementById('speed-label').textContent = (e.target.value / 1000).toFixed(1) + 's';
+  };
+  selSes.onchange = e => {
+    selDec.innerHTML = '';
+    const filtered = e.target.value === 'all' ? data.decisions : data.decisions.filter(d => d.session == e.target.value);
+    filtered.forEach(d => {
+      const o = document.createElement('option');
+      o.value = data.decisions.indexOf(d);
+      o.textContent = d.query.slice(0, 50);
+      selDec.appendChild(o);
+    });
+  };
+
+  // Keyboard shortcuts
+  document.addEventListener('keydown', e => {
+    if (e.code === 'Space') { e.preventDefault(); if (playInterval) { paused = !paused; } else { playDecision(parseInt(selDec.value)); } }
+    if (e.code === 'KeyR') resetGraph();
+    if (e.code === 'ArrowRight') { const v = selDec.value; selDec.value = Math.min(+v + 1, data.decisions.length - 1); playDecision(+selDec.value); }
+    if (e.code === 'ArrowLeft') { const v = selDec.value; selDec.value = Math.max(+v - 1, 0); playDecision(+selDec.value); }
+  });
+});
+</script>
+</body>
+</html>

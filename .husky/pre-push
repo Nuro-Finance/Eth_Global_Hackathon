@@ -1,0 +1,24 @@
+#!/usr/bin/env sh
+# Runs before `git push`. Blocks pushes that would fail backend CI.
+# Skip with --no-verify if you REALLY need to (e.g., WIP branch push).
+#
+# Gate 1 — dependency verification (every imported package declared in package.json)
+# Gate 2 — backend typecheck (tsconfig.backend.json scope)
+# Gate 3 — Vitest unit tests
+# Gate 4 — admin <script> parse-check (S33 regression class — see DJ 2026-04-26_002 DJ 4)
+
+set -e
+
+echo "[pre-push] Verifying all imports are declared in package.json..."
+node scripts/verify-deps.js
+
+echo "[pre-push] Running backend typecheck..."
+npm run --silent typecheck:backend
+
+echo "[pre-push] Running unit tests..."
+npm run --silent test:backend
+
+echo "[pre-push] Parse-checking rendered admin <script>..."
+node scripts/check-admin-script.js
+
+echo "[pre-push] All gates passed."

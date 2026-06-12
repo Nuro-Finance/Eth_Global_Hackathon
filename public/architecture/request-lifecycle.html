@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>09 · Request lifecycle · AFI Architecture</title>
+<link rel="stylesheet" href="/architecture/_style.css">
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+</head>
+<body>
+<div class="wrap">
+
+<nav class="top">
+  <a href="/architecture.html" class="back">← All diagrams</a>
+  <span class="spacer"></span>
+  <span class="label">Section</span><span class="index-num">09 / 10</span>
+</nav>
+
+<header class="page">
+  <span class="eyebrow">09 · End-to-end</span>
+  <h1>Full request lifecycle — Reload Card</h1>
+  <p class="lede">
+    The complete happy-path from <em>"user clicks Reload"</em> to <em>"card balance updated"</em>. Nine actors: Browser → Next.js FE → Next.js /api proxy → Express BE → Postgres → 0x API → source chain → Base chain → SD3 Issuer. <strong>Synchronous through step 12</strong>; asynchronous past that. Below: the sequence, then timing breakdown, then a failure-mode flow so you can see where retries kick in.
+  </p>
+</header>
+
+<div class="section-label">01 — Sequence diagram</div>
+<div class="diagram tall">
+<div class="mermaid">
+sequenceDiagram
+    autonumber
+    participant B as Browser
+    participant N as Next.js FE
+    participant A as /api proxy
+    participant E as Express BE
+    participant D as Postgres
+    participant Z as 0x API
+    participant C as Source chain
+    participant BA as Base chain
+    participant S as SD3 Issuer
+
+    B->>A: GET /api/supported-tokens
+    A->>E: GET /supported-tokens
+    E->>D: SELECT erc20_allowlist WHERE enabled
+    D-->>E: rows
+    E-->>A: categorized tokens
+    A-->>B: JSON (cached 60s)
+
+    B->>A: GET /api/quote/swap
+    A->>E: GET /quote/swap
+    E->>Z: /swap/allowance-holder/price
+    Z-->>E: buyAmount, minBuyAmount
+    E-->>A: preview
+    A-->>B: quote JSON
+
+    B->>C: wallet tx (send tokens)
+    Note over C,E: async from here on
+    C-->>E: Monitor poll detects balance
+    E->>Z: getSwapQuote (with taker)
+    E->>C: approve + swap tx
+    C-->>E: USDC arrives at deposit addr
+    E->>BA: CCTP burn
+    BA-->>S: webhook on USDC mint
+    S-->>E: sync balance
+    E->>D: INSERT transactions, UPDATE cards
+    D-->>B: next UI refresh shows new balance
+</div>
+</div>
+
+<div class="section-label">02 — Timing breakdown</div>
+<div class="service-grid">
+  <div class="service-card live">
+    <div class="service-title">Steps 1–12 — synchronous</div>
+    <div class="service-purpose">User-blocking phase while typing + picking + quoting.</div>
+    <div class="service-meta">
+      <dt>Total</dt><dd>~200–500 ms</dd>
+      <dt>Slowest step</dt><dd>0x <code>/price</code> call (typical 150–300 ms)</dd>
+      <dt>What user sees</dt><dd>Live quote updates as they type</dd>
+    </div>
+  </div>
+
+  <div class="service-card live">
+    <div class="service-title">Step 13 — tx broadcast</div>
+    <div class="service-purpose">From user's signature to on-chain inclusion.</div>
+    <div class="service-meta">
+      <dt>Typical</dt><dd>&lt;30 s on most chains</dd>
+      <dt>Ethereum mainnet</dt><dd>12 s (one block)</dd>
+      <dt>Solana</dt><dd>~1–2 s</dd>
+    </div>
+  </div>
+
+  <div class="service-card live">
+    <div class="service-title">Steps 14–16 — detect + swap</div>
+    <div class="service-purpose">Monitor notices the deposit, runs swap if needed.</div>
+    <div class="service-meta">
+      <dt>Detect</dt><dd>Up to <code>POLL_INTERVAL_MS</code> wait (60 s when live)</dd>
+      <dt>Swap tx</dt><dd>~30 s on-chain</dd>
+      <dt>Skipped for</dt><dd>Already-USDC deposits</dd>
+    </div>
+  </div>
+
+  <div class="service-card dormant">
+    <div class="service-title">Steps 17–19 — CCTP bridge</div>
+    <div class="service-purpose">Circle burn → attest → mint on Base.</div>
+    <div class="service-meta">
+      <dt>Burn</dt><dd>On-chain, ~30 s</dd>
+      <dt>Attestation</dt><dd><strong>10–15 min</strong> (this is the dominant wait)</dd>
+      <dt>Mint</dt><dd>On-chain, ~30 s</dd>
+    </div>
+  </div>
+
+  <div class="service-card live">
+    <div class="service-title">Steps 20–22 — SD3 credit</div>
+    <div class="service-purpose">Webhook fires, card balance updated in SD3's system.</div>
+    <div class="service-meta">
+      <dt>Webhook</dt><dd>Fires within seconds of Base mint</dd>
+      <dt>DB write</dt><dd>Near-instant (<code>INSERT transactions</code> + <code>UPDATE cards</code>)</dd>
+      <dt>UI refresh</dt><dd>Next SWR fetch picks it up</dd>
+    </div>
+  </div>
+
+  <div class="service-card live">
+    <div class="service-title">Total user-perceived time</div>
+    <div class="service-purpose">Depends heavily on chain + token path.</div>
+    <div class="service-meta">
+      <dt>Base-direct USDC</dt><dd>~1–3 min (fastest)</dd>
+      <dt>Solana USDC</dt><dd>~10–15 min</dd>
+      <dt>Ethereum native swap</dt><dd>~15–25 min</dd>
+      <dt>HyperEVM native (LZ hop)</dt><dd>~20–30 min</dd>
+    </div>
+  </div>
+</div>
+
+<div class="section-label">03 — Failure domains</div>
+<div class="diagram">
+<div class="mermaid">
+flowchart TD
+    Start["Reload request starts"]
+
+    Start --> Q{"Quote call"}
+    Q -->|"0x down"| QDown["degraded=true → FE shows<br/>'quote unavailable'<br/>user can still proceed"]
+    Q -->|"ok"| Send["User signs wallet tx"]
+
+    Send --> TX{"Tx inclusion"}
+    TX -->|"revert"| TXFail["User's native stays put<br/>no card credit; user retries"]
+    TX -->|"confirmed"| Detect
+
+    Detect["Monitor detects balance"]
+    Detect --> Swap{"Swap if needed"}
+    Swap -->|"revert<br/>e.g. slippage"| SwapFail["execution_log row with<br/>reason code · retry on next poll"]
+    Swap -->|"ok"| Bridge
+
+    Bridge["CCTP burn initiated"]
+    Bridge --> Attest{"Circle attestation"}
+    Attest -->|"&gt; 30 min"| AttestAlert["Telegram admin alert<br/>manual investigation"]
+    Attest -->|"&lt; 30 min"| Mint
+
+    Mint["CCTP mint on Base"]
+    Mint --> Webhook{"SD3 webhook"}
+    Webhook -->|"dropped"| Reconciler["issuer_sync reconciler<br/>catches via GET /balances<br/>on next cycle"]
+    Webhook -->|"received"| Credit["Card credited ✓"]
+
+    Reconciler --> Credit
+
+    classDef fail fill:#1a1a2e,stroke:#ff6b6b,color:#fff
+    classDef ok fill:#1a1a2e,stroke:#16e0a9,color:#fff
+    class QDown,TXFail,SwapFail,AttestAlert fail
+    class Credit ok
+</div>
+</div>
+
+<div class="section-label">04 — Notes &amp; risk disclosure</div>
+<section class="prose">
+  <h3>Failure domains, spelled out</h3>
+  <ul>
+    <li><strong>Quote phase fails</strong> — <code>/quote/swap</code> returns <code>degraded: true</code>. FE shows "quote unavailable"; user can still proceed (execution-time quote will be re-fetched, never trusting the preview).</li>
+    <li><strong>Swap reverts</strong> — logged to <code>execution_log</code> with reason code. Native balance stays put. User can retry; <code>swapInflight</code> TTL (5 min) clears automatically.</li>
+    <li><strong>CCTP attestation delay &gt; 30min</strong> — admin gets a Telegram alert. Usually Circle infrastructure; manual retry via <code>messageTransmitter.receiveMessage</code> clears it.</li>
+    <li><strong>SD3 webhook doesn't fire</strong> — Monitor's <code>issuer_sync</code> reconciler catches it on the next cycle via <code>GET /balances</code> comparison. No silent-loss scenarios.</li>
+  </ul>
+
+  <h3>Every step is recorded</h3>
+  <p>Every on-chain tx carries a <strong>correlation_id</strong> that ties the quote, swap, bridge, and credit rows together in <code>execution_log</code>. Post-incident debugging is a single query.</p>
+
+  <div class="callout risk">
+    <strong>Risk disclosure.</strong> The card gets credited with the <strong>actual USDC that lands</strong>, not a pre-swap dollar estimate. If a memecoin rugs 30% mid-transit, the user eats that delta. See <a href="/architecture/deposit-flow.html">diagram 02</a> + the Swap Risk Policy doc.
+  </div>
+</section>
+
+<nav class="pager">
+  <a href="/architecture/neural-net.html">
+    <div class="pager-label">← Prev</div>
+    <div class="pager-title">08 · Neural Net</div>
+  </a>
+  <a href="/architecture/deploy-topology.html" class="next">
+    <div class="pager-label">Next →</div>
+    <div class="pager-title">10 · Deploy topology</div>
+  </a>
+</nav>
+
+<footer>AFI System Architecture · 09 / 10</footer>
+
+</div>
+
+<script>
+mermaid.initialize({
+  startOnLoad: true, theme: 'dark',
+  themeVariables: { primaryColor: '#1a1a2e', primaryTextColor: '#e8e8e8', primaryBorderColor: '#16e0a9', lineColor: '#16e0a9', secondaryColor: '#2a2a4a', background: '#050510', mainBkg: '#1a1a2e', fontFamily: 'Inter, system-ui, sans-serif', fontSize: '17px' },
+  sequence: { actorMargin: 65, useMaxWidth: true, wrap: true, width: 200, messageFontSize: 15, actorFontSize: 15, noteFontSize: 14 },
+  flowchart: { curve: 'basis', padding: 24, useMaxWidth: true, nodeSpacing: 50, rankSpacing: 60, htmlLabels: true },
+});
+</script>
+</body>
+</html>

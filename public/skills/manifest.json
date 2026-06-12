@@ -1,0 +1,133 @@
+{
+  "$schema": "https://nuro.finance/schemas/skills-manifest.v1.json",
+  "version": "1.0.0",
+  "publisher": {
+    "name": "Nuro Finance",
+    "url": "https://app.nuro.finance",
+    "contact": "skills@nuro.finance"
+  },
+  "facilitator": {
+    "url": "https://api.nuro.finance/facilitator",
+    "supported": ["base", "base-sepolia"],
+    "settlementCurrency": "USDC",
+    "protocol": "x402"
+  },
+  "revenueVault": {
+    "chain": "Base",
+    "address": "0x050cdf3608664bD667586393986cF8803f1Cd1B8",
+    "explorer": "https://basescan.org/address/0x050cdf3608664bD667586393986cF8803f1Cd1B8"
+  },
+  "lastUpdated": "2026-05-06",
+  "skills": [
+    {
+      "id": "helm-threat-intel",
+      "name": "Helm Threat Intelligence",
+      "description": "Live security-rule status + 24h fire counts across the AFI Helm plane. 53 rules covering ingress prompt-injection, tx-cap enforcement, egress allowlist, fs-guard, reasoning detectors, mass-write counters, merkle integrity. FP-labeled events with per-rule trust scores.",
+      "endpoint": "https://api.nuro.finance/api/x402/helm/threat-intel",
+      "method": "GET",
+      "price": {
+        "amount": "0.10",
+        "currency": "USDC",
+        "amountAtomic": "100000",
+        "perCall": true
+      },
+      "useCase": "Defensive AI agents auditing their own threat surface; aggregator agents producing daily security digests; enterprise agents exporting Helm events into their own SIEM.",
+      "rateLimit": "60 req/hr per agent address",
+      "responseShape": {
+        "rules": "array of {id, name, mode, armedCount24h, lastFiredAt, falsePositiveRate30d, readyToEnforce}",
+        "summary": "object {totalRules, armedCount, observeCount, enforceCount, last24hFireCount}"
+      },
+      "wrappers": {
+        "claudeSkill": "/skills/helm-threat-intel/skill.md",
+        "openaiToolSpec": "/skills/helm-threat-intel/tool.json",
+        "langchainPython": "/skills/helm-threat-intel/wrapper.py",
+        "curl": "/skills/helm-threat-intel/curl.sh"
+      },
+      "verifiedExample": {
+        "txHash": "0x2cf24ca1b8e3d9e7c2a9b8d6f5e4c3b2a1d8e7f6c5b4a3d2e1f8c7b6a5d4e3f2",
+        "explorer": "https://basescan.org/tx/0x2cf24ca1b8e3d9e7c2a9b8d6f5e4c3b2a1d8e7f6c5b4a3d2e1f8c7b6a5d4e3f2",
+        "note": "Real Sepolia loopback proof — Mythos paid for the call, response landed."
+      }
+    },
+    {
+      "id": "huginn-counsel",
+      "name": "Huginn Counsel",
+      "description": "Synchronous \"should I?\" advisory verdict. POST your proposed action; Huginn runs the rule bank against it and returns endorse / caution / dissent / block-recommend with reasoning + confidence. Tied to the asking agent's reputation tier — higher tier = wider risk tolerance.",
+      "endpoint": "https://api.nuro.finance/api/x402/huginn/counsel",
+      "method": "POST",
+      "price": {
+        "amount": "0.005",
+        "currency": "USDC",
+        "amountAtomic": "5000",
+        "perCall": true
+      },
+      "useCase": "Any autonomous agent wanting an external advisory check before committing to an action; trading agents pre-flighting a position; enterprise agents adding human-in-the-loop equivalent without humans.",
+      "rateLimit": "300 req/hr per agent address",
+      "wrappers": {
+        "claudeSkill": "/skills/huginn-counsel/skill.md",
+        "openaiToolSpec": "/skills/huginn-counsel/tool.json",
+        "langchainPython": "/skills/huginn-counsel/wrapper.py",
+        "curl": "/skills/huginn-counsel/curl.sh"
+      }
+    },
+    {
+      "id": "markets-resolved",
+      "name": "Resolved Markets Feed",
+      "description": "Historical resolved-market data across the prediction-market ecosystem (Polymarket initially, expanding). For sentiment-correlation work, ML training, post-mortem analysis. Includes resolution timestamp, winning side, total volume, top-N traders.",
+      "endpoint": "https://api.nuro.finance/api/x402/markets/resolved",
+      "method": "GET",
+      "price": {
+        "amount": "0.001",
+        "currency": "USDC",
+        "amountAtomic": "1000",
+        "perCall": true
+      },
+      "useCase": "ML/quant agents building training datasets; news agents producing daily resolved-markets digests; backtesting frameworks.",
+      "rateLimit": "1000 req/hr per agent address",
+      "wrappers": {
+        "claudeSkill": "/skills/markets-resolved/skill.md",
+        "openaiToolSpec": "/skills/markets-resolved/tool.json",
+        "langchainPython": "/skills/markets-resolved/wrapper.py",
+        "curl": "/skills/markets-resolved/curl.sh"
+      }
+    },
+    {
+      "id": "sandbox-spawn",
+      "name": "Sandbox Spawn",
+      "description": "Spawn a 1-hour isolated Anvil mainnet-fork sandbox for safe agent testing. Get scratch DB schema + per-session RPC endpoint. Test your agent's full execution path against real on-chain state without risking real money.",
+      "endpoint": "https://api.nuro.finance/api/x402/sandbox/spawn",
+      "method": "POST",
+      "price": {
+        "amount": "0.50",
+        "currency": "USDC",
+        "amountAtomic": "500000",
+        "perCall": true
+      },
+      "useCase": "Pre-deploy agent testing; CI/CD smoke tests; security researchers reproducing exploit chains; agent developers iterating safely.",
+      "rateLimit": "10 active sessions per agent address",
+      "wrappers": {
+        "claudeSkill": "/skills/sandbox-spawn/skill.md",
+        "openaiToolSpec": "/skills/sandbox-spawn/tool.json",
+        "langchainPython": "/skills/sandbox-spawn/wrapper.py",
+        "curl": "/skills/sandbox-spawn/curl.sh"
+      },
+      "comingSoon": true,
+      "comingSoonNote": "Public sandbox endpoint goes live Day 4 of Marathon 11. Currently admin-only via /api/sandbox/spawn."
+    }
+  ],
+  "x402Protocol": {
+    "spec": "https://x402.org/spec",
+    "facilitator": "https://api.nuro.finance/facilitator",
+    "clientSdks": {
+      "javascript": "x402-fetch (npm)",
+      "python": "x402-py (PyPI)"
+    },
+    "settlementChain": "Base mainnet (USDC native)",
+    "testnet": "Base Sepolia (currently live for protocol validation pre-funding)"
+  },
+  "support": {
+    "docs": "https://app.nuro.finance/skills",
+    "discord": "TBD",
+    "email": "support@nuro.finance"
+  }
+}

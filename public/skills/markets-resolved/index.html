@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Resolved Markets · Nuro Skill</title>
+<meta name="description" content="Historical resolved-market data feed across Polymarket and Hyperliquid. ML-training ready, with our consensus oracle on top.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/styles/dark.css">
+<style>
+  .skill-hero { padding: 72px 0 48px; }
+  .skill-hero-grid { display: grid; grid-template-columns: 1fr 1.05fr; gap: 56px; align-items: start; }
+  @media (max-width: 960px) { .skill-hero-grid { grid-template-columns: 1fr; gap: 40px; } }
+  .skill-hero h1 { margin: 20px 0 16px; }
+  .skill-meta { display: flex; flex-direction: column; gap: 14px; margin: 28px 0 0; }
+  .skill-meta-row { display: flex; align-items: center; gap: 14px; padding: 14px 18px; background: var(--bg-1); border: 1px solid var(--border-subtle); border-radius: var(--r-md); }
+  .skill-meta-row [data-lucide] { width: 18px; height: 18px; color: var(--accent); flex-shrink: 0; }
+  .skill-meta-row .label { font-family: 'Geist Mono', monospace; font-size: 11px; color: var(--fg-muted); text-transform: uppercase; letter-spacing: 0.05em; flex-shrink: 0; }
+  .skill-meta-row .val { font-family: 'Geist Mono', monospace; font-size: 13px; color: var(--fg-primary); word-break: break-all; }
+  .features-section { padding: 64px 0; border-top: 1px solid var(--border-subtle); }
+  .features-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-top: 32px; }
+  @media (max-width: 720px) { .features-grid { grid-template-columns: 1fr; } }
+  .feature-card { padding: 24px; background: var(--bg-1); border: 1px solid var(--border-subtle); border-radius: var(--r-lg); }
+  .feature-icon { display: inline-flex; width: 32px; height: 32px; align-items: center; justify-content: center; border-radius: var(--r-sm); background: var(--accent-surface); color: var(--accent); border: 1px solid var(--accent-border); margin-bottom: 12px; }
+  .feature-icon [data-lucide] { width: 16px; height: 16px; }
+  .feature-title { font-size: 15px; font-weight: 600; color: var(--fg-primary); margin-bottom: 6px; letter-spacing: -0.005em; }
+  .feature-desc { font-size: 13px; line-height: 1.55; color: var(--fg-secondary); }
+  .back-link { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--fg-secondary); margin-bottom: 24px; transition: color var(--t-fast) var(--ease-out); }
+  .back-link:hover { color: var(--fg-primary); }
+  .back-link [data-lucide] { width: 14px; height: 14px; }
+  .cta-strip { padding: 64px 0; border-top: 1px solid var(--border-subtle); text-align: center; }
+  .cta-strip .t-h2 { margin: 12px 0 16px; }
+  .cta-strip .t-lede { max-width: 56ch; margin: 0 auto 28px; }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="/" class="brand"><span class="brand-mark">N</span><span>Nuro</span></a>
+    <div class="nav-links">
+      <a href="/skills" class="nav-link">Skills</a>
+      <a href="/agents" class="nav-link">Agents</a>
+      <a href="/contracts" class="nav-link">Contracts</a>
+      <a href="/login" class="nav-cta">Sign in <i data-lucide="arrow-right"></i></a>
+    </div>
+  </div>
+</nav>
+
+<section class="skill-hero">
+  <div class="container">
+    <a href="/skills" class="back-link"><i data-lucide="arrow-left"></i> Back to skill catalog</a>
+    <div class="skill-hero-grid">
+      <div>
+        <span class="chip"><i data-lucide="trending-up" style="width: 14px; height: 14px;"></i> Markets · Historical resolution feed</span>
+        <h1 class="t-h1">Resolved markets, ML-training ready.</h1>
+        <p class="t-lede">
+          Historical resolved-market data across Polymarket, Hyperliquid, and the broader prediction-market ecosystem. Our consensus oracle layered on top. Useful for ML training, sentiment-correlation analysis, post-mortem review, and backtesting frameworks.
+        </p>
+        <div class="skill-meta">
+          <div class="skill-meta-row"><i data-lucide="globe-2"></i><span class="label">Endpoint</span><span class="val">GET /api/x402/markets/resolved</span></div>
+          <div class="skill-meta-row"><i data-lucide="key-round"></i><span class="label">Auth</span><span class="val">Bearer $NURO_KEY · x402 native</span></div>
+          <div class="skill-meta-row"><i data-lucide="zap"></i><span class="label">Latency</span><span class="val">~80ms · paginated, cached for 5m</span></div>
+        </div>
+      </div>
+
+      <div class="code-window">
+        <div class="code-window-header">
+          <div class="code-window-tabs">
+            <button class="code-tab active" data-tab="curl">curl</button>
+            <button class="code-tab" data-tab="ts">TypeScript</button>
+            <button class="code-tab" data-tab="py">Python</button>
+            <button class="code-tab" data-tab="response">Response</button>
+          </div>
+          <div class="code-window-actions">
+            <button class="copy-btn" data-copy-target="code-body"><i data-lucide="copy"></i><span class="copy-label">Copy</span></button>
+          </div>
+        </div>
+        <div class="code-body" id="code-body"><pre><code></code></pre></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="features-section">
+  <div class="container">
+    <span class="t-eyebrow">What you get</span>
+    <h2 class="t-h2" style="margin: 12px 0 8px;">Settled outcomes, with provenance.</h2>
+    <p class="t-lede" style="max-width: 60ch;">Every row includes resolution timestamp, winning side, total volume, top trader counts, and the source venue. Deterministic order, queryable by category, exportable to your warehouse.</p>
+    <div class="features-grid">
+      <article class="feature-card">
+        <div class="feature-icon"><i data-lucide="layers"></i></div>
+        <div class="feature-title">Multi-venue feeds</div>
+        <div class="feature-desc">Polymarket and Hyperliquid out of the box. More venues coming as we onboard them: Kalshi, Manifold, Augur next.</div>
+      </article>
+      <article class="feature-card">
+        <div class="feature-icon"><i data-lucide="brain-circuit"></i></div>
+        <div class="feature-title">ML-training shape</div>
+        <div class="feature-desc">Question text, category, resolution timestamp, winning side, volume, top traders. Drop straight into your training pipeline.</div>
+      </article>
+      <article class="feature-card">
+        <div class="feature-icon"><i data-lucide="filter"></i></div>
+        <div class="feature-title">Time + category filtering</div>
+        <div class="feature-desc">Query parameters: <code style="color: var(--accent); font-family: 'Geist Mono', monospace;">since</code>, <code style="color: var(--accent); font-family: 'Geist Mono', monospace;">category</code>, <code style="color: var(--accent); font-family: 'Geist Mono', monospace;">limit</code>. Build your own historical slice without scraping.</div>
+      </article>
+      <article class="feature-card">
+        <div class="feature-icon"><i data-lucide="check-circle-2"></i></div>
+        <div class="feature-title">Consensus oracle</div>
+        <div class="feature-desc">Where venues disagree on resolution, our oracle reconciles. Disputed markets are flagged so you can decide how to handle them.</div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="cta-strip">
+  <div class="container">
+    <span class="t-eyebrow">Open your dashboard</span>
+    <h2 class="t-h2">Wire the feed. Watch your agent learn from outcomes.</h2>
+    <p class="t-lede">Sign in to mint your real API key. Pull resolved markets straight into your training data, your backtester, or your daily digest.</p>
+    <a href="/login" class="btn btn-primary btn-lg">Open your dashboard <i data-lucide="arrow-right"></i></a>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-links">
+      <a href="/skills">All skills</a><a href="/agents">Agents</a><a href="/contracts">Contracts</a><a href="/skills/manifest.json">manifest.json</a><a href="/login">Sign in</a>
+    </div>
+    <div>Nuro · Resolved markets · Mythos memory</div>
+  </div>
+</footer>
+
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script>
+if (window.lucide) lucide.createIcons({ attrs: { 'stroke-width': 1.5 } });
+
+const PLACEHOLDER_KEY = 'nuro_ak_REPLACE_AT_SIGNIN_x4f2a8c';
+let tab = 'curl';
+
+const codes = {
+  curl: () => [
+    '<span class="tok-comment"># Pull last 50 resolved markets in the politics category.</span>',
+    'curl <span class="tok-flag">-X</span> GET <span class="tok-string">"https://api.nuro.finance/api/x402/markets/resolved?category=politics&limit=50"</span> \\',
+    '  <span class="tok-flag">-H</span> <span class="tok-string">"Authorization: Bearer ' + PLACEHOLDER_KEY + '"</span>',
+  ].join('\n'),
+  ts: () => [
+    '<span class="tok-keyword">const</span> res = <span class="tok-keyword">await</span> <span class="tok-fn">fetch</span>(',
+    '  <span class="tok-string">"https://api.nuro.finance/api/x402/markets/resolved?category=politics&limit=50"</span>,',
+    '  { <span class="tok-prop">headers</span>: { <span class="tok-string">Authorization</span>: <span class="tok-string">`Bearer ${NURO_KEY}`</span> } }',
+    ');',
+    '<span class="tok-keyword">const</span> { markets } = <span class="tok-keyword">await</span> res.<span class="tok-fn">json</span>();',
+    '<span class="tok-comment">// markets[]: question, category, resolvedAt, winningSide, totalVolumeUsd, topTradersCount</span>',
+  ].join('\n'),
+  py: () => [
+    '<span class="tok-keyword">import</span> requests',
+    '',
+    'res = requests.<span class="tok-fn">get</span>(',
+    '    <span class="tok-string">"https://api.nuro.finance/api/x402/markets/resolved"</span>,',
+    '    params={<span class="tok-string">"category"</span>: <span class="tok-string">"politics"</span>, <span class="tok-string">"limit"</span>: <span class="tok-num">50</span>},',
+    '    headers={<span class="tok-string">"Authorization"</span>: <span class="tok-string">f"Bearer {NURO_KEY}"</span>},',
+    ')',
+    '<span class="tok-keyword">for</span> m <span class="tok-keyword">in</span> res.<span class="tok-fn">json</span>()[<span class="tok-string">"markets"</span>]:',
+    '    <span class="tok-keyword">print</span>(m[<span class="tok-string">"question"</span>], m[<span class="tok-string">"winningSide"</span>])',
+  ].join('\n'),
+  response: () => [
+    '<span class="tok-punct">{</span>',
+    '  <span class="tok-prop">"markets"</span>: <span class="tok-punct">[</span>',
+    '    <span class="tok-punct">{</span>',
+    '      <span class="tok-prop">"id"</span>: <span class="tok-string">"poly-uuid-1"</span>,',
+    '      <span class="tok-prop">"question"</span>: <span class="tok-string">"Will candidate X win election Y?"</span>,',
+    '      <span class="tok-prop">"category"</span>: <span class="tok-string">"politics"</span>,',
+    '      <span class="tok-prop">"resolvedAt"</span>: <span class="tok-string">"2026-05-01T14:30:00Z"</span>,',
+    '      <span class="tok-prop">"winningSide"</span>: <span class="tok-string">"yes"</span>,',
+    '      <span class="tok-prop">"totalVolumeUsd"</span>: <span class="tok-num">1234567</span>,',
+    '      <span class="tok-prop">"topTradersCount"</span>: <span class="tok-num">142</span>',
+    '    <span class="tok-punct">}</span>',
+    '  <span class="tok-punct">]</span>,',
+    '  <span class="tok-prop">"fetchedAt"</span>: <span class="tok-string">"..."</span>',
+    '<span class="tok-punct">}</span>',
+  ].join('\n'),
+};
+
+function render() { document.getElementById('code-body').innerHTML = '<pre><code>' + codes[tab]() + '</code></pre>'; }
+document.querySelectorAll('[data-tab]').forEach(t => { t.addEventListener('click', () => { document.querySelectorAll('[data-tab]').forEach(x => x.classList.remove('active')); t.classList.add('active'); tab = t.dataset.tab; render(); }); });
+document.querySelectorAll('.copy-btn[data-copy-target]').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    const lbl = btn.querySelector('.copy-label');
+    try { await navigator.clipboard.writeText(document.getElementById(btn.dataset.copyTarget).textContent || ''); btn.classList.add('copied'); lbl.textContent = 'Copied'; setTimeout(() => { btn.classList.remove('copied'); lbl.textContent = 'Copy'; }, 1800); }
+    catch { lbl.textContent = 'Press ⌘C'; setTimeout(() => { lbl.textContent = 'Copy'; }, 1800); }
+  });
+});
+render();
+</script>
+</body>
+</html>

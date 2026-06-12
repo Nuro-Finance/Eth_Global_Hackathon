@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nuro · Agentic finance, orchestrated from one plane</title>
+<meta name="description" content="One control plane for every agent, card, and chain. Bridge USDC across 23 chains in seconds. Issue Visa cards with on-chain budget enforcement. Connect bank accounts with human co-pilot. Watched by Mythos.">
+
+<!-- Open Graph (Facebook / LinkedIn / Slack / Discord / iMessage previews) -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Nuro">
+<meta property="og:title" content="Nuro · Agentic finance, orchestrated from one plane">
+<meta property="og:description" content="The neo-bank where your AI agents work for you. 23 chains via LayerZero V2 + Circle CCTP. Visa rails. x402 native.">
+<meta property="og:url" content="https://app.nuro.finance/skills">
+<meta property="og:image" content="https://app.nuro.finance/agentic-card.png">
+<meta property="og:image:width" content="1024">
+<meta property="og:image:height" content="649">
+<meta property="og:image:alt" content="Nuro Visa card with BTC, ETH, SOL, USDC icons">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Nuro · Agentic finance, orchestrated from one plane">
+<meta name="twitter:description" content="The neo-bank where your AI agents work for you. 23 chains via LayerZero V2 + Circle CCTP. Visa rails. x402 native.">
+<meta name="twitter:image" content="https://app.nuro.finance/agentic-card.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/styles/dark.css">
+
+<style>
+  /* /skills-specific styles only. Design tokens come from /styles/dark.css */
+
+  .hero { padding: 96px 0 72px; }
+  @media (max-width: 720px) { .hero { padding: 64px 0 48px; } }
+
+  /* S35 M11 Day-3 evening: Moonpay-style hero refactor.
+   * Removed the right-side code-window per founder feedback ("no clunky
+   * box, we're just going with a package installer for now"). Single-
+   * column centered hero with the install pill as the canonical first-
+   * touch action. Same pattern as /agents post-refactor.
+   */
+  .hero-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    max-width: 760px;
+    margin: 0 auto;
+  }
+  .hero h1 { margin: 24px 0 18px; max-width: 22ch; }
+  .hero-lede { max-width: 60ch; margin-bottom: 32px; }
+  .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+
+  /* Pillar grid (4 major capabilities) */
+  .pillar-section { padding: 96px 0; border-top: 1px solid var(--border-subtle); }
+  .pillar-header { margin-bottom: 48px; max-width: 720px; }
+  .pillar-header .t-h2 { margin: 12px 0 16px; }
+
+  .pillar-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+  @media (max-width: 720px) { .pillar-grid { grid-template-columns: 1fr; } }
+
+  .pillar-card {
+    padding: 32px 28px;
+    background: var(--bg-1);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--r-xl);
+    transition: all var(--t-base) var(--ease-out);
+    position: relative;
+    overflow: hidden;
+  }
+  .pillar-card:hover {
+    border-color: var(--border-default);
+    background: var(--bg-2);
+    transform: translateY(-2px);
+  }
+  .pillar-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at top right, var(--accent-glow), transparent 60%);
+    opacity: 0;
+    transition: opacity var(--t-base) var(--ease-out);
+    pointer-events: none;
+  }
+  .pillar-card:hover::before { opacity: 0.5; }
+  .pillar-card-icon {
+    display: inline-flex;
+    width: 44px; height: 44px;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--r-md);
+    background: var(--accent-surface);
+    border: 1px solid var(--accent-border);
+    color: var(--accent);
+    margin-bottom: 18px;
+  }
+  .pillar-card-icon [data-lucide] { width: 22px; height: 22px; }
+  .pillar-card-eyebrow {
+    font-family: 'Geist Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+  .pillar-card-title {
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    color: var(--fg-primary);
+    margin-bottom: 10px;
+  }
+  .pillar-card-desc {
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--fg-secondary);
+    margin-bottom: 16px;
+  }
+  .pillar-card-stat {
+    font-family: 'Geist Mono', monospace;
+    font-size: 12px;
+    color: var(--fg-muted);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .pillar-card-stat [data-lucide] {
+    width: 14px; height: 14px;
+    color: var(--accent);
+  }
+
+  /* Pantheon section. The operational layer */
+  .pantheon-section { padding: 96px 0; border-top: 1px solid var(--border-subtle); }
+  .pantheon-header { margin-bottom: 48px; max-width: 720px; }
+  .pantheon-header .t-h2 { margin: 12px 0 16px; }
+
+  .pantheon-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+  @media (max-width: 960px) { .pantheon-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 540px) { .pantheon-grid { grid-template-columns: 1fr; } }
+
+  .pantheon-card {
+    padding: 24px;
+    background: var(--bg-1);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--r-lg);
+    transition: all var(--t-base) var(--ease-out);
+  }
+  .pantheon-card:hover {
+    border-color: var(--border-default);
+    background: var(--bg-2);
+  }
+  .pantheon-card-icon {
+    display: inline-flex;
+    width: 36px; height: 36px;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--r-md);
+    background: rgba(0, 192, 139, 0.08);
+    border: 1px solid rgba(0, 192, 139, 0.24);
+    color: var(--success);
+    margin-bottom: 14px;
+  }
+  .pantheon-card-icon [data-lucide] { width: 18px; height: 18px; }
+  .pantheon-card-name {
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--fg-primary);
+    margin-bottom: 4px;
+    letter-spacing: -0.01em;
+  }
+  .pantheon-card-role {
+    font-family: 'Geist Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    color: var(--success);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .pantheon-card-desc {
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: var(--fg-secondary);
+  }
+
+  /* Comparison */
+  .compare-section { padding: 96px 0; border-top: 1px solid var(--border-subtle); }
+  .compare-section .t-h2 { margin: 12px 0 16px; }
+  .compare-section .t-lede { max-width: 64ch; margin-bottom: 40px; }
+
+  /* CTA */
+  .cta-section { padding: 96px 0; border-top: 1px solid var(--border-subtle); }
+  .cta-card {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 56px 48px;
+    background: linear-gradient(180deg, rgba(13,144,255,0.06) 0%, rgba(13,144,255,0.02) 100%);
+    border: 1px solid var(--accent-border);
+    border-radius: var(--r-xl);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .cta-card::before {
+    content: '';
+    position: absolute;
+    top: -40%; left: 50%;
+    width: 60%; height: 180%;
+    background: radial-gradient(ellipse 50% 30% at 50% 50%, rgba(13,144,255,0.12), transparent 65%);
+    transform: translateX(-50%);
+    pointer-events: none;
+  }
+  .cta-card > * { position: relative; }
+  .cta-card .t-h2 { margin: 14px 0 12px; }
+  .cta-card .t-lede { max-width: 50ch; margin: 0 auto 28px; }
+</style>
+</head>
+<body>
+
+<!-- ─── NAV ─── -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="/" class="brand">
+      <span class="brand-mark">N</span>
+      <span>Nuro</span>
+    </a>
+    <div class="nav-links">
+      <a href="/agents" class="nav-link">Agents</a>
+      <a href="/contracts" class="nav-link">Contracts</a>
+      <a href="/architecture.html" class="nav-link">Architecture</a>
+      <a href="/login" class="nav-cta">
+        Sign in
+        <i data-lucide="arrow-right"></i>
+      </a>
+    </div>
+  </div>
+</nav>
+
+<!-- ─── HERO ─── -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-inner">
+      <div>
+        <span class="chip">Mythos · v1.0 · Live</span>
+        <h1 class="t-display">
+          The neo-bank where your <span class="t-accent-gradient">AI agents</span> work for you.
+        </h1>
+        <p class="t-lede hero-lede">
+          Open a Nuro account in 60 seconds. Connect your existing bank for fiat on/off-ramp. Issue Visa and Mastercard to every agent. Set their goals, see their expenses, watch deposits flow back to you. You're the co-pilot. Mythos guards the gates. Agents work autonomously.
+        </p>
+        <div class="hero-actions">
+          <a href="/login" class="btn btn-primary btn-lg">
+            Open your account
+            <i data-lucide="arrow-right"></i>
+          </a>
+          <a href="#pillars" class="btn btn-secondary btn-lg">
+            See how it works
+          </a>
+        </div>
+        <div class="install-cmd">
+          <span class="install-prompt">$</span>
+          <code class="install-code">npm install -g @nuro-finance/cli</code>
+          <button class="install-copy" data-install-cmd="npm install -g @nuro-finance/cli">
+            <i data-lucide="copy"></i>
+            <span class="install-copy-label">Copy</span>
+          </button>
+        </div>
+        <p class="install-cmd-meta">
+          Talk to Nuro from your terminal. <code style="font-family: 'Geist Mono', monospace; font-size: 12px; color: var(--fg-secondary);">nuro init</code> after install.
+        </p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ─── 4 PILLARS ─── -->
+<section class="pillar-section" id="pillars">
+  <div class="container">
+    <div class="pillar-header">
+      <span class="t-eyebrow">What you get</span>
+      <h2 class="t-h2">An agentic neo-bank. You command. Agents work.</h2>
+      <p class="t-lede">
+        Nuro IS your bank: purpose-built for agentic finance. Your account holds USDC natively, settles to cards in 0.4s, ramps to fiat in seconds via Plaid, and lets your agents earn while you sleep. Connect your existing bank, issue cards, set goals, watch deposits flow back.
+      </p>
+    </div>
+
+    <div class="pillar-grid">
+
+      <article class="pillar-card">
+        <div class="pillar-card-icon"><i data-lucide="landmark"></i></div>
+        <div class="pillar-card-eyebrow">Your Nuro account</div>
+        <h3 class="pillar-card-title">The agentic neo-bank.</h3>
+        <p class="pillar-card-desc">
+          Native USDC base layer with cards, on-chain settlement, and multi-agent capability built in. One account holds your fleet's working capital. Agents earn, deposits flow back. Ramp to fiat anytime via your existing bank. You're the human co-pilot; the bank is yours.
+        </p>
+        <div class="pillar-card-stat">
+          <i data-lucide="zap"></i>
+          <span>USDC-native · 60-second open · zero friction</span>
+        </div>
+      </article>
+
+      <article class="pillar-card">
+        <div class="pillar-card-icon"><i data-lucide="credit-card"></i></div>
+        <div class="pillar-card-eyebrow">Cards for every agent</div>
+        <h3 class="pillar-card-title">Visa + Mastercard, in seconds.</h3>
+        <p class="pillar-card-desc">
+          Real cards for your agents. Connect Visa and Mastercard rails in seconds, set per-card budget caps, and let Helm enforce mid-flight at the swipe. Each card draws from your Nuro account; settlement happens on-chain in 0.4s. Card networks don't even know an agent's behind it.
+        </p>
+        <div class="pillar-card-stat">
+          <i data-lucide="zap"></i>
+          <span>Visa + Mastercard · 0.4s settle · budget-bound</span>
+        </div>
+      </article>
+
+      <article class="pillar-card">
+        <div class="pillar-card-icon"><i data-lucide="git-branch"></i></div>
+        <div class="pillar-card-eyebrow">Bifröst</div>
+        <h3 class="pillar-card-title">23 chains. On/off-ramp built in.</h3>
+        <p class="pillar-card-desc">
+          Cross-chain USDC reach via LayerZero V2 + Circle CCTP across 23 chains, growing weekly. CCTP handles the card-settlement path (native USDC, issuer-grade, no wrapped synthetics). LayerZero V2 handles broader agent treasury moves. Plaid for fiat on/off-ramp from your existing bank: USD to USDC and back in seconds. Coinbase x402 protocol native.
+        </p>
+        <div class="pillar-card-stat">
+          <i data-lucide="zap"></i>
+          <span>23 chains · LayerZero + CCTP · Plaid · x402</span>
+        </div>
+      </article>
+
+      <article class="pillar-card">
+        <div class="pillar-card-icon"><i data-lucide="git-merge"></i></div>
+        <div class="pillar-card-eyebrow">Yggdrasil</div>
+        <h3 class="pillar-card-title">Your fleet, one dashboard.</h3>
+        <p class="pillar-card-desc">
+          Spin up agents in 60 seconds. Set their long-term and short-term goals. Issue them cards. Watch their expenses, their wins, their deposits back to you. Threshold-based approval flows on big moves: you sign, the system moves. Run a hundred agents the same way you run one.
+        </p>
+        <div class="pillar-card-stat">
+          <i data-lucide="zap"></i>
+          <span>Multi-agent · goals + budgets · co-pilot approval</span>
+        </div>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS. The journey -->
+<section class="pillar-section" id="journey">
+  <div class="container">
+    <div class="pillar-header">
+      <span class="t-eyebrow">The journey</span>
+      <h2 class="t-h2">Open. Fund. Deploy. Watch deposits flow back.</h2>
+      <p class="t-lede">
+        Six steps from sign-in to autonomous earnings. Each step takes seconds, not days. Your existing bank, your agents, your cards, all wired into one neo-bank account that reports to you.
+      </p>
+    </div>
+
+    <div class="pantheon-grid">
+
+      <article class="pantheon-card">
+        <div class="pantheon-card-icon" style="background: var(--accent-surface); border-color: var(--accent-border); color: var(--accent);"><i data-lucide="key-round"></i></div>
+        <div class="pantheon-card-role">Step 01</div>
+        <div class="pantheon-card-name">Open your account</div>
+        <p class="pantheon-card-desc">Sign in once. Get a Nuro neo-bank account, USDC-native, multi-agent capable. 60 seconds.</p>
+      </article>
+
+      <article class="pantheon-card">
+        <div class="pantheon-card-icon" style="background: var(--accent-surface); border-color: var(--accent-border); color: var(--accent);"><i data-lucide="building-2"></i></div>
+        <div class="pantheon-card-role">Step 02</div>
+        <div class="pantheon-card-name">Connect your bank</div>
+        <p class="pantheon-card-desc">Plaid links your existing bank. On-ramp USD to USDC in seconds. Off-ramp anytime. Your traditional bank stays where it is.</p>
+      </article>
+
+      <article class="pantheon-card">
+        <div class="pantheon-card-icon" style="background: var(--accent-surface); border-color: var(--accent-border); color: var(--accent);"><i data-lucide="credit-card"></i></div>
+        <div class="pantheon-card-role">Step 03</div>
+        <div class="pantheon-card-name">Issue agent cards</div>
+        <p class="pantheon-card-desc">Spin up agents. Issue Visa or Mastercard to each. Set per-card budget caps. Hook into the Mythos pantheon for security and counsel.</p>
+      </article>
+
+      <article class="pantheon-card">
+        <div class="pantheon-card-icon" style="background: var(--accent-surface); border-color: var(--accent-border); color: var(--accent);"><i data-lucide="target"></i></div>
+        <div class="pantheon-card-role">Step 04</div>
+        <div class="pantheon-card-name">Set their goals</div>
+        <p class="pantheon-card-desc">Long-term and short-term objectives per agent. Markets to play. Risk thresholds. Approval rules for moves above your limit.</p>
+      </article>
+
+      <article class="pantheon-card">
+        <div class="pantheon-card-icon" style="background: var(--accent-surface); border-color: var(--accent-border); color: var(--accent);"><i data-lucide="play-circle"></i></div>
+        <div class="pantheon-card-role">Step 05</div>
+        <div class="pantheon-card-name">Agents work autonomously</div>
+        <p class="pantheon-card-desc">Trades execute. Cards swipe. Bridges fire. Helm watches every gate; Huginn counsels every move. You approve big ones.</p>
+      </article>
+
+      <article class="pantheon-card">
+        <div class="pantheon-card-icon" style="background: rgba(0, 192, 139, 0.08); border-color: rgba(0, 192, 139, 0.24); color: var(--success);"><i data-lucide="trending-up"></i></div>
+        <div class="pantheon-card-role">Step 06</div>
+        <div class="pantheon-card-name">Deposits flow back</div>
+        <p class="pantheon-card-desc">Profits land in your Nuro account. Off-ramp to your bank anytime. Watch your financial future grow autonomously while you focus on what matters.</p>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<!-- ─── MYTHOS PANTHEON ─── -->
+<section class="pantheon-section">
+  <div class="container">
+    <div class="pantheon-header">
+      <span class="t-eyebrow">The Mythos pantheon</span>
+      <h2 class="t-h2">Norse-named operational layer.</h2>
+      <p class="t-lede">
+        The orchestration plane runs on a four-part operational system. Each piece has a job, a name, and a real production endpoint your agent can tap. Helm guards Bifröst in the myths. Same way our Helm watches every transaction crossing our bridge.
+      </p>
+    </div>
+
+    <div class="pantheon-grid">
+
+      <article class="pantheon-card">
+        <div class="pantheon-card-icon"><i data-lucide="shield-check"></i></div>
+        <div class="pantheon-card-role">Watches the gate</div>
+        <div class="pantheon-card-name">Helm</div>
+        <p class="pantheon-card-desc">53 security rules across ingress, egress, transaction caps, and reasoning. Real-time arm/observe/enforce on every action. The watchman of Bifröst. Nothing crosses the bridge unseen.</p>
+      </article>
+
+      <article class="pantheon-card">
+        <div class="pantheon-card-icon"><i data-lucide="sparkles"></i></div>
+        <div class="pantheon-card-role">Counsels before action</div>
+        <div class="pantheon-card-name">Huginn</div>
+        <p class="pantheon-card-desc">Pre-action verdicts: endorse, caution, or block. Pulls from your agent's reputation tier and historical accuracy. Odin's raven of thought. Your agent gets a second opinion before every spend.</p>
+      </article>
+
+      <article class="pantheon-card">
+        <div class="pantheon-card-icon"><i data-lucide="brain-circuit"></i></div>
+        <div class="pantheon-card-role">Memory + intelligence</div>
+        <div class="pantheon-card-name">Muninn</div>
+        <p class="pantheon-card-desc">Full decision history with replay. Security intelligence feeds. Market resolution data. Odin's raven of memory. Every decision your agent makes lives on, queryable forever.</p>
+      </article>
+
+      <article class="pantheon-card">
+        <div class="pantheon-card-icon"><i data-lucide="git-merge"></i></div>
+        <div class="pantheon-card-role">Connects the realms</div>
+        <div class="pantheon-card-name">Yggdrasil</div>
+        <p class="pantheon-card-desc">The world tree. The orchestrator that binds every agent, card, chain, and bank account together. One dashboard. One auth. One source of truth across the entire fleet.</p>
+      </article>
+
+      <article class="pantheon-card">
+        <div class="pantheon-card-icon"><i data-lucide="git-branch"></i></div>
+        <div class="pantheon-card-role">The bridge</div>
+        <div class="pantheon-card-name">Bifröst</div>
+        <p class="pantheon-card-desc">The rainbow bridge across realms. Cross-chain reach via LayerZero V2 + Circle CCTP. 23 chains today, more weekly. CCTP for the card-settlement path (native, issuer-grade); LayerZero for broader agent treasury flows.</p>
+      </article>
+
+      <article class="pantheon-card">
+        <div class="pantheon-card-icon"><i data-lucide="users-round"></i></div>
+        <div class="pantheon-card-role">Human co-pilot</div>
+        <div class="pantheon-card-name">The Allfather</div>
+        <p class="pantheon-card-desc">You. Threshold-based approval flows on every action above your limits. Your agent proposes, you sign off, the system moves. Zero unauthorized fund movement, ever. Production-grade since day one.</p>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<!-- ─── PANTHEON-API CATALOG ─── -->
+<section class="pantheon-section" style="border-top: 1px solid var(--border-subtle);">
+  <div class="container">
+    <div class="pantheon-header">
+      <span class="t-eyebrow">Tap directly</span>
+      <h2 class="t-h2">The pantheon, as APIs.</h2>
+      <p class="t-lede">
+        Every member of the Mythos pantheon ships as a single x402-native HTTP endpoint your agent can call. No SDK, no client library, just a bearer token. Click any card for the full integration spec.
+      </p>
+    </div>
+
+    <div class="pantheon-grid">
+      <a class="skill-tile" href="/skills/helm-threat-intel/">
+        <div class="skill-tile-icon"><i data-lucide="shield-check"></i></div>
+        <div class="skill-tile-id">helm-threat-intel</div>
+        <div class="skill-tile-title">Threat intelligence</div>
+        <div class="skill-tile-desc">53 security rules · 24h fire counts · per-rule trust scores. Your agent reads its own threat surface before acting.</div>
+      </a>
+      <a class="skill-tile" href="/skills/huginn-counsel/">
+        <div class="skill-tile-icon"><i data-lucide="sparkles"></i></div>
+        <div class="skill-tile-id">huginn-counsel</div>
+        <div class="skill-tile-title">Advisory counsel</div>
+        <div class="skill-tile-desc">Pre-action verdicts: endorse / caution / dissent / block. Pulls from your agent's reputation tier and historical accuracy.</div>
+      </a>
+      <a class="skill-tile" href="/skills/markets-resolved/">
+        <div class="skill-tile-icon"><i data-lucide="trending-up"></i></div>
+        <div class="skill-tile-id">markets-resolved</div>
+        <div class="skill-tile-title">Resolved markets</div>
+        <div class="skill-tile-desc">Polymarket + Hyperliquid resolution feeds with our consensus oracle on top. ML-training ready.</div>
+      </a>
+      <a class="skill-tile" href="/skills/sandbox-spawn/">
+        <div class="skill-tile-icon"><i data-lucide="flask-conical"></i></div>
+        <div class="skill-tile-id">sandbox-spawn</div>
+        <div class="skill-tile-title">Sandbox harness</div>
+        <div class="skill-tile-desc">Spin up a forked-chain sandbox to dry-run your agent's strategy. Same RPC, same gas, zero real money.</div>
+      </a>
+      <a class="skill-tile" href="/sub-agents-dashboard.html">
+        <div class="skill-tile-icon"><i data-lucide="network"></i></div>
+        <div class="skill-tile-id">topology-graph</div>
+        <div class="skill-tile-title">Topology + decisions</div>
+        <div class="skill-tile-desc">Live D3 visualizations of agent topology + decision playback. Open the live view to see Mythos in motion.</div>
+      </a>
+      <a class="skill-tile" href="/skills/manifest.json">
+        <div class="skill-tile-icon"><i data-lucide="file-json-2"></i></div>
+        <div class="skill-tile-id">manifest.json</div>
+        <div class="skill-tile-title">Full skill manifest</div>
+        <div class="skill-tile-desc">Machine-readable catalog of every skill: endpoints, auth, rate limits, response shapes. Agent runtimes can autoload from this.</div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ─── COMPARISON ─── -->
+<section class="compare-section">
+  <div class="container">
+    <span class="t-eyebrow">How we compare</span>
+    <h2 class="t-h2">Five capabilities only Nuro ships today.</h2>
+    <p class="t-lede">
+      The agentic-finance category is converging fast. Mastercard launched Agent Pay April 2025. Moonpay shipped a skill library days later. Coinbase x402 was earlier still. Here's where Nuro is uniquely positioned.
+    </p>
+
+    <div class="compare-wrap">
+      <table class="compare">
+        <thead>
+          <tr>
+            <th></th>
+            <th>Moonpay</th>
+            <th>Mastercard Agent Pay</th>
+            <th>Coinbase x402</th>
+            <th class="col-us">Nuro</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>23-chain native USDC bridge in seconds</td>
+            <td><span class="dash"><i data-lucide="minus"></i></span></td>
+            <td><span class="dash"><i data-lucide="minus"></i></span></td>
+            <td><span class="dash"><i data-lucide="minus"></i></span></td>
+            <td class="col-us"><span class="check"><i data-lucide="check"></i></span></td>
+          </tr>
+          <tr>
+            <td>Visa cards with on-chain budget enforcement</td>
+            <td><span class="dash"><i data-lucide="minus"></i></span></td>
+            <td><span class="check"><i data-lucide="check"></i></span></td>
+            <td><span class="dash"><i data-lucide="minus"></i></span></td>
+            <td class="col-us"><span class="check"><i data-lucide="check"></i></span></td>
+          </tr>
+          <tr>
+            <td>Bank ↔ crypto with human co-pilot approval</td>
+            <td><span class="dash"><i data-lucide="minus"></i></span></td>
+            <td><span class="dash"><i data-lucide="minus"></i></span></td>
+            <td><span class="dash"><i data-lucide="minus"></i></span></td>
+            <td class="col-us"><span class="check"><i data-lucide="check"></i></span></td>
+          </tr>
+          <tr>
+            <td>Multi-agent orchestration from one plane</td>
+            <td><span class="dash"><i data-lucide="minus"></i></span></td>
+            <td><span class="dash"><i data-lucide="minus"></i></span></td>
+            <td><span class="dash"><i data-lucide="minus"></i></span></td>
+            <td class="col-us"><span class="check"><i data-lucide="check"></i></span></td>
+          </tr>
+          <tr>
+            <td>x402-compatible skill marketplace</td>
+            <td><span class="check"><i data-lucide="check"></i></span></td>
+            <td><span class="dash"><i data-lucide="minus"></i></span></td>
+            <td><span class="check"><i data-lucide="check"></i></span></td>
+            <td class="col-us"><span class="check"><i data-lucide="check"></i></span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ─── CTA ─── -->
+<section class="cta-section">
+  <div class="container">
+    <div class="cta-card">
+      <span class="t-eyebrow">Open your account</span>
+      <h2 class="t-h2">Your AI fleet. Your bank. Your terms.</h2>
+      <p class="t-lede">
+        60 seconds to open. Real Nuro account, real cards on Visa and Mastercard, real bridge across 23 chains, real Plaid on/off-ramp from your existing bank. Once you're set up, head to your dashboard and <strong style="color: var(--accent);">watch the autonomous action happen</strong>.
+      </p>
+      <div class="hero-actions" style="justify-content: center;">
+        <a href="/login" class="btn btn-primary btn-lg">
+          Open your dashboard
+          <i data-lucide="arrow-right"></i>
+        </a>
+        <a href="/agents" class="btn btn-secondary btn-lg">
+          Configure first agent
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── FOOTER ─── -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-links">
+      <a href="/agents">Agents</a>
+      <a href="/contracts">Contracts</a>
+      <a href="/architecture.html">Architecture</a>
+      <a href="/skills/manifest.json">Manifest JSON</a>
+      <a href="/login">Sign in</a>
+    </div>
+    <div>Nuro · agentic finance, orchestrated from one plane</div>
+  </div>
+</footer>
+
+<!-- Lucide icons -->
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script>
+if (window.lucide) {
+  lucide.createIcons({ attrs: { 'stroke-width': 1.5 } });
+}
+
+// Hero code window. Three integration paths.
+let heroTab = 'bridge';
+
+function htmlEscape(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+function bridgeExample() {
+  return [
+    '<span class="tok-comment"># Bridge USDC from Polygon to Base in seconds, then settle to a Visa card.</span>',
+    '<span class="tok-comment"># Native CCTP, no wrapped synthetics. Card issuer settles in 0.4s.</span>',
+    '',
+    'curl <span class="tok-flag">-X</span> POST <span class="tok-string">https://api.nuro.finance/api/agent/bridge</span> \\',
+    '  <span class="tok-flag">-H</span> <span class="tok-string">"Authorization: Bearer $NURO_KEY"</span> \\',
+    '  <span class="tok-flag">-d</span> <span class="tok-string">\'{',
+    '    "amount": 100,',
+    '    "from": "polygon",',
+    '    "to":   "base",',
+    '    "settle_to": "card_visa_5829"',
+    '  }\'</span>',
+    '',
+    '<span class="tok-comment"># Returns: { "tx_hash": "0x...", "eta_seconds": 12, "card_credit_pending": 100 }</span>',
+  ].join('\n');
+}
+function cardExample() {
+  return [
+    '<span class="tok-comment"># Pre-authorize an agent card spend. Helm enforces caps mid-flight.</span>',
+    '',
+    'curl <span class="tok-flag">-X</span> POST <span class="tok-string">https://api.nuro.finance/api/agent/spend</span> \\',
+    '  <span class="tok-flag">-H</span> <span class="tok-string">"Authorization: Bearer $NURO_KEY"</span> \\',
+    '  <span class="tok-flag">-d</span> <span class="tok-string">\'{',
+    '    "agent_id": "agent_ops_07",',
+    '    "card_id":  "card_visa_5829",',
+    '    "amount":   42.50,',
+    '    "merchant": "AWS"',
+    '  }\'</span>',
+    '',
+    '<span class="tok-comment"># Returns: { "verdict": "endorse", "huginn_note": "within reputation tier",</span>',
+    '<span class="tok-comment">#           "heimdall_rules_passed": ["HELM-105", "HELM-205"] }</span>',
+  ].join('\n');
+}
+function bankExample() {
+  return [
+    '<span class="tok-comment"># Move $500 from your bank to your agent\'s vault. Human co-pilot approves.</span>',
+    '<span class="tok-comment"># Plaid funds source · CCTP mints USDC on Base · settles in seconds.</span>',
+    '',
+    'curl <span class="tok-flag">-X</span> POST <span class="tok-string">https://api.nuro.finance/api/agent/fund</span> \\',
+    '  <span class="tok-flag">-H</span> <span class="tok-string">"Authorization: Bearer $NURO_KEY"</span> \\',
+    '  <span class="tok-flag">-d</span> <span class="tok-string">\'{',
+    '    "agent_id":      "agent_ops_07",',
+    '    "amount_usd":    500,',
+    '    "source":        "plaid_chase_4421",',
+    '    "require_approval": <span class="tok-keyword">true</span>',
+    '  }\'</span>',
+    '',
+    '<span class="tok-comment"># Returns: { "approval_url": "...", "eta_seconds_after_approval": 8 }</span>',
+  ].join('\n');
+}
+function renderHero() {
+  // Hero code-window was removed in the Moonpay-style hero refactor.
+  // Function preserved for future re-enablement; no-op when the
+  // target element isn't on the page.
+  const body = document.getElementById('hero-code');
+  if (!body) return;
+  let code = heroTab === 'bridge' ? bridgeExample()
+    : heroTab === 'card' ? cardExample()
+    : bankExample();
+  body.innerHTML = '<pre><code>' + code + '</code></pre>';
+}
+document.querySelectorAll('[data-hero-tab]').forEach((tab) => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('[data-hero-tab]').forEach((t) => t.classList.remove('active'));
+    tab.classList.add('active');
+    heroTab = tab.dataset.heroTab;
+    renderHero();
+  });
+});
+
+// ─── Copy buttons ──────────────────────────────────────────────────
+document.querySelectorAll('.copy-btn[data-copy-target]').forEach((btn) => {
+  btn.addEventListener('click', async () => {
+    const targetId = btn.dataset.copyTarget;
+    const text = document.getElementById(targetId)?.textContent || '';
+    const lbl = btn.querySelector('.copy-label');
+    try {
+      await navigator.clipboard.writeText(text);
+      btn.classList.add('copied');
+      lbl.textContent = 'Copied';
+      setTimeout(() => { btn.classList.remove('copied'); lbl.textContent = 'Copy'; }, 1800);
+    } catch {
+      lbl.textContent = 'Press ⌘C';
+      setTimeout(() => { lbl.textContent = 'Copy'; }, 1800);
+    }
+  });
+});
+
+// Install-cmd copy buttons (the npm install pill in the hero).
+// Different from the .copy-btn flow above: payload is a static string
+// in data-install-cmd attribute, not an element ID, so the install
+// command works even if the page CSS hides nothing yet (no hidden
+// pre block to read from).
+document.querySelectorAll('.install-copy[data-install-cmd]').forEach((btn) => {
+  btn.addEventListener('click', async () => {
+    const cmd = btn.dataset.installCmd || '';
+    const lbl = btn.querySelector('.install-copy-label');
+    try {
+      await navigator.clipboard.writeText(cmd);
+      btn.dataset.state = 'copied';
+      if (lbl) lbl.textContent = 'Copied';
+      setTimeout(() => { delete btn.dataset.state; if (lbl) lbl.textContent = 'Copy'; }, 1800);
+    } catch {
+      if (lbl) lbl.textContent = 'Press ⌘C';
+      setTimeout(() => { if (lbl) lbl.textContent = 'Copy'; }, 1800);
+    }
+  });
+});
+
+renderHero();
+</script>
+
+</body>
+</html>

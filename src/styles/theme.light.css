@@ -1,0 +1,176 @@
+/**
+ * Light Mode Theme - COMPLETELY ISOLATED (requires :root.light on <html>)
+ * ALL variables defined here. Nothing inherited from theme.css.
+ */
+
+:root.light {
+    /* === BRAND COLORS === */
+    --color-primary: #e55a2b;
+    --color-primary-light: #f07045;
+    --color-brand-primary: #e55a2b;
+    --color-brand-primary-light: #f07045;
+    --color-brand-surface: rgba(229, 90, 43, 0.1);
+    --color-brand-border: rgba(229, 90, 43, 0.2);
+    --color-brand-glow: rgba(229, 90, 43, 0.3);
+    --color-nuro-brand: #846FFF;
+    --color-moonpay-app: #7d00ff;
+    --color-accent: #f07045;
+    --color-text-on-primary: #ffffff;
+
+    /* === BACKGROUND COLORS === */
+    --color-bg-primary: #f5f0e8;
+    --color-bg-secondary: #faf6f0;
+    --color-bg-card: rgba(255, 255, 255, 0.7);
+    --color-bg-picker-panel: var(--color-bg-secondary);
+    --color-bg-tertiary: #faf8f5;
+    --color-bg-input: rgba(255, 255, 255, 0.1);
+    --color-bg-hover: rgba(139, 94, 60, 0.04);
+    --color-bg-subtle: #3d3d3d;
+
+    /* === GLASS BACKGROUNDS === */
+    --color-bg-glass: rgba(255, 255, 255, 0.7);
+    --color-bg-glass-strong: rgba(255, 255, 255, 0.85);
+
+    /* === BORDER COLORS === */
+    --color-border-primary: #e8e0d5;
+    --color-border-secondary: #e8e0d5;
+    --color-border-tertiary: #ede8e0;
+    --color-border-input: #d9cfc2;
+    --color-border-table: rgba(139, 94, 60, 0.2);
+    --color-border-shell: #e8e0d5;
+    --color-border-active: #e55a2b;
+    --color-border-glass: rgba(255, 255, 255, 0.08);
+    --color-border-glass-strong: rgba(255, 255, 255, 0.12);
+
+    /* === MODAL TABLE COLORS === */
+    --color-bg-modal-table-row: rgba(255, 255, 255, 0.1);
+    --color-bg-modal-table-row-alt: rgba(255, 255, 255, 0.25);
+    --color-bg-modal-table-header: rgba(255, 255, 255, 0.30);
+    --color-bg-modal-table-header-hover: transparent;
+    --color-white: 255, 255, 255;
+
+    /* === TEXT COLORS === */
+    --color-text-primary: #3d3d3d;
+    --color-text-secondary: #3d3630;
+    --color-text-muted: #867d74;
+    --color-text-placeholder: #a89f94;
+    --color-text-dimmed: rgba(0,0,0,0.3);
+
+    /* === SURFACE COLORS === */
+    --color-surface-hover: rgba(139, 94, 60, 0.04);
+
+    /* === SIDEBAR === */
+    --color-sidebar-bg: rgba(255, 255, 255, 0.7);
+    /** Toolbar / icon controls on main canvas — same fill as nav shell */
+    --color-bg-chrome-on-canvas: var(--color-sidebar-bg);
+    --color-sidebar-active-bg: rgba(229, 90, 43, 0.1);
+    --color-sidebar-active-border: rgba(229, 90, 43, 0.2);
+    --color-sidebar-item-hover: rgba(0, 0, 0, 0.04);
+
+    /* === SHADOW === */
+    --color-shadow-primary: rgba(139, 94, 60, 0.08);
+
+    /* === STATE COLORS === */
+    --color-success: #166534;
+    --color-error: #991b1b;
+    --color-error-light: #ff7a7a;
+    --color-warning: #f59e0b;
+    --color-info: #3b82f6;
+
+    /* === CARD ACCENT === */
+    --color-card-accent: #f07045;
+    --color-card-accent-muted: #e55a2b;
+
+    /* === BUTTON === */
+    --color-button-text: #1a1612;
+    --color-reload-button-text: #ffffff;
+    --color-reload-button-bg: var(--color-nuro-brand);
+
+    /* === CRYPTO TOKEN COLORS === */
+    --color-usdc-blue: #2775ca;
+    --color-tether-green: #24a17b;
+    --color-dai-gold: #f5ac37;
+
+    /* === INPUT/BUTTON VARIANTS === */
+    --color-bg-input-hover: rgba(0, 0, 0, 0.06);
+    --color-border-input-hover: rgba(0, 0, 0, 0.15);
+    --color-border-input-focus: rgba(139, 94, 60, 0.4);
+    --color-switch-off: rgba(0, 0, 0, 0.15);
+    --color-bg-modal-info: rgba(0, 0, 0, 0.06);
+
+    /* === QR/Deposit Specific === */
+    --color-bg-qr-container: #ffffff;
+    --color-bg-deposit-input: rgba(0, 0, 0, 0.03);
+    --color-border-deposit-input: rgba(0, 0, 0, 0.08);
+    --color-bg-address-copy-chip: #272727;
+    --color-bg-asset-picker-panel: rgba(20, 20, 20, 0.6);
+    --color-bg-swap-panel: var(--color-bg-primary);
+    --color-bg-swap-center-inner: #202020;
+    --color-border-swap-center: #121212;
+
+    /* === Modal/Dropdown === */
+    --color-bg-modal-overlay: rgba(0, 0, 0, 0.5);
+    --color-bg-modal: rgba(255, 255, 255, 0.7);
+    --color-bg-dropdown-hover: rgba(139, 94, 60, 0.04);
+
+    /* === Progress Indicators === */
+    --color-progress-active: var(--color-primary);
+    --color-progress-inactive: rgba(0, 0, 0, 0.1);
+
+    /* === Button States === */
+    --color-button-bg-transparent: transparent;
+    --color-button-border-accent: var(--color-primary);
+
+    /* === MAP COLORS === */
+    --color-map-fill: #e8e0d5;
+    --color-map-stroke: #d9cfc2;
+    --color-map-hover: #c9bdb0;
+
+    /* === BRAND IMAGE FILTERS === */
+    --brand-hue-rotate: hue-rotate(0deg);
+    --brand-saturate: saturate(1);
+    --brand-brightness: brightness(1);
+
+    /* === ERROR STATE EXTENDED === */
+    --color-error-muted: rgba(255, 82, 82, 0.05);
+    --color-error-border: rgba(255, 82, 82, 0.3);
+    --color-error-shadow: rgba(255, 82, 82, 0.15);
+
+    /* === GLASS/TRANSPARENT EXTENDED === */
+    --color-glass-highlight: rgba(255, 255, 255, 0.08);
+    --color-glass-strong: rgba(255, 255, 255, 0.55);
+
+    /* === CARD SHADOWS === */
+    --color-card-shadow-default: rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.2);
+    --color-card-shadow-hover: rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.3);
+
+    /* === MASK GRADIENTS === */
+    --color-mask-black: rgba(0, 0, 0, 0.3);
+    --color-mask-fade-light: rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.06);
+    --color-shadow-heavy: rgba(0, 0, 0, 0.35);
+
+    /* === CHART COLORS === */
+    --color-chart-muted: #64748b;
+
+    /* === QR SHADOW === */
+    --color-qr-glow: rgba(143, 124, 255, 0.30), rgba(143, 124, 255, 0.16);
+
+    /* === GLASS EFFECT === */
+    --glass-blur: 20px;
+    --glass-blur-strong: 28px;
+    --glass-blur-modal: 28px;
+
+    /* === UI COMPONENTS - FILTERS === */
+    --filter-bg: rgba(0, 0, 0, 0.03);
+    --filter-border: transparent;
+    --filter-text: #3d3630;
+    --filter-hover-bg: rgba(0, 0, 0, 0.08);
+    --filter-hover-border: rgba(0, 0, 0, 0.15);
+    --filter-hover-text: #1a1612;
+    --filter-active-bg: rgba(229, 90, 43, 0.1);
+    --filter-active-border: #e55a2b;
+    --filter-active-text: #e55a2b;
+
+    /* === SIDEBAR OVERRIDES === */
+    --color-sidebar-divider: var(--color-border-primary);
+}

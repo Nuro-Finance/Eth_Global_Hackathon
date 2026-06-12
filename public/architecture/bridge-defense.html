@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>11 · Bridge defense posture · AFI Architecture</title>
+<link rel="stylesheet" href="/architecture/_style.css">
+<style>
+  /* Bridge-defense — extra-tall diagrams + bigger mermaid type so the
+     dense flow charts read cleanly. Page-local override; doesn't touch
+     the shared _style.css. */
+  .diagram.xxl { min-height: 760px; padding: 36px 24px; }
+  .diagram.xxl .mermaid { min-height: 720px; }
+  .diagram.xxl .mermaid svg { font-size: 15px !important; }
+  .diagram.xxl .mermaid .nodeLabel,
+  .diagram.xxl .mermaid .edgeLabel,
+  .diagram.xxl .mermaid .label { font-size: 14px !important; }
+  .diagram.xl { min-height: 600px; padding: 30px 24px; }
+  .diagram.xl .mermaid { min-height: 560px; }
+  .diagram.xl .mermaid svg { font-size: 14px !important; }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+</head>
+<body>
+<div class="wrap">
+
+<nav class="top">
+  <a href="/architecture.html" class="back">← All diagrams</a>
+  <span class="spacer"></span>
+  <span class="label">Section</span><span class="index-num">11 / 11</span>
+</nav>
+
+<header class="page">
+  <span class="eyebrow">11 · Security</span>
+  <h1>Bridge defense posture</h1>
+  <p class="lede">
+    <strong>AFI's omnichain bridge runs a defense-in-depth posture against the dominant DVN-compromise attack class</strong>
+    — RPC poisoning of the observation layer that lets a forged source-chain message pass cryptographically valid attestation.
+    The protocol ships five on-chain + off-chain controls (per-message cap, per-peer rolling 24h cap, single-block on-chain pause, off-chain reserve reconciliation, TS-layer kill-switch) with a multi-DVN attestation quorum.
+    Every layer is independent — compromise of any single one does not breach the bridge.
+    <br/><br/>
+    Aligns to LayerZero's official integration checklist (April 2026): <em>"The LayerZero Labs DVN will not sign or attest messages from any applications that utilize a 1/1 configuration."</em>
+  </p>
+</header>
+
+<div class="section-label">01 — Vulnerable pattern vs AFI hardened</div>
+<div class="diagram xxl">
+<div class="mermaid">
+flowchart TB
+    subgraph Vuln["Industry-common vulnerable pattern"]
+        VLZ["OFT escrow on hub chain<br/>large pooled reserve<br/>backing many wrapped chains"]
+        VDVN["1-of-1 DVN<br/>single attestation operator"]
+        VReceive["Vanilla _lzReceive<br/>no caps · no pause · no events"]
+        VPause["Multi-step manual pause<br/>tens of minutes window<br/>during which replay is possible"]
+    end
+
+    subgraph Nuro["AFI / Nuro (hardened)"]
+        NuroLZ["OFT adapter on Arbitrum<br/>transit flow · seconds in escrow<br/>immediately CCTP to Base"]
+        NuroDVN["2-of-3 DVN target<br/>LZ Labs + Nethermind + Google Cloud<br/>operationally independent"]
+        NuroReceive["Custom _lzReceive<br/>per-message cap 100k USDC<br/>per-peer 24h cap 500k USDC<br/>owner pause · rich events"]
+        NuroPause["Emergency pause: 1 block<br/>+ TS-layer kill-switch flag<br/>(belt-and-suspenders)"]
+        NuroMonitor["Off-chain reserve monitor<br/>hub balance vs sum(spoke supplies)<br/>alert at -$100 drift · 5-min cadence"]
+    end
+
+    Vuln -.->|"attack class<br/>(DVN observation-layer compromise)"| Nuro
+
+    classDef bad fill:#ff6b6b22,stroke:#ff6b6b,color:#ff9a9a;
+    classDef good fill:#16e0a922,stroke:#16e0a9,color:#8ef5cc;
+    class Vuln bad
+    class Nuro good
+</div>
+</div>
+
+<div class="section-label">02 — Attack vector (LayerZero's official disclosure)</div>
+<div class="prose">
+<p>LayerZero's April 2026 statement on the dominant DVN-compromise class: <em>"compromise[d] a quorum of the RPCs the LayerZero Labs DVN relied upon...swap[ping] out binaries running the op-geth nodes."</em> Attackers then DDoS'd the remaining healthy RPCs to force failover to the poisoned pair. The DVN attestation was cryptographically valid — its view of the source chain was lied to. <strong>Not a signature bug, not a replay, not a missing nonce check.</strong> The <strong>observation layer</strong> was corrupted, and a 1-of-1 DVN configuration has no cross-check.</p>
+<p>Threat-actor attribution for the exemplar incident (preliminary): DPRK Lazarus subgroup TraderTraitor — same operational cadence as adjacent multi-hundred-million-dollar exploits in the same window. The attack class is now table-stakes for any cross-chain protocol's threat model.</p>
+</div>
+
+<div class="section-label">03 — Our five defense layers</div>
+<div class="diagram xxl">
+<div class="mermaid">
+%%{init: {'flowchart': {'nodeSpacing': 60, 'rankSpacing': 70}, 'themeVariables': {'fontSize': '15px'}}}%%
+flowchart TB
+    User["User deposit<br/>exotic chain (zkSync, Scroll, Celo, Gnosis, BSC)"]
+
+    subgraph L1["1 · Ingress (source chain)"]
+        direction LR
+        Approve["USDC.approve(adapter)"]
+        Send["adapter.send(sendParam)"]
+        Approve --> Send
+    end
+
+    subgraph DVN_Quorum["Multi-DVN quorum (target config)"]
+        direction LR
+        D1["LayerZero Labs DVN"]
+        D2["Nethermind DVN"]
+        D3["Google Cloud DVN"]
+        Quorum{"2-of-3<br/>required"}
+        D1 --> Quorum
+        D2 --> Quorum
+        D3 --> Quorum
+    end
+
+    subgraph L2["2 · Custom _lzReceive (hardened contract)"]
+        direction TB
+        Pause{"paused?"}
+        PerMsg{"amount &le; 100k USDC?"}
+        PerPeer{"peer cumulative 24h<br/>&le; 500k USDC?"}
+        Credit["super._lzReceive<br/>+ OFTInboundReceived event"]
+        Pause -->|no| PerMsg
+        PerMsg -->|yes| PerPeer
+        PerPeer -->|yes| Credit
+    end
+
+    subgraph L3["3 · TypeScript kill-switch"]
+        TSFlag{"LZ_BRIDGE_ENABLED<br/>=true?"}
+        BlockedTS["blocked at caller<br/>HELM-compatible"]
+        TSFlag -->|false — default| BlockedTS
+    end
+
+    subgraph L4["4 · Off-chain monitor"]
+        direction TB
+        Reconcile["pollLzReserveReconciliation<br/>every 5 min"]
+        Drift{"drift &gt; -$100 USDC?"}
+        Alert["reportError +<br/>execution_log critical"]
+        Operator["operator decides:<br/>manual setPaused(true)"]
+        Reconcile --> Drift
+        Drift -->|breached| Alert --> Operator
+    end
+
+    subgraph L5["5 · Downstream (different trust class)"]
+        CCTP["Circle CCTP<br/>Arbitrum → Base<br/>(Circle-attested per-message)"]
+    end
+
+    User --> L1
+    L1 --> DVN_Quorum
+    DVN_Quorum -->|pass| L2
+    L2 --> L5
+    L1 -.-> L3
+    L3 -.->|true| L1
+
+    classDef layer fill:#1a1a2e,stroke:#00bcd4,color:#e0e0e0;
+    class L1,L2,L3,L4,L5 layer
+</div>
+</div>
+
+<div class="section-label">04 — The five controls in detail</div>
+<div class="prose">
+<p><strong>1. On-chain per-message cap (100k USDC default).</strong> A single forged message can drain at most the cap, not the entire escrow. A nine-figure attack would require thousands of forged messages through this contract — each must pass the DVN quorum, so the attacker's operational cost scales linearly with proceeds. Tunable by owner; default sized at ~10× typical user transfer.</p>
+
+<p><strong>2. On-chain per-peer 24h cap (500k USDC default).</strong> Rolling window bounds daily drain from any single compromised pathway. Even if the per-message cap is bypassed via many small messages, the pathway hits the daily ceiling and reverts. State: <code>cumulativeReceivedInWindow[srcEid]</code> + <code>windowStartTimestamp[srcEid]</code> map on the adapter.</p>
+
+<p><strong>3. Single-block owner pause.</strong> <code>setPaused(true)</code> halts all inbound messages in one block (~1 second on Arbitrum). Industry incidents have shown multi-step manual pauses taking tens of minutes — during which replay attempts hit the contract and only fail because the hot wallet was drained first. Our pause stops the pathway at the receive handler, not at downstream wallets.</p>
+
+<p><strong>4. Off-chain reserve reconciliation monitor.</strong> <code>src/lz-reserve-monitor.ts</code> polls every 5 min: reads Arbitrum OFTAdapter USDC balance, reads <code>totalSupply()</code> of MyOFT on each of 5 spokes (zkSync, Scroll, Celo, Gnosis, BSC), computes <code>drift = hub - sum(spokes)</code>. Alert at <code>drift &lt; -$100 USDC</code>. The dominant attack shape is exactly this: spoke-side mint without hub-side escrow. If an attacker mints on zkSync without depositing on Arbitrum, we see the drift within 5 min of the next cycle.</p>
+
+<p><strong>5. TypeScript-layer kill-switch flag.</strong> <code>CONFIG.LZ_BRIDGE_ENABLED</code> defaults to <code>false</code>. Backend service refuses to initiate any LZ send via <code>bridge.ts</code> unless the flag is explicitly flipped to <code>true</code> in the VPS <code>.env</code>. Independent of on-chain <code>paused</code> state — belt-and-suspenders. Even if an attacker got the owner key and un-paused the contract, the backend layer would independently refuse.</p>
+
+<p><strong>Primary path is not LayerZero at all.</strong> Circle CCTP handles the bulk of deposit volume (Base, Ethereum, Arbitrum, Optimism, Polygon, Avalanche). CCTP messages are signed by Circle's attestation service — cryptographically verified per-message, not DVN-verified. The DVN-compromise attack class does not apply to CCTP. LayerZero is only the first hop from 5 exotic chains Circle doesn't cover.</p>
+</div>
+
+<div class="section-label">05 — Multi-DVN quorum (target config)</div>
+<div class="prose">
+<p>The hardened config at <code>layerzero.config.hardened.ts</code> defines the 2-of-3 target per pathway: LayerZero Labs DVN + Nethermind DVN + Google Cloud DVN. DVN addresses verified on-chain (<code>eth_getCode</code>) on 2026-04-22, which surfaced a separate finding: a prior config had Arbitrum and zkSync DVN addresses that were NOT deployed contracts (Arbitrum's was on a different chain; zkSync had a typo). Those two pathways had been dead-on-arrival since deployment — coincidentally safer than a working 1-of-1 config, but coincidentally so, not by design. Both replaced.</p>
+
+<p>Migration sequence: (a) compile hardened MyOFTAdapter on Node 22 (Hardhat v3 incompatible with Node 23), (b) deploy new contract on all 6 chains, (c) <code>lz:oapp:wire --dry-run</code>, (d) operator reviews config delta, (e) real wire, (f) flip <code>LZ_BRIDGE_ENABLED=true</code>, (g) scheduler picks up the reserve monitor. Gated behind a Node 22 environment fix on the VPS.</p>
+
+<p><strong>Independence of DVN operators</strong>: LayerZero Labs, Nethermind, Google Cloud are operationally independent — different companies, different keys, different infrastructure. An attacker would need to compromise ≥2 simultaneously to forge a quorum, substantially higher cost than the single-DVN-RPC-set compromise that has dominated DVN-class incidents. Independence is reviewed quarterly; if two operators we rely on merge infrastructure or leadership, the quorum weakens and we re-pick.</p>
+</div>
+
+<div class="section-label">06 — Helm hardens the bridge: ideal-state flow</div>
+<div class="prose">
+<p>The bridge controls above are static — they enforce the same caps regardless of what's calling them. <strong>Helm</strong> is AFI's behavioral security plane (Marathon 8 Corvus, Layer 4.5): a 52-rule catalog that watches every I/O surface across the agent stack, including the bridge. The diagram below shows the bridge with Helm in <em>ideal state</em> — every applicable rule active and gating its surface.</p>
+<p>The diagram is a forward-looking design view: it shows what the architecture looks like with all 52 catalog rules enforced. The TypeScript bridge today enforces a subset (HELM-108 secret redaction live, HELM-101 egress observer in observe mode); the rest scaffold into the Rust ingress proxy in Phase 1 of Marathon 8.</p>
+</div>
+
+<div class="diagram xxl">
+<div class="mermaid">
+%%{init: {'flowchart': {'nodeSpacing': 50, 'rankSpacing': 65}, 'themeVariables': {'fontSize': '14px'}}}%%
+flowchart TB
+    subgraph BridgeFlow["Bridge data path"]
+        direction TB
+        UserCall["User / Agent → bridge.ts"]
+        TxBuild["Construct LZ send tx"]
+        TxSign["Sign with owner / agent key"]
+        TxBroadcast["Broadcast via RPC"]
+        OnChain["On-chain hardened _lzReceive"]
+        Mint["Spoke mint / hub credit"]
+
+        UserCall --> TxBuild --> TxSign --> TxBroadcast --> OnChain --> Mint
+    end
+
+    subgraph Helm["🛡️ Helm security plane (52 rules · ideal state)"]
+        direction TB
+
+        subgraph Hingress["Ingress (8 rules)"]
+            HI["HELM-001..008<br/>prompt-injection · template hijack<br/>tool-call-spoof · unsigned envelope"]
+        end
+
+        subgraph Hegress["Egress (14 rules)"]
+            HE101["HELM-101 · outbound HTTP allowlist"]
+            HE105["HELM-105 · per-tx value cap"]
+            HE106["HELM-106 · bridge adapter allowlist"]
+            HE108["HELM-108 · secret-in-log redaction"]
+            HEother["HELM-102/103/104/107/109<br/>110/111/112/113/114"]
+        end
+
+        subgraph Hintegrity["Integrity (8 rules)"]
+            HInt["HELM-201..208<br/>Neural Net writes · skill tampering<br/>mass-write ceiling · merkle drift"]
+        end
+
+        subgraph Hcred["Credentials (8 rules)"]
+            HCred["HELM-301..308<br/>scope · TTL · git-secret<br/>rotation · audit-gap"]
+        end
+
+        subgraph Hreason["Reasoning (8 rules)"]
+            HReas["HELM-401..408<br/>bypass-meta · self-modification<br/>identity-drift · CoT anomaly"]
+        end
+
+        subgraph Hgjall["Gjallarhorn (6 rules)"]
+            HG501["HELM-501 · 2+ critical / 1h → Pause"]
+            HG502["HELM-502 · bypass reasoning → Quarantine"]
+            HGother["HELM-503/504/505/506"]
+        end
+    end
+
+    subgraph Vault["Credential vault (Helm-issued)"]
+        ShortToken["Short-lived bridge owner token<br/>5-min TTL · scoped to bridge.send"]
+    end
+
+    UserCall -.->|"screened"| HI
+    HI -.->|"pass"| TxBuild
+
+    TxBuild -.->|"value check"| HE105
+    TxBuild -.->|"adapter allowlist"| HE106
+    HE105 -.->|"≤ daily cap"| TxSign
+    HE106 -.->|"target on allowlist"| TxSign
+
+    TxSign -.->|"credential request"| HCred
+    HCred -.->|"scoped + fresh"| Vault
+    Vault -.-> TxSign
+
+    TxBroadcast -.->|"host check"| HE101
+    HE101 -.->|"RPC allowlisted"| OnChain
+
+    OnChain -.->|"event log<br/>audit"| HE108
+    HE108 -.->|"redacted"| Mint
+
+    HG501 -.->|"compound signal"| Quarantine["⛔ Quarantine<br/>(bridge paused)"]
+    HG502 -.->|"adversary detected"| Quarantine
+    Quarantine -.->|"halts"| TxBuild
+
+    classDef bridge fill:#1a1a2e,stroke:#00bcd4,color:#e0e0e0;
+    classDef heim fill:#16e0a911,stroke:#16e0a9,color:#8ef5cc;
+    classDef vault fill:#f5a62311,stroke:#f5a623,color:#ffd28a;
+    classDef quarantine fill:#ff6b6b22,stroke:#ff6b6b,color:#ff9a9a;
+
+    class BridgeFlow bridge
+    class Helm,Hingress,Hegress,Hintegrity,Hcred,Hreason,Hgjall heim
+    class Vault vault
+    class Quarantine quarantine
+</div>
+</div>
+
+<div class="prose">
+<p><strong>What you're looking at.</strong> Every dashed arrow is a Helm gate. The bridge data path (cyan) flows top-to-bottom; Helm (green) watches each transition. A bridge call doesn't reach <code>send()</code> until ingress screening passes. The signed tx doesn't broadcast until egress allowlist + value cap + bridge-adapter allowlist all pass. The credential to sign is issued by Helm's vault with a 5-minute TTL — even if the agent's process is compromised, the bridge-owner token expires before it can be re-used. Every emitted event is scanned for secret leakage before it lands in logs. Compound critical-rule hits (HELM-501) and any bypass reasoning (HELM-502) jump straight to Quarantine, which halts the bridge data path at the source.</p>
+
+<p><strong>Defense-in-depth restated</strong>: an attacker who compromises one layer (RPC poisoning, owner key theft, or agent jailbreak) cannot drain the bridge in isolation — the next layer's controls fire independently. Helm is the meta-layer: it makes the per-layer controls visible, audit-loggable, and centrally tunable.</p>
+
+<p>Catalog full text: <code>Neural Net/Claude Memory/Helm — Rule Catalog.md</code>. Eval cases (20 attack scenarios, every critical rule covered): <code>Helm — Eval Cases.md</code>. TypeScript runtime bridge source: <code>src/helm/</code>. Admin operator surface at <code>/admin</code> → 🛡️ Helm tab.</p>
+</div>
+
+<div class="section-label">07 — Operational posture going forward</div>
+<div class="prose">
+<ul>
+<li><strong>No new LayerZero protocol integration without multi-DVN baseline.</strong> LZ Labs mandate makes this enforceable at their attestation layer; we also self-enforce at <code>layerzero.config.hardened.ts</code>.</li>
+<li><strong>DVN operator independence reviewed quarterly.</strong> If two DVNs we rely on merge infrastructure or leadership, their independence degrades and the quorum weakens.</li>
+<li><strong>Reserve drift monitor is always-on.</strong> Scheduler cron: <code>*/5 * * * *</code>. First line of detection.</li>
+<li><strong>Owner key on hardware wallet + 2-of-3 multisig.</strong> No single signer can unpause. No single signer can raise the per-message cap.</li>
+<li><strong>Helm posture promotes through observe → enforce as the rule surface widens.</strong> HELM-101 egress is in observe mode today; flips to enforce once the full axios-client surface is instrumented (Marathon 8 Phase 1 work). Operator can flip per-rule from the admin tab without redeploy.</li>
+<li><strong>Public post-mortem on any security event.</strong> Industry standard since the 2026 wave of cross-chain incidents — full transparency on root cause, controls that fired, controls that didn't, and forward-looking changes.</li>
+</ul>
+</div>
+
+<footer>
+  AFI Bridge Defense · Multi-DVN hardening · Helm security plane
+</footer>
+
+</div>
+<script>
+mermaid.initialize({
+  startOnLoad: true,
+  theme: 'dark',
+  themeVariables: {
+    darkMode: true,
+    background: '#0a0a14',
+    primaryColor: '#1a1a2e',
+    primaryTextColor: '#e0e0e0',
+    primaryBorderColor: '#00bcd4',
+    lineColor: '#00bcd4',
+    secondaryColor: '#1a1a2e',
+    tertiaryColor: '#050510',
+    fontSize: '15px',
+  },
+  flowchart: { useMaxWidth: false, htmlLabels: true, curve: 'basis' },
+});
+</script>
+</body>
+</html>

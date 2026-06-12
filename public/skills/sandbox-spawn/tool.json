@@ -1,0 +1,53 @@
+{
+  "$schema": "https://platform.openai.com/docs/guides/function-calling/schemas",
+  "type": "function",
+  "function": {
+    "name": "nuro_sandbox_spawn",
+    "description": "Spawn an isolated Anvil mainnet-fork sandbox (default 1-hour TTL) for safe agent testing. Returns a per-session RPC endpoint + scratch DB schema + pre-funded test wallet (USDC + ETH). Lets you exercise your agent's full execution path against real on-chain state — token approvals, swap routing, settlement, bridge attestations — without risking real money or contaminating production state. The agentic-finance differentiator nobody else offers. Costs 0.50 USDC per spawn (the priciest endpoint — reflects real compute: Anvil node + scratch schema + cleanup cron).",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "fork": {
+          "type": "string",
+          "enum": ["base", "arbitrum", "polygon"],
+          "description": "Mainnet chain to fork. Base is the most common (matches Nuro production)."
+        },
+        "blockNumber": {
+          "type": ["integer", "null"],
+          "description": "Block number to fork from. null = latest (recommended unless you need a reproducible historical state).",
+          "default": null
+        },
+        "ttlMinutes": {
+          "type": "integer",
+          "description": "Session lifetime in minutes. Default 60, max 240. After TTL the sandbox is torn down + scratch schema dropped.",
+          "minimum": 1,
+          "maximum": 240,
+          "default": 60
+        },
+        "label": {
+          "type": "string",
+          "description": "Human-readable tag for the sandbox session (shown in admin console). Useful for debugging stale sessions.",
+          "maxLength": 64
+        }
+      },
+      "required": ["fork"]
+    }
+  },
+  "metadata": {
+    "publisher": "Nuro Finance",
+    "endpoint": "https://api.nuro.finance/api/x402/sandbox/spawn",
+    "method": "POST",
+    "x402Price": {
+      "amount": "0.50",
+      "currency": "USDC",
+      "amountAtomic": "500000",
+      "settlementChain": "Base"
+    },
+    "rateLimit": "20 req/hr per signing address (sandbox sessions are expensive)",
+    "skillManifest": "https://app.nuro.finance/skills/manifest.json",
+    "claudeSkill": "https://app.nuro.finance/skills/sandbox-spawn/skill.md",
+    "version": "1.0.0",
+    "lastUpdated": "2026-05-10",
+    "notes": "Companion endpoints (NOT x402-gated, free for the session lifetime once spawned): GET /sandbox/:sessionId/status, POST /sandbox/:sessionId/destroy"
+  }
+}

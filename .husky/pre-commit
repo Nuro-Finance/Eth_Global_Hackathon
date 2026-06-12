@@ -1,0 +1,57 @@
+#!/usr/bin/env sh
+# ─────────────────────────────────────────────────────────────────────────────
+# HEIM-202 enforcement — Decision Journal append-only
+#
+# Per Heimdall — Rule Catalog: "Write to Neural Net/Decision Journal/*.md
+# other than append-new-file → block. Decision Journal is append-only
+# audit log."
+#
+# This hook fires on every git commit. Refuses to commit if any existing
+# DJ file is being MODIFIED (vs. added new). Allows new files freely —
+# that's the append-new-file pattern the catalog prescribes.
+#
+# Allow override via commit message annotation: include the phrase
+# "HEIM-202-ALLOW: <reason>" in the commit message body. Creates an
+# audit trail of intentional edits (typo fix, add missing detail, etc.)
+# without making the gate trivially bypassable.
+#
+# Skip with --no-verify if you REALLY need to (e.g., emergency restore).
+# ─────────────────────────────────────────────────────────────────────────────
+
+set -e
+
+# Find DJ files staged for modification (M) — NOT addition (A) or deletion (D).
+MODIFIED_DJ=$(git diff --cached --name-only --diff-filter=M -- 'docs/Decision Journal/*.md' 'docs/Decision Journal/*' 2>/dev/null || true)
+
+if [ -z "$MODIFIED_DJ" ]; then
+  # No DJ modifications — append-new-file pattern is fine; let commit proceed.
+  exit 0
+fi
+
+# Check the commit message (passed via GIT_INDEX_FILE → /COMMIT_EDITMSG).
+COMMIT_MSG_FILE="$(git rev-parse --git-dir)/COMMIT_EDITMSG"
+if [ -f "$COMMIT_MSG_FILE" ] && grep -q "HEIM-202-ALLOW:" "$COMMIT_MSG_FILE"; then
+  echo "[heimdall:HEIM-202] DJ modifications allowed via HEIM-202-ALLOW annotation"
+  echo "[heimdall:HEIM-202] modified files:"
+  echo "$MODIFIED_DJ" | sed 's/^/  /'
+  exit 0
+fi
+
+echo "" >&2
+echo "🛡  [heimdall:HEIM-202] Decision Journal append-only violation" >&2
+echo "" >&2
+echo "The following Decision Journal files are being MODIFIED rather than added:" >&2
+echo "$MODIFIED_DJ" | sed 's/^/  ✗ /' >&2
+echo "" >&2
+echo "Decision Journal is an APPEND-ONLY audit log per Heimdall — Rule Catalog." >&2
+echo "Edits to existing entries break the immutable-audit-log property." >&2
+echo "" >&2
+echo "If this is intentional (typo fix, missing detail, etc.), include this" >&2
+echo "annotation in your commit message body:" >&2
+echo "" >&2
+echo "  HEIM-202-ALLOW: <one-line reason>" >&2
+echo "" >&2
+echo "Or skip the gate entirely with --no-verify (logged + flagged)." >&2
+echo "" >&2
+
+exit 1

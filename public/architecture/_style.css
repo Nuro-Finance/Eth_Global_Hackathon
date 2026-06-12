@@ -1,0 +1,378 @@
+/* Shared style for every architecture sub-page — Session 25 restructure. */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: #050510; color: #e0e0e0;
+  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+body::before {
+  content: ''; position: fixed; top: 50%; left: 50%;
+  width: 1000px; height: 1000px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(22,224,169,0.035) 0%, transparent 70%);
+  transform: translate(-50%, -50%); pointer-events: none; z-index: 0;
+}
+.wrap {
+  max-width: 1480px; margin: 0 auto;
+  padding: 40px 24px 80px; position: relative; z-index: 1;
+}
+
+/* Top nav — consistent across sub-pages */
+nav.top {
+  background: rgba(10, 10, 20, 0.85);
+  border: 1px solid rgba(22,224,169,0.18);
+  border-radius: 14px; padding: 10px 14px;
+  backdrop-filter: blur(20px);
+  margin-bottom: 24px;
+  display: flex; gap: 6px; flex-wrap: wrap; align-items: center;
+}
+nav.top a, nav.top .index-num {
+  background: rgba(22,224,169,0.12); color: #16e0a9;
+  border: 1px solid rgba(22,224,169,0.28);
+  padding: 5px 12px; border-radius: 16px;
+  font-size: 10.5px; font-weight: 600; letter-spacing: 0.3px;
+  text-decoration: none; transition: all 0.2s;
+  display: inline-block;
+}
+nav.top a:hover { background: rgba(22,224,169,0.22); }
+nav.top .back {
+  background: rgba(199,112,240,0.12); color: #c770f0;
+  border-color: rgba(199,112,240,0.3);
+}
+nav.top .back:hover { background: rgba(199,112,240,0.22); }
+nav.top .spacer { flex: 1; }
+nav.top .dim { color: #666; background: transparent; border-color: rgba(255,255,255,0.08); }
+nav.top .dim:hover { color: #aaa; }
+nav.top .label { font-size: 9px; color: #444; letter-spacing: 1.5px; text-transform: uppercase; }
+
+/* Page header */
+header.page {
+  margin-bottom: 28px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid rgba(22,224,169,0.15);
+}
+header.page .eyebrow {
+  display: inline-block;
+  font-size: 10px; color: #16e0a9; font-weight: 700;
+  letter-spacing: 1.5px;
+  padding: 3px 10px; border-radius: 10px;
+  background: rgba(22,224,169,0.12); border: 1px solid rgba(22,224,169,0.3);
+  margin-bottom: 14px;
+}
+header.page h1 {
+  font-size: 32px; color: #e0e0e0; font-weight: 600;
+  letter-spacing: 0.5px; margin-bottom: 12px;
+  line-height: 1.3;
+}
+header.page .lede {
+  font-size: 15px; color: #b5b5b5; max-width: 960px; line-height: 1.75;
+}
+header.page .lede strong { color: #e8e8e8; }
+header.page .lede code {
+  background: #1a1a2e; padding: 2px 6px; border-radius: 4px;
+  font-size: 12px; color: #c770f0;
+}
+
+/* Mermaid container — full width, generous padding, readable font */
+.diagram {
+  background: rgba(5, 5, 16, 0.6);
+  border: 1px solid rgba(22,224,169,0.15);
+  border-radius: 14px;
+  padding: 30px 24px;
+  overflow-x: auto;
+  margin-bottom: 24px;
+  min-height: 320px;
+}
+.diagram.tall { min-height: 480px; }
+.diagram-caption {
+  font-size: 11px; color: #666; letter-spacing: 1px; text-transform: uppercase;
+  padding: 0 0 14px 2px; font-weight: 600;
+}
+.mermaid {
+  font-family: 'Inter', system-ui, sans-serif !important;
+  min-height: 280px;
+  display: flex; justify-content: center;
+}
+.mermaid svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Section spacing — pages with multiple diagrams */
+.section-label {
+  display: flex; align-items: center; gap: 10px;
+  margin: 36px 0 14px;
+  font-size: 10px; color: #16e0a9; letter-spacing: 2px;
+  text-transform: uppercase; font-weight: 700;
+}
+.section-label::before {
+  content: ''; display: inline-block; width: 28px; height: 1px; background: #16e0a9;
+}
+.section-title {
+  font-size: 22px; color: #e8e8e8; font-weight: 600;
+  margin-bottom: 14px; letter-spacing: 0.3px;
+}
+.section-sub {
+  font-size: 13.5px; color: #999; max-width: 900px; line-height: 1.7;
+  margin-bottom: 18px;
+}
+
+/* Prose sections below diagrams */
+section.prose {
+  background: rgba(10, 10, 20, 0.4);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 12px;
+  padding: 26px 30px;
+  margin-bottom: 20px;
+  font-size: 14.5px;
+  color: #bbb;
+  line-height: 1.8;
+}
+section.prose h3 {
+  font-size: 15px; color: #e0e0e0; font-weight: 600;
+  margin: 18px 0 10px;
+  letter-spacing: 0.3px;
+}
+section.prose h3:first-child { margin-top: 0; }
+section.prose h3::before {
+  content: '▸'; color: #16e0a9;
+  margin-right: 8px;
+}
+section.prose p { margin-bottom: 10px; }
+section.prose ul { margin: 10px 0 10px 22px; }
+section.prose li { margin: 6px 0; }
+section.prose strong { color: #ddd; }
+section.prose code {
+  background: #1a1a2e; padding: 2px 6px; border-radius: 4px;
+  font-size: 12.5px; color: #c770f0; font-family: 'SF Mono', Menlo, monospace;
+}
+section.prose a { color: #16e0a9; text-decoration: none; }
+section.prose a:hover { text-decoration: underline; }
+
+/* Callout — colored left-border notes */
+.callout {
+  margin: 16px 0;
+  padding: 14px 18px;
+  border-left: 3px solid #16e0a9;
+  background: rgba(22,224,169,0.05);
+  border-radius: 6px;
+  font-size: 13.5px; color: #bbb;
+}
+.callout.warn { border-color: #f4a840; background: rgba(244,168,64,0.06); }
+.callout.risk { border-color: #ff6b6b; background: rgba(255,107,107,0.06); }
+.callout.info { border-color: #6aaaff; background: rgba(106,170,255,0.06); }
+.callout strong { color: #e8e8e8; }
+.callout code { font-size: 12.5px; }
+
+/* Worked example — numbered timeline with address column */
+.worked {
+  margin: 18px 0 24px;
+  background: rgba(5, 5, 16, 0.65);
+  border: 1px solid rgba(22,224,169,0.12);
+  border-radius: 12px;
+  padding: 22px 24px;
+}
+.worked-header {
+  font-size: 11px; color: #16e0a9; letter-spacing: 1.5px;
+  text-transform: uppercase; font-weight: 700;
+  margin-bottom: 14px; padding-bottom: 10px;
+  border-bottom: 1px solid rgba(22,224,169,0.15);
+}
+.worked-step {
+  display: grid;
+  grid-template-columns: 38px 1fr;
+  gap: 14px;
+  padding: 12px 0;
+  border-bottom: 1px dashed rgba(255,255,255,0.06);
+}
+.worked-step:last-child { border-bottom: none; }
+.worked-num {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: rgba(22,224,169,0.15); color: #16e0a9;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700;
+  border: 1px solid rgba(22,224,169,0.35);
+}
+.worked-body h4 {
+  font-size: 14px; color: #e8e8e8; font-weight: 600;
+  margin-bottom: 4px;
+}
+.worked-body p { font-size: 13px; color: #aaa; margin-bottom: 6px; }
+.worked-body code {
+  background: #0a0a14; color: #c770f0;
+  padding: 3px 8px; border-radius: 4px;
+  font-size: 12px; font-family: 'SF Mono', Menlo, monospace;
+  display: inline-block; margin: 2px 4px 2px 0;
+  word-break: break-all;
+}
+.worked-meta {
+  font-size: 11px; color: #666; margin-top: 6px;
+  letter-spacing: 0.3px;
+}
+
+/* Service cards — external services page */
+.service-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+  gap: 16px;
+  margin: 18px 0 28px;
+}
+.service-card {
+  background: rgba(5, 5, 16, 0.65);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 18px 20px;
+  display: flex; flex-direction: column;
+  transition: border-color 0.2s;
+}
+.service-card:hover { border-color: rgba(22,224,169,0.28); }
+.service-card.live { border-left: 3px solid #16e0a9; }
+.service-card.dormant { border-left: 3px solid #f4a840; }
+.service-card.gated { border-left: 3px solid #ff6b6b; }
+.service-title {
+  font-size: 15px; color: #e8e8e8; font-weight: 600;
+  margin-bottom: 2px; display: flex; align-items: center; gap: 8px;
+}
+.service-badge {
+  font-size: 9px; letter-spacing: 1px; text-transform: uppercase;
+  padding: 2px 7px; border-radius: 10px; font-weight: 700;
+}
+.badge-live { background: rgba(22,224,169,0.18); color: #16e0a9; }
+.badge-dormant { background: rgba(244,168,64,0.18); color: #f4a840; }
+.badge-gated { background: rgba(255,107,107,0.15); color: #ff6b6b; }
+.service-purpose { font-size: 12px; color: #888; margin-bottom: 12px; }
+.service-meta {
+  font-size: 12px; color: #bbb; line-height: 1.75;
+  padding-top: 10px;
+  border-top: 1px dashed rgba(255,255,255,0.08);
+}
+.service-meta dt {
+  font-size: 10px; color: #666; letter-spacing: 0.8px;
+  text-transform: uppercase; font-weight: 600; margin-top: 6px;
+}
+.service-meta dd {
+  font-size: 12.5px; color: #bbb; margin-left: 0; margin-bottom: 3px;
+}
+.service-meta code {
+  background: #1a1a2e; padding: 1px 5px; border-radius: 3px;
+  font-size: 11.5px; color: #c770f0;
+  font-family: 'SF Mono', Menlo, monospace;
+}
+
+/* Horizontal scroll story — neural net page */
+.scroll-story {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding: 8px 4px 20px;
+  margin: 18px -4px 28px;
+  scroll-snap-type: x mandatory;
+  scrollbar-color: #16e0a9 #1a1a2e;
+}
+.scroll-story::-webkit-scrollbar { height: 8px; }
+.scroll-story::-webkit-scrollbar-track { background: #1a1a2e; border-radius: 4px; }
+.scroll-story::-webkit-scrollbar-thumb { background: #16e0a9; border-radius: 4px; }
+.frame {
+  flex: 0 0 340px;
+  background: rgba(10,10,20,0.65);
+  border: 1px solid rgba(22,224,169,0.15);
+  border-radius: 12px;
+  padding: 20px 22px;
+  scroll-snap-align: start;
+  position: relative;
+  display: flex; flex-direction: column;
+}
+.frame-num {
+  position: absolute; top: 16px; right: 18px;
+  font-size: 10px; color: #16e0a9; letter-spacing: 1px;
+  font-weight: 700;
+}
+.frame h4 {
+  font-size: 16px; color: #e8e8e8; font-weight: 600;
+  margin-bottom: 8px; padding-right: 36px;
+}
+.frame p { font-size: 13px; color: #aaa; line-height: 1.7; }
+.frame code {
+  background: #1a1a2e; padding: 2px 6px; border-radius: 4px;
+  font-size: 11.5px; color: #c770f0;
+}
+.frame-visual {
+  margin-top: 14px; padding: 12px;
+  background: rgba(5,5,16,0.5);
+  border: 1px dashed rgba(22,224,169,0.2);
+  border-radius: 8px;
+  font-size: 11px; font-family: 'SF Mono', Menlo, monospace;
+  color: #16e0a9; line-height: 1.65;
+}
+
+/* Snapshot embed — for linking live dashboards */
+.snapshot {
+  display: block;
+  background: rgba(5,5,16,0.7);
+  border: 1px solid rgba(22,224,169,0.22);
+  border-radius: 14px;
+  padding: 18px;
+  margin: 16px 0 22px;
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.25s;
+}
+.snapshot:hover {
+  border-color: rgba(22,224,169,0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(22,224,169,0.08);
+}
+.snapshot-thumb {
+  width: 100%;
+  height: 260px;
+  background:
+    radial-gradient(circle at 30% 40%, rgba(22,224,169,0.25), transparent 55%),
+    radial-gradient(circle at 70% 60%, rgba(199,112,240,0.22), transparent 50%),
+    linear-gradient(135deg, #0a0a14 0%, #1a1a2e 100%);
+  border-radius: 10px;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+.snapshot-thumb::after {
+  content: ''; position: absolute; inset: 0;
+  background:
+    radial-gradient(circle at 20% 30%, #16e0a9 1px, transparent 2px) 0 0 / 40px 40px,
+    radial-gradient(circle at 60% 70%, #c770f0 1px, transparent 2px) 0 0 / 50px 50px,
+    radial-gradient(circle at 80% 20%, #6aaaff 1px, transparent 2px) 0 0 / 60px 60px;
+  opacity: 0.4;
+}
+.snapshot-label { font-size: 11px; color: #16e0a9; letter-spacing: 1.5px; text-transform: uppercase; font-weight: 600; }
+.snapshot-title { font-size: 17px; color: #e8e8e8; font-weight: 600; margin: 4px 0 6px; }
+.snapshot-desc { font-size: 13px; color: #999; line-height: 1.65; }
+
+/* Pager at bottom — prev / next */
+nav.pager {
+  display: flex; justify-content: space-between; gap: 12px;
+  margin-top: 32px;
+}
+nav.pager a {
+  flex: 1; max-width: 360px;
+  display: block;
+  padding: 16px 20px;
+  background: rgba(10, 10, 20, 0.6);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 14px;
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.3s;
+}
+nav.pager a:hover {
+  border-color: rgba(22,224,169,0.4);
+  background: rgba(22,224,169,0.06);
+}
+nav.pager .pager-label {
+  font-size: 9px; color: #666; letter-spacing: 1.5px;
+  text-transform: uppercase; margin-bottom: 4px;
+}
+nav.pager .pager-title { font-size: 14px; color: #e0e0e0; font-weight: 600; }
+nav.pager .next { text-align: right; }
+nav.pager .disabled { opacity: 0.3; pointer-events: none; }
+
+footer { text-align: center; padding: 20px; font-size: 10px; color: #444; letter-spacing: 1px; text-transform: uppercase; margin-top: 30px; }
+footer a { color: #16e0a9; text-decoration: none; }

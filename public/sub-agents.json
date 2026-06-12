@@ -1,0 +1,2098 @@
+{
+  "nodes": [
+    {
+      "id": "huginn",
+      "label": "huginn",
+      "group": "counsel",
+      "health": "green",
+      "type": "sub_agent",
+      "lastUpdated": "2026-04-25",
+      "conflictMode": "counselor",
+      "skillPath": "C:/Users/Richa/AFI/Nuro-Finance/src/huginn/index.ts",
+      "triggers": [
+        "high-stakes action proposed (called via huginn.counsel())",
+        "Helm state transition (watch / paused / quarantined)",
+        "external-doc-drift:breaking bus event from doc-monitor",
+        "agent budget remaining < 20%",
+        "agent reputation tier flip",
+        "compound-signal pattern detected (recent decisions trending wrong)"
+      ]
+    },
+    {
+      "id": "agent",
+      "label": "agent",
+      "group": "on-demand",
+      "health": "green",
+      "type": "skill",
+      "lastUpdated": "2026-04-18",
+      "conflictMode": null,
+      "skillPath": ".claude/skills/agent/SKILL.md",
+      "triggers": []
+    },
+    {
+      "id": "auditor",
+      "label": "auditor",
+      "group": "on-demand",
+      "health": "green",
+      "type": "skill",
+      "lastUpdated": "2026-04-18",
+      "conflictMode": null,
+      "skillPath": ".claude/skills/auditor/SKILL.md",
+      "triggers": []
+    },
+    {
+      "id": "balances",
+      "label": "balances",
+      "group": "on-demand",
+      "health": "green",
+      "type": "skill",
+      "lastUpdated": "2026-04-18",
+      "conflictMode": null,
+      "skillPath": ".claude/skills/balances/SKILL.md",
+      "triggers": []
+    },
+    {
+      "id": "boot",
+      "label": "boot",
+      "group": "on-demand",
+      "health": "green",
+      "type": "skill",
+      "lastUpdated": "2026-04-18",
+      "conflictMode": null,
+      "skillPath": ".claude/skills/boot/SKILL.md",
+      "triggers": []
+    },
+    {
+      "id": "bridge",
+      "label": "bridge",
+      "group": "on-demand",
+      "health": "green",
+      "type": "skill",
+      "lastUpdated": "2026-04-18",
+      "conflictMode": null,
+      "skillPath": ".claude/skills/bridge/SKILL.md",
+      "triggers": []
+    },
+    {
+      "id": "dep-verify",
+      "label": "dep-verify",
+      "group": "on-demand",
+      "health": "green",
+      "type": "skill",
+      "lastUpdated": "2026-04-17",
+      "conflictMode": null,
+      "skillPath": null,
+      "triggers": []
+    },
+    {
+      "id": "deployer",
+      "label": "deployer",
+      "group": "on-demand",
+      "health": "green",
+      "type": "skill",
+      "lastUpdated": "2026-04-18",
+      "conflictMode": null,
+      "skillPath": ".claude/skills/deployer/SKILL.md",
+      "triggers": []
+    },
+    {
+      "id": "gate-check",
+      "label": "gate-check",
+      "group": "on-demand",
+      "health": "green",
+      "type": "skill",
+      "lastUpdated": "2026-04-17",
+      "conflictMode": "fail-closed",
+      "skillPath": "C:/Users/Richa/AFI/.claude/skills/gate-check/SKILL.md",
+      "triggers": [
+        "before any flag flip (AGENT_FUNDING_OBSERVE_ONLY, AGENT_CLOB_TRADES_ENABLED, AGENT_PROFIT_SWEEP_ENABLED, NEXT_PUBLIC_PRIVY_APP_ID)",
+        "before VPS deploy (git pull + restart)",
+        "before enabling any on-chain money-movement path",
+        "when adding new risky code that needs a gate (medium rule)"
+      ]
+    },
+    {
+      "id": "issuer-status",
+      "label": "issuer-status",
+      "group": "on-demand",
+      "health": "green",
+      "type": "skill",
+      "lastUpdated": "2026-04-18",
+      "conflictMode": null,
+      "skillPath": ".claude/skills/issuer-status/SKILL.md",
+      "triggers": []
+    },
+    {
+      "id": "issuer",
+      "label": "issuer",
+      "group": "on-demand",
+      "health": "green",
+      "type": "skill",
+      "lastUpdated": "2026-04-18",
+      "conflictMode": null,
+      "skillPath": ".claude/skills/issuer/SKILL.md",
+      "triggers": []
+    },
+    {
+      "id": "jwt",
+      "label": "jwt",
+      "group": "on-demand",
+      "health": "green",
+      "type": "skill",
+      "lastUpdated": "2026-04-18",
+      "conflictMode": null,
+      "skillPath": ".claude/skills/jwt/SKILL.md",
+      "triggers": []
+    },
+    {
+      "id": "librarian",
+      "label": "librarian",
+      "group": "on-demand",
+      "health": "green",
+      "type": "skill",
+      "lastUpdated": "2026-04-18",
+      "conflictMode": null,
+      "skillPath": ".claude/skills/librarian/SKILL.md",
+      "triggers": []
+    },
+    {
+      "id": "marathon",
+      "label": "marathon",
+      "group": "on-demand",
+      "health": "green",
+      "type": "skill",
+      "lastUpdated": "2026-04-18",
+      "conflictMode": null,
+      "skillPath": ".claude/skills/marathon/SKILL.md",
+      "triggers": []
+    },
+    {
+      "id": "market",
+      "label": "market",
+      "group": "on-demand",
+      "health": "green",
+      "type": "skill",
+      "lastUpdated": "2026-04-18",
+      "conflictMode": null,
+      "skillPath": ".claude/skills/market/SKILL.md",
+      "triggers": []
+    },
+    {
+      "id": "researcher",
+      "label": "researcher",
+      "group": "on-demand",
+      "health": "green",
+      "type": "skill",
+      "lastUpdated": "2026-04-18",
+      "conflictMode": null,
+      "skillPath": ".claude/skills/researcher/SKILL.md",
+      "triggers": []
+    },
+    {
+      "id": "sync",
+      "label": "sync",
+      "group": "on-demand",
+      "health": "green",
+      "type": "skill",
+      "lastUpdated": "2026-04-18",
+      "conflictMode": null,
+      "skillPath": ".claude/skills/sync/SKILL.md",
+      "triggers": []
+    },
+    {
+      "id": "vps-health",
+      "label": "vps-health",
+      "group": "on-demand",
+      "health": "green",
+      "type": "skill",
+      "lastUpdated": "2026-04-18",
+      "conflictMode": null,
+      "skillPath": ".claude/skills/vps-health/SKILL.md",
+      "triggers": []
+    },
+    {
+      "id": "mythos",
+      "label": "mythos",
+      "group": "kernel",
+      "health": "green",
+      "type": "orchestrator",
+      "lastUpdated": "2026-04-17",
+      "conflictMode": "adjudicator",
+      "skillPath": "C:/Users/Richa/AFI/.claude/skills/boot/SKILL.md",
+      "triggers": [
+        "session start",
+        "user request",
+        "any sub-agent returning a result"
+      ]
+    },
+    {
+      "id": "gate-completeness-audit",
+      "label": "gate-completeness-audit",
+      "group": "scheduled",
+      "health": "green",
+      "type": "scheduled-task",
+      "lastUpdated": "2026-04-17",
+      "conflictMode": "advisory-only",
+      "skillPath": "C:/Users/Richa/.claude/scheduled-tasks/gate-completeness-audit/SKILL.md",
+      "triggers": [
+        "weekly cron fire"
+      ]
+    },
+    {
+      "id": "helm",
+      "label": "helm",
+      "group": "kernel",
+      "health": "green",
+      "type": "security-plane",
+      "lastUpdated": "2026-04-25",
+      "conflictMode": "gatekeeper",
+      "skillPath": "C:/Users/Richa/AFI/Nuro-Finance/src/helm/index.ts",
+      "triggers": [
+        "outbound HTTP from any axios client",
+        "console.log / .warn / .error emission",
+        "process.stdout / .stderr write",
+        "agent action with on-chain value transfer",
+        "filesystem write to Neural Net or .claude/skills/",
+        "credential request from any agent",
+        "compound critical-rule hits within 1h window"
+      ]
+    },
+    {
+      "id": "doc_monitor",
+      "label": "doc_monitor",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "agent_bus",
+      "label": "agent_bus",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "agent_budgets",
+      "label": "agent_budgets",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "agent_reputation",
+      "label": "agent_reputation",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "decision_journal",
+      "label": "decision_journal",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "agent_predictions",
+      "label": "agent_predictions",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "heimdall_events",
+      "label": "heimdall_events",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "user_command",
+      "label": "user-command",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "agents_table",
+      "label": "agents-table",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "execution_dispatch",
+      "label": "execution-dispatch",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "agent_fundings",
+      "label": "agent-fundings",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "bot_status_report",
+      "label": "bot-status-report",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "funding_operations",
+      "label": "funding-operations",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "cycle_triggers",
+      "label": "cycle-triggers",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "src_tree",
+      "label": "src-tree",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "execution_log_for_fake_data_detection",
+      "label": "execution_log-for-fake-data-detection",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "findings_report",
+      "label": "findings-report",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "must_fix_list",
+      "label": "must-fix-list",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "optional_cleanup_list",
+      "label": "optional-cleanup-list",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "rpc_providers",
+      "label": "rpc-providers",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "wallet_addresses",
+      "label": "wallet-addresses",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "balance_report_per_chain",
+      "label": "balance-report-per-chain",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "low_gas_alerts",
+      "label": "low-gas-alerts",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "git_log",
+      "label": "git-log",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "memory_dir",
+      "label": "memory-dir",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "pending_tasks",
+      "label": "pending-tasks",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "identity_confirmation",
+      "label": "identity-confirmation",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "context_summary",
+      "label": "context-summary",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "mission_prompt",
+      "label": "mission-prompt",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "rpc_nodes",
+      "label": "rpc-nodes",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "circle_iris_api",
+      "label": "circle-iris-api",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "layerzero_scan",
+      "label": "layerzero-scan",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "pm2_logs",
+      "label": "pm2-logs",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "bridge_health_report",
+      "label": "bridge-health-report",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "route_diagnostics",
+      "label": "route-diagnostics",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "deployer_balance_check",
+      "label": "deployer-balance-check",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "git_push_event",
+      "label": "git-push-event",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "ci_trigger",
+      "label": "ci-trigger",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "developer_stdout",
+      "label": "developer-stdout",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "ci_status_check",
+      "label": "ci-status-check",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "git_status",
+      "label": "git-status",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "dirty_tree_script",
+      "label": "dirty-tree-script",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "shell_commands",
+      "label": "shell-commands",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "pm2_restart",
+      "label": "pm2-restart",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "post_deploy_verification",
+      "label": "post-deploy-verification",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "user",
+      "label": "user",
+      "group": "human",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "src_**",
+      "label": "src/**",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "gates.yaml",
+      "label": "gates.yaml",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "vps_via_user_pasted_psql_pm2_output",
+      "label": "vps (via user-pasted psql / pm2 output)",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "execution_log",
+      "label": "execution_log",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "sd3_api",
+      "label": "sd3-api",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "cards_table",
+      "label": "cards-table",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "status_report_single_card",
+      "label": "status-report-single-card",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "issuer_credentials",
+      "label": "issuer-credentials",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "card_operations",
+      "label": "card-operations",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "kyc_flows",
+      "label": "kyc-flows",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "balance_reads",
+      "label": "balance-reads",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "transaction_syncs",
+      "label": "transaction-syncs",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "jwt_secret_env",
+      "label": "jwt-secret-env",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "test_user_ids",
+      "label": "test-user-ids",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "jwt_token_printed_to_shell",
+      "label": "jwt-token-printed-to-shell",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "user_query",
+      "label": "user-query",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "memory_files",
+      "label": "memory-files",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "session_logs",
+      "label": "session-logs",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "relevant_excerpts",
+      "label": "relevant-excerpts",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "citations_with_filepaths",
+      "label": "citations-with-filepaths",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "v2_marathons_doc",
+      "label": "V2-Marathons-doc",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "pending_tasks_doc",
+      "label": "Pending-Tasks-doc",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "sprint_status_report",
+      "label": "sprint-status-report",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "next_action_proposal",
+      "label": "next-action-proposal",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "marathon_progress_bar",
+      "label": "marathon-progress-bar",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "markets_table",
+      "label": "markets-table",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "polymarket_gamma_api",
+      "label": "polymarket-gamma-api",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "market_oracle",
+      "label": "market-oracle",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "market_creation_ops",
+      "label": "market-creation-ops",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "resolution_queries",
+      "label": "resolution-queries",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "bet_history",
+      "label": "bet-history",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "webfetch",
+      "label": "WebFetch",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "websearch",
+      "label": "WebSearch",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "github_api",
+      "label": "github-api",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "package_registries",
+      "label": "package-registries",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "package_candidate_list",
+      "label": "package-candidate-list",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "protocol_summary",
+      "label": "protocol-summary",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "neural_net_memory_files",
+      "label": "neural-net-memory-files",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "repo_docs_sanitized",
+      "label": "repo-docs-sanitized",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "commit_ready_artifacts",
+      "label": "commit-ready-artifacts",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "ssh_to_vps",
+      "label": "ssh-to-vps",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "pm2",
+      "label": "pm2",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "df",
+      "label": "df",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "free",
+      "label": "free",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "systemctl",
+      "label": "systemctl",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "health_report",
+      "label": "health-report",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "warning_list",
+      "label": "warning-list",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "all_sub_agents",
+      "label": "all_sub_agents",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "memory",
+      "label": "memory",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "git_log_last_7_days",
+      "label": "git_log (last 7 days)",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "src_config.ts",
+      "label": "src/config.ts",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "src_migrations_**",
+      "label": "src/migrations/**",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "src_execution_dispatch.ts",
+      "label": "src/execution-dispatch.ts",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "src_bridge.ts",
+      "label": "src/bridge.ts",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "src_solana_bridge.ts",
+      "label": "src/solana-bridge.ts",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "src_hype_bridge.ts",
+      "label": "src/hype-bridge.ts",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "src_nuro_routes.ts",
+      "label": "src/nuro-routes.ts",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "neural_net_audits_yyyy_mm_dd_gate_audit",
+      "label": "Neural Net/Audits/YYYY-MM-DD_gate-audit.md",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "decision_journal_if_findings_>_0",
+      "label": "decision_journal (if findings > 0)",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "pushnotification_if_findings_>_0",
+      "label": "pushnotification (if findings > 0)",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "network_egress",
+      "label": "network_egress",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "filesystem",
+      "label": "filesystem",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "credential_vault",
+      "label": "credential_vault",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "push_notification",
+      "label": "push_notification",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    },
+    {
+      "id": "gates_yaml",
+      "label": "gates_yaml",
+      "group": "artifact",
+      "health": "n/a",
+      "type": "artifact"
+    }
+  ],
+  "links": [
+    {
+      "source": "mythos",
+      "target": "huginn",
+      "kind": "inputs"
+    },
+    {
+      "source": "helm",
+      "target": "huginn",
+      "kind": "inputs"
+    },
+    {
+      "source": "doc_monitor",
+      "target": "huginn",
+      "kind": "inputs"
+    },
+    {
+      "source": "agent_bus",
+      "target": "huginn",
+      "kind": "inputs"
+    },
+    {
+      "source": "agent_budgets",
+      "target": "huginn",
+      "kind": "inputs"
+    },
+    {
+      "source": "agent_reputation",
+      "target": "huginn",
+      "kind": "inputs"
+    },
+    {
+      "source": "decision_journal",
+      "target": "huginn",
+      "kind": "inputs"
+    },
+    {
+      "source": "huginn",
+      "target": "mythos",
+      "kind": "outputs"
+    },
+    {
+      "source": "huginn",
+      "target": "agent_bus",
+      "kind": "outputs"
+    },
+    {
+      "source": "huginn",
+      "target": "agent_predictions",
+      "kind": "outputs"
+    },
+    {
+      "source": "huginn",
+      "target": "heimdall_events",
+      "kind": "outputs"
+    },
+    {
+      "source": "mythos",
+      "target": "huginn",
+      "kind": "orchestrates"
+    },
+    {
+      "source": "user_command",
+      "target": "agent",
+      "kind": "inputs"
+    },
+    {
+      "source": "agents_table",
+      "target": "agent",
+      "kind": "inputs"
+    },
+    {
+      "source": "execution_dispatch",
+      "target": "agent",
+      "kind": "inputs"
+    },
+    {
+      "source": "agent_fundings",
+      "target": "agent",
+      "kind": "inputs"
+    },
+    {
+      "source": "agent",
+      "target": "bot_status_report",
+      "kind": "outputs"
+    },
+    {
+      "source": "agent",
+      "target": "funding_operations",
+      "kind": "outputs"
+    },
+    {
+      "source": "agent",
+      "target": "cycle_triggers",
+      "kind": "outputs"
+    },
+    {
+      "source": "user_command",
+      "target": "auditor",
+      "kind": "inputs"
+    },
+    {
+      "source": "src_tree",
+      "target": "auditor",
+      "kind": "inputs"
+    },
+    {
+      "source": "execution_log_for_fake_data_detection",
+      "target": "auditor",
+      "kind": "inputs"
+    },
+    {
+      "source": "auditor",
+      "target": "findings_report",
+      "kind": "outputs"
+    },
+    {
+      "source": "auditor",
+      "target": "must_fix_list",
+      "kind": "outputs"
+    },
+    {
+      "source": "auditor",
+      "target": "optional_cleanup_list",
+      "kind": "outputs"
+    },
+    {
+      "source": "user_command",
+      "target": "balances",
+      "kind": "inputs"
+    },
+    {
+      "source": "rpc_providers",
+      "target": "balances",
+      "kind": "inputs"
+    },
+    {
+      "source": "wallet_addresses",
+      "target": "balances",
+      "kind": "inputs"
+    },
+    {
+      "source": "balances",
+      "target": "balance_report_per_chain",
+      "kind": "outputs"
+    },
+    {
+      "source": "balances",
+      "target": "low_gas_alerts",
+      "kind": "outputs"
+    },
+    {
+      "source": "user_command",
+      "target": "boot",
+      "kind": "inputs"
+    },
+    {
+      "source": "git_log",
+      "target": "boot",
+      "kind": "inputs"
+    },
+    {
+      "source": "memory_dir",
+      "target": "boot",
+      "kind": "inputs"
+    },
+    {
+      "source": "decision_journal",
+      "target": "boot",
+      "kind": "inputs"
+    },
+    {
+      "source": "pending_tasks",
+      "target": "boot",
+      "kind": "inputs"
+    },
+    {
+      "source": "boot",
+      "target": "identity_confirmation",
+      "kind": "outputs"
+    },
+    {
+      "source": "boot",
+      "target": "context_summary",
+      "kind": "outputs"
+    },
+    {
+      "source": "boot",
+      "target": "mission_prompt",
+      "kind": "outputs"
+    },
+    {
+      "source": "user_command",
+      "target": "bridge",
+      "kind": "inputs"
+    },
+    {
+      "source": "rpc_nodes",
+      "target": "bridge",
+      "kind": "inputs"
+    },
+    {
+      "source": "circle_iris_api",
+      "target": "bridge",
+      "kind": "inputs"
+    },
+    {
+      "source": "layerzero_scan",
+      "target": "bridge",
+      "kind": "inputs"
+    },
+    {
+      "source": "pm2_logs",
+      "target": "bridge",
+      "kind": "inputs"
+    },
+    {
+      "source": "bridge",
+      "target": "bridge_health_report",
+      "kind": "outputs"
+    },
+    {
+      "source": "bridge",
+      "target": "route_diagnostics",
+      "kind": "outputs"
+    },
+    {
+      "source": "bridge",
+      "target": "deployer_balance_check",
+      "kind": "outputs"
+    },
+    {
+      "source": "git_push_event",
+      "target": "dep-verify",
+      "kind": "inputs"
+    },
+    {
+      "source": "ci_trigger",
+      "target": "dep-verify",
+      "kind": "inputs"
+    },
+    {
+      "source": "dep-verify",
+      "target": "developer_stdout",
+      "kind": "outputs"
+    },
+    {
+      "source": "dep-verify",
+      "target": "ci_status_check",
+      "kind": "outputs"
+    },
+    {
+      "source": "user_command",
+      "target": "deployer",
+      "kind": "inputs"
+    },
+    {
+      "source": "git_status",
+      "target": "deployer",
+      "kind": "inputs"
+    },
+    {
+      "source": "dirty_tree_script",
+      "target": "deployer",
+      "kind": "inputs"
+    },
+    {
+      "source": "deployer",
+      "target": "shell_commands",
+      "kind": "outputs"
+    },
+    {
+      "source": "deployer",
+      "target": "pm2_restart",
+      "kind": "outputs"
+    },
+    {
+      "source": "deployer",
+      "target": "post_deploy_verification",
+      "kind": "outputs"
+    },
+    {
+      "source": "mythos",
+      "target": "gate-check",
+      "kind": "inputs"
+    },
+    {
+      "source": "user",
+      "target": "gate-check",
+      "kind": "inputs"
+    },
+    {
+      "source": "src_**",
+      "target": "gate-check",
+      "kind": "inputs"
+    },
+    {
+      "source": "gates.yaml",
+      "target": "gate-check",
+      "kind": "inputs"
+    },
+    {
+      "source": "vps_via_user_pasted_psql_pm2_output",
+      "target": "gate-check",
+      "kind": "inputs"
+    },
+    {
+      "source": "gate-check",
+      "target": "user",
+      "kind": "outputs"
+    },
+    {
+      "source": "gate-check",
+      "target": "decision_journal",
+      "kind": "outputs"
+    },
+    {
+      "source": "gate-check",
+      "target": "execution_log",
+      "kind": "outputs"
+    },
+    {
+      "source": "mythos",
+      "target": "gate-check",
+      "kind": "orchestrates"
+    },
+    {
+      "source": "user_command",
+      "target": "issuer-status",
+      "kind": "inputs"
+    },
+    {
+      "source": "sd3_api",
+      "target": "issuer-status",
+      "kind": "inputs"
+    },
+    {
+      "source": "cards_table",
+      "target": "issuer-status",
+      "kind": "inputs"
+    },
+    {
+      "source": "issuer-status",
+      "target": "status_report_single_card",
+      "kind": "outputs"
+    },
+    {
+      "source": "user_command",
+      "target": "issuer",
+      "kind": "inputs"
+    },
+    {
+      "source": "sd3_api",
+      "target": "issuer",
+      "kind": "inputs"
+    },
+    {
+      "source": "issuer_credentials",
+      "target": "issuer",
+      "kind": "inputs"
+    },
+    {
+      "source": "issuer",
+      "target": "card_operations",
+      "kind": "outputs"
+    },
+    {
+      "source": "issuer",
+      "target": "kyc_flows",
+      "kind": "outputs"
+    },
+    {
+      "source": "issuer",
+      "target": "balance_reads",
+      "kind": "outputs"
+    },
+    {
+      "source": "issuer",
+      "target": "transaction_syncs",
+      "kind": "outputs"
+    },
+    {
+      "source": "user_command",
+      "target": "jwt",
+      "kind": "inputs"
+    },
+    {
+      "source": "jwt_secret_env",
+      "target": "jwt",
+      "kind": "inputs"
+    },
+    {
+      "source": "test_user_ids",
+      "target": "jwt",
+      "kind": "inputs"
+    },
+    {
+      "source": "jwt",
+      "target": "jwt_token_printed_to_shell",
+      "kind": "outputs"
+    },
+    {
+      "source": "user_query",
+      "target": "librarian",
+      "kind": "inputs"
+    },
+    {
+      "source": "memory_files",
+      "target": "librarian",
+      "kind": "inputs"
+    },
+    {
+      "source": "decision_journal",
+      "target": "librarian",
+      "kind": "inputs"
+    },
+    {
+      "source": "session_logs",
+      "target": "librarian",
+      "kind": "inputs"
+    },
+    {
+      "source": "librarian",
+      "target": "relevant_excerpts",
+      "kind": "outputs"
+    },
+    {
+      "source": "librarian",
+      "target": "citations_with_filepaths",
+      "kind": "outputs"
+    },
+    {
+      "source": "user_command",
+      "target": "marathon",
+      "kind": "inputs"
+    },
+    {
+      "source": "v2_marathons_doc",
+      "target": "marathon",
+      "kind": "inputs"
+    },
+    {
+      "source": "pending_tasks_doc",
+      "target": "marathon",
+      "kind": "inputs"
+    },
+    {
+      "source": "git_log",
+      "target": "marathon",
+      "kind": "inputs"
+    },
+    {
+      "source": "marathon",
+      "target": "sprint_status_report",
+      "kind": "outputs"
+    },
+    {
+      "source": "marathon",
+      "target": "next_action_proposal",
+      "kind": "outputs"
+    },
+    {
+      "source": "marathon",
+      "target": "marathon_progress_bar",
+      "kind": "outputs"
+    },
+    {
+      "source": "user_command",
+      "target": "market",
+      "kind": "inputs"
+    },
+    {
+      "source": "markets_table",
+      "target": "market",
+      "kind": "inputs"
+    },
+    {
+      "source": "polymarket_gamma_api",
+      "target": "market",
+      "kind": "inputs"
+    },
+    {
+      "source": "market_oracle",
+      "target": "market",
+      "kind": "inputs"
+    },
+    {
+      "source": "market",
+      "target": "market_creation_ops",
+      "kind": "outputs"
+    },
+    {
+      "source": "market",
+      "target": "resolution_queries",
+      "kind": "outputs"
+    },
+    {
+      "source": "market",
+      "target": "bet_history",
+      "kind": "outputs"
+    },
+    {
+      "source": "user_query",
+      "target": "researcher",
+      "kind": "inputs"
+    },
+    {
+      "source": "webfetch",
+      "target": "researcher",
+      "kind": "inputs"
+    },
+    {
+      "source": "websearch",
+      "target": "researcher",
+      "kind": "inputs"
+    },
+    {
+      "source": "github_api",
+      "target": "researcher",
+      "kind": "inputs"
+    },
+    {
+      "source": "package_registries",
+      "target": "researcher",
+      "kind": "inputs"
+    },
+    {
+      "source": "researcher",
+      "target": "findings_report",
+      "kind": "outputs"
+    },
+    {
+      "source": "researcher",
+      "target": "package_candidate_list",
+      "kind": "outputs"
+    },
+    {
+      "source": "researcher",
+      "target": "protocol_summary",
+      "kind": "outputs"
+    },
+    {
+      "source": "user_command",
+      "target": "sync",
+      "kind": "inputs"
+    },
+    {
+      "source": "neural_net_memory_files",
+      "target": "sync",
+      "kind": "inputs"
+    },
+    {
+      "source": "sync",
+      "target": "repo_docs_sanitized",
+      "kind": "outputs"
+    },
+    {
+      "source": "sync",
+      "target": "commit_ready_artifacts",
+      "kind": "outputs"
+    },
+    {
+      "source": "user_command",
+      "target": "vps-health",
+      "kind": "inputs"
+    },
+    {
+      "source": "ssh_to_vps",
+      "target": "vps-health",
+      "kind": "inputs"
+    },
+    {
+      "source": "pm2",
+      "target": "vps-health",
+      "kind": "inputs"
+    },
+    {
+      "source": "df",
+      "target": "vps-health",
+      "kind": "inputs"
+    },
+    {
+      "source": "free",
+      "target": "vps-health",
+      "kind": "inputs"
+    },
+    {
+      "source": "systemctl",
+      "target": "vps-health",
+      "kind": "inputs"
+    },
+    {
+      "source": "vps-health",
+      "target": "health_report",
+      "kind": "outputs"
+    },
+    {
+      "source": "vps-health",
+      "target": "warning_list",
+      "kind": "outputs"
+    },
+    {
+      "source": "user",
+      "target": "mythos",
+      "kind": "inputs"
+    },
+    {
+      "source": "all_sub_agents",
+      "target": "mythos",
+      "kind": "inputs"
+    },
+    {
+      "source": "memory",
+      "target": "mythos",
+      "kind": "inputs"
+    },
+    {
+      "source": "decision_journal",
+      "target": "mythos",
+      "kind": "inputs"
+    },
+    {
+      "source": "git_log",
+      "target": "mythos",
+      "kind": "inputs"
+    },
+    {
+      "source": "execution_log",
+      "target": "mythos",
+      "kind": "inputs"
+    },
+    {
+      "source": "mythos",
+      "target": "user",
+      "kind": "outputs"
+    },
+    {
+      "source": "mythos",
+      "target": "all_sub_agents",
+      "kind": "outputs"
+    },
+    {
+      "source": "mythos",
+      "target": "memory",
+      "kind": "outputs"
+    },
+    {
+      "source": "mythos",
+      "target": "decision_journal",
+      "kind": "outputs"
+    },
+    {
+      "source": "git_log_last_7_days",
+      "target": "gate-completeness-audit",
+      "kind": "inputs"
+    },
+    {
+      "source": "src_config.ts",
+      "target": "gate-completeness-audit",
+      "kind": "inputs"
+    },
+    {
+      "source": "src_migrations_**",
+      "target": "gate-completeness-audit",
+      "kind": "inputs"
+    },
+    {
+      "source": "src_execution_dispatch.ts",
+      "target": "gate-completeness-audit",
+      "kind": "inputs"
+    },
+    {
+      "source": "src_bridge.ts",
+      "target": "gate-completeness-audit",
+      "kind": "inputs"
+    },
+    {
+      "source": "src_solana_bridge.ts",
+      "target": "gate-completeness-audit",
+      "kind": "inputs"
+    },
+    {
+      "source": "src_hype_bridge.ts",
+      "target": "gate-completeness-audit",
+      "kind": "inputs"
+    },
+    {
+      "source": "src_nuro_routes.ts",
+      "target": "gate-completeness-audit",
+      "kind": "inputs"
+    },
+    {
+      "source": "gates.yaml",
+      "target": "gate-completeness-audit",
+      "kind": "inputs"
+    },
+    {
+      "source": "gate-completeness-audit",
+      "target": "neural_net_audits_yyyy_mm_dd_gate_audit",
+      "kind": "outputs"
+    },
+    {
+      "source": "gate-completeness-audit",
+      "target": "decision_journal_if_findings_>_0",
+      "kind": "outputs"
+    },
+    {
+      "source": "gate-completeness-audit",
+      "target": "pushnotification_if_findings_>_0",
+      "kind": "outputs"
+    },
+    {
+      "source": "mythos",
+      "target": "gate-completeness-audit",
+      "kind": "orchestrates"
+    },
+    {
+      "source": "all_sub_agents",
+      "target": "helm",
+      "kind": "inputs"
+    },
+    {
+      "source": "user",
+      "target": "helm",
+      "kind": "inputs"
+    },
+    {
+      "source": "network_egress",
+      "target": "helm",
+      "kind": "inputs"
+    },
+    {
+      "source": "filesystem",
+      "target": "helm",
+      "kind": "inputs"
+    },
+    {
+      "source": "credential_vault",
+      "target": "helm",
+      "kind": "inputs"
+    },
+    {
+      "source": "decision_journal",
+      "target": "helm",
+      "kind": "inputs"
+    },
+    {
+      "source": "helm",
+      "target": "execution_log",
+      "kind": "outputs"
+    },
+    {
+      "source": "helm",
+      "target": "push_notification",
+      "kind": "outputs"
+    },
+    {
+      "source": "helm",
+      "target": "all_sub_agents",
+      "kind": "outputs"
+    },
+    {
+      "source": "helm",
+      "target": "gates_yaml",
+      "kind": "outputs"
+    }
+  ],
+  "agents": [
+    {
+      "id": "huginn",
+      "type": "sub_agent",
+      "category": "counsel",
+      "triggers": [
+        "high-stakes action proposed (called via huginn.counsel())",
+        "Helm state transition (watch / paused / quarantined)",
+        "external-doc-drift:breaking bus event from doc-monitor",
+        "agent budget remaining < 20%",
+        "agent reputation tier flip",
+        "compound-signal pattern detected (recent decisions trending wrong)"
+      ],
+      "skillPath": "C:/Users/Richa/AFI/Nuro-Finance/src/huginn/index.ts",
+      "health": "green",
+      "lastUpdated": "2026-04-25",
+      "conflictMode": "counselor",
+      "schedule": null,
+      "nextRun": null
+    },
+    {
+      "id": "agent",
+      "type": "skill",
+      "category": "on-demand",
+      "triggers": [],
+      "skillPath": ".claude/skills/agent/SKILL.md",
+      "health": "green",
+      "lastUpdated": "2026-04-18",
+      "conflictMode": null,
+      "schedule": null,
+      "nextRun": null
+    },
+    {
+      "id": "auditor",
+      "type": "skill",
+      "category": "on-demand",
+      "triggers": [],
+      "skillPath": ".claude/skills/auditor/SKILL.md",
+      "health": "green",
+      "lastUpdated": "2026-04-18",
+      "conflictMode": null,
+      "schedule": null,
+      "nextRun": null
+    },
+    {
+      "id": "balances",
+      "type": "skill",
+      "category": "on-demand",
+      "triggers": [],
+      "skillPath": ".claude/skills/balances/SKILL.md",
+      "health": "green",
+      "lastUpdated": "2026-04-18",
+      "conflictMode": null,
+      "schedule": null,
+      "nextRun": null
+    },
+    {
+      "id": "boot",
+      "type": "skill",
+      "category": "on-demand",
+      "triggers": [],
+      "skillPath": ".claude/skills/boot/SKILL.md",
+      "health": "green",
+      "lastUpdated": "2026-04-18",
+      "conflictMode": null,
+      "schedule": null,
+      "nextRun": null
+    },
+    {
+      "id": "bridge",
+      "type": "skill",
+      "category": "on-demand",
+      "triggers": [],
+      "skillPath": ".claude/skills/bridge/SKILL.md",
+      "health": "green",
+      "lastUpdated": "2026-04-18",
+      "conflictMode": null,
+      "schedule": null,
+      "nextRun": null
+    },
+    {
+      "id": "dep-verify",
+      "type": "skill",
+      "category": "on-demand",
+      "triggers": [],
+      "skillPath": null,
+      "health": "green",
+      "lastUpdated": "2026-04-17",
+      "conflictMode": null,
+      "schedule": null,
+      "nextRun": null
+    },
+    {
+      "id": "deployer",
+      "type": "skill",
+      "category": "on-demand",
+      "triggers": [],
+      "skillPath": ".claude/skills/deployer/SKILL.md",
+      "health": "green",
+      "lastUpdated": "2026-04-18",
+      "conflictMode": null,
+      "schedule": null,
+      "nextRun": null
+    },
+    {
+      "id": "gate-check",
+      "type": "skill",
+      "category": "on-demand",
+      "triggers": [
+        "before any flag flip (AGENT_FUNDING_OBSERVE_ONLY, AGENT_CLOB_TRADES_ENABLED, AGENT_PROFIT_SWEEP_ENABLED, NEXT_PUBLIC_PRIVY_APP_ID)",
+        "before VPS deploy (git pull + restart)",
+        "before enabling any on-chain money-movement path",
+        "when adding new risky code that needs a gate (medium rule)"
+      ],
+      "skillPath": "C:/Users/Richa/AFI/.claude/skills/gate-check/SKILL.md",
+      "health": "green",
+      "lastUpdated": "2026-04-17",
+      "conflictMode": "fail-closed",
+      "schedule": null,
+      "nextRun": null
+    },
+    {
+      "id": "issuer-status",
+      "type": "skill",
+      "category": "on-demand",
+      "triggers": [],
+      "skillPath": ".claude/skills/issuer-status/SKILL.md",
+      "health": "green",
+      "lastUpdated": "2026-04-18",
+      "conflictMode": null,
+      "schedule": null,
+      "nextRun": null
+    },
+    {
+      "id": "issuer",
+      "type": "skill",
+      "category": "on-demand",
+      "triggers": [],
+      "skillPath": ".claude/skills/issuer/SKILL.md",
+      "health": "green",
+      "lastUpdated": "2026-04-18",
+      "conflictMode": null,
+      "schedule": null,
+      "nextRun": null
+    },
+    {
+      "id": "jwt",
+      "type": "skill",
+      "category": "on-demand",
+      "triggers": [],
+      "skillPath": ".claude/skills/jwt/SKILL.md",
+      "health": "green",
+      "lastUpdated": "2026-04-18",
+      "conflictMode": null,
+      "schedule": null,
+      "nextRun": null
+    },
+    {
+      "id": "librarian",
+      "type": "skill",
+      "category": "on-demand",
+      "triggers": [],
+      "skillPath": ".claude/skills/librarian/SKILL.md",
+      "health": "green",
+      "lastUpdated": "2026-04-18",
+      "conflictMode": null,
+      "schedule": null,
+      "nextRun": null
+    },
+    {
+      "id": "marathon",
+      "type": "skill",
+      "category": "on-demand",
+      "triggers": [],
+      "skillPath": ".claude/skills/marathon/SKILL.md",
+      "health": "green",
+      "lastUpdated": "2026-04-18",
+      "conflictMode": null,
+      "schedule": null,
+      "nextRun": null
+    },
+    {
+      "id": "market",
+      "type": "skill",
+      "category": "on-demand",
+      "triggers": [],
+      "skillPath": ".claude/skills/market/SKILL.md",
+      "health": "green",
+      "lastUpdated": "2026-04-18",
+      "conflictMode": null,
+      "schedule": null,
+      "nextRun": null
+    },
+    {
+      "id": "researcher",
+      "type": "skill",
+      "category": "on-demand",
+      "triggers": [],
+      "skillPath": ".claude/skills/researcher/SKILL.md",
+      "health": "green",
+      "lastUpdated": "2026-04-18",
+      "conflictMode": null,
+      "schedule": null,
+      "nextRun": null
+    },
+    {
+      "id": "sync",
+      "type": "skill",
+      "category": "on-demand",
+      "triggers": [],
+      "skillPath": ".claude/skills/sync/SKILL.md",
+      "health": "green",
+      "lastUpdated": "2026-04-18",
+      "conflictMode": null,
+      "schedule": null,
+      "nextRun": null
+    },
+    {
+      "id": "vps-health",
+      "type": "skill",
+      "category": "on-demand",
+      "triggers": [],
+      "skillPath": ".claude/skills/vps-health/SKILL.md",
+      "health": "green",
+      "lastUpdated": "2026-04-18",
+      "conflictMode": null,
+      "schedule": null,
+      "nextRun": null
+    },
+    {
+      "id": "mythos",
+      "type": "orchestrator",
+      "category": "kernel",
+      "triggers": [
+        "session start",
+        "user request",
+        "any sub-agent returning a result"
+      ],
+      "skillPath": "C:/Users/Richa/AFI/.claude/skills/boot/SKILL.md",
+      "health": "green",
+      "lastUpdated": "2026-04-17",
+      "conflictMode": "adjudicator",
+      "schedule": null,
+      "nextRun": null
+    },
+    {
+      "id": "gate-completeness-audit",
+      "type": "scheduled-task",
+      "category": "scheduled",
+      "triggers": [
+        "weekly cron fire"
+      ],
+      "skillPath": "C:/Users/Richa/.claude/scheduled-tasks/gate-completeness-audit/SKILL.md",
+      "health": "green",
+      "lastUpdated": "2026-04-17",
+      "conflictMode": "advisory-only",
+      "schedule": "Sundays at 10:03 AM local time",
+      "nextRun": "2026-04-19T10:03:00-04:00"
+    },
+    {
+      "id": "helm",
+      "type": "security-plane",
+      "category": "kernel",
+      "triggers": [
+        "outbound HTTP from any axios client",
+        "console.log / .warn / .error emission",
+        "process.stdout / .stderr write",
+        "agent action with on-chain value transfer",
+        "filesystem write to Neural Net or .claude/skills/",
+        "credential request from any agent",
+        "compound critical-rule hits within 1h window"
+      ],
+      "skillPath": "C:/Users/Richa/AFI/Nuro-Finance/src/helm/index.ts",
+      "health": "green",
+      "lastUpdated": "2026-04-25",
+      "conflictMode": "gatekeeper",
+      "schedule": null,
+      "nextRun": null
+    }
+  ],
+  "meta": {
+    "totalAgents": 21,
+    "categories": [
+      "counsel",
+      "on-demand",
+      "kernel",
+      "scheduled"
+    ],
+    "healthCounts": {
+      "green": 21
+    },
+    "exportedAt": "2026-04-26T02:41:21.734Z"
+  }
+}

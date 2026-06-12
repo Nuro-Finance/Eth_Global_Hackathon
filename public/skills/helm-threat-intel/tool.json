@@ -1,0 +1,45 @@
+{
+  "$schema": "https://platform.openai.com/docs/guides/function-calling/schemas",
+  "type": "function",
+  "function": {
+    "name": "nuro_helm_threat_intel",
+    "description": "Fetch live security-rule status from Nuro's Helm plane: 53 rules with armed/mode/24h-fire-count/FP-rate-30d, plus aggregate summary. Use when producing security audits, checking whether Helm is currently protecting the platform, or exporting events to an external SIEM. Costs 0.10 USDC per call via x402 protocol; the underlying HTTP layer (e.g. x402-fetch) handles payment automatically when the agent's signing key is configured.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "ruleFilter": {
+          "type": "string",
+          "description": "Optional rule-id prefix filter (e.g. 'HELM-1' returns only HELM-100..199). Omit for all rules.",
+          "examples": ["HELM-1", "HELM-2", "HELM-5"]
+        },
+        "minSeverity": {
+          "type": "string",
+          "enum": ["low", "medium", "high", "critical"],
+          "description": "Optional minimum severity filter. Defaults to all severities."
+        },
+        "armedOnly": {
+          "type": "boolean",
+          "description": "If true, return only rules with armed=true. Defaults to false (all rules).",
+          "default": false
+        }
+      },
+      "required": []
+    }
+  },
+  "metadata": {
+    "publisher": "Nuro Finance",
+    "endpoint": "https://api.nuro.finance/api/x402/helm/threat-intel",
+    "method": "GET",
+    "x402Price": {
+      "amount": "0.10",
+      "currency": "USDC",
+      "amountAtomic": "100000",
+      "settlementChain": "Base"
+    },
+    "rateLimit": "60 req/hr per signing address",
+    "skillManifest": "https://app.nuro.finance/skills/manifest.json",
+    "claudeSkill": "https://app.nuro.finance/skills/helm-threat-intel/skill.md",
+    "version": "1.0.0",
+    "lastUpdated": "2026-05-06"
+  }
+}

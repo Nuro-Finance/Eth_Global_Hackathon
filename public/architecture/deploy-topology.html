@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>10 · Deploy topology · AFI Architecture</title>
+<link rel="stylesheet" href="/architecture/_style.css">
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+</head>
+<body>
+<div class="wrap">
+
+<nav class="top">
+  <a href="/architecture.html" class="back">← All diagrams</a>
+  <span class="spacer"></span>
+  <span class="label">Section</span><span class="index-num">10 / 10</span>
+</nav>
+
+<header class="page">
+  <span class="eyebrow">10 · Deployment</span>
+  <h1>Deployment topology</h1>
+  <p class="lede">
+    <strong>Dev machine → GitHub → VPS.</strong> Both backend (<code>~/Nuro-Finance</code>) and frontend (<code>~/Nuro-Finance</code>) live on the same VPS at <code>74.50.109.203</code> under PM2. Three pre-push gates protect <code>main</code>: verify-deps (all imports declared in <code>package.json</code>), typecheck (backend scope only), 84 vitest tests. Migration-first rule: schema changes always apply <strong>before</strong> the backend restart.
+  </p>
+</header>
+
+<div class="section-label">01 — Topology</div>
+<div class="diagram tall">
+<div class="mermaid">
+flowchart LR
+    GH["GitHub<br/>main"]
+
+    subgraph Dev["Dev machine"]
+        Local["Nuro-Finance<br/>(local repo)"]
+        Push["pre-push gates<br/>verify-deps · typecheck · tests"]
+    end
+
+    subgraph VPS["VPS 74.50.109.203"]
+        NuroRepo["~/Nuro-Finance<br/>backend repo"]
+        FERepo["~/Nuro-Finance<br/>frontend repo"]
+
+        subgraph PM2["PM2"]
+            BE["nuro-api (id 4)<br/>tsx src/index.ts<br/>port 3000"]
+            FE["nuro-frontend (id 1)<br/>next start -p 2800<br/>port 2800"]
+        end
+
+        PG[("Postgres 15<br/>port 5432")]
+        Nginx["nginx<br/>app.nuro.finance<br/>api.nuro.finance"]
+    end
+
+    Local -->|git push| GH
+    GH -->|git pull| NuroRepo
+    GH -->|git pull| FERepo
+    NuroRepo -.->|tsx runtime<br/>no build step| BE
+    FERepo -->|next build| FE
+    BE --> PG
+    Nginx --> FE
+    Nginx --> BE
+</div>
+</div>
+
+<div class="section-label">02 — Deploy commands (copy-paste ready)</div>
+<div class="diagram" style="padding: 22px 24px;">
+<pre style="background:#0a0a14;padding:20px;border-radius:10px;overflow-x:auto;color:#c770f0;font-size:13.5px;line-height:1.8;margin:0;">
+<span style="color:#16e0a9"># Backend deploy (no build step — tsx runs .ts directly)</span>
+ssh nuro@74.50.109.203 "cd ~/Nuro-Finance && git pull --ff-only && pm2 restart 4"
+
+<span style="color:#16e0a9"># Frontend deploy (needs build)</span>
+ssh nuro@74.50.109.203 "cd ~/Nuro-Finance && git pull --ff-only && \
+  ./node_modules/.bin/next build && pm2 restart 1"
+
+<span style="color:#16e0a9"># Migration-first rule: apply DB migrations BEFORE backend restart</span>
+ssh nuro@74.50.109.203 "psql 'postgresql://...' -f src/migrations/NNN_name.sql"
+
+<span style="color:#16e0a9"># Nginx config edit (Session 25+ pattern)</span>
+scp ops/nginx-nuro.conf ops/install-nginx-nuro.sh cash@74.50.109.203:/tmp/
+ssh -t cash@74.50.109.203 "sudo bash /tmp/install-nginx-nuro.sh"
+<span style="color:#888"># ↑ The -t flag allocates a pseudo-terminal so sudo can prompt for password.</span>
+</pre>
+</div>
+
+<div class="section-label">03 — Pre-push gates (husky-driven)</div>
+<div class="service-grid">
+  <div class="service-card live">
+    <div class="service-title">verify-deps <span class="service-badge badge-live">gate 1 of 3</span></div>
+    <div class="service-purpose">Walks every <code>import</code> in <code>src/</code>, fails if any imported package isn't in <code>package.json</code>.</div>
+    <div class="service-meta">
+      <dt>Script</dt><dd><code>scripts/verify-deps.js</code></dd>
+      <dt>Runs on</dt><dd><code>pre-push</code> only (not pre-commit — too slow)</dd>
+      <dt>Caught historically</dt><dd><code>@tanstack/react-query</code>, <code>next-intl</code> misses</dd>
+      <dt>Why we need it</dt><dd>Yarn Berry silently tolerates undeclared deps via lockfile; npm strict-purges them</dd>
+    </div>
+  </div>
+
+  <div class="service-card live">
+    <div class="service-title">typecheck <span class="service-badge badge-live">gate 2 of 3</span></div>
+    <div class="service-purpose">Backend-only TypeScript strict compilation.</div>
+    <div class="service-meta">
+      <dt>Command</dt><dd><code>tsc --noEmit -p tsconfig.backend.json</code></dd>
+      <dt>Why backend-only</dt><dd>Frontend has pre-existing type noise we intentionally don't gate on (would block every push)</dd>
+      <dt>Typical runtime</dt><dd>8–15 s</dd>
+    </div>
+  </div>
+
+  <div class="service-card live">
+    <div class="service-title">vitest <span class="service-badge badge-live">gate 3 of 3</span></div>
+    <div class="service-purpose">84 unit tests covering core money-movement helpers.</div>
+    <div class="service-meta">
+      <dt>Command</dt><dd><code>pnpm vitest run</code></dd>
+      <dt>Coverage</dt><dd>Bridge + swap routing, CCTP domain mapping, allowlist parsing</dd>
+      <dt>Status</dt><dd>All 84 green continuously through Sessions 22–25</dd>
+    </div>
+  </div>
+</div>
+
+<div class="section-label">04 — Runtime state</div>
+<section class="prose">
+  <h3>Monitor polling state</h3>
+  <p>Paused by default at <code>POLL_INTERVAL_MS=86400000</code> (24h). Stop hook in <code>~/.claude/settings.json</code> auto-pauses when Claude Code sessions end (prevents accidental Alchemy spend). Un-pause via:</p>
+  <pre style="background:#0a0a14;padding:12px;border-radius:6px;overflow-x:auto;color:#c770f0;font-size:12.5px;">sed -i 's|POLL_INTERVAL_MS=.*|POLL_INTERVAL_MS=60000|' ~/Nuro-Finance/.env &amp;&amp; pm2 restart 4 --update-env</pre>
+
+  <h3>PM2 process IDs (don't guess, look them up)</h3>
+  <ul>
+    <li><strong>id 4</strong> — <code>nuro-api</code> — backend, port 3000, tsx runtime</li>
+    <li><strong>id 1</strong> — <code>nuro-frontend</code> — Next.js SSR, port 2800</li>
+  </ul>
+  <p>Confirm with <code>ssh nuro@74.50.109.203 "pm2 list | head -8"</code> before restarting anything.</p>
+
+  <h3>Nginx routing (Session 25 additions)</h3>
+  <ul>
+    <li><code>app.nuro.finance/admin</code> → backend port 3000 (admin console + auth gate) — <strong>live as of Session 25</strong></li>
+    <li><code>app.nuro.finance/telegram/webhook</code> → backend port 3000 (replaces 10s polling) — <strong>nginx ready; <code>setWebhook</code> call still pending</strong></li>
+    <li><code>app.nuro.finance/</code> → frontend port 2800 (Next.js SSR) — default</li>
+    <li><code>api.nuro.finance/</code> → backend port 3000 (REST API) — legacy direct path</li>
+  </ul>
+  <p>Config source lives in the repo at <code>ops/nginx-nuro.conf</code>; installer at <code>ops/install-nginx-nuro.sh</code>.</p>
+
+  <div class="callout info">
+    <strong>Why the migration-first rule matters.</strong> A schema change that hasn't been applied yet means the new backend code will hit <em>"column does not exist"</em> on first query. Always apply migrations before restart — otherwise the restart will cause downtime while you figure it out.
+  </div>
+
+  <h3>Secrets rotation (informational)</h3>
+  <ul>
+    <li><code>MASTER_SEED</code> — BIP-39 mnemonic; 3-of-3 BIP-39 split (Richard + 2 backups). Rotation via KMS is a Sprint 3 priority.</li>
+    <li><code>ZEROX_API_KEY</code>, <code>ANTHROPIC_API_KEY</code>, <code>TELEGRAM_BOT_TOKEN</code> — stored in <code>~/Nuro-Finance/.env</code>, never committed.</li>
+    <li><code>SD3_BEARER_TOKEN</code> + webhook HMAC — rotate on request from Owen / Matt.</li>
+  </ul>
+</section>
+
+<nav class="pager">
+  <a href="/architecture/request-lifecycle.html">
+    <div class="pager-label">← Prev</div>
+    <div class="pager-title">09 · Request lifecycle</div>
+  </a>
+  <a href="/architecture.html" class="next">
+    <div class="pager-label">✓ Done</div>
+    <div class="pager-title">Back to all diagrams</div>
+  </a>
+</nav>
+
+<footer>AFI System Architecture · 10 / 10</footer>
+
+</div>
+
+<script>
+mermaid.initialize({
+  startOnLoad: true, theme: 'dark',
+  themeVariables: { primaryColor: '#1a1a2e', primaryTextColor: '#e8e8e8', primaryBorderColor: '#16e0a9', lineColor: '#16e0a9', secondaryColor: '#2a2a4a', background: '#050510', mainBkg: '#1a1a2e', fontFamily: 'Inter, system-ui, sans-serif', fontSize: '17px' },
+  flowchart: { curve: 'basis', padding: 32, useMaxWidth: true, nodeSpacing: 75, rankSpacing: 95, htmlLabels: true },
+});
+</script>
+</body>
+</html>

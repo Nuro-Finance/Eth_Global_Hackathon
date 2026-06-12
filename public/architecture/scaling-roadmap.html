@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>13 · Scaling roadmap · AFI Architecture</title>
+<link rel="stylesheet" href="/architecture/_style.css">
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<style>
+  /* Page-specific extensions on top of _style.css */
+  .tier-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+    gap: 18px;
+    margin-bottom: 28px;
+  }
+  .tier-card {
+    background: rgba(10, 10, 20, 0.65);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-left-width: 4px;
+    border-radius: 14px;
+    padding: 22px 24px;
+    backdrop-filter: blur(20px);
+  }
+  .tier-card.tier-green  { border-left-color: #16e0a9; }
+  .tier-card.tier-orange { border-left-color: #f5a623; }
+  .tier-card.tier-red    { border-left-color: #ff6b6b; }
+  .tier-card .tier-label {
+    font-size: 10px; color: #888; letter-spacing: 1.5px; text-transform: uppercase;
+    margin-bottom: 4px; font-weight: 700;
+  }
+  .tier-card h3 { font-size: 22px; color: #e0e0e0; margin-bottom: 6px; font-weight: 600; }
+  .tier-card .verdict {
+    display: inline-block; padding: 4px 12px; border-radius: 16px;
+    font-size: 10.5px; font-weight: 700; letter-spacing: 0.5px;
+    margin: 6px 0 14px;
+  }
+  .tier-card.tier-green  .verdict { background: rgba(22,224,169,0.12); color: #16e0a9; border: 1px solid rgba(22,224,169,0.3); }
+  .tier-card.tier-orange .verdict { background: rgba(245,166,35,0.12); color: #f5a623; border: 1px solid rgba(245,166,35,0.3); }
+  .tier-card.tier-red    .verdict { background: rgba(255,107,107,0.12); color: #ff6b6b; border: 1px solid rgba(255,107,107,0.3); }
+  .tier-card .stat {
+    display: flex; justify-content: space-between; align-items: baseline;
+    padding: 6px 0; border-bottom: 1px dashed rgba(255,255,255,0.06);
+    font-size: 12px;
+  }
+  .tier-card .stat:last-child { border-bottom: none; }
+  .tier-card .stat .k { color: #888; }
+  .tier-card .stat .v { color: #ddd; font-weight: 600; }
+  .tier-card .breaks {
+    margin-top: 14px; padding-top: 14px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+  }
+  .tier-card .breaks-h {
+    font-size: 9px; color: #666; letter-spacing: 1.5px; text-transform: uppercase;
+    margin-bottom: 6px; font-weight: 700;
+  }
+  .tier-card .breaks ul { list-style: none; }
+  .tier-card .breaks li {
+    font-size: 11.5px; color: #b5b5b5; padding: 3px 0; position: relative; padding-left: 14px;
+    line-height: 1.5;
+  }
+  .tier-card .breaks li::before {
+    content: '▸'; position: absolute; left: 0; top: 3px;
+  }
+  .tier-card.tier-green  .breaks li::before { color: #16e0a9; }
+  .tier-card.tier-orange .breaks li::before { color: #f5a623; }
+  .tier-card.tier-red    .breaks li::before { color: #ff6b6b; }
+  .tier-card .breaks code {
+    background: #1a1a2e; padding: 1px 5px; border-radius: 3px; font-size: 10.5px; color: #c770f0;
+  }
+
+  /* Decision-triggers + summary tables */
+  table.scale {
+    width: 100%; border-collapse: collapse; margin-bottom: 28px;
+    background: rgba(10, 10, 20, 0.5);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px; overflow: hidden;
+    backdrop-filter: blur(20px);
+  }
+  table.scale th, table.scale td {
+    padding: 12px 16px; text-align: left;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    font-size: 12.5px;
+  }
+  table.scale th {
+    background: rgba(22,224,169,0.08); color: #16e0a9;
+    font-size: 10px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase;
+  }
+  table.scale tr:last-child td { border-bottom: none; }
+  table.scale tr:hover td { background: rgba(255,255,255,0.02); }
+  table.scale .pill {
+    display: inline-block; padding: 2px 9px; border-radius: 10px;
+    font-size: 10px; font-weight: 700; letter-spacing: 0.4px;
+  }
+  .pill.green  { background: rgba(22,224,169,0.15); color: #16e0a9; }
+  .pill.orange { background: rgba(245,166,35,0.15); color: #f5a623; }
+  .pill.red    { background: rgba(255,107,107,0.15); color: #ff6b6b; }
+  .pill.purple { background: rgba(199,112,240,0.15); color: #c770f0; }
+
+  /* Treasury sidebar — distinct from scaling tiers */
+  .treasury {
+    background: rgba(199,112,240,0.05);
+    border: 1px solid rgba(199,112,240,0.25);
+    border-radius: 14px;
+    padding: 24px 26px;
+    margin-bottom: 28px;
+  }
+  .treasury h3 {
+    font-size: 18px; color: #c770f0; margin-bottom: 8px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .treasury h3::before {
+    content: '💰'; font-size: 22px;
+  }
+  .treasury p { color: #c5c5c5; font-size: 13px; margin-bottom: 16px; line-height: 1.7; }
+  .treasury .reserves {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 10px; margin-bottom: 16px;
+  }
+  .treasury .reserve-row {
+    background: rgba(0,0,0,0.3); border-radius: 8px; padding: 10px 12px;
+    border: 1px solid rgba(199,112,240,0.15);
+  }
+  .treasury .reserve-row .chain {
+    font-size: 10.5px; color: #c770f0; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+    margin-bottom: 4px;
+  }
+  .treasury .reserve-row .amounts { font-size: 12px; color: #ddd; font-family: 'Menlo', monospace; }
+  .treasury .reserve-row .amounts .target { color: #888; font-size: 10.5px; }
+
+  /* Section heads */
+  h2.section {
+    font-size: 20px; color: #e0e0e0; font-weight: 600;
+    margin: 8px 0 16px; padding-top: 8px;
+    border-top: 1px solid rgba(255,255,255,0.05);
+  }
+  h2.section:first-of-type { border-top: none; padding-top: 0; }
+  h2.section .num {
+    display: inline-block; width: 28px; height: 28px;
+    background: rgba(22,224,169,0.1); color: #16e0a9;
+    border: 1px solid rgba(22,224,169,0.3); border-radius: 8px;
+    font-size: 12px; line-height: 26px; text-align: center;
+    font-weight: 700; margin-right: 10px;
+    vertical-align: middle;
+  }
+
+  .topology-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-bottom: 28px;
+  }
+  .topology-card {
+    background: rgba(10, 10, 20, 0.5);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 18px 20px;
+    backdrop-filter: blur(20px);
+  }
+  .topology-card .top-label {
+    font-size: 10px; color: #888; letter-spacing: 1.4px; text-transform: uppercase;
+    font-weight: 700; margin-bottom: 8px;
+  }
+  .topology-card h4 { font-size: 14px; color: #16e0a9; margin-bottom: 10px; font-weight: 600; }
+  .topology-card .stack {
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .topology-card .layer {
+    background: rgba(5, 5, 16, 0.5);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 8px; padding: 7px 10px;
+    font-size: 11px; color: #c5c5c5;
+    font-family: 'Menlo', monospace;
+  }
+  .topology-card .layer.added {
+    border-color: rgba(22,224,169,0.3);
+    background: rgba(22,224,169,0.04);
+    color: #16e0a9;
+  }
+  .topology-card .layer.changed {
+    border-color: rgba(245,166,35,0.3);
+    background: rgba(245,166,35,0.04);
+    color: #f5a623;
+  }
+
+  @media (max-width: 720px) {
+    .topology-row { grid-template-columns: 1fr; }
+  }
+
+  /* ─── Per-tier topology sections ─── */
+  .tier-section {
+    background: rgba(10, 10, 20, 0.5);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 14px;
+    padding: 22px 24px 24px;
+    margin-bottom: 28px;
+    backdrop-filter: blur(20px);
+  }
+  .tier-section-header {
+    display: flex; align-items: center; gap: 14px;
+    margin-bottom: 18px; padding-bottom: 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .tier-section-header h3 {
+    font-size: 18px; color: #e0e0e0; font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+  .tier-tag {
+    display: inline-block;
+    padding: 4px 11px; border-radius: 14px;
+    font-size: 10px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase;
+  }
+  .tier-section-green  .tier-tag { background: rgba(22,224,169,0.15); color: #16e0a9; border: 1px solid rgba(22,224,169,0.35); }
+  .tier-section-orange .tier-tag { background: rgba(245,166,35,0.15); color: #f5a623; border: 1px solid rgba(245,166,35,0.35); }
+  .tier-section-red    .tier-tag { background: rgba(255,107,107,0.15); color: #ff6b6b; border: 1px solid rgba(255,107,107,0.35); }
+  .tier-section-purple .tier-tag { background: rgba(199,112,240,0.15); color: #c770f0; border: 1px solid rgba(199,112,240,0.35); }
+
+  .tier-section-green  { border-top: 3px solid #16e0a9; }
+  .tier-section-orange { border-top: 3px solid #f5a623; }
+  .tier-section-red    { border-top: 3px solid #ff6b6b; }
+  .tier-section-purple { border-top: 3px solid #c770f0; }
+
+  .tier-section .alt-note {
+    font-size: 12.5px; color: #b5b5b5; line-height: 1.7;
+    background: rgba(199,112,240,0.06); border-left: 3px solid rgba(199,112,240,0.4);
+    padding: 12px 16px; border-radius: 8px;
+    margin-bottom: 18px;
+  }
+
+  /* Delta panel — Added / Removed / Stays-same columns */
+  .delta-panel {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;
+    margin-top: 18px; margin-bottom: 16px;
+  }
+  .delta-col {
+    background: rgba(5, 5, 16, 0.5);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 10px;
+    padding: 14px 16px;
+  }
+  .delta-col h5 {
+    font-size: 11px; letter-spacing: 1.4px; text-transform: uppercase;
+    font-weight: 700; margin-bottom: 10px; padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  .delta-col.delta-add  h5 { color: #16e0a9; border-bottom-color: rgba(22,224,169,0.2); }
+  .delta-col.delta-rm   h5 { color: #ff6b6b; border-bottom-color: rgba(255,107,107,0.2); }
+  .delta-col.delta-keep h5 { color: #888;    border-bottom-color: rgba(255,255,255,0.08); }
+  .delta-col ul { list-style: none; }
+  .delta-col li {
+    font-size: 11.5px; color: #b5b5b5; line-height: 1.6;
+    padding: 5px 0 5px 14px; position: relative;
+  }
+  .delta-col li::before {
+    position: absolute; left: 0; top: 4px;
+    font-weight: 700; font-size: 12px;
+  }
+  .delta-col.delta-add  li::before { content: '+'; color: #16e0a9; }
+  .delta-col.delta-rm   li::before { content: '−'; color: #ff6b6b; }
+  .delta-col.delta-keep li::before { content: '~'; color: #666; }
+  .delta-col li code {
+    background: #1a1a2e; padding: 1px 5px; border-radius: 3px;
+    font-size: 10.5px; color: #c770f0;
+  }
+  .delta-col li strong { color: #d5d5d5; }
+  .delta-col li em { color: #888; font-style: italic; }
+
+  .tier-meta {
+    display: flex; flex-wrap: wrap; gap: 14px;
+    padding: 10px 14px;
+    background: rgba(5, 5, 16, 0.5);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 8px;
+    font-size: 11.5px; color: #888;
+    margin-top: 4px;
+  }
+  .tier-meta strong { color: #b5b5b5; font-weight: 600; }
+  .tier-meta span { white-space: nowrap; }
+
+  @media (max-width: 920px) {
+    .delta-panel { grid-template-columns: 1fr; }
+    .tier-meta { flex-direction: column; gap: 4px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<nav class="top">
+  <a href="/architecture.html" class="back">← All diagrams</a>
+  <span class="spacer"></span>
+  <span class="label">Section</span>
+  <span class="index-num">13 / 13</span>
+</nav>
+
+<header class="page">
+  <span class="eyebrow">13 · Scaling roadmap</span>
+  <h1>Capacity ladder — 1K → 10K → 100K DAU</h1>
+  <p class="lede">
+    Holding <strong>treasury constant</strong> (covered by the parallel automation track), this is what the <strong>software infrastructure</strong> can carry today, and what topology shift each tier demands. <strong>Three real architecture changes</strong>, not one continuous scale curve. Cost goes up by ~10× per tier; effort goes up by ~5×; complexity goes up by ~3× and never comes down.
+  </p>
+</header>
+
+<!-- ────── Tier 1 LIVE status banner (S35 Marathon 11 Day-1 evening) ────── -->
+
+<div style="background: linear-gradient(135deg, rgba(22,224,169,0.08) 0%, rgba(22,224,169,0.03) 100%); border: 1px solid rgba(22,224,169,0.35); border-left: 4px solid #16e0a9; border-radius: 14px; padding: 22px 26px; margin-bottom: 28px; backdrop-filter: blur(20px);">
+  <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+    <span style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 14px; background: rgba(22,224,169,0.15); border: 1px solid rgba(22,224,169,0.4); color: #16e0a9; font-size: 10px; font-weight: 700; letter-spacing: 1.5px;">
+      <span style="width: 8px; height: 8px; border-radius: 50%; background: #16e0a9; box-shadow: 0 0 8px #16e0a9; display: inline-block;"></span>
+      TIER 1 LIVE
+    </span>
+    <span style="font-size: 11px; color: #888;">As of 2026-05-06</span>
+  </div>
+  <p style="font-size: 13.5px; color: #c5c5c5; line-height: 1.7; margin-bottom: 12px;">
+    Migrated to <strong style="color:#16e0a9;">Supabase Pro ($25/mo)</strong> — managed Postgres 17.6 on AWS US-East-1 with built-in PgBouncer (transaction pooler at port 6543, IPv4 add-on enabled). 169,378 rows transferred clean across 10 critical tables. SSL auto-detected via connection string regex; rejectUnauthorized:false for self-signed cert chain.
+  </p>
+  <p style="font-size: 12.5px; color: #b5b5b5; line-height: 1.7; margin-bottom: 8px;">
+    <strong style="color:#e0e0e0;">Tier 1 mitigations applied:</strong>
+  </p>
+  <ul style="list-style: none; padding: 0; margin-bottom: 8px;">
+    <li style="font-size: 12px; color: #b5b5b5; padding: 3px 0 3px 18px; position: relative;"><span style="position: absolute; left: 0; color: #16e0a9; font-weight: 700;">✓</span> Managed Postgres via Supabase (replaces self-hosted Postgres on VPS)</li>
+    <li style="font-size: 12px; color: #b5b5b5; padding: 3px 0 3px 18px; position: relative;"><span style="position: absolute; left: 0; color: #16e0a9; font-weight: 700;">✓</span> Built-in PgBouncer transaction pooler (Tier 2 connection-pooling capability obtained early at no extra cost)</li>
+    <li style="font-size: 12px; color: #b5b5b5; padding: 3px 0 3px 18px; position: relative;"><span style="position: absolute; left: 0; color: #16e0a9; font-weight: 700;">✓</span> 5 composite indexes deployed: <code style="background:#1a1a2e;padding:1px 5px;border-radius:3px;font-size:10.5px;color:#c770f0;">heimdall_events(occurred_at, agent_id, severity)</code>, <code style="background:#1a1a2e;padding:1px 5px;border-radius:3px;font-size:10.5px;color:#c770f0;">notifications(user_id, is_dismissed, created_at)</code>, agent_bets, card_transactions, execution_log</li>
+    <li style="font-size: 12px; color: #b5b5b5; padding: 3px 0 3px 18px; position: relative;"><span style="position: absolute; left: 0; color: #16e0a9; font-weight: 700;">✓</span> Daily backups + 7-day point-in-time recovery (managed)</li>
+    <li style="font-size: 12px; color: #b5b5b5; padding: 3px 0 3px 18px; position: relative;"><span style="position: absolute; left: 0; color: #16e0a9; font-weight: 700;">✓</span> Redis cache layer wired (<code style="background:#1a1a2e;padding:1px 5px;border-radius:3px;font-size:10.5px;color:#c770f0;">src/cache.ts</code>) — read-through with 60s TTL on <code style="background:#1a1a2e;padding:1px 5px;border-radius:3px;font-size:10.5px;color:#c770f0;">getBudgetSnapshot</code>, write-side invalidation on <code style="background:#1a1a2e;padding:1px 5px;border-radius:3px;font-size:10.5px;color:#c770f0;">recordSpend</code> / <code style="background:#1a1a2e;padding:1px 5px;border-radius:3px;font-size:10.5px;color:#c770f0;">recordRefill</code> / rollover. In-memory by default; flips to Upstash via <code style="background:#1a1a2e;padding:1px 5px;border-radius:3px;font-size:10.5px;color:#c770f0;">UPSTASH_REDIS_REST_URL</code> env (zero code change). Diagnostic at <code style="background:#1a1a2e;padding:1px 5px;border-radius:3px;font-size:10.5px;color:#c770f0;">/health/cache</code>.</li>
+    <li style="font-size: 12px; color: #b5b5b5; padding: 3px 0 3px 18px; position: relative;"><span style="position: absolute; left: 0; color: #16e0a9; font-weight: 700;">✓</span> pm2-logrotate setup script committed (<code style="background:#1a1a2e;padding:1px 5px;border-radius:3px;font-size:10.5px;color:#c770f0;">scripts/setup-logrotate.sh</code>) — 10MB max, daily, 30-day gzip retention. Run-once on VPS.</li>
+  </ul>
+  <p style="font-size: 11.5px; color: #888; margin-top: 10px;">
+    VPS Postgres retained as warm fallback for 7 days (rollback path documented). Local data dump preserved at <code style="background:#1a1a2e;padding:1px 5px;border-radius:3px;font-size:10.5px;color:#c770f0;">/tmp/nuro_20260506_012919.sql</code>.
+  </p>
+</div>
+
+<!-- ────── 3-tier verdict cards ────── -->
+
+<h2 class="section"><span class="num">1</span>What the system carries — at each tier</h2>
+
+<div class="tier-grid">
+
+  <div class="tier-card tier-green">
+    <div class="tier-label">Tier 1</div>
+    <h3>1,000 DAU</h3>
+    <span class="verdict">🟢 Holds with caveats</span>
+    <div class="stat"><span class="k">Concurrent peak</span><span class="v">100–200</span></div>
+    <div class="stat"><span class="k">Actions/sec</span><span class="v">0.5 avg · 5–10 burst</span></div>
+    <div class="stat"><span class="k">Effort to lock in</span><span class="v">1–2 weeks</span></div>
+    <div class="stat"><span class="k">Infra cost</span><span class="v">$0–50/mo</span></div>
+    <div class="breaks">
+      <div class="breaks-h">First failures</div>
+      <ul>
+        <li><code>pg.Pool</code> exhaustion under spikes — fixable: pool 10 → 50</li>
+        <li><code>/notifications</code> 5-source UNION slow at 100+ users — fixable: 30s Redis cache</li>
+        <li><code>/agents/:id/details</code> 9 sub-queries take ~1–2s on busy DB — fixable: add indexes</li>
+        <li>Logs grow 50–100 MB/day, no rotation — fixable: <code>logrotate</code> cron</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="tier-card tier-orange">
+    <div class="tier-label">Tier 2</div>
+    <h3>10,000 DAU</h3>
+    <span class="verdict">🟧 Collapses without rework</span>
+    <div class="stat"><span class="k">Concurrent peak</span><span class="v">1K–2K</span></div>
+    <div class="stat"><span class="k">Actions/sec</span><span class="v">50–100 avg · 200–300 burst</span></div>
+    <div class="stat"><span class="k">Effort to support</span><span class="v">4–6 weeks</span></div>
+    <div class="stat"><span class="k">Infra cost</span><span class="v">$200–500/mo</span></div>
+    <div class="breaks">
+      <div class="breaks-h">What melts (in order)</div>
+      <ul>
+        <li>T+0–5 min: <code>pg.Pool</code> saturated; <code>/notifications</code> melts DB at 165+ qps; <code>agent_budgets</code> row-locks queue</li>
+        <li>T+5–30 min: Issuer reconcile cron tanked by 429s; <code>heimdall_events</code> ~3GB/30d; sweep queue grows unbounded</li>
+        <li>T+30 min+: Cron jobs stack > interval → PM2 OOM cascade</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="tier-card tier-red">
+    <div class="tier-label">Tier 3</div>
+    <h3>100,000 DAU</h3>
+    <span class="verdict">🟥 Total rebuild required</span>
+    <div class="stat"><span class="k">Concurrent peak</span><span class="v">10K–20K</span></div>
+    <div class="stat"><span class="k">Actions/sec</span><span class="v">500–1K avg · 3K–5K burst</span></div>
+    <div class="stat"><span class="k">Effort to support</span><span class="v">3–4 months + DevOps headcount</span></div>
+    <div class="stat"><span class="k">Infra cost</span><span class="v">$1K–3K/mo + scale-linear</span></div>
+    <div class="breaks">
+      <div class="breaks-h">Why it's a different system</div>
+      <ul>
+        <li>Single-instance Postgres can't sustain 5K writes/sec at any tuning</li>
+        <li>Stateless route handlers must horizontally scale (5–20 Node instances behind LB)</li>
+        <li>Sweep / reconcile / bridge attestation must be dedicated worker services</li>
+        <li>Multi-region for fault isolation; per-agent egress for venue rate limits</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+
+<!-- ────── Topology evolution — 4 standalone diagrams ────── -->
+
+<h2 class="section"><span class="num">2</span>Topology — per-tier standalone</h2>
+
+<p style="font-size: 13px; color: #b5b5b5; max-width: 960px; line-height: 1.7; margin-bottom: 24px;">
+  Each tier as its own complete topology, then a delta panel underneath listing
+  <strong style="color:#16e0a9;">+ added</strong>,
+  <strong style="color:#ff6b6b;">− removed</strong>, and
+  <strong style="color:#888;">~ changed</strong> vs the previous tier. The
+  fourth panel shows the own-hardware capex alternative to Tier 3's cloud opex —
+  same capacity, ~50-70% cost reduction at sustained load, in exchange for
+  upfront hardware spend and physical operations responsibility.
+</p>
+
+<!-- ── TIER 1 ── -->
+
+<div class="tier-section">
+  <div class="tier-section-header tier-section-green">
+    <span class="tier-tag">Tier 1</span>
+    <h3>Today + caching · Single VPS · 1K DAU ceiling</h3>
+  </div>
+
+  <div class="diagram">
+  <div class="mermaid">
+flowchart TB
+    Browser["🖥️ Browser"]
+    subgraph VPS ["VPS · 74.50.109.203 · 16GB"]
+        T1FE["Next.js FE<br/>port 2800<br/>PM2 id 1"]
+        T1BE["Express middleware<br/>port 3000<br/>PM2 id 4"]
+        T1PG[("Postgres<br/>same VPS<br/>port 5432")]
+        T1Crons{{"Crons inline<br/>monitor · gas-sync<br/>reputation · settle-sweep<br/>card-balance-reconcile"}}
+        T1RD["Redis cache<br/>(NEW — Upstash free<br/>60s TTL)"]
+        T1Idx["+ Indexes<br/>heimdall_events<br/>(occurred_at, agent_id, severity)"]
+        T1Logs["+ logrotate<br/>daily · 7d retention"]
+    end
+    External["External services<br/>SD3 · Alchemy · CCTP<br/>Polymarket · Hyperliquid"]
+    Browser --> T1FE
+    T1FE --> T1BE
+    T1BE --> T1PG
+    T1BE --> T1RD
+    T1Crons --> T1PG
+    T1BE -.->|polling 30s| External
+
+    style T1FE  fill:#0d2718,stroke:#16e0a9,color:#a0e8c0
+    style T1BE  fill:#0d2718,stroke:#16e0a9,color:#a0e8c0
+    style T1PG  fill:#0d2718,stroke:#16e0a9,color:#a0e8c0
+    style T1Crons fill:#0d2718,stroke:#16e0a9,color:#a0e8c0
+    style T1RD  fill:#1a3a26,stroke:#16e0a9,color:#16e0a9,stroke-width:2px
+    style T1Idx fill:#1a3a26,stroke:#16e0a9,color:#16e0a9,stroke-width:2px
+    style T1Logs fill:#1a3a26,stroke:#16e0a9,color:#16e0a9,stroke-width:2px
+    style VPS fill:#0a1a13,stroke:#16e0a9,color:#16e0a9
+  </div>
+  </div>
+
+  <div class="delta-panel">
+    <div class="delta-col delta-add">
+      <h5>+ Added (vs today raw)</h5>
+      <ul>
+        <li>Redis cache layer (Upstash free) — agent_budgets, agent_reputation, card balance, notification snapshot. 60s TTL.</li>
+        <li><code>heimdall_events</code> composite index <code>(occurred_at, agent_id, severity)</code></li>
+        <li><code>notifications(user_id, is_dismissed, created_at)</code> index</li>
+        <li><code>pg.Pool</code> default 10 → 50 connections</li>
+        <li><code>logrotate</code> daily, 7d retention</li>
+        <li>Cursor pagination on <code>/notifications</code> with LIMIT 50</li>
+      </ul>
+    </div>
+    <div class="delta-col delta-rm">
+      <h5>− Removed (vs today)</h5>
+      <ul>
+        <li><em>Nothing removed</em> — Tier 1 is purely additive. Same VPS, same processes, just better-tuned.</li>
+      </ul>
+    </div>
+    <div class="delta-col delta-keep">
+      <h5>~ Stays the same</h5>
+      <ul>
+        <li>Single VPS (74.50.109.203, 16GB)</li>
+        <li>PM2 supervision (id 1 FE, id 4 BE)</li>
+        <li>All crons inline in middleware process</li>
+        <li>Polling (30s) for Issuer + RPC</li>
+        <li>One Alchemy provider per chain</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="tier-meta">
+    <span><strong>Effort:</strong> 1–2 weeks</span>
+    <span><strong>Infra Δ:</strong> $0–50/mo</span>
+    <span><strong>Hardware:</strong> No new hardware</span>
+  </div>
+</div>
+
+<!-- ── TIER 2 ── -->
+
+<div class="tier-section">
+  <div class="tier-section-header tier-section-orange">
+    <span class="tier-tag">Tier 2</span>
+    <h3>Service decomposition · VPS + replica + workers · 10K DAU</h3>
+  </div>
+
+  <div class="diagram">
+  <div class="mermaid">
+flowchart TB
+    Browser["🖥️ Browser"]
+    subgraph T2Stack [" "]
+        direction TB
+        T2FE["Next.js FE<br/>port 2800<br/>(unchanged)"]
+        T2BE["Express middleware<br/>port 3000<br/>(scaled vertical 32GB)"]
+        T2PgB["PgBouncer<br/>txn pooling<br/>200–500 conns"]
+        T2PG[("Postgres primary")]
+        T2RR[("Postgres read replica<br/>routes /notifications<br/>+ /agents/:id/details")]
+        T2RD["Redis<br/>cache · queue · SSE"]
+        T2Workers["Worker pool<br/>BullMQ workers<br/>sweep · reputation<br/>bridge attestation"]
+        T2SSE["SSE endpoint<br/>/api/notifications/stream<br/>(replaces 30s poll)"]
+        T2APM["APM<br/>Sentry · pg_stat_statements<br/>slow-query alerts"]
+    end
+    External["External services<br/>SD3 webhooks · multi-RPC<br/>per-chain failover"]
+
+    Browser --> T2FE
+    T2FE --> T2BE
+    T2FE -.SSE.-> T2SSE
+    T2SSE --> T2RD
+    T2BE --> T2PgB --> T2PG
+    T2BE -.read.-> T2RR
+    T2BE --> T2RD
+    T2Workers --> T2PgB
+    T2RD --> T2Workers
+    External -.webhooks.-> T2BE
+    T2BE -.metrics.-> T2APM
+
+    style T2FE  fill:#0d2718,stroke:#16e0a9,color:#a0e8c0
+    style T2BE  fill:#2a1f0a,stroke:#f5a623,color:#f5a623,stroke-width:2px
+    style T2PgB fill:#3a2c10,stroke:#f5a623,color:#f5a623,stroke-width:2px
+    style T2PG  fill:#0d2718,stroke:#16e0a9,color:#a0e8c0
+    style T2RR  fill:#3a2c10,stroke:#f5a623,color:#f5a623,stroke-width:2px
+    style T2RD  fill:#3a2c10,stroke:#f5a623,color:#f5a623,stroke-width:2px
+    style T2Workers fill:#3a2c10,stroke:#f5a623,color:#f5a623,stroke-width:2px
+    style T2SSE fill:#3a2c10,stroke:#f5a623,color:#f5a623,stroke-width:2px
+    style T2APM fill:#3a2c10,stroke:#f5a623,color:#f5a623,stroke-width:2px
+  </div>
+  </div>
+
+  <div class="delta-panel">
+    <div class="delta-col delta-add">
+      <h5>+ Added (vs Tier 1)</h5>
+      <ul>
+        <li><strong>PgBouncer</strong> in transaction-pooling mode — 200–500 effective conns from a single PostgreSQL backend</li>
+        <li><strong>Postgres read replica</strong> — physical replication, separate VM (~$50–100/mo). Routes <code>/agents/:id/details</code> + <code>/notifications</code> + analytics</li>
+        <li><strong>BullMQ worker pool</strong> on Redis — 10–50 parallel workers. Picks up <code>card_settlements</code>, <code>reputation-recompute</code>, <code>bridge-attestation-poll</code> jobs</li>
+        <li><strong>Notification SSE</strong> endpoint — one persistent connection per user, server pushes deltas. Drops 99% of notification load</li>
+        <li><strong>heimdall_events partitioning</strong> via pg_partman — daily partitions, drop 90+ day automatically</li>
+        <li><strong>Redis Pro tier</strong> (~$10–40/mo) — cache + queue backing + SSE coordination</li>
+        <li><strong>APM</strong> — Sentry for errors, pg_stat_statements for slow queries</li>
+        <li><strong>Multiple RPC providers</strong> in failover (Alchemy → QuickNode → Infura)</li>
+      </ul>
+    </div>
+    <div class="delta-col delta-rm">
+      <h5>− Removed (vs Tier 1)</h5>
+      <ul>
+        <li><strong>Inline crons</strong> moved to BullMQ workers — no more "cron stacks > interval"</li>
+        <li><strong>Issuer 30s polling</strong> killed entirely — replaced by SD3 webhooks + 5min cache</li>
+        <li><strong>RPC polling</strong> in <code>monitor.ts</code> replaced by websocket-subscribed events (Alchemy Notify or self-run subgraph)</li>
+        <li><strong>Notification 30s polling</strong> from FE replaced by SSE</li>
+        <li><strong>Single Alchemy provider</strong> dependency</li>
+      </ul>
+    </div>
+    <div class="delta-col delta-keep">
+      <h5>~ Changed</h5>
+      <ul>
+        <li>VPS scaled vertically: 16GB → 32GB. Postgres optionally moved to its own machine.</li>
+        <li>Express middleware: same code, same PM2 supervision — just bigger box</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="tier-meta">
+    <span><strong>Effort:</strong> 4–6 weeks</span>
+    <span><strong>Infra Δ:</strong> $200–500/mo</span>
+    <span><strong>Hardware:</strong> 1 extra VM (replica) + bigger main VPS</span>
+  </div>
+</div>
+
+<!-- ── TIER 3 — Managed cloud ── -->
+
+<div class="tier-section">
+  <div class="tier-section-header tier-section-red">
+    <span class="tier-tag">Tier 3</span>
+    <h3>Managed multi-region · Cloud opex · 100K DAU</h3>
+  </div>
+
+  <div class="diagram">
+  <div class="mermaid">
+flowchart TB
+    Browser["🖥️ Browser"]
+    T3CDN["CDN edge · Vercel<br/>(static FE assets)"]
+    T3LB["Load balancer<br/>+ per-tenant rate limits<br/>+ DDoS protection"]
+    subgraph Compute ["Compute — horizontal scale"]
+        T3MW["Express ×N<br/>k8s / Fly.io / Render<br/>auto-scale 5–20 instances"]
+        T3WK["Worker services ×M<br/>dedicated containers<br/>scaled independently"]
+    end
+    subgraph Data ["Data — managed"]
+        T3RD["Managed Redis cluster<br/>Upstash Pro / Redis Cloud<br/>multi-region replication"]
+        T3PG[("Managed Postgres<br/>Supabase Pro / Neon / RDS<br/>primary + read replicas<br/>multi-AZ failover")]
+        T3S3["S3 / R2 archive<br/>heimdall_events<br/>30+ days cold"]
+    end
+    T3OBS["Observability<br/>Datadog / Honeycomb<br/>+ synthetic monitoring<br/>+ per-feature cost dashboards"]
+    T3Egress["Per-agent egress<br/>proxy / IP rotation<br/>(market venue rate limits)"]
+    External["External services<br/>SD3 · multi-RPC · CCTP<br/>Polymarket · Hyperliquid"]
+
+    Browser --> T3CDN --> T3LB --> T3MW
+    T3MW --> T3RD
+    T3MW --> T3PG
+    T3WK --> T3RD
+    T3WK --> T3PG
+    T3PG -.archive.-> T3S3
+    T3MW -.metrics.-> T3OBS
+    T3WK -.metrics.-> T3OBS
+    T3WK --> T3Egress --> External
+
+    style T3CDN fill:#2a1414,stroke:#ff6b6b,color:#ff6b6b,stroke-width:2px
+    style T3LB  fill:#2a1414,stroke:#ff6b6b,color:#ff6b6b,stroke-width:2px
+    style T3MW  fill:#2a1414,stroke:#ff6b6b,color:#ff6b6b,stroke-width:2px
+    style T3WK  fill:#2a1414,stroke:#ff6b6b,color:#ff6b6b,stroke-width:2px
+    style T3RD  fill:#2a1414,stroke:#ff6b6b,color:#ff6b6b,stroke-width:2px
+    style T3PG  fill:#2a1414,stroke:#ff6b6b,color:#ff6b6b,stroke-width:2px
+    style T3S3  fill:#2a1414,stroke:#ff6b6b,color:#ff6b6b,stroke-width:2px
+    style T3OBS fill:#2a1414,stroke:#ff6b6b,color:#ff6b6b,stroke-width:2px
+    style T3Egress fill:#2a1414,stroke:#ff6b6b,color:#ff6b6b,stroke-width:2px
+  </div>
+  </div>
+
+  <div class="delta-panel">
+    <div class="delta-col delta-add">
+      <h5>+ Added (vs Tier 2)</h5>
+      <ul>
+        <li><strong>Managed Postgres</strong> — Supabase Pro / Neon Scale / RDS — connection pooling at the platform layer, multi-AZ failover, point-in-time recovery</li>
+        <li><strong>Horizontal Express scaling</strong> — 5–20 stateless instances behind LB; auto-scale on CPU</li>
+        <li><strong>Dedicated worker services</strong> — sweep / reconcile / bridge / Issuer-webhook each as its own scaling unit</li>
+        <li><strong>CDN</strong> — Vercel for FE assets (free tier handles 100K easily)</li>
+        <li><strong>Per-agent egress</strong> — proxy / IP rotation to avoid Polymarket / Hyperliquid IP-based rate limits</li>
+        <li><strong>Multi-region replication</strong> — at least US-east + US-west primary/replica</li>
+        <li><strong>Helm event archival</strong> — daily partitions ship to S3/R2 after 30 days; hot table stays under 100GB</li>
+        <li><strong>Real observability</strong> — Datadog / Honeycomb / Grafana Cloud + synthetic monitoring on critical user flows</li>
+        <li><strong>Per-tenant rate limits</strong> at the LB layer — no single user/agent can DoS the platform</li>
+        <li><strong>DevOps headcount</strong> — at least 1 dedicated SRE</li>
+      </ul>
+    </div>
+    <div class="delta-col delta-rm">
+      <h5>− Removed (vs Tier 2)</h5>
+      <ul>
+        <li><strong>Self-hosted Postgres</strong> — gone; managed service replaces it</li>
+        <li><strong>Self-hosted PgBouncer</strong> — managed Postgres has its own pooling</li>
+        <li><strong>Self-hosted Redis</strong> — replaced by managed cluster</li>
+        <li><strong>Single-VPS Express</strong> — no more PM2-on-one-box; horizontal containers</li>
+        <li><strong>Single-region deploy</strong> — multi-region from day one</li>
+        <li><strong>Self-hosted PM2 supervision</strong> — replaced by k8s/Fly orchestration</li>
+        <li><strong>Inline VPS file storage</strong> for old heimdall partitions — moved to S3/R2</li>
+      </ul>
+    </div>
+    <div class="delta-col delta-keep">
+      <h5>~ Changed</h5>
+      <ul>
+        <li>Same code base, deployed across containers</li>
+        <li>Same Helm + Huginn + Mythos sub-agents — now scale-aware</li>
+        <li>BullMQ pattern preserved — just on managed Redis</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="tier-meta">
+    <span><strong>Effort:</strong> 3–4 months + DevOps headcount</span>
+    <span><strong>Infra Δ:</strong> $1K–3K/mo + scale-linear</span>
+    <span><strong>Hardware:</strong> Zero — pure cloud opex</span>
+  </div>
+</div>
+
+<!-- ── TIER 3 ALT — Own hardware ── -->
+
+<div class="tier-section">
+  <div class="tier-section-header tier-section-purple">
+    <span class="tier-tag">Tier 3 alt</span>
+    <h3>Own-hardware capex · Bare metal in colo · 100K DAU</h3>
+  </div>
+
+  <p class="alt-note">
+    Same capacity as Tier 3 managed, but self-hosted on dedicated hardware in a
+    colocation facility. Trades upfront capex (~$15–40K) and operational
+    responsibility for ~50–70% lower steady-state cost. Crossover ROI is
+    ~14–20 months at sustained 100K DAU. Worth considering once cloud bills
+    pass ~$3K/mo for 6+ consecutive months.
+  </p>
+
+  <div class="diagram">
+  <div class="mermaid">
+flowchart TB
+    Browser["🖥️ Browser"]
+    HWCDN["CDN edge<br/>Cloudflare ($20/mo)<br/>(or self-hosted Varnish)"]
+    HWLB["HAProxy / nginx<br/>+ rate limits<br/>(running on a 1U VM)"]
+    subgraph Rack ["🏢 Colocation rack — Tier 3+ datacenter"]
+        direction TB
+        subgraph BoxA ["Box A — Compute · 2U"]
+            HWMW1["Express ×8 containers<br/>Docker Compose / Nomad<br/>Threadripper 7995WX<br/>96 cores · 256GB RAM"]
+            HWWK1["Worker containers ×6<br/>BullMQ consumers"]
+        end
+        subgraph BoxB ["Box B — DB · 2U"]
+            HWPG[("PostgreSQL<br/>EPYC 7763 · 64 cores<br/>512GB ECC · 8TB NVMe RAID10<br/>physical replication to Box C")]
+            HWPgB["PgBouncer<br/>local socket"]
+        end
+        subgraph BoxC ["Box C — Replicas + cache · 2U"]
+            HWPGRR[("Postgres read replica<br/>(physical streaming)")]
+            HWRD["Redis Sentinel cluster<br/>3 nodes · keepalived VIP"]
+        end
+        subgraph BoxD ["Box D — Backup + archival · 1U"]
+            HWZFS[("ZFS pool<br/>nightly snapshots<br/>+ daily off-site rsync")]
+            HWArchive["heimdall_events archive<br/>cold partitions"]
+        end
+    end
+    Backup["Off-site backup<br/>Backblaze B2 / Wasabi<br/>~$5/TB/mo"]
+    External["External services"]
+    HWObs["Self-hosted observability<br/>Grafana + Loki + Tempo<br/>(also on Box A)"]
+
+    Browser --> HWCDN --> HWLB --> HWMW1
+    HWMW1 --> HWPgB --> HWPG
+    HWMW1 -.read.-> HWPGRR
+    HWMW1 --> HWRD
+    HWWK1 --> HWPgB
+    HWWK1 --> HWRD
+    HWPG -.streaming repl.-> HWPGRR
+    HWPG -.snapshots.-> HWZFS
+    HWZFS -.daily.-> Backup
+    HWMW1 --> External
+    HWMW1 -.metrics.-> HWObs
+
+    style HWCDN fill:#1f0d2e,stroke:#c770f0,color:#c770f0
+    style HWLB  fill:#1f0d2e,stroke:#c770f0,color:#c770f0
+    style HWMW1 fill:#2a1438,stroke:#c770f0,color:#c770f0,stroke-width:2px
+    style HWWK1 fill:#2a1438,stroke:#c770f0,color:#c770f0,stroke-width:2px
+    style HWPG  fill:#2a1438,stroke:#c770f0,color:#c770f0,stroke-width:2px
+    style HWPgB fill:#2a1438,stroke:#c770f0,color:#c770f0,stroke-width:2px
+    style HWPGRR fill:#2a1438,stroke:#c770f0,color:#c770f0,stroke-width:2px
+    style HWRD fill:#2a1438,stroke:#c770f0,color:#c770f0,stroke-width:2px
+    style HWZFS fill:#2a1438,stroke:#c770f0,color:#c770f0,stroke-width:2px
+    style HWArchive fill:#2a1438,stroke:#c770f0,color:#c770f0,stroke-width:2px
+    style HWObs fill:#1f0d2e,stroke:#c770f0,color:#c770f0
+    style Rack fill:#0d0517,stroke:#c770f0,color:#c770f0
+    style BoxA fill:#15082a,stroke:#a050d0,color:#c770f0
+    style BoxB fill:#15082a,stroke:#a050d0,color:#c770f0
+    style BoxC fill:#15082a,stroke:#a050d0,color:#c770f0
+    style BoxD fill:#15082a,stroke:#a050d0,color:#c770f0
+  </div>
+  </div>
+
+  <div class="delta-panel">
+    <div class="delta-col delta-add">
+      <h5>+ Added (vs Tier 3 managed)</h5>
+      <ul>
+        <li><strong>Bare-metal servers</strong> — 4 boxes (compute, DB primary, replica+cache, backup). ~$15–40K upfront</li>
+        <li><strong>Colocation contract</strong> — 1/4 rack at a Tier 3+ datacenter. ~$300–800/mo. Includes power, cooling, cross-connect</li>
+        <li><strong>Self-managed Postgres</strong> — full control of tuning, extensions, version upgrades; physical streaming replication</li>
+        <li><strong>Redis Sentinel cluster</strong> — 3-node HA, keepalived VIP for automatic failover</li>
+        <li><strong>ZFS storage pool</strong> — nightly snapshots, off-site rsync to Backblaze B2 ($5/TB/mo)</li>
+        <li><strong>Self-hosted observability</strong> — Grafana + Loki + Tempo on Box A. No Datadog/Honeycomb subscription</li>
+        <li><strong>Owner-operator skill</strong> — someone who can debug a kernel issue at 3am</li>
+      </ul>
+    </div>
+    <div class="delta-col delta-rm">
+      <h5>− Removed (vs Tier 3 managed)</h5>
+      <ul>
+        <li><strong>Managed Postgres bill</strong> — Supabase/RDS bill goes to zero (~$500–2K/mo savings)</li>
+        <li><strong>Managed Redis bill</strong> — Upstash Pro bill goes to zero (~$50–500/mo savings)</li>
+        <li><strong>k8s / Fly.io / Render</strong> — replaced by Docker Compose or Nomad on bare metal</li>
+        <li><strong>Datadog / Honeycomb subscription</strong> — replaced by self-hosted Grafana stack (~$100–500/mo savings)</li>
+        <li><strong>Cloud egress fees</strong> — colocation deals usually include generous transit; cross-AZ replication doesn't cost cents/GB</li>
+        <li><strong>Provider lock-in</strong> — your data, your hardware, your control plane</li>
+      </ul>
+    </div>
+    <div class="delta-col delta-keep">
+      <h5>~ Trade-offs</h5>
+      <ul>
+        <li>YOU are now responsible for hardware failure, RAID rebuilds, kernel patches, datacenter trips</li>
+        <li>Capacity is fixed at the rack — scaling beyond requires more boxes (lead time + colo expansion)</li>
+        <li>No multi-region — single colocation = single point of failure unless you do dual-colo</li>
+        <li>CDN still external (Cloudflare or similar) — colo isn't optimal for static asset edge delivery</li>
+        <li>External backup target (Backblaze B2 / off-site) remains essential</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="tier-meta">
+    <span><strong>Capex:</strong> $15–40K hardware upfront</span>
+    <span><strong>Opex:</strong> ~$500–1K/mo (colo + electricity + bandwidth + B2 backup)</span>
+    <span><strong>Hardware:</strong> 4× rack-mount servers (compute + DB primary + replica/cache + backup)</span>
+    <span><strong>ROI vs cloud:</strong> ~14–20 months at sustained 100K DAU</span>
+  </div>
+</div>
+
+<!-- ────── Treasury parallel track ────── -->
+
+<h2 class="section"><span class="num">3</span>Treasury automation — parallel track</h2>
+
+<div class="treasury">
+  <h3>Treasury automation unlocks every tier</h3>
+  <p>
+    Software capacity is necessary but not sufficient — the chains run dry
+    long before the DB does. <strong>Per-chain reserve targets</strong> + a
+    <strong>5-min refill cron</strong> with <strong>gas-price gating</strong>
+    keep the system funded automatically. Without this, even a fully-scaled
+    Tier 3 stack halts on a quiet weekend. Full plan in
+    <strong style="color:#c770f0;">Marathon 10</strong>.
+    <strong>Buildable today in OBSERVE-only mode</strong> — flips live the moment funding arrives.
+  </p>
+  <div class="reserves">
+    <div class="reserve-row">
+      <div class="chain">Base — priority 1</div>
+      <div class="amounts">$10K USDC <span class="target">target</span> · 0.5 ETH</div>
+    </div>
+    <div class="reserve-row">
+      <div class="chain">Polygon — priority 2</div>
+      <div class="amounts">$5K USDC <span class="target">target</span> · 500 MATIC</div>
+    </div>
+    <div class="reserve-row">
+      <div class="chain">Arbitrum — priority 3</div>
+      <div class="amounts">$2.5K USDC <span class="target">target</span> · 0.25 ETH</div>
+    </div>
+    <div class="reserve-row">
+      <div class="chain">HyperEVM — priority 3</div>
+      <div class="amounts">$2.5K USDC <span class="target">target</span> · 5 HYPE</div>
+    </div>
+    <div class="reserve-row">
+      <div class="chain">Solana — priority 3</div>
+      <div class="amounts">$2.5K USDC <span class="target">target</span> · 5 SOL</div>
+    </div>
+    <div class="reserve-row">
+      <div class="chain">18 other chains</div>
+      <div class="amounts">$500 each <span class="target">target</span> · per-chain native</div>
+    </div>
+  </div>
+  <p style="margin-bottom:0;">
+    <strong>Kill-switches:</strong> operating-account &lt; 4 weeks runway · 3+ chains
+    below-min · refill failure rate &gt; 20%/hr · outflow spike &gt; 3× rolling 7d.
+    Any fires → halt + Telegram critical.
+  </p>
+</div>
+
+<!-- ────── Decision triggers ────── -->
+
+<h2 class="section"><span class="num">4</span>Decision triggers — when to invest</h2>
+
+<table class="scale">
+  <thead>
+    <tr>
+      <th>Signal</th>
+      <th>Action</th>
+      <th>Tier</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Sustained 100 active users</td>
+      <td>Execute Tier 1 mitigations (pg.Pool, Redis, indexes, logrotate)</td>
+      <td><span class="pill green">T1</span></td>
+    </tr>
+    <tr>
+      <td>500 sustained <em>or</em> p95 dashboard load &gt; 2s</td>
+      <td>Begin Tier 2 planning, fund infra</td>
+      <td><span class="pill orange">T2 plan</span></td>
+    </tr>
+    <tr>
+      <td>2K sustained users</td>
+      <td>Tier 2 must ship in 4-6 week sprint</td>
+      <td><span class="pill orange">T2 ship</span></td>
+    </tr>
+    <tr>
+      <td>10K sustained <em>or</em> Postgres CPU &gt; 80% sustained</td>
+      <td>Begin Tier 3 architecture, hire DevOps</td>
+      <td><span class="pill red">T3</span></td>
+    </tr>
+    <tr>
+      <td>Treasury operating-account &lt; 4 weeks runway</td>
+      <td>Build/deploy treasury automation IMMEDIATELY (any tier)</td>
+      <td><span class="pill purple">M10</span></td>
+    </tr>
+    <tr>
+      <td>Single-chain reserve hits 50% of target</td>
+      <td>Treasury automation should be live and refilling — if not, manual</td>
+      <td><span class="pill purple">M10</span></td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- ────── Quick-reference summary ────── -->
+
+<h2 class="section"><span class="num">5</span>Summary at a glance</h2>
+
+<table class="scale">
+  <thead>
+    <tr>
+      <th></th>
+      <th>1K DAU</th>
+      <th>10K DAU</th>
+      <th>100K DAU</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Concurrent peak</strong></td>
+      <td>100–200</td>
+      <td>1K–2K</td>
+      <td>10K–20K</td>
+    </tr>
+    <tr>
+      <td><strong>Actions/sec</strong></td>
+      <td>0.5 avg, 5–10 burst</td>
+      <td>50–100 avg, 200–300 burst</td>
+      <td>500–1K avg, 3K–5K burst</td>
+    </tr>
+    <tr>
+      <td><strong>Verdict</strong></td>
+      <td><span class="pill green">holds with caveats</span></td>
+      <td><span class="pill orange">collapses</span></td>
+      <td><span class="pill red">wrong topology</span></td>
+    </tr>
+    <tr>
+      <td><strong>Effort</strong></td>
+      <td>1–2 weeks</td>
+      <td>4–6 weeks</td>
+      <td>3–4 months + DevOps</td>
+    </tr>
+    <tr>
+      <td><strong>Cost</strong></td>
+      <td>$0–50/mo</td>
+      <td>$200–500/mo</td>
+      <td>$1K–3K/mo + scale-linear</td>
+    </tr>
+    <tr>
+      <td><strong>First failure</strong></td>
+      <td><code>pg.Pool</code> spike exhaustion</td>
+      <td><code>/notifications</code> UNION melts DB</td>
+      <td>Single-instance Postgres throughput ceiling</td>
+    </tr>
+    <tr>
+      <td><strong>Required topology</strong></td>
+      <td>Same VPS + Redis cache</td>
+      <td>VPS + replica + worker pool + queue</td>
+      <td>Managed everything, multi-region, horizontal</td>
+    </tr>
+  </tbody>
+</table>
+
+<footer style="margin-top:32px; padding-top:20px; border-top: 1px solid rgba(255,255,255,0.05); color: #555; font-size:11px; line-height:1.6;">
+  Marathon 9 (agent control plane FE) and Marathon 10 (treasury automation) run independent of these scaling tiers — both are pre-funding work that ships in OBSERVE-only mode and unlocks the moment real money flows. <strong>This doc is dynamic</strong> — updates as we hit each tier and confirm what actually broke vs. what we predicted.
+  <br/><br/>
+  Source: <code>Neural Net/Claude Memory/Scaling Roadmap.md</code> · Authored Session 34
+</footer>
+
+</div>
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'dark',
+    themeVariables: {
+      primaryColor: '#16e0a9',
+      primaryTextColor: '#e0e0e0',
+      primaryBorderColor: '#16e0a9',
+      lineColor: '#888',
+      textColor: '#c5c5c5',
+      mainBkg: '#0a0a14',
+      nodeBorder: '#444',
+      clusterBkg: 'rgba(22,224,169,0.04)',
+      clusterBorder: 'rgba(22,224,169,0.3)',
+    }
+  });
+</script>
+</body>
+</html>

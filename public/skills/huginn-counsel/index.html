@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Huginn Counsel · Nuro Skill</title>
+<meta name="description" content="Pre-action advisory verdicts for any agent. Endorse / caution / dissent / block-recommend with reasoning + confidence. Odin's raven of thought.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/styles/dark.css">
+<style>
+  .skill-hero { padding: 72px 0 48px; }
+  .skill-hero-grid { display: grid; grid-template-columns: 1fr 1.05fr; gap: 56px; align-items: start; }
+  @media (max-width: 960px) { .skill-hero-grid { grid-template-columns: 1fr; gap: 40px; } }
+  .skill-hero h1 { margin: 20px 0 16px; }
+  .skill-meta { display: flex; flex-direction: column; gap: 14px; margin: 28px 0 0; }
+  .skill-meta-row { display: flex; align-items: center; gap: 14px; padding: 14px 18px; background: var(--bg-1); border: 1px solid var(--border-subtle); border-radius: var(--r-md); }
+  .skill-meta-row [data-lucide] { width: 18px; height: 18px; color: var(--accent); flex-shrink: 0; }
+  .skill-meta-row .label { font-family: 'Geist Mono', monospace; font-size: 11px; color: var(--fg-muted); text-transform: uppercase; letter-spacing: 0.05em; flex-shrink: 0; }
+  .skill-meta-row .val { font-family: 'Geist Mono', monospace; font-size: 13px; color: var(--fg-primary); word-break: break-all; }
+  .features-section { padding: 64px 0; border-top: 1px solid var(--border-subtle); }
+  .features-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-top: 32px; }
+  @media (max-width: 720px) { .features-grid { grid-template-columns: 1fr; } }
+  .feature-card { padding: 24px; background: var(--bg-1); border: 1px solid var(--border-subtle); border-radius: var(--r-lg); }
+  .feature-icon { display: inline-flex; width: 32px; height: 32px; align-items: center; justify-content: center; border-radius: var(--r-sm); background: var(--accent-surface); color: var(--accent); border: 1px solid var(--accent-border); margin-bottom: 12px; }
+  .feature-icon [data-lucide] { width: 16px; height: 16px; }
+  .feature-title { font-size: 15px; font-weight: 600; color: var(--fg-primary); margin-bottom: 6px; letter-spacing: -0.005em; }
+  .feature-desc { font-size: 13px; line-height: 1.55; color: var(--fg-secondary); }
+  .back-link { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--fg-secondary); margin-bottom: 24px; transition: color var(--t-fast) var(--ease-out); }
+  .back-link:hover { color: var(--fg-primary); }
+  .back-link [data-lucide] { width: 14px; height: 14px; }
+  .cta-strip { padding: 64px 0; border-top: 1px solid var(--border-subtle); text-align: center; }
+  .cta-strip .t-h2 { margin: 12px 0 16px; }
+  .cta-strip .t-lede { max-width: 56ch; margin: 0 auto 28px; }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="/" class="brand"><span class="brand-mark">N</span><span>Nuro</span></a>
+    <div class="nav-links">
+      <a href="/skills" class="nav-link">Skills</a>
+      <a href="/agents" class="nav-link">Agents</a>
+      <a href="/contracts" class="nav-link">Contracts</a>
+      <a href="/login" class="nav-cta">Sign in <i data-lucide="arrow-right"></i></a>
+    </div>
+  </div>
+</nav>
+
+<section class="skill-hero">
+  <div class="container">
+    <a href="/skills" class="back-link"><i data-lucide="arrow-left"></i> Back to skill catalog</a>
+    <div class="skill-hero-grid">
+      <div>
+        <span class="chip"><i data-lucide="sparkles" style="width: 14px; height: 14px;"></i> Huginn · The raven of thought</span>
+        <h1 class="t-h1">A second opinion before every move.</h1>
+        <p class="t-lede">
+          POST a proposed action to Huginn. Receive an advisory verdict (endorse, caution, dissent, or block-recommend) with reasoning and confidence. Drop-in human-in-the-loop equivalent for autonomous agents. Pulls from your reputation tier and historical accuracy.
+        </p>
+        <div class="skill-meta">
+          <div class="skill-meta-row"><i data-lucide="globe-2"></i><span class="label">Endpoint</span><span class="val">POST /api/x402/huginn/counsel</span></div>
+          <div class="skill-meta-row"><i data-lucide="key-round"></i><span class="label">Auth</span><span class="val">Bearer $NURO_KEY · x402 native</span></div>
+          <div class="skill-meta-row"><i data-lucide="zap"></i><span class="label">Latency</span><span class="val">~300ms median · synchronous verdict</span></div>
+        </div>
+      </div>
+
+      <div class="code-window">
+        <div class="code-window-header">
+          <div class="code-window-tabs">
+            <button class="code-tab active" data-tab="curl">curl</button>
+            <button class="code-tab" data-tab="ts">TypeScript</button>
+            <button class="code-tab" data-tab="py">Python</button>
+            <button class="code-tab" data-tab="response">Response</button>
+          </div>
+          <div class="code-window-actions">
+            <button class="copy-btn" data-copy-target="code-body"><i data-lucide="copy"></i><span class="copy-label">Copy</span></button>
+          </div>
+        </div>
+        <div class="code-body" id="code-body"><pre><code></code></pre></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="features-section">
+  <div class="container">
+    <span class="t-eyebrow">What you get</span>
+    <h2 class="t-h2" style="margin: 12px 0 8px;">Verdicts your agent can actually act on.</h2>
+    <p class="t-lede" style="max-width: 60ch;">Wire Huginn into your agent loop before any high-value or unusual action. Endorse keeps you moving. Caution warns. Dissent recommends rework. Block-recommend says stop.</p>
+    <div class="features-grid">
+      <article class="feature-card">
+        <div class="feature-icon"><i data-lucide="circle-check"></i></div>
+        <div class="feature-title">Four verdict tiers</div>
+        <div class="feature-desc">Endorse, caution, dissent, block-recommend. Each maps to a clear action your agent (or its co-pilot) can take.</div>
+      </article>
+      <article class="feature-card">
+        <div class="feature-icon"><i data-lucide="award"></i></div>
+        <div class="feature-title">Reputation-aware</div>
+        <div class="feature-desc">Pulls your agent's historical accuracy from Mythos. New agents get strict counsel; proven agents get more leeway.</div>
+      </article>
+      <article class="feature-card">
+        <div class="feature-icon"><i data-lucide="message-square-quote"></i></div>
+        <div class="feature-title">Reasoning included</div>
+        <div class="feature-desc">Every verdict comes with human-readable reasoning. Log it in your decision journal for audit trails.</div>
+      </article>
+      <article class="feature-card">
+        <div class="feature-icon"><i data-lucide="link"></i></div>
+        <div class="feature-title">Helm rule references</div>
+        <div class="feature-desc">When Huginn cites a rule fire, the rule ID is in the response. Cross-reference with Helm threat intel.</div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="cta-strip">
+  <div class="container">
+    <span class="t-eyebrow">Open your dashboard</span>
+    <h2 class="t-h2">Wire Huginn. Watch your agents pause and check.</h2>
+    <p class="t-lede">Sign in to mint your real API key. Huginn becomes a single POST your agent runs before high-stakes moves.</p>
+    <a href="/login" class="btn btn-primary btn-lg">Open your dashboard <i data-lucide="arrow-right"></i></a>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-links">
+      <a href="/skills">All skills</a><a href="/agents">Agents</a><a href="/contracts">Contracts</a><a href="/skills/manifest.json">manifest.json</a><a href="/login">Sign in</a>
+    </div>
+    <div>Nuro · Huginn counsels before action</div>
+  </div>
+</footer>
+
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script>
+if (window.lucide) lucide.createIcons({ attrs: { 'stroke-width': 1.5 } });
+
+const PLACEHOLDER_KEY = 'nuro_ak_REPLACE_AT_SIGNIN_x4f2a8c';
+let tab = 'curl';
+
+const codes = {
+  curl: () => [
+    '<span class="tok-comment"># Ask Huginn before betting $100 on Polymarket.</span>',
+    'curl <span class="tok-flag">-X</span> POST <span class="tok-string">https://api.nuro.finance/api/x402/huginn/counsel</span> \\',
+    '  <span class="tok-flag">-H</span> <span class="tok-string">"Authorization: Bearer ' + PLACEHOLDER_KEY + '"</span> \\',
+    '  <span class="tok-flag">-H</span> <span class="tok-string">"Content-Type: application/json"</span> \\',
+    '  <span class="tok-flag">-d</span> <span class="tok-string">\'{',
+    '    "proposerAgentId": "agent_ops_07",',
+    '    "actionType":      "bet",',
+    '    "actionSubject":   "Polymarket Trump-2028 YES",',
+    '    "valueUsd":        100,',
+    '    "reasoning":       "outcome uncertainty 0.62, horizon 1100d"',
+    '  }\'</span>',
+  ].join('\n'),
+  ts: () => [
+    '<span class="tok-keyword">const</span> verdict = <span class="tok-keyword">await</span> <span class="tok-fn">fetch</span>(<span class="tok-string">"https://api.nuro.finance/api/x402/huginn/counsel"</span>, {',
+    '  <span class="tok-prop">method</span>: <span class="tok-string">"POST"</span>,',
+    '  <span class="tok-prop">headers</span>: { <span class="tok-string">Authorization</span>: <span class="tok-string">`Bearer ${NURO_KEY}`</span> },',
+    '  <span class="tok-prop">body</span>: <span class="tok-fn">JSON.stringify</span>({',
+    '    <span class="tok-prop">proposerAgentId</span>: <span class="tok-string">"agent_ops_07"</span>,',
+    '    <span class="tok-prop">actionType</span>: <span class="tok-string">"bet"</span>,',
+    '    <span class="tok-prop">actionSubject</span>: <span class="tok-string">"Polymarket Trump-2028 YES"</span>,',
+    '    <span class="tok-prop">valueUsd</span>: <span class="tok-num">100</span>,',
+    '  }),',
+    '});',
+    '<span class="tok-keyword">const</span> { verdict: v, reasoning } = <span class="tok-keyword">await</span> verdict.<span class="tok-fn">json</span>();',
+  ].join('\n'),
+  py: () => [
+    '<span class="tok-keyword">import</span> requests',
+    '',
+    'res = requests.<span class="tok-fn">post</span>(',
+    '    <span class="tok-string">"https://api.nuro.finance/api/x402/huginn/counsel"</span>,',
+    '    headers={<span class="tok-string">"Authorization"</span>: <span class="tok-string">f"Bearer {NURO_KEY}"</span>},',
+    '    json={',
+    '        <span class="tok-string">"proposerAgentId"</span>: <span class="tok-string">"agent_ops_07"</span>,',
+    '        <span class="tok-string">"actionType"</span>:      <span class="tok-string">"bet"</span>,',
+    '        <span class="tok-string">"actionSubject"</span>:   <span class="tok-string">"Polymarket Trump-2028 YES"</span>,',
+    '        <span class="tok-string">"valueUsd"</span>:        <span class="tok-num">100</span>,',
+    '    },',
+    ')',
+    'verdict = res.<span class="tok-fn">json</span>()',
+    '<span class="tok-keyword">print</span>(verdict[<span class="tok-string">"verdict"</span>])  <span class="tok-comment"># endorse | caution | dissent | block-recommend</span>',
+  ].join('\n'),
+  response: () => [
+    '<span class="tok-punct">{</span>',
+    '  <span class="tok-prop">"verdict"</span>: <span class="tok-string">"caution"</span>,',
+    '  <span class="tok-prop">"confidence"</span>: <span class="tok-num">0.72</span>,',
+    '  <span class="tok-prop">"reasoning"</span>: <span class="tok-string">"Outcome uncertainty 0.62 + horizon 1100d. Tier multiplier 1.0× → max recommended $50."</span>,',
+    '  <span class="tok-prop">"rulesFired"</span>: <span class="tok-punct">[</span><span class="tok-string">"HELM-105"</span><span class="tok-punct">]</span>,',
+    '  <span class="tok-prop">"tier"</span>: <span class="tok-string">"good"</span>,',
+    '  <span class="tok-prop">"tierMultiplier"</span>: <span class="tok-num">1.0</span>',
+    '<span class="tok-punct">}</span>',
+  ].join('\n'),
+};
+
+function render() { document.getElementById('code-body').innerHTML = '<pre><code>' + codes[tab]() + '</code></pre>'; }
+document.querySelectorAll('[data-tab]').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('[data-tab]').forEach(x => x.classList.remove('active'));
+    t.classList.add('active'); tab = t.dataset.tab; render();
+  });
+});
+document.querySelectorAll('.copy-btn[data-copy-target]').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    const lbl = btn.querySelector('.copy-label');
+    try { await navigator.clipboard.writeText(document.getElementById(btn.dataset.copyTarget).textContent || ''); btn.classList.add('copied'); lbl.textContent = 'Copied'; setTimeout(() => { btn.classList.remove('copied'); lbl.textContent = 'Copy'; }, 1800); }
+    catch { lbl.textContent = 'Press ⌘C'; setTimeout(() => { lbl.textContent = 'Copy'; }, 1800); }
+  });
+});
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>02 · Deposit → Card credit · AFI Architecture</title>
+<link rel="stylesheet" href="/architecture/_style.css">
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+</head>
+<body>
+<div class="wrap">
+
+<nav class="top">
+  <a href="/architecture.html" class="back">← All diagrams</a>
+  <span class="spacer"></span>
+  <span class="label">Section</span>
+  <span class="index-num">02 / 10</span>
+</nav>
+
+<header class="page">
+  <span class="eyebrow">02 · Critical path</span>
+  <h1>Deposit → Card credit</h1>
+  <p class="lede">
+    The canonical money-movement path, end-to-end. User sends tokens to their HD-derived deposit address on any supported chain; Monitor detects the balance, Swap converts to USDC (if not already USDC), Bridge routes to Base, and SD3 Issuer credits the Visa card. Every other deposit path is a <strong>variant</strong> of this one. Below: the full sequence, then a focused view of the <em>bridge tier</em> (CCTP-direct vs LZ→CCTP 2-hop), then a worked example with concrete addresses and transaction shapes.
+  </p>
+</header>
+
+<div class="section-label">01 — Full sequence</div>
+<div class="diagram tall">
+<div class="mermaid">
+sequenceDiagram
+    autonumber
+    participant User
+    participant Wallet as User Wallet
+    participant Chain as Source Chain
+    participant Monitor as Backend Monitor
+    participant Swap as swap.ts (0x)
+    participant Bridge as bridge.ts
+    participant Base as Base chain
+    participant SD3 as SD3 Issuer
+    participant Card as Visa Card
+
+    User->>Wallet: Click Send
+    Wallet->>Chain: tx — transfer tokens to deposit address
+    Chain-->>Monitor: poll cycle detects new balance
+    alt Token is USDC already
+        Monitor->>Bridge: skip swap, go to bridge
+    else Token is native or allowlisted ERC-20
+        Monitor->>Swap: executeSwap(amount)
+        Swap->>Chain: approve + swap tx via 0x
+        Chain-->>Monitor: USDC arrives at same deposit address
+        Monitor->>Bridge: bridge the new USDC balance
+    end
+    Bridge->>Base: CCTP burn + Circle attest + Base mint
+    Base-->>SD3: webhook on deposit at Issuer address
+    SD3->>Card: credit balance (USD)
+    SD3-->>Monitor: sync via GET /balances
+    Monitor-->>User: notification (Telegram + UI refresh)
+</div>
+</div>
+
+<div class="section-label">02 — Bridge tier (CCTP-direct vs 2-hop)</div>
+<p class="section-sub">Not every chain has a CCTP burn/mint endpoint. For chains that don't, we route the USDC through LayerZero V2 to the Arbitrum hub first, then burn CCTP to Base. This is the piece that was rushed on the original single-page diagram — it deserves its own view.</p>
+<div class="diagram">
+<div class="mermaid">
+flowchart TD
+    USDC["USDC at deposit address<br/>(HD-derived, source chain)"]
+
+    USDC --> Decide{"CCTP-enabled chain?"}
+
+    Decide -->|"YES · 22 chains"| DirectBurn["CCTP burn on source<br/>destDomain → 6 (Base)"]
+    Decide -->|"NO · niche L1/L2"| LZHop["LayerZero V2 OFT<br/>→ Arbitrum hub<br/>0xd58C…2b18"]
+
+    LZHop --> ArbBurn["CCTP burn on Arbitrum<br/>domain 3 → 6 (Base)"]
+
+    DirectBurn --> CircleAttest["Circle attestation<br/>~10–15 min"]
+    ArbBurn --> CircleAttest
+    CircleAttest --> BaseMint["CCTP mint on Base<br/>at Issuer-linked address"]
+    BaseMint --> IssuerWebhook["SD3 webhook<br/>card credited"]
+
+    classDef warn fill:#1a1a2e,stroke:#f4a840,color:#fff
+    class LZHop,ArbBurn warn
+</div>
+</div>
+
+<div class="callout info">
+  <strong>Circle domain IDs</strong> — Ethereum 0 · Avalanche 1 · Optimism 2 · Arbitrum 3 · Solana 5 · <strong>Base 6</strong> (our terminus) · Polygon 7 · Sonic 8 · Linea 11 · HyperEVM (not CCTP-enabled — LZ only). A full list lives in <code>src/cctp-domains.ts</code>.
+</div>
+
+<div class="section-label">03 — Worked example</div>
+<p class="section-sub">Concrete walk-through of what a single reload looks like. Addresses are illustrative placeholders; real txs are visible in <code>execution_log</code> by correlation_id.</p>
+<div class="worked">
+  <div class="worked-header">Scenario — User 42 reloads with 50 SHIB from Ethereum</div>
+
+  <div class="worked-step">
+    <div class="worked-num">1</div>
+    <div class="worked-body">
+      <h4>User sends SHIB to deposit address</h4>
+      <p>Frontend derives address via <code>/api/supported-tokens</code>. User hits "Send from Wallet" → wagmi calls <code>SHIB.transfer(0xDEP…42A1, 50 * 10^18)</code>.</p>
+      <div class="worked-meta">source chain: Ethereum (chainId 1) · tx lands ~12s later</div>
+    </div>
+  </div>
+
+  <div class="worked-step">
+    <div class="worked-num">2</div>
+    <div class="worked-body">
+      <h4>Monitor poll cycle detects balance</h4>
+      <p>Every <code>POLL_INTERVAL_MS</code> (60s when live), Monitor scans the allowlist × user-deposit matrix. SHIB balance &gt; 0 triggers <code>swapInflight.set(...)</code> to prevent double-swap, then calls <code>executeErc20ToUsdcSwap</code>.</p>
+      <div class="worked-meta">table rows touched: <code>erc20_allowlist</code>, <code>users</code>, <code>user_deposits</code> · writes to <code>execution_log</code> (action=<code>monitor_tick</code>)</div>
+    </div>
+  </div>
+
+  <div class="worked-step">
+    <div class="worked-num">3</div>
+    <div class="worked-body">
+      <h4>Approve + swap via 0x</h4>
+      <p>Backend signer (the Deployer key at <code>0x27FbEAD2…ECBC</code>) signs two txs:</p>
+      <code>SHIB.approve(0xAllowanceHolder, 50e18)</code>
+      <code>0xAllowanceHolder.swap(SHIB → USDC, recipient=0xDEP…42A1)</code>
+      <p>Quote is re-fetched at execution time from 0x <code>/swap/allowance-holder/quote</code> — the FE preview quote is never trusted.</p>
+      <div class="worked-meta">~$0.10 USDC lands at same deposit address</div>
+    </div>
+  </div>
+
+  <div class="worked-step">
+    <div class="worked-num">4</div>
+    <div class="worked-body">
+      <h4>Next poll detects USDC → Bridge decision</h4>
+      <p>Ethereum is CCTP-enabled (domain 0) → skip the LayerZero hop. <code>bridge.ts::bridgeToBase</code> builds:</p>
+      <code>USDC.approve(tokenMessenger, amount)</code>
+      <code>tokenMessenger.depositForBurn(amount, destDomain=6, mintRecipient=userIssuerAddr)</code>
+      <div class="worked-meta">if user were on HyperEVM instead, step 4a would be <code>OFTadapter.send(...)</code> to Arbitrum hub first</div>
+    </div>
+  </div>
+
+  <div class="worked-step">
+    <div class="worked-num">5</div>
+    <div class="worked-body">
+      <h4>Circle attestation (async wait)</h4>
+      <p>Typical wait: 10–15 minutes. Monitor's <code>cctp_finalize</code> reconciler polls Circle's attestation API; once signed, it calls <code>messageTransmitter.receiveMessage(msg, attestation)</code> on Base to complete the mint.</p>
+      <div class="worked-meta">alert threshold: &gt; 30 min attestation delay → Telegram ping to admin</div>
+    </div>
+  </div>
+
+  <div class="worked-step">
+    <div class="worked-num">6</div>
+    <div class="worked-body">
+      <h4>SD3 webhook → card credit</h4>
+      <p>USDC lands at the Issuer-linked Base address that SD3 provisioned during KYC. SD3 fires an <em>inbound-deposit</em> webhook to our backend, we post the entry into <code>transactions</code>, <code>cards.balance</code> increments, FE refreshes via next SWR fetch.</p>
+      <div class="worked-meta">end-to-end: ~1–3 min (Base-direct USDC) · ~15–25 min (native swap path) · ~10–15 min (Solana)</div>
+    </div>
+  </div>
+</div>
+
+<section class="prose">
+  <h3>Four variants to know</h3>
+  <ul>
+    <li><strong>Native path</strong> (Marathon 7): Monitor detects ETH/MATIC/BNB/AVAX/S/HYPE → <code>swap.ts::executeNativeToUsdcSwap</code> routes through 0x. USDC lands at the same address; next poll cycle picks it up and takes the bridge path below.</li>
+    <li><strong>ERC-20 path</strong>: Monitor detects an allowlisted token (SHIB/PEPE/PENGU/ANDY/LINK/UNI/WBTC/WETH/cbBTC) → <code>executeErc20ToUsdcSwap</code> runs approve + swap. Same terminus.</li>
+    <li><strong>Base-direct</strong>: USDC already sitting on Base → skip CCTP entirely, direct send to the Issuer-linked Base address.</li>
+    <li><strong>Solana</strong>: Solana USDC → <code>@circle-fin/bridge-kit</code> (not Circle's public CCTP SDK — that one still lacks remote domains) → Base mint → Issuer.</li>
+  </ul>
+
+  <h3>Why the Monitor polls twice</h3>
+  <p>For swap paths, the same address needs to be polled twice — first to detect the native/ERC-20 balance, then again after the swap completes to see USDC. The <code>swapInflight</code> map prevents double-swaps during the gap. 5-minute TTL.</p>
+
+  <div class="callout risk">
+    <strong>Risk policy applies here.</strong> The card gets credited with <strong>actual USDC received</strong>, not the pre-swap dollar value of the deposit. If a memecoin rugs 30% between deposit and swap, user eats the loss. See <a href="/architecture/on-chain.html">on-chain routing</a> for edge cases and <code>Neural Net/Claude Memory/Swap Risk Policy.md</code> for the full codification.
+  </div>
+</section>
+
+<nav class="pager">
+  <a href="/architecture/system-view.html">
+    <div class="pager-label">← Prev</div>
+    <div class="pager-title">01 · System view</div>
+  </a>
+  <a href="/architecture/reload-ui.html" class="next">
+    <div class="pager-label">Next →</div>
+    <div class="pager-title">03 · Reload Card UI</div>
+  </a>
+</nav>
+
+<footer>AFI System Architecture · 02 / 10</footer>
+
+</div>
+
+<script>
+mermaid.initialize({
+  startOnLoad: true,
+  theme: 'dark',
+  themeVariables: { primaryColor: '#1a1a2e', primaryTextColor: '#e8e8e8', primaryBorderColor: '#16e0a9', lineColor: '#16e0a9', secondaryColor: '#2a2a4a', tertiaryColor: '#0a0a14', background: '#050510', mainBkg: '#1a1a2e', secondBkg: '#2a2a4a', fontFamily: 'Inter, system-ui, sans-serif', fontSize: '17px', edgeLabelBackground: '#050510' },
+  flowchart: { curve: 'basis', padding: 32, useMaxWidth: true, nodeSpacing: 75, rankSpacing: 95, htmlLabels: true },
+  sequence: { actorMargin: 70, useMaxWidth: true, wrap: true, width: 200, messageFontSize: 15, actorFontSize: 15, noteFontSize: 14 },
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nuro Agents · Production-grade rails for autonomous AI</title>
+<meta name="description" content="Configure your agent in 60 seconds. Native USDC settlement across 23 chains, multi-runtime policy enforcement, Mythos neural-net intel, and Visa rails. Without rebuilding your stack.">
+
+<!-- Open Graph (Facebook / LinkedIn / Slack / Discord / iMessage previews) -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Nuro">
+<meta property="og:title" content="Nuro Agents · Production-grade rails for autonomous AI">
+<meta property="og:description" content="Wire your agents. Manage them from your dashboard. Native USDC across 23 chains, multi-runtime policy enforcement, Visa rails. npm install -g @nuro-finance/cli.">
+<meta property="og:url" content="https://app.nuro.finance/agents">
+<meta property="og:image" content="https://app.nuro.finance/agentic-card.png">
+<meta property="og:image:width" content="1024">
+<meta property="og:image:height" content="649">
+<meta property="og:image:alt" content="Nuro Visa card with BTC, ETH, SOL, USDC icons">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Nuro Agents · Production-grade rails for autonomous AI">
+<meta name="twitter:description" content="Wire your agents. Manage them from your dashboard. npm install -g @nuro-finance/cli.">
+<meta name="twitter:image" content="https://app.nuro.finance/agentic-card.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/styles/dark.css">
+
+<style>
+  /* /agents-specific styles only. Design tokens come from /styles/dark.css */
+
+  .hero { padding: 96px 0 64px; }
+  @media (max-width: 720px) { .hero { padding: 64px 0 48px; } }
+
+  /* S35 M11 Day-3 evening: Moonpay-style hero refactor.
+   * Was 2-column (left content + right code-window). Founder feedback
+   * (per Chris): "no clunky box, we're just going with a package
+   * installer for now." So the right-side code window is gone, and the
+   * hero centers on the install pill as the canonical first-touch
+   * action. Pattern matches Moonpay / Vercel / Linear dev landing
+   * pages: big brand statement above the fold, one install command,
+   * trust signals below. Code samples live in the configurator further
+   * down for users who want to dig.
+   */
+  .hero-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    max-width: 760px;
+    margin: 0 auto;
+  }
+
+  .hero h1 {
+    margin-top: 24px;
+    margin-bottom: 20px;
+    max-width: 22ch;
+  }
+  .hero-lede {
+    max-width: 60ch;
+    margin-bottom: 32px;
+  }
+  .hero-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .hero-meta {
+    margin-top: 36px;
+    display: flex;
+    gap: 28px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .hero-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--fg-muted);
+  }
+  .hero-meta-item [data-lucide] {
+    width: 14px; height: 14px;
+    color: var(--accent);
+  }
+
+  /* Pillars (post-hero) */
+  .pillars {
+    margin-top: 80px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+  }
+  @media (max-width: 960px) { .pillars { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 480px) { .pillars { grid-template-columns: 1fr; } }
+  .pillar {
+    padding: 20px;
+    background: var(--bg-1);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--r-lg);
+    transition: all var(--t-base) var(--ease-out);
+  }
+  .pillar:hover {
+    border-color: var(--border-default);
+    background: var(--bg-2);
+    transform: translateY(-2px);
+  }
+  .pillar-icon {
+    display: inline-flex;
+    width: 36px; height: 36px;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--r-md);
+    background: var(--accent-surface);
+    border: 1px solid var(--accent-border);
+    color: var(--accent);
+    margin-bottom: 14px;
+  }
+  .pillar-icon [data-lucide] { width: 18px; height: 18px; }
+  .pillar-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--fg-primary);
+    margin-bottom: 4px;
+    letter-spacing: -0.005em;
+  }
+  .pillar-desc {
+    font-size: 13px;
+    color: var(--fg-secondary);
+    line-height: 1.5;
+  }
+
+  /* Configurator */
+  .config { padding: 96px 0; }
+  .config-grid {
+    margin-top: 48px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    align-items: start;
+  }
+  @media (max-width: 960px) { .config-grid { grid-template-columns: 1fr; } }
+  .config-form {
+    background: var(--bg-1);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--r-xl);
+    overflow: hidden;
+  }
+  .config-preview { position: sticky; top: 88px; }
+
+  .step {
+    padding: 28px 28px;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .step:last-child { border-bottom: none; }
+  .step-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+  .step-num {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    background: var(--accent-surface);
+    border: 1px solid var(--accent-border);
+    color: var(--accent);
+    font-family: 'Geist Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    display: grid;
+    place-items: center;
+  }
+  .step-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--fg-primary);
+    letter-spacing: -0.005em;
+  }
+  .step-help {
+    font-size: 12.5px;
+    color: var(--fg-muted);
+    margin-top: 2px;
+  }
+
+  .input {
+    width: 100%;
+    font-family: inherit;
+    font-size: 14px;
+    color: var(--fg-primary);
+    background: var(--bg-0);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--r-md);
+    padding: 11px 14px;
+    outline: none;
+    transition: all var(--t-fast) var(--ease-out);
+  }
+  .input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+  }
+  .input::placeholder { color: var(--fg-disabled); }
+
+  .field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  @media (max-width: 540px) { .field-row { grid-template-columns: 1fr; } }
+  .field-label {
+    display: block;
+    font-family: 'Geist Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+    margin-bottom: 8px;
+  }
+
+  .pill-grid { display: grid; gap: 8px; }
+  .pill-grid-2 { grid-template-columns: repeat(2, 1fr); }
+  .pill-grid-4 { grid-template-columns: repeat(4, 1fr); }
+  @media (max-width: 540px) { .pill-grid-4 { grid-template-columns: repeat(2, 1fr); } }
+
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--fg-secondary);
+    background: var(--bg-0);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--r-md);
+    padding: 10px 14px;
+    cursor: pointer;
+    text-align: left;
+    transition: all var(--t-fast) var(--ease-out);
+  }
+  .pill:hover {
+    border-color: var(--border-default);
+    color: var(--fg-primary);
+  }
+  .pill.active {
+    background: var(--accent-surface);
+    border-color: var(--accent-border);
+    color: var(--accent);
+  }
+  .pill [data-lucide] { width: 14px; height: 14px; flex-shrink: 0; }
+
+  .cap-row {
+    display: grid;
+    grid-template-columns: 56px 1fr 64px;
+    gap: 12px;
+    align-items: center;
+  }
+  .cap-row .cap-min {
+    font-family: 'Geist Mono', monospace;
+    font-size: 12px;
+    color: var(--fg-muted);
+  }
+  .range {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 4px;
+    background: var(--bg-3);
+    border-radius: 4px;
+    outline: none;
+  }
+  .range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+    box-shadow: 0 0 0 1px var(--accent-border), 0 2px 8px var(--accent-glow);
+    border: none;
+  }
+  .range::-moz-range-thumb {
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+    border: none;
+  }
+  .cap-val {
+    font-family: 'Geist Mono', monospace;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--accent);
+    text-align: right;
+  }
+
+  /* CTA section */
+  .cta-section { padding: 80px 0; }
+  .cta-card {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 48px 40px;
+    background: linear-gradient(180deg, rgba(13,144,255,0.06) 0%, rgba(13,144,255,0.02) 100%);
+    border: 1px solid var(--accent-border);
+    border-radius: var(--r-xl);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .cta-card::before {
+    content: '';
+    position: absolute;
+    top: -50%; left: 50%;
+    width: 60%; height: 200%;
+    background: radial-gradient(ellipse 50% 30% at 50% 50%, rgba(13,144,255,0.10), transparent 70%);
+    transform: translateX(-50%);
+    pointer-events: none;
+  }
+  .cta-card > * { position: relative; }
+  .cta-card .t-h2 { margin: 12px 0; }
+  .cta-card .t-lede { max-width: 50ch; margin: 0 auto 28px; }
+
+  /* Trust section */
+  .trust { padding: 96px 0; border-top: 1px solid var(--border-subtle); }
+  .trust-header { margin-bottom: 40px; }
+  .trust-header .t-h2 { margin: 12px 0; }
+  .trust-header .t-lede { max-width: 60ch; }
+</style>
+</head>
+<body>
+
+<!-- ─── NAV ─── -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="/" class="brand">
+      <span class="brand-mark">N</span>
+      <span>Nuro</span>
+    </a>
+    <div class="nav-links">
+      <a href="/skills" class="nav-link">Skills</a>
+      <a href="/contracts" class="nav-link">Contracts</a>
+      <a href="/architecture.html" class="nav-link">Architecture</a>
+      <a href="/login" class="nav-cta">
+        Sign in
+        <i data-lucide="arrow-right"></i>
+      </a>
+    </div>
+  </div>
+</nav>
+
+<!-- ─── HERO ─── -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-inner">
+      <div>
+        <span class="chip">v0.5.6 · Live dashboard</span>
+        <h1 class="t-display">
+          Wire your agents. <span class="t-accent-gradient">Manage them</span> from your dashboard.
+        </h1>
+        <p class="t-lede hero-lede">
+          Open a Nuro account. Install our SDK or hit the API directly. Your agents post events to Nuro automatically, and you see everything in one dashboard. Balances, expenses, decisions, deposits, all live. Set caps, approve big moves, watch your fleet earn.
+        </p>
+        <div class="hero-actions">
+          <a href="/login" class="btn btn-primary btn-lg">
+            Open your dashboard
+            <i data-lucide="arrow-right"></i>
+          </a>
+          <a href="#preview" class="btn btn-secondary btn-lg">
+            Preview the integration
+          </a>
+        </div>
+        <div class="install-cmd">
+          <span class="install-prompt">$</span>
+          <code class="install-code">npm install -g @nuro-finance/cli</code>
+          <button class="install-copy" data-install-cmd="npm install -g @nuro-finance/cli">
+            <i data-lucide="copy"></i>
+            <span class="install-copy-label">Copy</span>
+          </button>
+        </div>
+        <p class="install-cmd-meta">
+          Talk to Nuro from your terminal. <code style="font-family: 'Geist Mono', monospace; font-size: 12px; color: var(--fg-secondary);">nuro init</code> after install.
+        </p>
+        <div class="hero-meta">
+          <div class="hero-meta-item">
+            <i data-lucide="check"></i>
+            <span>One dashboard, your whole fleet</span>
+          </div>
+          <div class="hero-meta-item">
+            <i data-lucide="check"></i>
+            <span>Visa + Mastercard issuing</span>
+          </div>
+          <div class="hero-meta-item">
+            <i data-lucide="check"></i>
+            <span>Co-pilot approval on big moves</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Pillars -->
+    <div class="pillars">
+      <div class="pillar">
+        <div class="pillar-icon"><i data-lucide="landmark"></i></div>
+        <div class="pillar-title">Your Nuro account</div>
+        <div class="pillar-desc">USDC-native neo-bank. Holds your fleet's working capital. Cards draw from here.</div>
+      </div>
+      <div class="pillar">
+        <div class="pillar-icon"><i data-lucide="credit-card"></i></div>
+        <div class="pillar-title">Visa + Mastercard</div>
+        <div class="pillar-desc">Real cards for every agent. Per-card budgets, mid-flight enforcement, 0.4s settle.</div>
+      </div>
+      <div class="pillar">
+        <div class="pillar-icon"><i data-lucide="git-branch"></i></div>
+        <div class="pillar-title">Bridge + on/off-ramp</div>
+        <div class="pillar-desc">23 chains via LayerZero + CCTP. Plaid for fiat ↔ crypto in seconds. New chains weekly.</div>
+      </div>
+      <div class="pillar">
+        <div class="pillar-icon"><i data-lucide="git-merge"></i></div>
+        <div class="pillar-title">Co-pilot orchestration</div>
+        <div class="pillar-desc">Set goals. Approve big moves. Watch deposits flow back. You command, agents work.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ─── CTA ─── -->
+<section class="cta-section">
+  <div class="container">
+    <div class="cta-card">
+      <span class="t-eyebrow">Open your dashboard</span>
+      <h2 class="t-h2">Wire your agent. Watch it work.</h2>
+      <p class="t-lede">
+        Sign in once. We mint your real API key, register your agent under our policy stack, and route every event into your dashboard. Then head to <code style="color: var(--accent); background: var(--bg-2); padding: 2px 8px; border-radius: 6px; font-family: 'Geist Mono', monospace; font-size: 14px;">/dashboard</code> and <strong style="color: var(--fg-primary);">watch the autonomous action happen</strong>.
+      </p>
+      <a href="/login" class="btn btn-primary btn-lg">
+        Open your dashboard
+        <i data-lucide="arrow-right"></i>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ─── TRUST / COMPARISON ─── -->
+<section class="trust">
+  <div class="container">
+    <div class="trust-header">
+      <span class="t-eyebrow">How we compare</span>
+      <h2 class="t-h2">The only stack that does all four.</h2>
+      <p class="t-lede">
+        The agentic-finance category is converging fast. Mastercard launched Agent Pay April 2025. Moonpay shipped a skill library days later. Coinbase x402 was earlier still. Here's where Nuro is uniquely positioned.
+      </p>
+    </div>
+
+    <div class="compare-wrap">
+      <table class="compare">
+        <thead>
+          <tr>
+            <th></th>
+            <th>Moonpay</th>
+            <th>Mastercard Agent Pay</th>
+            <th>Coinbase x402</th>
+            <th class="col-us">Nuro</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Native USDC card settlement</td>
+            <td><span class="dash"><i data-lucide="minus"></i></span></td>
+            <td><span class="check"><i data-lucide="check"></i></span></td>
+            <td><span class="dash"><i data-lucide="minus"></i></span></td>
+            <td class="col-us"><span class="check"><i data-lucide="check"></i></span></td>
+          </tr>
+          <tr>
+            <td>Wrap external agents under policy</td>
+            <td><span class="dash"><i data-lucide="minus"></i></span></td>
+            <td><span class="dash"><i data-lucide="minus"></i></span></td>
+            <td><span class="dash"><i data-lucide="minus"></i></span></td>
+            <td class="col-us"><span class="check"><i data-lucide="check"></i></span></td>
+          </tr>
+          <tr>
+            <td>Built-in security and threat intel</td>
+            <td><span class="dash"><i data-lucide="minus"></i></span></td>
+            <td><span class="dash"><i data-lucide="minus"></i></span></td>
+            <td><span class="dash"><i data-lucide="minus"></i></span></td>
+            <td class="col-us"><span class="check"><i data-lucide="check"></i></span></td>
+          </tr>
+          <tr>
+            <td>Multi-agent fleet orchestration</td>
+            <td><span class="dash"><i data-lucide="minus"></i></span></td>
+            <td><span class="dash"><i data-lucide="minus"></i></span></td>
+            <td><span class="dash"><i data-lucide="minus"></i></span></td>
+            <td class="col-us"><span class="check"><i data-lucide="check"></i></span></td>
+          </tr>
+          <tr>
+            <td>x402-compatible skill marketplace</td>
+            <td><span class="check"><i data-lucide="check"></i></span></td>
+            <td><span class="dash"><i data-lucide="minus"></i></span></td>
+            <td><span class="check"><i data-lucide="check"></i></span></td>
+            <td class="col-us"><span class="check"><i data-lucide="check"></i></span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ─── FOOTER ─── -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-links">
+      <a href="/skills">Skills</a>
+      <a href="/contracts">Contracts</a>
+      <a href="/architecture.html">Architecture</a>
+      <a href="/login">Sign in</a>
+    </div>
+    <div>Nuro · the financial OS for autonomous AI agents</div>
+  </div>
+</footer>
+
+<!-- Lucide icons CDN. Converts every <i data-lucide="..."></i> into an SVG -->
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script>
+// Render Lucide icons with 1.5px stroke (override default 2px for the modern look)
+if (window.lucide) {
+  lucide.createIcons({ attrs: { 'stroke-width': 1.5 } });
+}
+
+// ─── Configurator state ────────────────────────────────────────────
+const state = {
+  name: 'my-agent',
+  runtime: 'claude',
+  capabilities: ['omnichain', 'attach', 'mythos'],
+  actionCapUsd: 50,
+  dailyCapUsd: 500,
+  markets: ['polymarket', 'hyperliquid', 'swap'],
+  chain: 'base',
+  cfgTab: 'curl',
+  heroTab: 'curl',
+};
+
+const PLACEHOLDER_KEY = 'nuro_ak_REPLACE_AT_SIGNIN_x4f2a8c';
+
+function htmlEscape(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+// ─── Hero code generators ──────────────────────────────────────────
+// Three-tab "integration teaser." Each tab is now exactly TWO LINES:
+//   1. Install the Nuro CLI (the canonical install path, same as the
+//      install-cmd pill on the left side of the hero)
+//   2. Your agent's one-line integration call (post events back to Nuro)
+//
+// Why two lines instead of "actually one": developer-grade audiences
+// expect to see "install + use," not just "use." Pretending the curl
+// works without auth would mislead. So we show install + a single
+// one-liner that uses the published key.
+//
+// All three tabs follow the same shape so the visual rhythm is
+// preserved across language toggles. The curl tab is shell, ts is
+// Node ≥ 18 native fetch, py is the requests stdlib analog.
+
+function heroCurl() {
+  return [
+    '<span class="tok-comment"># 1. Install Nuro</span>',
+    'npm <span class="tok-fn">install</span> <span class="tok-flag">-g</span> <span class="tok-string">@nuro-finance/cli</span>',
+    '',
+    '<span class="tok-comment"># 2. Post events from your agent (one curl, no SDK)</span>',
+    'curl <span class="tok-string">https://api.nuro.finance/event</span> <span class="tok-flag">-H</span> <span class="tok-string">"Authorization: Bearer $NURO_KEY"</span> <span class="tok-flag">-d</span> <span class="tok-string">\'{"subject":"trade","amount":12.50}\'</span>',
+  ].join('\n');
+}
+
+function heroTs() {
+  return [
+    '<span class="tok-comment">// 1. Install Nuro</span>',
+    'npm <span class="tok-fn">install</span> <span class="tok-flag">-g</span> <span class="tok-string">@nuro-finance/cli</span>',
+    '',
+    '<span class="tok-comment">// 2. Post events from your agent (Node &ge; 18 native fetch)</span>',
+    '<span class="tok-keyword">await</span> <span class="tok-fn">fetch</span>(<span class="tok-string">"https://api.nuro.finance/event"</span>, { <span class="tok-prop">method</span>: <span class="tok-string">"POST"</span>, <span class="tok-prop">headers</span>: { <span class="tok-string">Authorization</span>: <span class="tok-string">`Bearer ${NURO_KEY}`</span> }, <span class="tok-prop">body</span>: <span class="tok-fn">JSON.stringify</span>({ <span class="tok-prop">subject</span>: <span class="tok-string">"trade"</span>, <span class="tok-prop">amount</span>: <span class="tok-num">12.50</span> }) });',
+  ].join('\n');
+}
+
+function heroPy() {
+  return [
+    '<span class="tok-comment"># 1. Install Nuro</span>',
+    'npm <span class="tok-fn">install</span> <span class="tok-flag">-g</span> <span class="tok-string">@nuro-finance/cli</span>',
+    '',
+    '<span class="tok-comment"># 2. Post events from your agent (requests stdlib)</span>',
+    'requests.<span class="tok-fn">post</span>(<span class="tok-string">"https://api.nuro.finance/event"</span>, headers={<span class="tok-string">"Authorization"</span>: <span class="tok-string">f"Bearer {NURO_KEY}"</span>}, json={<span class="tok-string">"subject"</span>: <span class="tok-string">"trade"</span>, <span class="tok-string">"amount"</span>: <span class="tok-num">12.50</span>})',
+  ].join('\n');
+}
+function renderHero() {
+  // Hero code-window was removed in the Moonpay-style hero refactor.
+  // Function preserved for future re-enablement; no-op when the
+  // target element isn't on the page.
+  const body = document.getElementById('hero-code');
+  if (!body) return;
+  let code = '';
+  if (state.heroTab === 'curl') code = heroCurl();
+  else if (state.heroTab === 'ts') code = heroTs();
+  else if (state.heroTab === 'py') code = heroPy();
+  body.innerHTML = '<pre><code>' + code + '</code></pre>';
+}
+
+// ─── Configurator code generators ──────────────────────────────────
+// All three (curl / Python / Node) show the REGISTRATION call,
+// POST /api/connectors/agent, which uses every config field. This way
+// every selection in the form (runtime, capabilities, caps, markets,
+// chain) becomes immediately visible in the rendered code. After
+// registering once, the returned API key is what your agent uses to
+// post events; that flow is shown separately in the dashboard.
+
+// Helpers. JSON-quote a string list with newline-aware indenting.
+function quotedList(items, indent) {
+  if (!items.length) return '[]';
+  const inner = items.map((s) => '<span class="tok-string">"' + htmlEscape(s) + '"</span>').join(', ');
+  return '[' + inner + ']';
+}
+
+function cfgCurl() {
+  const caps = state.capabilities.length
+    ? state.capabilities.map((c) => '"' + c + '"').join(', ')
+    : '';
+  const markets = state.markets.length
+    ? state.markets.map((m) => '"' + m + '"').join(', ')
+    : '';
+  return [
+    '<span class="tok-comment"># Run ONCE to register your "' + htmlEscape(state.name) + '" agent with Nuro.</span>',
+    '<span class="tok-comment"># Returns an API key your agent uses to post events to your dashboard.</span>',
+    '',
+    'curl <span class="tok-flag">-X</span> POST <span class="tok-string">https://api.nuro.finance/api/connectors/agent</span> \\',
+    '  <span class="tok-flag">-H</span> <span class="tok-string">"Authorization: Bearer $NURO_OWNER_KEY"</span> \\',
+    '  <span class="tok-flag">-H</span> <span class="tok-string">"Content-Type: application/json"</span> \\',
+    '  <span class="tok-flag">-d</span> <span class="tok-string">\'{',
+    '    "name":          "' + htmlEscape(state.name) + '",',
+    '    "agent_type":    "' + state.runtime + '",',
+    '    "capabilities":  [' + caps + '],',
+    '    "policy": {',
+    '      "max_per_action_usd": ' + state.actionCapUsd + ',',
+    '      "max_daily_usd":      ' + state.dailyCapUsd + ',',
+    '      "allowed_markets":    [' + markets + ']',
+    '    },',
+    '    "settlement": {',
+    '      "default_chain": "' + state.chain + '",',
+    '      "currency":      "USDC"',
+    '    }',
+    '  }\'</span>',
+    '',
+    '<span class="tok-comment"># Response: { "agent_id": "...", "api_key": "nuro_ak_...",</span>',
+    '<span class="tok-comment">#             "webhook_secret": "whsec_...", ... }</span>',
+  ].join('\n');
+}
+function cfgPython() {
+  return [
+    '<span class="tok-comment"># pip install requests</span>',
+    '<span class="tok-keyword">import</span> requests',
+    '',
+    '<span class="tok-comment"># Run ONCE to register. Save the api_key from the response.</span>',
+    'res = requests.<span class="tok-fn">post</span>(',
+    '    <span class="tok-string">"https://api.nuro.finance/api/connectors/agent"</span>,',
+    '    headers={<span class="tok-string">"Authorization"</span>: <span class="tok-string">f"Bearer {NURO_OWNER_KEY}"</span>},',
+    '    json={',
+    '        <span class="tok-string">"name"</span>:         <span class="tok-string">"' + htmlEscape(state.name) + '"</span>,',
+    '        <span class="tok-string">"agent_type"</span>:   <span class="tok-string">"' + state.runtime + '"</span>,',
+    '        <span class="tok-string">"capabilities"</span>: ' + quotedList(state.capabilities) + ',',
+    '        <span class="tok-string">"policy"</span>: {',
+    '            <span class="tok-string">"max_per_action_usd"</span>: <span class="tok-num">' + state.actionCapUsd + '</span>,',
+    '            <span class="tok-string">"max_daily_usd"</span>:      <span class="tok-num">' + state.dailyCapUsd + '</span>,',
+    '            <span class="tok-string">"allowed_markets"</span>:    ' + quotedList(state.markets) + ',',
+    '        },',
+    '        <span class="tok-string">"settlement"</span>: {',
+    '            <span class="tok-string">"default_chain"</span>: <span class="tok-string">"' + state.chain + '"</span>,',
+    '            <span class="tok-string">"currency"</span>:      <span class="tok-string">"USDC"</span>,',
+    '        },',
+    '    },',
+    ')',
+    'agent = res.<span class="tok-fn">json</span>()',
+    '<span class="tok-keyword">print</span>(<span class="tok-fn">f</span><span class="tok-string">"Agent {agent[\'agent_id\']} ready · key: {agent[\'api_key\']}"</span>)',
+  ].join('\n');
+}
+function cfgNode() {
+  return [
+    '<span class="tok-comment">// No deps required &middot; native fetch (Node ≥ 18)</span>',
+    '',
+    '<span class="tok-comment">// Run ONCE to register. Save the api_key from the response.</span>',
+    '<span class="tok-keyword">const</span> res = <span class="tok-keyword">await</span> <span class="tok-fn">fetch</span>(<span class="tok-string">"https://api.nuro.finance/api/connectors/agent"</span>, {',
+    '  <span class="tok-prop">method</span>: <span class="tok-string">"POST"</span>,',
+    '  <span class="tok-prop">headers</span>: {',
+    '    <span class="tok-string">"Authorization"</span>: <span class="tok-string">`Bearer ${NURO_OWNER_KEY}`</span>,',
+    '    <span class="tok-string">"Content-Type"</span>: <span class="tok-string">"application/json"</span>,',
+    '  },',
+    '  <span class="tok-prop">body</span>: <span class="tok-fn">JSON.stringify</span>({',
+    '    <span class="tok-prop">name</span>:         <span class="tok-string">"' + htmlEscape(state.name) + '"</span>,',
+    '    <span class="tok-prop">agent_type</span>:   <span class="tok-string">"' + state.runtime + '"</span>,',
+    '    <span class="tok-prop">capabilities</span>: ' + quotedList(state.capabilities) + ',',
+    '    <span class="tok-prop">policy</span>: {',
+    '      <span class="tok-prop">max_per_action_usd</span>: <span class="tok-num">' + state.actionCapUsd + '</span>,',
+    '      <span class="tok-prop">max_daily_usd</span>:      <span class="tok-num">' + state.dailyCapUsd + '</span>,',
+    '      <span class="tok-prop">allowed_markets</span>:    ' + quotedList(state.markets) + ',',
+    '    },',
+    '    <span class="tok-prop">settlement</span>: {',
+    '      <span class="tok-prop">default_chain</span>: <span class="tok-string">"' + state.chain + '"</span>,',
+    '      <span class="tok-prop">currency</span>:      <span class="tok-string">"USDC"</span>,',
+    '    },',
+    '  }),',
+    '});',
+    '<span class="tok-keyword">const</span> agent = <span class="tok-keyword">await</span> res.<span class="tok-fn">json</span>();',
+    '<span class="tok-fn">console.log</span>(<span class="tok-string">`Agent ${agent.agent_id} ready · key: ${agent.api_key}`</span>);',
+  ].join('\n');
+}
+function cfgConfig() {
+  const cfg = {
+    name: state.name,
+    runtime: state.runtime,
+    capabilities: state.capabilities,
+    policy: {
+      maxPerActionUsd: state.actionCapUsd,
+      maxDailyUsd: state.dailyCapUsd,
+      allowedMarkets: state.markets,
+    },
+    settlement: { chain: state.chain, currency: 'USDC' },
+    apiKey: PLACEHOLDER_KEY,
+  };
+  return htmlEscape(JSON.stringify(cfg, null, 2))
+    .replace(/&quot;([^&]+?)&quot;:/g, '<span class="tok-prop">&quot;$1&quot;</span>:')
+    .replace(/: &quot;([^&]*?)&quot;/g, ': <span class="tok-string">&quot;$1&quot;</span>')
+    .replace(/: (-?\d+\.?\d*)/g, ': <span class="tok-num">$1</span>')
+    .replace(/(\btrue\b|\bfalse\b)/g, '<span class="tok-keyword">$1</span>');
+}
+function renderCfg() {
+  const body = document.getElementById('cfg-code');
+  let code = '';
+  if (state.cfgTab === 'curl') code = cfgCurl();
+  else if (state.cfgTab === 'python') code = cfgPython();
+  else if (state.cfgTab === 'node') code = cfgNode();
+  else if (state.cfgTab === 'config') code = cfgConfig();
+  body.innerHTML = '<pre><code>' + code + '</code></pre>';
+}
+
+function renderAll() { renderHero(); renderCfg(); }
+
+// ─── Bind hero code-window tabs ────────────────────────────────────
+document.querySelectorAll('[data-hero-tab]').forEach((tab) => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('[data-hero-tab]').forEach((t) => t.classList.remove('active'));
+    tab.classList.add('active');
+    state.heroTab = tab.dataset.heroTab;
+    renderHero();
+  });
+});
+
+// ─── Bind configurator pills + inputs ──────────────────────────────
+function bindSingleSelect(groupId, stateKey, dataAttr) {
+  document.querySelectorAll(`#${groupId} .pill`).forEach((btn) => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll(`#${groupId} .pill`).forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+      state[stateKey] = btn.dataset[dataAttr];
+      renderCfg();
+    });
+  });
+}
+bindSingleSelect('cfg-runtime', 'runtime', 'runtime');
+bindSingleSelect('cfg-chain', 'chain', 'chain');
+
+document.querySelectorAll('#cfg-caps .pill').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    btn.classList.toggle('active');
+    state.capabilities = Array.from(document.querySelectorAll('#cfg-caps .pill.active')).map((b) => b.dataset.cap);
+    renderCfg();
+  });
+});
+document.querySelectorAll('[data-mkt]').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    btn.classList.toggle('active');
+    state.markets = Array.from(document.querySelectorAll('[data-mkt].active')).map((b) => b.dataset.mkt);
+    renderCfg();
+  });
+});
+
+// HOTFIX: configurator section was removed in 99d9f19 but these
+// getElementById bindings remained. They threw TypeError on every page
+// load (cfg-name returns null, .addEventListener on null = throw),
+// halting the rest of the script body and leaving the install-pill
+// Copy button dead. Wrapping each binding in optional-chaining +
+// null-checks so the JS continues running when the configurator HTML
+// is absent. Full deletion of this block is queued behind a follow-up
+// cleanup commit.
+const cfgName = document.getElementById('cfg-name');
+cfgName?.addEventListener('input', (e) => {
+  state.name = e.target.value.trim() || 'my-agent';
+  renderCfg();
+});
+const actionCap = document.getElementById('cfg-action-cap');
+const actionCapVal = document.getElementById('cfg-action-cap-val');
+if (actionCap && actionCapVal) {
+  actionCap.addEventListener('input', (e) => {
+    state.actionCapUsd = Number(e.target.value);
+    actionCapVal.textContent = '$' + state.actionCapUsd;
+    renderCfg();
+  });
+}
+const dailyCap = document.getElementById('cfg-daily-cap');
+const dailyCapVal = document.getElementById('cfg-daily-cap-val');
+if (dailyCap && dailyCapVal) {
+  dailyCap.addEventListener('input', (e) => {
+    state.dailyCapUsd = Number(e.target.value);
+    dailyCapVal.textContent = '$' + state.dailyCapUsd.toLocaleString();
+    renderCfg();
+  });
+}
+
+// Configurator code-window tabs
+document.querySelectorAll('[data-cfg-tab]').forEach((tab) => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('[data-cfg-tab]').forEach((t) => t.classList.remove('active'));
+    tab.classList.add('active');
+    state.cfgTab = tab.dataset.cfgTab;
+    renderCfg();
+  });
+});
+
+// ─── Copy buttons ──────────────────────────────────────────────────
+document.querySelectorAll('.copy-btn[data-copy-target]').forEach((btn) => {
+  btn.addEventListener('click', async () => {
+    const targetId = btn.dataset.copyTarget;
+    const text = document.getElementById(targetId)?.textContent || '';
+    const lbl = btn.querySelector('.copy-label');
+    try {
+      await navigator.clipboard.writeText(text);
+      btn.classList.add('copied');
+      lbl.textContent = 'Copied';
+      // Swap icon to check
+      const iconWrap = btn.querySelector('svg');
+      setTimeout(() => {
+        btn.classList.remove('copied');
+        lbl.textContent = 'Copy';
+      }, 1800);
+    } catch {
+      lbl.textContent = 'Press ⌘C';
+      setTimeout(() => { lbl.textContent = 'Copy'; }, 1800);
+    }
+  });
+});
+
+// Install-cmd copy buttons (the npm install pill in the hero).
+// Different from .copy-btn above: payload comes from data-install-cmd,
+// not from a hidden DOM element, so the click works against a static
+// string regardless of any other code-window state.
+document.querySelectorAll('.install-copy[data-install-cmd]').forEach((btn) => {
+  btn.addEventListener('click', async () => {
+    const cmd = btn.dataset.installCmd || '';
+    const lbl = btn.querySelector('.install-copy-label');
+    try {
+      await navigator.clipboard.writeText(cmd);
+      btn.dataset.state = 'copied';
+      if (lbl) lbl.textContent = 'Copied';
+      setTimeout(() => { delete btn.dataset.state; if (lbl) lbl.textContent = 'Copy'; }, 1800);
+    } catch {
+      if (lbl) lbl.textContent = 'Press ⌘C';
+      setTimeout(() => { if (lbl) lbl.textContent = 'Copy'; }, 1800);
+    }
+  });
+});
+
+renderAll();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,211 @@
+# =============================================================================
+# ARCHIVE — previous ReloadModal.tsx (cards) before 2026-05-12 shell rewrite.
+# Not imported by the app; copy/paste reference only.
+# =============================================================================
+
+"use client";
+
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { FULL_MODAL_OVERLAY_CLASS } from "@/components/ui/modalPresets";
+import { ChevronLeft, X } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
+import { ReloadFlow, type ReloadFlowHandle } from "@/features/dashboard/my-card-1/components/ReloadFlow";
+
+interface ReloadModalProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+const layerVariants = {
+  initial: { opacity: 0 },
+  animate: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.04,
+    },
+  },
+};
+
+const cascadeVariants = {
+  initial: { opacity: 0, y: -8 },
+  animate: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.42,
+      ease: [0.33, 1, 0.68, 1],
+    },
+  },
+};
+
+/**
+ * Reload flow (`ReloadFlow`) in a compact glass modal: narrower max width than
+ * the transactions table modal, with aligned title row and consistent body gutters.
+ */
+export function ReloadModal({ open, onOpenChange }: ReloadModalProps) {
+  const shellRef = useRef<HTMLDivElement>(null);
+  const reloadFlowRef = useRef<ReloadFlowHandle>(null);
+  const [lockedShellHeightPx, setLockedShellHeightPx] = useState<number | null>(null);
+  const [flowStep, setFlowStep] = useState(1);
+
+  useEffect(() => {
+    if (open) {
+      // Remeasure on each open. Do not clear while closing — Radix still animates the
+      // shell out; dropping the height lock early reads as a “shrink” during close.
+      setLockedShellHeightPx(null);
+    }
+    setFlowStep(1);
+  }, [open]);
+
+  useLayoutEffect(() => {
+    if (!open || lockedShellHeightPx !== null) return;
+    let raf1 = 0;
+    let raf2 = 0;
+    let cancelled = false;
+
+    const measure = () => {
+      if (cancelled) return;
+      const shell = shellRef.current;
+      if (!shell) return;
+      const h = Math.round(shell.getBoundingClientRect().height);
+      if (h > 0) setLockedShellHeightPx(h);
+    };
+
+    raf1 = requestAnimationFrame(() => {
+      raf2 = requestAnimationFrame(measure);
+    });
+
+    return () => {
+      cancelled = true;
+      cancelAnimationFrame(raf1);
+      cancelAnimationFrame(raf2);
+    };
+  }, [open, lockedShellHeightPx]);
+
+  const handleClose = useCallback(() => {
+    onOpenChange(false);
+  }, [onOpenChange]);
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent
+        ref={shellRef}
+        hideClose
+        overlayClassName={FULL_MODAL_OVERLAY_CLASS}
+        className={cn(
+          "notifications-full-dialog z-[110] flex min-h-0 flex-col gap-0 overflow-hidden p-2.5 sm:p-3 w-[calc(100vw-2rem)] max-w-[min(32rem,calc(100vw-2rem))] !rounded-[56px] backdrop-blur-md shadow-xl",
+          lockedShellHeightPx == null
+            ? "h-fit max-h-[min(85vh,42rem)]"
+            : "min-h-0",
+        )}
+        style={{
+          backgroundColor: "rgba(255, 255, 255, 0.02)",
+          borderColor: "rgba(255, 255, 255, 0.03)",
+          borderWidth: "1px",
+          borderStyle: "solid",
+          ...(lockedShellHeightPx != null
+            ? {
+                height: lockedShellHeightPx,
+                minHeight: lockedShellHeightPx,
+                maxHeight: lockedShellHeightPx,
+              }
+            : {}),
+        }}
+      >
+        <div
+          className={cn(
+            "relative flex w-full min-w-0 flex-col overflow-hidden rounded-[44px] border !backdrop-blur-none",
+            lockedShellHeightPx == null
+              ? "max-h-[min(85vh,42rem)]"
+              : "min-h-0 flex-1",
+          )}
+          style={{
+            backgroundColor: "rgba(255, 255, 255, 0.04)",
+            borderColor: "rgba(255, 255, 255, 0.03)",
+            borderWidth: "1px",
+            borderStyle: "solid",
+          }}
+        >
+          <motion.div
+            className="flex w-full min-w-0 shrink-0 flex-col"
+            variants={layerVariants}
+            initial="initial"
+            animate="animate"
+          >
+            <motion.div
+              className="shrink-0 px-5 pb-3 pt-5 sm:px-6 sm:pb-3.5 sm:pt-6"
+              variants={cascadeVariants}
+            >
+              <div className="flex items-start justify-between gap-4">
+                <div
+                  className={cn(
+                    "flex min-w-0 flex-1 gap-2.5",
+                    flowStep === 1 ? "items-start" : "items-center",
+                  )}
+                >
+                  {flowStep > 1 ? (
+                    <button
+                      type="button"
+                      onClick={() => reloadFlowRef.current?.goBack()}
+                      className="-ml-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[var(--color-text-primary)] transition-colors hover:bg-white/5"
+                      aria-label="Back"
+                    >
+                      <ChevronLeft className="h-6 w-6" strokeWidth={2} />
+                    </button>
+                  ) : null}
+                  <div className="flex min-w-0 flex-1 flex-col gap-1.5 text-start">
+                    <DialogTitle className="m-0 text-2xl font-semibold leading-none tracking-tight text-[var(--color-text-primary)]">
+                      Reload Card
+                    </DialogTitle>
+                    {flowStep === 1 ? (
+                      <p className="m-0 text-[13px] font-medium leading-snug text-[var(--color-text-muted)]">
+                        Top up your card with crypto.
+                      </p>
+                    ) : null}
+                  </div>
+                </div>
+                <DialogClose asChild>
+                  <button
+                    type="button"
+                    className={cn(
+                      "flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] p-1.5 text-[var(--color-text-muted)] outline-none transition-all",
+                      "hover:bg-white/5 hover:text-[var(--color-text-primary)]",
+                      "focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]/25",
+                    )}
+                    aria-label="Close"
+                  >
+                    <X className="h-full w-full" strokeWidth={2} />
+                  </button>
+                </DialogClose>
+              </div>
+            </motion.div>
+
+            <motion.div
+              className="flex w-full min-w-0 shrink-0 flex-col px-5 pb-6 pt-0 sm:px-6"
+              variants={cascadeVariants}
+            >
+              <div className="min-w-0 w-full">
+                <ReloadFlow
+                  ref={reloadFlowRef}
+                  variant="modal"
+                  onStepChange={setFlowStep}
+                  onNext={() => {}}
+                  onBack={() => {}}
+                  onClose={handleClose}
+                />
+              </div>
+            </motion.div>
+          </motion.div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}

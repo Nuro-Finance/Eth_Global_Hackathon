@@ -1,0 +1,4 @@
+setup:
+  - project: nuro-ethglobal
+    config: dev
+    path: ./

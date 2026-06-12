@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AFI System Architecture</title>
+<style>
+  /* Landing page — Nuro emerald aesthetic. Each card routes to a dedicated
+     diagram sub-page so text can breathe at readable sizes. */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #050510; color: #e0e0e0;
+    font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+  body::before {
+    content: ''; position: fixed; top: 50%; left: 50%;
+    width: 1000px; height: 1000px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(22,224,169,0.035) 0%, transparent 70%);
+    transform: translate(-50%, -50%); pointer-events: none; z-index: 0;
+  }
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 40px 24px 80px; position: relative; z-index: 1; }
+  header { margin-bottom: 32px; padding-bottom: 24px; border-bottom: 1px solid rgba(22,224,169,0.15); }
+  header h1 { font-size: 28px; color: #16e0a9; font-weight: 600; letter-spacing: 1px; margin-bottom: 4px; }
+  header .subtitle { font-size: 10px; color: #555; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 14px; }
+  header .intro { font-size: 13px; color: #aaa; max-width: 800px; line-height: 1.7; }
+  header .intro strong { color: #ccc; }
+  header .principle {
+    display: inline-block; margin-top: 10px; padding: 6px 14px;
+    background: rgba(22,224,169,0.1); border: 1px solid rgba(22,224,169,0.3);
+    border-radius: 18px; color: #16e0a9;
+    font-size: 11px; font-weight: 600; letter-spacing: 0.5px;
+  }
+
+  /* Related nav */
+  nav.top {
+    background: rgba(10, 10, 20, 0.85); border: 1px solid rgba(22,224,169,0.18);
+    border-radius: 14px; padding: 12px 14px;
+    backdrop-filter: blur(20px);
+    margin-bottom: 28px;
+    display: flex; gap: 6px; flex-wrap: wrap; align-items: center;
+  }
+  nav.top .label { font-size: 9px; color: #444; letter-spacing: 1.5px; text-transform: uppercase; margin-right: 4px; }
+  nav.top a {
+    background: rgba(22,224,169,0.12); color: #16e0a9;
+    border: 1px solid rgba(22,224,169,0.28);
+    padding: 5px 12px; border-radius: 16px;
+    font-size: 10.5px; font-weight: 600; letter-spacing: 0.3px;
+    text-decoration: none; transition: all 0.2s;
+  }
+  nav.top a:hover { background: rgba(22,224,169,0.22); }
+  nav.top .external {
+    background: transparent; color: #aaa; border-color: rgba(255,255,255,0.1);
+  }
+  nav.top .external:hover { color: #c770f0; border-color: rgba(199,112,240,0.4); }
+
+  /* Card grid — one card per diagram */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 16px;
+  }
+  .card {
+    background: rgba(10, 10, 20, 0.6);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    padding: 20px 22px;
+    backdrop-filter: blur(20px);
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.3s;
+    display: block;
+    position: relative;
+  }
+  .card:hover {
+    border-color: rgba(22,224,169,0.4);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(22,224,169,0.1);
+  }
+  .card .num {
+    display: inline-block;
+    font-size: 10px; color: #16e0a9; font-weight: 700;
+    letter-spacing: 1px;
+    padding: 3px 9px; border-radius: 10px;
+    background: rgba(22,224,169,0.12); border: 1px solid rgba(22,224,169,0.3);
+    margin-bottom: 10px;
+  }
+  .card h2 {
+    font-size: 16px; color: #e0e0e0; font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .card p { font-size: 12px; color: #888; line-height: 1.6; margin-bottom: 10px; }
+  .card .tags {
+    display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px;
+  }
+  .card .tags span {
+    font-size: 9px; color: #aaa;
+    padding: 2px 8px; background: rgba(255,255,255,0.04); border-radius: 10px;
+    letter-spacing: 0.5px;
+  }
+  .card .arrow {
+    position: absolute; right: 20px; top: 20px;
+    color: rgba(22,224,169,0.3); font-size: 18px;
+    transition: all 0.3s;
+  }
+  .card:hover .arrow { color: #16e0a9; transform: translateX(3px); }
+
+  footer {
+    text-align: center; padding: 20px; font-size: 10px; color: #444;
+    letter-spacing: 1px; text-transform: uppercase;
+    margin-top: 40px;
+  }
+  footer a { color: #16e0a9; text-decoration: none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>AFI System Architecture</h1>
+  <div class="subtitle">Data Flow · System Communication · Canonical Reference</div>
+  <div class="intro">
+    Canonical map of how AFI's pieces talk to each other. Covers <strong>client</strong>, <strong>backend</strong>, <strong>database</strong>, <strong>external services</strong>, and <strong>on-chain infrastructure</strong>. Each section is a dedicated page with a full-width diagram and context prose.
+    <br/>Source of truth lives in <code style="background:#1a1a2e;padding:2px 6px;border-radius:4px;font-size:11px;color:#16e0a9;">Neural Net/Claude Memory/System Architecture.md</code>.
+  </div>
+  <div class="principle">Intent Layer records intent · Execution Layer moves real money · Never conflate</div>
+</header>
+
+<nav class="top">
+  <span class="label">Neural Net views</span>
+  <a href="/sub-agents-dashboard.html" class="external">Sub-Agents</a>
+  <a href="/neural-dashboard.html" class="external">Decisions</a>
+  <a href="/unified-dashboard.html" class="external">Unified</a>
+  <span class="label" style="margin-left:auto;">More</span>
+  <a href="/contracts.html" class="external">Contracts</a>
+  <a href="/skills" class="external">Skills</a>
+</nav>
+
+<div class="grid">
+  <a href="/architecture/system-view.html" class="card">
+    <span class="num">01</span>
+    <h2>System-wide flow</h2>
+    <p>The 30,000-ft view. Five logical tiers plus on-chain. Every arrow is a real dependency.</p>
+    <div class="tags"><span>client</span><span>backend</span><span>external</span></div>
+    <span class="arrow">→</span>
+  </a>
+
+  <a href="/architecture/deposit-flow.html" class="card">
+    <span class="num">02</span>
+    <h2>Deposit → Card credit</h2>
+    <p>Critical money-movement path. Detect → bridge → Base → SD3 → Visa. Every variant of deposit maps here.</p>
+    <div class="tags"><span>sequence</span><span>cctp</span><span>variants</span></div>
+    <span class="arrow">→</span>
+  </a>
+
+  <a href="/architecture/reload-ui.html" class="card">
+    <span class="num">03</span>
+    <h2>Reload Card UI</h2>
+    <p>User-facing flow: category picker → live 0x quote → wallet-prompt send or copy-paste. Dynamic chain filtering.</p>
+    <div class="tags"><span>frontend</span><span>0x</span><span>marathon-7</span></div>
+    <span class="arrow">→</span>
+  </a>
+
+  <a href="/architecture/mythos-cycle.html" class="card">
+    <span class="num">04</span>
+    <h2>Mythos daily cycle</h2>
+    <p>Growth-agent pipeline: perceive → think → generate → quality-gate → risk-classify → publish → track engagement.</p>
+    <div class="tags"><span>state</span><span>agent</span><span>learning</span></div>
+    <span class="arrow">→</span>
+  </a>
+
+  <a href="/architecture/db-schema.html" class="card">
+    <span class="num">05</span>
+    <h2>Database schema</h2>
+    <p>25 migrations applied. Key tables: users, cards, agents, erc20_allowlist, execution_log, post_engagement.</p>
+    <div class="tags"><span>postgres</span><span>er-diagram</span><span>relations</span></div>
+    <span class="arrow">→</span>
+  </a>
+
+  <a href="/architecture/external-services.html" class="card">
+    <span class="num">06</span>
+    <h2>External service topology</h2>
+    <p>0x · Circle CCTP · LayerZero · SD3 Issuer · Telegram · Moltbook · Twitter · HeyGen · Claude · CoinGecko · Polymarket.</p>
+    <div class="tags"><span>apis</span><span>integrations</span><span>dependencies</span></div>
+    <span class="arrow">→</span>
+  </a>
+
+  <a href="/architecture/on-chain.html" class="card">
+    <span class="num">07</span>
+    <h2>On-chain infrastructure</h2>
+    <p>13 chains support native swap · 23 chains accept USDC deposits · routing per chain to Base for SD3 credit.</p>
+    <div class="tags"><span>23-chains</span><span>routing</span><span>cctp-lz</span></div>
+    <span class="arrow">→</span>
+  </a>
+
+  <a href="/architecture/neural-net.html" class="card">
+    <span class="num">08</span>
+    <h2>Neural Net (Mythos brain)</h2>
+    <p>How skills, artifacts, and execution_log feedback form a closed-loop operational memory for Mythos.</p>
+    <div class="tags"><span>skills</span><span>orchestrator</span><span>telemetry</span></div>
+    <span class="arrow">→</span>
+  </a>
+
+  <a href="/architecture/request-lifecycle.html" class="card">
+    <span class="num">09</span>
+    <h2>Full request lifecycle</h2>
+    <p>End-to-end Reload Card: browser → Next.js → Express → Postgres → 0x → source chain → Base → SD3. Async past step 8.</p>
+    <div class="tags"><span>sequence</span><span>e2e</span><span>async</span></div>
+    <span class="arrow">→</span>
+  </a>
+
+  <a href="/architecture/deploy-topology.html" class="card">
+    <span class="num">10</span>
+    <h2>Deployment topology</h2>
+    <p>Dev → GitHub → VPS → PM2. Pre-push gates: verify-deps, typecheck, 84 vitest tests.</p>
+    <div class="tags"><span>ci-cd</span><span>pm2</span><span>vps</span></div>
+    <span class="arrow">→</span>
+  </a>
+
+  <a href="/architecture/bridge-defense.html" class="card">
+    <span class="num">11</span>
+    <h2>Bridge defense posture</h2>
+    <p>Kelp DAO hardening (Session 28): multi-DVN migration, on-chain receive handler with per-message + per-peer caps, off-chain reserve reconciliation monitor, TypeScript-layer kill-switch flag. Aligns to LayerZero's April 2026 integration-checklist mandate.</p>
+    <div class="tags"><span>security</span><span>kelp-response</span><span>multi-dvn</span><span>defense-in-depth</span></div>
+    <span class="arrow">→</span>
+  </a>
+
+  <a href="/architecture/codebase-graph.html" class="card">
+    <span class="num">12</span>
+    <h2>Codebase dependency graph</h2>
+    <p>Live force-directed graph of every <code style="background:#1a1a2e;padding:1px 4px;border-radius:3px;font-size:11px;color:#16e0a9;">src/</code> file + its imports — 689 files, 778 edges, colored by module (heimdall, huginn, sandbox, money paths, FE features). Click a node to highlight its neighborhood; legend filters by cluster. Renders directly in the browser, no setup. Complementary to card 08 (markdown Neural Net).</p>
+    <div class="tags"><span>code-graph</span><span>d3-force</span><span>madge</span><span>S32</span></div>
+    <span class="arrow">→</span>
+  </a>
+
+  <a href="/skills/" class="card">
+    <span class="num">14</span>
+    <h2>📜 Skill Library — pay-per-call agentic APIs</h2>
+    <p>Drop-in skills for Claude, OpenAI, LangChain, or any x402-aware agent runtime. Four productized endpoints (Helm threat intel $0.10, Huginn counsel $0.005, resolved markets $0.001, sandbox spawn $0.50). Single GitHub-published manifest, per-skill .md + tool-spec + Python wrapper + curl. Distribution surface for the Capital Event Sprint.</p>
+    <div class="tags"><span>x402</span><span>moonpay-pattern</span><span>agentic-finance</span><span>S35-M11</span></div>
+    <span class="arrow">→</span>
+  </a>
+
+  <a href="/architecture/scaling-roadmap.html" class="card">
+    <span class="num">13</span>
+    <h2>Scaling roadmap — 1K → 10K → 100K DAU</h2>
+    <p>Full attack-scaling plan: capacity per tier, what breaks first, exact mitigations + costs. Three-tier topology shift (single-VPS → VPS+replica+Redis → managed multi-region). Treasury automation track runs in parallel — without it, gas/USDC depletion kills any tier. Clear decision triggers for when to invest. Dynamic doc, updates as we hit each ceiling.</p>
+    <div class="tags"><span>scaling</span><span>capacity</span><span>treasury</span><span>S34</span></div>
+    <span class="arrow">→</span>
+  </a>
+</div>
+
+<footer>
+  AFI System Architecture · Session 25 restructured for readability · Session 29 added Bridge Defense after Kelp DAO incident · Session 32 added codebase dep-graph (D3) · Session 34 added Scaling Roadmap (1K/10K/100K capacity tiers)
+</footer>
+
+</div>
+</body>
+</html>

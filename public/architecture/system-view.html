@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>01 · System-wide flow · AFI Architecture</title>
+<link rel="stylesheet" href="/architecture/_style.css">
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+</head>
+<body>
+<div class="wrap">
+
+<nav class="top">
+  <a href="/architecture.html" class="back">← All diagrams</a>
+  <span class="spacer"></span>
+  <span class="label">Section</span>
+  <span class="index-num">01 / 10</span>
+</nav>
+
+<header class="page">
+  <span class="eyebrow">01 · System view</span>
+  <h1>System-wide flow</h1>
+  <p class="lede">
+    The 30,000-foot view of AFI. Five logical tiers — <strong>client</strong>, <strong>Next.js edge</strong>, <strong>Express backend</strong>, <strong>Postgres</strong>, and <strong>external services</strong> — plus <strong>on-chain infrastructure</strong> across 23 chains. Every arrow is a real dependency; if you cut it, something breaks.
+  </p>
+</header>
+
+<div class="diagram">
+<div class="mermaid">
+flowchart LR
+    subgraph Client["🖥️ Client — Browser"]
+        UI["Next.js 15.5 FE<br/>app.nuro.finance"]
+        Wallet["Wagmi / Privy<br/>wallet connector"]
+    end
+
+    subgraph Edge["⚡ Next.js Edge (port 2800)"]
+        NR["/api/* route handlers<br/>(proxy to backend)"]
+        Static["/public/* static HTML<br/>(dashboards)"]
+    end
+
+    subgraph Backend["⚙️ Express Backend (port 3000)"]
+        NuroR["nuro-routes.ts<br/>REST API"]
+        Monitor["monitor.ts<br/>polls 23 chains"]
+        Swap["swap.ts<br/>0x allowance-holder"]
+        Bridge["bridge.ts<br/>CCTP + LayerZero"]
+        Mythos["growth-agent<br/>(Mythos)"]
+    end
+
+    subgraph DB["💾 Postgres (port 5432)"]
+        Tables[("users · cards · transactions<br/>execution_log · erc20_allowlist<br/>post_engagement · agents")]
+    end
+
+    subgraph External["🌐 External Services"]
+        Money["Money routing<br/>0x · CCTP · LZ · SD3"]
+        Content["Content platforms<br/>Telegram · Moltbook · Twitter"]
+        AI["AI / data<br/>Claude · CoinGecko · Polymarket"]
+    end
+
+    subgraph Chain["⛓️ On-chain — 23 chains"]
+        EVM["EVM chains (22)"]
+        Sol["Solana"]
+    end
+
+    UI --> NR
+    UI --> Static
+    Wallet --> EVM
+    NR --> NuroR
+    NuroR --> DB
+    NuroR --> Swap
+    NuroR --> Bridge
+    Monitor --> EVM
+    Monitor --> Sol
+    Monitor --> Bridge
+    Swap --> Money
+    Swap --> EVM
+    Bridge --> Money
+    Bridge --> EVM
+    Bridge --> Sol
+    Mythos --> Content
+    Mythos --> AI
+    Mythos --> DB
+    NuroR --> Money
+</div>
+</div>
+
+<section class="prose">
+  <h3>What each tier does</h3>
+  <ul>
+    <li><strong>Client</strong> — Next.js 15.5 single-page app at <code>app.nuro.finance</code>, wallet connectors (wagmi for EVM, Privy for social login prep).</li>
+    <li><strong>Next.js Edge</strong> — serves <code>/public/*.html</code> static files directly (dashboards), and proxies <code>/api/*</code> to the backend without exposing secrets.</li>
+    <li><strong>Express Backend</strong> — six major subsystems: REST API (<code>nuro-routes.ts</code>), chain monitor, swap engine, bridge router, Mythos growth agent, and the admin console.</li>
+    <li><strong>Postgres</strong> — single source of truth for all intent-layer state. 25 migrations applied. Contains users, cards, transactions, execution_log (every sweep logs), erc20_allowlist (DB-backed since Session 23), post_engagement (time-series metrics).</li>
+    <li><strong>External services</strong> — grouped by purpose: money-routing (0x, Circle CCTP, LayerZero, SD3 Issuer), content platforms (Telegram, Moltbook, Twitter, HeyGen), and AI/data (Claude API, CoinGecko, Polymarket CLOB).</li>
+    <li><strong>On-chain</strong> — 23 chains total: 22 EVM (Ethereum, Base, Arbitrum, Optimism, Polygon, BSC, Avalanche, Linea, Scroll, Unichain, World Chain, Sonic, HyperEVM, zkSync, Celo, Gnosis, Sei, XDC, Codex, Ink, Plume, Monad) plus Solana via Circle Bridge Kit.</li>
+  </ul>
+</section>
+
+<nav class="pager">
+  <a href="/architecture.html">
+    <div class="pager-label">← Back</div>
+    <div class="pager-title">All diagrams</div>
+  </a>
+  <a href="/architecture/deposit-flow.html" class="next">
+    <div class="pager-label">Next →</div>
+    <div class="pager-title">02 · Deposit → Card credit</div>
+  </a>
+</nav>
+
+<footer>AFI System Architecture · 01 / 10</footer>
+
+</div>
+
+<script>
+mermaid.initialize({
+  startOnLoad: true,
+  theme: 'dark',
+  themeVariables: {
+    primaryColor: '#1a1a2e',
+    primaryTextColor: '#e0e0e0',
+    primaryBorderColor: '#16e0a9',
+    lineColor: '#16e0a9',
+    secondaryColor: '#2a2a4a',
+    tertiaryColor: '#0a0a14',
+    background: '#050510',
+    mainBkg: '#1a1a2e',
+    secondBkg: '#2a2a4a',
+    fontFamily: 'Inter, system-ui, sans-serif',
+    fontSize: '17px',
+    edgeLabelBackground: '#050510',
+    clusterBkg: '#0a0a14',
+    clusterBorder: 'rgba(22,224,169,0.2)',
+  },
+  flowchart: { curve: 'basis', padding: 32, useMaxWidth: true, nodeSpacing: 75, rankSpacing: 95, htmlLabels: true },
+  sequence: { actorMargin: 70, useMaxWidth: true, wrap: true, width: 200, messageFontSize: 15, actorFontSize: 15 },
+  er: { useMaxWidth: true, fontSize: 15 },
+  state: { useMaxWidth: true, nodeSpacing: 70 },
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,61 @@
+{
+  "$schema": "https://platform.openai.com/docs/guides/function-calling/schemas",
+  "type": "function",
+  "function": {
+    "name": "nuro_huginn_counsel",
+    "description": "POST a proposed action to Huginn — Nuro's rule-bank advisory agent — and receive a synchronous verdict (endorse / caution / dissent / block-recommend) with reasoning + confidence. Drop-in human-in-the-loop equivalent for autonomous agents. Use BEFORE committing to high-value transfers, unusual swaps, novel-destination bridges, or any action where a second opinion is cheap insurance. Costs 0.005 USDC per call via x402; x402-fetch / x402-py SDKs handle payment automatically.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "proposerAgentId": {
+          "type": "string",
+          "description": "Identifier of the agent requesting counsel — your agent's UUID or wallet address. Used to look up reputation tier."
+        },
+        "actionType": {
+          "type": "string",
+          "enum": ["transfer", "bet", "swap", "bridge", "message", "spend"],
+          "description": "Category of action being proposed."
+        },
+        "actionSubject": {
+          "type": "string",
+          "description": "Human-readable description of the action (e.g. 'place 100 USDC on Polymarket Trump-2028')."
+        },
+        "valueUsd": {
+          "type": "number",
+          "description": "USD value of the action. Used by Helm tx-cap rules + tier-based caution thresholds.",
+          "minimum": 0
+        },
+        "chainId": {
+          "type": "integer",
+          "description": "EVM chain id where the action will execute (or -1 for Solana). Helps Huginn assess chain-specific risk (e.g. memecoins on Avalanche)."
+        },
+        "reasoning": {
+          "type": "string",
+          "description": "Optional: your agent's own reasoning for the proposed action. Huginn folds it into the response context but does not blindly trust it."
+        },
+        "metadata": {
+          "type": "object",
+          "description": "Optional arbitrary context (counterparty info, market id, source price quote, etc.). Used for compound-rule matching (HELM-501).",
+          "additionalProperties": true
+        }
+      },
+      "required": ["proposerAgentId", "actionType", "actionSubject", "valueUsd"]
+    }
+  },
+  "metadata": {
+    "publisher": "Nuro Finance",
+    "endpoint": "https://api.nuro.finance/api/x402/huginn/counsel",
+    "method": "POST",
+    "x402Price": {
+      "amount": "0.005",
+      "currency": "USDC",
+      "amountAtomic": "5000",
+      "settlementChain": "Base"
+    },
+    "rateLimit": "120 req/hr per signing address",
+    "skillManifest": "https://app.nuro.finance/skills/manifest.json",
+    "claudeSkill": "https://app.nuro.finance/skills/huginn-counsel/skill.md",
+    "version": "1.0.0",
+    "lastUpdated": "2026-05-10"
+  }
+}

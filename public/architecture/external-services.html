@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>06 · External services · AFI Architecture</title>
+<link rel="stylesheet" href="/architecture/_style.css">
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+</head>
+<body>
+<div class="wrap">
+
+<nav class="top">
+  <a href="/architecture.html" class="back">← All diagrams</a>
+  <span class="spacer"></span>
+  <span class="label">Section</span><span class="index-num">06 / 10</span>
+</nav>
+
+<header class="page">
+  <span class="eyebrow">06 · Integrations</span>
+  <h1>External service topology</h1>
+  <p class="lede">
+    Every arrow from the backend to an external service is a paid or rate-limited dependency — each one is a failure domain. Grouped below by purpose: <strong>money routing</strong>, <strong>content platforms</strong>, <strong>AI / market data</strong>. Each card shows the endpoints, auth method, gate flag, and Session-25 activation status.
+  </p>
+</header>
+
+<div class="section-label">01 — At a glance</div>
+<div class="diagram">
+<div class="mermaid">
+flowchart LR
+    Backend["AFI Backend<br/>(Express on port 3000)"]
+
+    subgraph Money["💰 Money routing"]
+        direction TB
+        Zerox["0x Aggregator v2"]
+        Circle["Circle CCTP"]
+        LZ["LayerZero V2"]
+        SD3["SD3 Issuer"]
+    end
+
+    subgraph Content["📣 Content platforms"]
+        direction TB
+        TG["Telegram Bot API"]
+        MB["Moltbook API"]
+        TW["Twitter v2 API"]
+        HG["HeyGen API"]
+    end
+
+    subgraph AI["🧠 AI / data"]
+        direction TB
+        Anth["Anthropic Claude"]
+        CG["CoinGecko"]
+        PM["Polymarket CLOB"]
+    end
+
+    Backend --> Money
+    Backend --> Content
+    Backend --> AI
+</div>
+</div>
+
+<div class="section-label">02 — Money routing</div>
+
+<div class="service-grid">
+  <div class="service-card live">
+    <div class="service-title">0x Aggregator v2 <span class="service-badge badge-live">live</span></div>
+    <div class="service-purpose">Native + ERC-20 → USDC swap routing across 13 chains.</div>
+    <div class="service-meta">
+      <dt>Endpoints</dt>
+      <dd><code>/swap/allowance-holder/price</code> (preview)<br><code>/swap/allowance-holder/quote</code> (execution)</dd>
+      <dt>Auth</dt><dd>API key in <code>ZEROX_API_KEY</code></dd>
+      <dt>Rate limit</dt><dd>Pro tier, ~30 req/sec per chain</dd>
+      <dt>Gate</dt><dd><code>ERC20_SWAP_ENABLED</code> + <code>ERC20_MEMECOIN_SWAP_ENABLED</code></dd>
+      <dt>Failure mode</dt><dd>"Quote unavailable" bubbles to FE; user can still proceed — execution-time quote is always re-fetched</dd>
+    </div>
+  </div>
+
+  <div class="service-card live">
+    <div class="service-title">Circle CCTP v2 <span class="service-badge badge-live">live</span></div>
+    <div class="service-purpose">USDC burn on source chain, attested mint on Base.</div>
+    <div class="service-meta">
+      <dt>APIs</dt><dd>On-chain <code>TokenMessenger.depositForBurn</code>; attestation REST at <code>iris-api.circle.com</code></dd>
+      <dt>Auth</dt><dd>Public APIs; on-chain calls signed by Deployer key</dd>
+      <dt>Domains</dt><dd>22 chains; destination always 6 (Base)</dd>
+      <dt>Failure mode</dt><dd>Attestation &gt; 30 min → Telegram alert + manual attestation retry</dd>
+      <dt>Solana variant</dt><dd><code>@circle-fin/bridge-kit@1.8.2</code> (not the public SDK)</dd>
+    </div>
+  </div>
+
+  <div class="service-card live">
+    <div class="service-title">LayerZero V2 <span class="service-badge badge-live">live</span></div>
+    <div class="service-purpose">OFT hub-spoke bridge for non-CCTP chains (HyperEVM, etc.) → Arbitrum hub.</div>
+    <div class="service-meta">
+      <dt>Hub</dt><dd><code>0xd58C1412e50fF00212770B170D86e2387D2d2b18</code> (Arbitrum)</dd>
+      <dt>Auth</dt><dd>On-chain calls signed by Deployer key</dd>
+      <dt>Fee</dt><dd>Dynamic via <code>quoteSend()</code>; usually &lt;$0.50</dd>
+      <dt>Prior art</dt><dd>Reuses OApp/OFT patterns from Memetropolis ($300K TVL launchpad)</dd>
+    </div>
+  </div>
+
+  <div class="service-card live">
+    <div class="service-title">SD3 Issuer <span class="service-badge badge-live">live</span></div>
+    <div class="service-purpose">Visa card issuance, KYC, balance sync, card-transaction webhooks.</div>
+    <div class="service-meta">
+      <dt>Endpoints</dt><dd><code>POST /users</code>, <code>GET /balances</code>, <code>POST /cards/:id/freeze</code>, inbound webhooks</dd>
+      <dt>Auth</dt><dd>Bearer token + signed webhook HMAC</dd>
+      <dt>Contacts</dt><dd>Owen · Matt (SD3)</dd>
+      <dt>Reconciler</dt><dd><code>issuer_sync</code> polls <code>GET /balances</code> if webhook missed — catches dropped events</dd>
+    </div>
+  </div>
+</div>
+
+<div class="section-label">03 — Content platforms</div>
+
+<div class="service-grid">
+  <div class="service-card live">
+    <div class="service-title">Telegram Bot API <span class="service-badge badge-live">live</span></div>
+    <div class="service-purpose">Admin approval callbacks, CCTP attestation alerts, Telegram growth agent posting.</div>
+    <div class="service-meta">
+      <dt>Current mode</dt><dd>10s polling via <code>getUpdates</code></dd>
+      <dt>Session 25 upgrade</dt><dd>Webhook at <code>app.nuro.finance/telegram/webhook</code> — nginx proxy installed, waiting for <code>setWebhook</code> call</dd>
+      <dt>Auth</dt><dd>Bot token in <code>TELEGRAM_BOT_TOKEN</code></dd>
+      <dt>Admins</dt><dd>Configured in <code>TELEGRAM_ADMIN_IDS</code> env</dd>
+    </div>
+  </div>
+
+  <div class="service-card live">
+    <div class="service-title">Moltbook API <span class="service-badge badge-live">live posting</span></div>
+    <div class="service-purpose">Primary social platform for Mythos content + engagement fetch.</div>
+    <div class="service-meta">
+      <dt>Post endpoint</dt><dd><code>POST /agent/posts</code></dd>
+      <dt>Metrics endpoint</dt><dd><code>GET /agent/posts/:id/metrics</code> (wrapped Session 24)</dd>
+      <dt>Auth</dt><dd><code>MOLTBOOK_AGENT_TOKEN</code> — fetch cron activates when set</dd>
+      <dt>Blocked on</dt><dd>Richard to provide production agent token</dd>
+    </div>
+  </div>
+
+  <div class="service-card dormant">
+    <div class="service-title">Twitter v2 API <span class="service-badge badge-dormant">posting · read dormant</span></div>
+    <div class="service-purpose">Post tweets + fetch <code>public_metrics</code> for engagement cron.</div>
+    <div class="service-meta">
+      <dt>Write</dt><dd>OAuth1 keys set; live posting works</dd>
+      <dt>Read</dt><dd>Needs <code>TWITTER_BEARER_TOKEN</code> for <code>GET /2/tweets/:id</code></dd>
+      <dt>Rate limit</dt><dd>Free tier: ~500 reads/mo — upgrade path deferred</dd>
+      <dt>Blocked on</dt><dd>Bearer token from Richard</dd>
+    </div>
+  </div>
+
+  <div class="service-card gated">
+    <div class="service-title">HeyGen <span class="service-badge badge-gated">gated off</span></div>
+    <div class="service-purpose">Avatar video generation for Mythos visual posts.</div>
+    <div class="service-meta">
+      <dt>Current state</dt><dd><code>HEYGEN_ENABLED=false</code> since Session 23</dd>
+      <dt>Why gated</dt><dd>Default avatar look_id wasn't configured → was spamming logs</dd>
+      <dt>Re-enable</dt><dd>Set <code>HEYGEN_AVATAR_LOOK_ID</code> + <code>HEYGEN_AVATAR_SPACE_ID</code>, run <code>/gate-check heygen-live</code></dd>
+      <dt>Gate</dt><dd><code>heygen-live</code></dd>
+    </div>
+  </div>
+</div>
+
+<div class="section-label">04 — AI / market data</div>
+
+<div class="service-grid">
+  <div class="service-card live">
+    <div class="service-title">Anthropic Claude <span class="service-badge badge-live">live</span></div>
+    <div class="service-purpose">Thought-engine for Mythos content generation + reasoning.</div>
+    <div class="service-meta">
+      <dt>Model</dt><dd>claude-sonnet-4 default; opus for deep analysis</dd>
+      <dt>Auth</dt><dd><code>ANTHROPIC_API_KEY</code></dd>
+      <dt>Usage pattern</dt><dd>Streaming when user-facing, batched when cron-driven</dd>
+      <dt>Backend caller</dt><dd><code>src/growth-agent/thought-engine.ts</code></dd>
+    </div>
+  </div>
+
+  <div class="service-card live">
+    <div class="service-title">CoinGecko <span class="service-badge badge-live">live</span></div>
+    <div class="service-purpose">Market data for daily cycle commentary + token price context.</div>
+    <div class="service-meta">
+      <dt>Endpoints</dt><dd><code>/coins/markets</code>, <code>/coins/:id</code></dd>
+      <dt>Tier</dt><dd>Free (10–30 req/min)</dd>
+      <dt>Cadence</dt><dd>60s poll during daily cycle; cached in-memory 5 min</dd>
+      <dt>Failure</dt><dd>Silent fallback to last-cached values</dd>
+    </div>
+  </div>
+
+  <div class="service-card gated">
+    <div class="service-title">Polymarket CLOB <span class="service-badge badge-gated">read live · trade gated</span></div>
+    <div class="service-purpose">Market prices for prediction-market agent + eventual trade execution.</div>
+    <div class="service-meta">
+      <dt>Read</dt><dd>Public REST + WebSocket — live</dd>
+      <dt>Trade</dt><dd><code>AGENT_CLOB_TRADES_ENABLED=false</code> until observe-only period completes</dd>
+      <dt>Signer</dt><dd>Polymarket L2 key (separate from Deployer)</dd>
+      <dt>Safety</dt><dd>Observe-only flag; dry-run logs + Telegram alerts only</dd>
+    </div>
+  </div>
+</div>
+
+<div class="section-label">05 — Defense in depth</div>
+<section class="prose">
+  <h3>Every external call is wrapped</h3>
+  <p>Each outbound request is in a <code>try/catch</code> with structured error logging to <code>execution_log</code>. Rate-limit responses and transient 5xx bubble up as task-level failures; they don't cascade into retry storms. The <code>gates.yaml</code> registry (9 gates) encodes the preconditions for flipping risky flags — run <code>/gate-check &lt;name&gt;</code> before any <code>.env</code> edit or VPS deploy.</p>
+
+  <h3>Color-coding recap</h3>
+  <ul>
+    <li><span style="color:#16e0a9">🟢 Live (green border)</span> — currently active in production</li>
+    <li><span style="color:#f4a840">🟡 Dormant (amber border)</span> — keys missing, feature dormant until set</li>
+    <li><span style="color:#ff6b6b">🔴 Gated off (red border)</span> — intentionally disabled behind a flag; re-enable via <code>/gate-check</code> workflow</li>
+  </ul>
+</section>
+
+<nav class="pager">
+  <a href="/architecture/db-schema.html">
+    <div class="pager-label">← Prev</div>
+    <div class="pager-title">05 · DB schema</div>
+  </a>
+  <a href="/architecture/on-chain.html" class="next">
+    <div class="pager-label">Next →</div>
+    <div class="pager-title">07 · On-chain</div>
+  </a>
+</nav>
+
+<footer>AFI System Architecture · 06 / 10</footer>
+
+</div>
+
+<script>
+mermaid.initialize({
+  startOnLoad: true, theme: 'dark',
+  themeVariables: { primaryColor: '#1a1a2e', primaryTextColor: '#e8e8e8', primaryBorderColor: '#16e0a9', lineColor: '#16e0a9', secondaryColor: '#2a2a4a', background: '#050510', mainBkg: '#1a1a2e', fontFamily: 'Inter, system-ui, sans-serif', fontSize: '17px' },
+  flowchart: { curve: 'basis', padding: 32, useMaxWidth: true, nodeSpacing: 75, rankSpacing: 95, htmlLabels: true },
+});
+</script>
+</body>
+</html>

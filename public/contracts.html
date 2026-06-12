@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nuro · Public Smart Contracts</title>
+<meta name="description" content="Public proof-of-existence for the Nuro on-chain stack: LayerZero V2 OFT bridge, MyOFTAdapter, fee vaults, x402 revenue contracts, CCTP V2 routes across 23 chains.">
+
+<!-- Open Graph (Facebook / LinkedIn / Slack / Discord / iMessage previews) -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Nuro">
+<meta property="og:title" content="Nuro · Public Smart Contracts">
+<meta property="og:description" content="Public proof-of-existence for the Nuro on-chain stack. LayerZero V2 OFT bridge, x402 revenue, CCTP V2 across 23 chains.">
+<meta property="og:url" content="https://app.nuro.finance/contracts">
+<meta property="og:image" content="https://app.nuro.finance/agentic-card.png">
+<meta property="og:image:width" content="1024">
+<meta property="og:image:height" content="649">
+<meta property="og:image:alt" content="Nuro Visa card with BTC, ETH, SOL, USDC icons">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Nuro · Public Smart Contracts">
+<meta name="twitter:description" content="Public proof-of-existence for the Nuro on-chain stack. LayerZero V2 OFT bridge, x402 revenue, CCTP V2 across 23 chains.">
+<meta name="twitter:image" content="https://app.nuro.finance/agentic-card.png">
+
+<link rel="stylesheet" href="/architecture/_style.css">
+<style>
+  /* S35 M11 Day-3: dark theme token alignment. Replaces the old
+     emerald + purple + light-blue accent triple with Chris's electric
+     blue (--accent) + success teal (--success) for a single-accent
+     marketing surface that matches /agents and /skills. */
+  :root {
+    --c-accent: #0D90FF;
+    --c-accent-light: #3DA6FF;
+    --c-accent-deep: #0A73CC;
+    --c-accent-surface: rgba(13, 144, 255, 0.08);
+    --c-accent-border: rgba(13, 144, 255, 0.24);
+    --c-accent-glow: rgba(13, 144, 255, 0.18);
+    --c-success: #00C08B;
+    --c-warning: #F5A523;
+    --c-bg-card: rgba(20, 20, 22, 0.5);
+    --c-code-bg: #1a1a1a;
+    --c-fg-1: #EDEDED;
+    --c-fg-2: #A1A1A1;
+    --c-fg-3: #707070;
+  }
+
+  /* Page-specific extensions on top of _style.css */
+  table.contracts {
+    width: 100%; border-collapse: collapse; margin-bottom: 24px;
+    background: var(--c-bg-card);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px; overflow: hidden;
+    backdrop-filter: blur(20px);
+  }
+  table.contracts th, table.contracts td {
+    padding: 13px 16px; text-align: left;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    font-size: 13px;
+  }
+  table.contracts th {
+    background: var(--c-accent-surface); color: var(--c-accent);
+    font-family: 'Geist Mono', ui-monospace, 'Menlo', monospace;
+    font-size: 11px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase;
+    white-space: nowrap;
+  }
+  table.contracts tr:last-child td { border-bottom: none; }
+  table.contracts tr:hover td { background: rgba(255,255,255,0.025); }
+  table.contracts code {
+    background: var(--c-code-bg); padding: 3px 7px; border-radius: 4px;
+    font-size: 11.5px; color: var(--c-success);
+    font-family: 'Geist Mono', ui-monospace, 'Menlo', monospace;
+  }
+  table.contracts a {
+    color: var(--c-accent); text-decoration: none;
+    border-bottom: 1px dotted rgba(13, 144, 255, 0.4);
+    transition: all 0.2s;
+  }
+  table.contracts a:hover { color: var(--c-accent-light); border-bottom-color: rgba(61, 166, 255, 0.6); }
+  table.contracts .chain {
+    font-weight: 500; color: var(--c-fg-1);
+  }
+  table.contracts .chain-id {
+    color: var(--c-fg-3); font-size: 11px;
+    font-family: 'Geist Mono', ui-monospace, 'Menlo', monospace;
+  }
+
+  .contract-section {
+    background: var(--c-bg-card);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-left: 3px solid var(--c-accent);
+    border-radius: 12px;
+    padding: 24px 28px 8px;
+    margin-bottom: 24px;
+    backdrop-filter: blur(20px);
+  }
+  /* Color variants. Kept for visual differentiation between sections.
+     Now all derive from accent + success + warning, no purple/emerald mix. */
+  .contract-section.purple { border-left-color: var(--c-success); }
+  .contract-section.blue   { border-left-color: var(--c-accent-light); }
+  .contract-section.amber  { border-left-color: var(--c-warning); }
+  .contract-section h3 {
+    font-size: 18px; color: var(--c-fg-1); font-weight: 600;
+    letter-spacing: -0.01em; margin-bottom: 6px;
+  }
+  .contract-section .sub {
+    font-size: 13px; color: var(--c-fg-2); margin-bottom: 18px; line-height: 1.6;
+  }
+  .contract-section .sub code {
+    background: var(--c-code-bg); padding: 2px 6px; border-radius: 4px;
+    font-size: 11.5px; color: var(--c-success);
+    font-family: 'Geist Mono', ui-monospace, 'Menlo', monospace;
+  }
+
+  .info-box {
+    background: var(--c-accent-surface);
+    border: 1px solid var(--c-accent-border);
+    border-radius: 10px;
+    padding: 18px 22px;
+    margin-bottom: 24px;
+  }
+  .info-box h4 {
+    font-size: 13px; color: var(--c-accent); font-weight: 600;
+    letter-spacing: -0.005em; margin-bottom: 8px;
+  }
+  .info-box p {
+    font-size: 13px; color: var(--c-fg-2); line-height: 1.65;
+  }
+  .info-box code {
+    background: var(--c-code-bg); padding: 2px 6px; border-radius: 4px;
+    font-size: 11.5px; color: var(--c-success);
+    font-family: 'Geist Mono', ui-monospace, 'Menlo', monospace;
+  }
+
+  .bullet-list {
+    list-style: none; padding: 0; margin: 0;
+  }
+  .bullet-list li {
+    font-size: 13px; color: var(--c-fg-2); padding: 5px 0 5px 20px;
+    position: relative; line-height: 1.6;
+  }
+  .bullet-list li::before {
+    content: '▸'; position: absolute; left: 0; color: var(--c-accent);
+  }
+
+  .verify-status {
+    display: inline-block; padding: 3px 9px; border-radius: 12px;
+    font-family: 'Geist Mono', ui-monospace, 'Menlo', monospace;
+    font-size: 10px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase;
+    margin-left: 8px;
+  }
+  .verify-status.live {
+    background: rgba(0, 192, 139, 0.12); color: var(--c-success);
+    border: 1px solid rgba(0, 192, 139, 0.28);
+  }
+  .verify-status.pending {
+    background: rgba(245, 165, 35, 0.12); color: var(--c-warning);
+    border: 1px solid rgba(245, 165, 35, 0.28);
+  }
+
+  /* S35 M11 Day-3 evening: mobile breakpoints. The contracts page was
+     previously zero-media-query and would overflow horizontally on
+     iPhone-size viewports. The contract-section padding shrinks, tables
+     get a horizontal-scroll container so they can be panned without
+     blowing out the page width, addresses (long hex strings) wrap. */
+  @media (max-width: 720px) {
+    .contract-section {
+      padding: 18px 18px 4px;
+      margin-bottom: 18px;
+    }
+    .contract-section h3 {
+      font-size: 16px;
+    }
+    .contract-section .sub {
+      font-size: 12.5px;
+    }
+    /* Table horizontal scroll wrapper. Wrapping it post-hoc since the
+       structure already exists. Tables that exceed viewport width can be
+       panned horizontally. The first column (chain name) stays put. */
+    table.contracts {
+      display: block;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      white-space: nowrap;
+    }
+    table.contracts th, table.contracts td {
+      padding: 10px 12px;
+      font-size: 12px;
+    }
+    table.contracts code {
+      /* Long hex addresses. Wrap with break-all so they fit the cell */
+      word-break: break-all;
+      white-space: normal;
+      font-size: 10.5px;
+      padding: 2px 5px;
+    }
+    .info-box {
+      padding: 14px 16px;
+    }
+    .info-box p {
+      font-size: 12.5px;
+    }
+    .verify-status {
+      font-size: 9px;
+      padding: 2px 7px;
+      margin-left: 4px;
+    }
+    /* Top nav. Stack the spacer + links into wrap */
+    nav.top {
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    nav.top .spacer {
+      display: none;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<nav class="top">
+  <a href="/architecture.html" class="back">← Architecture</a>
+  <span class="spacer"></span>
+  <span class="label">Public Surface</span>
+  <a href="/skills/" class="external">Skill Library</a>
+</nav>
+
+<header class="page">
+  <span class="eyebrow">Public Smart Contracts</span>
+  <h1>Nuro on-chain · proof of existence</h1>
+  <p class="lede">
+    Every Nuro-deployed contract across the chains we support, with block-explorer links for verification. Contracts cover the <strong>LayerZero V2 OFT bridge</strong> (synthetic USDC routing where CCTP isn't available), <strong>fee vaults</strong> (collected protocol revenue), and <strong>x402 agentic-finance vaults</strong> (revenue from external agent traffic). Everything is HD-derived from a single root key for clean attribution.
+  </p>
+</header>
+
+<!-- ────── MyOFTAdapter · LayerZero V2 ────── -->
+
+<div class="contract-section">
+  <h3>MyOFTAdapter · LayerZero V2 OFT bridge</h3>
+  <p class="sub">
+    Locks/unlocks USDC against the Stargate / LayerZero network for cross-chain flow.
+    Used on chains where Circle CCTP isn't supported, or where LayerZero is the cheaper / faster route.
+    Source: <code>contracts/MyOFTAdapter.sol</code>.
+  </p>
+
+  <table class="contracts">
+    <thead>
+      <tr>
+        <th>Chain</th>
+        <th>Chain&nbsp;ID</th>
+        <th>Address</th>
+        <th>Block</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="chain">Base</td>
+        <td class="chain-id">8453</td>
+        <td><a href="https://basescan.org/address/0xA150EC8B718C22E12036f916d90FF72af14B3E96" target="_blank" rel="noopener"><code>0xA150EC8B718C22E12036f916d90FF72af14B3E96</code></a></td>
+        <td><code>43,065,841</code></td>
+      </tr>
+      <tr>
+        <td class="chain">Arbitrum</td>
+        <td class="chain-id">42161</td>
+        <td><a href="https://arbiscan.io/address/0xd58C1412e50fF00212770B170D86e2387D2d2b18" target="_blank" rel="noopener"><code>0xd58C1412e50fF00212770B170D86e2387D2d2b18</code></a></td>
+        <td><code>441,771,079</code></td>
+      </tr>
+      <tr>
+        <td class="chain">BSC</td>
+        <td class="chain-id">56</td>
+        <td><a href="https://bscscan.com/address/0xce4c2270890267aC860fdc72b6946359d0898675" target="_blank" rel="noopener"><code>0xce4c2270890267aC860fdc72b6946359d0898675</code></a></td>
+        <td><code>n/a</code></td>
+      </tr>
+      <tr>
+        <td class="chain">Celo</td>
+        <td class="chain-id">42220</td>
+        <td><a href="https://celoscan.io/address/0xA150EC8B718C22E12036f916d90FF72af14B3E96" target="_blank" rel="noopener"><code>0xA150EC8B718C22E12036f916d90FF72af14B3E96</code></a></td>
+        <td><code>61,633,777</code></td>
+      </tr>
+      <tr>
+        <td class="chain">Gnosis</td>
+        <td class="chain-id">100</td>
+        <td><a href="https://gnosisscan.io/address/0xA150EC8B718C22E12036f916d90FF72af14B3E96" target="_blank" rel="noopener"><code>0xA150EC8B718C22E12036f916d90FF72af14B3E96</code></a></td>
+        <td><code>45,153,715</code></td>
+      </tr>
+      <tr>
+        <td class="chain">Scroll</td>
+        <td class="chain-id">534352</td>
+        <td><a href="https://scrollscan.com/address/0xA150EC8B718C22E12036f916d90FF72af14B3E96" target="_blank" rel="noopener"><code>0xA150EC8B718C22E12036f916d90FF72af14B3E96</code></a></td>
+        <td><code>31,907,962</code></td>
+      </tr>
+      <tr>
+        <td class="chain">zkSync Era</td>
+        <td class="chain-id">324</td>
+        <td><a href="https://explorer.zksync.io/address/0xA150EC8B718C22E12036f916d90FF72af14B3E96" target="_blank" rel="noopener"><code>0xA150EC8B718C22E12036f916d90FF72af14B3E96</code></a></td>
+        <td><code>69,073,536</code></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="info-box">
+    <h4>Why 5 chains share the same address</h4>
+    <p>
+      CREATE2 deterministic deployment: same deployer address + same salt + same bytecode produces the same address on every EVM chain. Base, Celo, Gnosis, Scroll, and zkSync Era all received their adapters via this path. Proof we're using a single canonical deployment pipeline. Arbitrum and BSC differ because they were deployed earlier with non-CREATE2 paths.
+    </p>
+  </div>
+</div>
+
+<!-- ────── MyOFT · synthetic OFT ────── -->
+
+<div class="contract-section purple">
+  <h3>MyOFT · synthetic OFT token</h3>
+  <p class="sub">
+    LayerZero-side companion to the OFT Adapter. Currently deployed on Arbitrum only.
+    Source: <code>contracts/MyOFT.sol</code>.
+  </p>
+
+  <table class="contracts">
+    <thead>
+      <tr>
+        <th>Chain</th>
+        <th>Chain&nbsp;ID</th>
+        <th>Address</th>
+        <th>Block</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="chain">Arbitrum</td>
+        <td class="chain-id">42161</td>
+        <td><a href="https://arbiscan.io/address/0xCf06b8A18b49c6b26b11426F8Cd9d697ba714134" target="_blank" rel="noopener"><code>0xCf06b8A18b49c6b26b11426F8Cd9d697ba714134</code></a></td>
+        <td><code>439,422,870</code></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ────── Fee Vaults ────── -->
+
+<div class="contract-section blue">
+  <h3>Fee Vaults · collected protocol revenue</h3>
+  <p class="sub">
+    HD-derived addresses that receive protocol-fee transfers. Not contracts in the bytecode sense (these are EOAs controlled by the Nuro signer infrastructure), but verifiable on-chain and balance-checkable like any other public address.
+  </p>
+
+  <table class="contracts">
+    <thead>
+      <tr>
+        <th>Vault</th>
+        <th>Chain</th>
+        <th>Address</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="chain">EVM Fee Vault</td>
+        <td>Base</td>
+        <td><a href="https://basescan.org/address/0x749edFC84A28793ce150d4E7E71bcEe73C454b56" target="_blank" rel="noopener"><code>0x749edFC84A28793ce150d4E7E71bcEe73C454b56</code></a></td>
+      </tr>
+      <tr>
+        <td class="chain">SPL Fee Vault</td>
+        <td>Solana</td>
+        <td><a href="https://solscan.io/account/GZxqx21AX1uXgDv86mveNmaBS7fSK1AyxAMxkYRsMf8t" target="_blank" rel="noopener"><code>GZxqx21AX1uXgDv86mveNmaBS7fSK1AyxAMxkYRsMf8t</code></a></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ────── x402 Revenue Vault ────── -->
+
+<div class="contract-section amber">
+  <h3>x402 Revenue Vault · agentic-finance moat</h3>
+  <p class="sub">
+    Receives USDC payments from external agents calling our productized x402 endpoints.
+    <code>/heimdall/threat-intel</code> ($0.10), <code>/huginn/counsel</code> ($0.005), <code>/markets/resolved</code> ($0.001), <code>/demo/echo</code> ($0.001).
+    HD-derived from the <code>nuro-revenue</code> agent ID seed, distinct from agent SPEND vaults so accounting stays clean.
+  </p>
+
+  <table class="contracts">
+    <thead>
+      <tr>
+        <th>Vault</th>
+        <th>Chain</th>
+        <th>Address</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="chain">x402 Revenue (Base)</td>
+        <td>Base / Base Sepolia</td>
+        <td><a href="https://basescan.org/address/0x050cdf3608664bD667586393986cF8803f1Cd1B8" target="_blank" rel="noopener"><code>0x050cdf3608664bD667586393986cF8803f1Cd1B8</code></a></td>
+      </tr>
+      <tr>
+        <td class="chain">Mythos Agent Vault</td>
+        <td>Base / Base Sepolia</td>
+        <td><a href="https://basescan.org/address/0xe9e54C01Eea4fB8a429BE8975567077AFA6929aa" target="_blank" rel="noopener"><code>0xe9e54C01Eea4fB8a429BE8975567077AFA6929aa</code></a></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ────── Chains without Nuro contracts ────── -->
+
+<div class="contract-section">
+  <h3>Chains supported via external public infrastructure</h3>
+  <p class="sub">
+    These chains do not require Nuro-deployed contracts because they use mature public infrastructure
+    (Circle CCTP V2, Across Protocol, Bridge Kit) for routing. Each user gets an HD-derived deposit address,
+    but no bespoke smart contract on-chain.
+  </p>
+
+  <ul class="bullet-list">
+    <li><strong>Ethereum, Polygon, Optimism, Avalanche, Mantle, Mode</strong>: Circle CCTP V2 native</li>
+    <li><strong>HyperEVM</strong>: Across Protocol SpokePool <code>0x35E63eA3eb0fb7A3bc543C71FB66412e1F6B0E04</code></li>
+    <li><strong>Solana</strong>: Circle CCTP V2 (program ID <code>CCTPiPYPc6AsJuwueEnWgSgucamXDZwBd53dQ11YiKX3</code>)</li>
+  </ul>
+</div>
+
+<footer style="margin-top:32px; padding-top:20px; border-top: 1px solid rgba(255,255,255,0.05); color: #555; font-size:11px; line-height:1.6;">
+  All addresses verifiable on the linked block explorers. Public source repo coming soon · Ready to wire up? <a href="/login" style="color:var(--c-accent-light);">Open your dashboard</a> and watch the autonomous action happen · Architecture: <a href="/architecture.html" style="color:var(--c-accent-light);">/architecture.html</a> · Scaling: <a href="/architecture/scaling-roadmap.html" style="color:var(--c-accent-light);">/architecture/scaling-roadmap.html</a>
+</footer>
+
+</div>
+</body>
+</html>

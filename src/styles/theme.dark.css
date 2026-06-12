@@ -1,0 +1,169 @@
+/**
+ * Dark Theme - Flat Gray and Blue
+ * SAFE CONTAINER for precision building
+ */
+
+:root.dark {
+    /* === BRAND COLORS === */
+    --color-primary: #0D90FF;
+    --color-primary-dark: #0A73CC;
+    --color-primary-light: #3da6ff;
+    --color-brand-primary: #0D90FF;
+    --color-brand-primary-light: #3da6ff;
+    --color-brand-surface: rgba(13, 144, 255, 0.1);
+    --color-brand-border: rgba(13, 144, 255, 0.2);
+    --color-brand-glow: rgba(13, 144, 255, 0.3);
+    --color-nuro-brand: #846FFF;
+    --color-moonpay-app: #7d00ff;
+    --color-accent: #0D90FF;
+    --color-text-on-primary: #ffffff;
+    --color-reload-button-text: #ffffff;
+    --color-reload-button-bg: var(--color-cta-button-bg);
+    --color-primary-glow: rgba(13, 144, 255, 0.4);
+    --color-primary-glow-strong: rgba(13, 144, 255, 0.2);
+
+    /* === BACKGROUND COLORS === */
+    --color-bg-primary: #111111;
+    --color-bg-secondary: #171717;
+    --color-bg-chat-thread-plate: #1a1a1a;
+    --color-bg-chat-thread-plate-bottom: #181818;
+    --color-bg-card: #171717;
+    --color-card-base-bg: #171717;
+    --color-bg-picker-panel: #1d1d1d;
+    --color-bg-tertiary: #111111;
+    --color-bg-input: rgba(255, 255, 255, 0.04);
+    --color-bg-hover: rgba(255, 255, 255, 0.08);
+    --color-bg-subtle: #2d2d2d;
+
+    /* === BRAND IMAGE FILTERS (Anti-Bleed Locks) === */
+    --brand-hue-rotate: hue-rotate(0deg);
+    --brand-saturate: saturate(1);
+    --brand-brightness: brightness(1);
+
+    /* === ATMOSPHERICS === */
+    --color-grid-line: transparent;
+    --color-bg-atmospheric: transparent;
+    --opacity-aurora: 0;
+    /* === GLASS BACKGROUNDS (For Modals/Floating only) === */
+    --color-bg-glass: rgba(255, 255, 255, 0.02);
+    --color-bg-glass-strong: rgba(255, 255, 255, 0.04);
+    --glass-blur: 20px;
+    --glass-blur-strong: 24px;
+    --glass-blur-modal: 30px;
+
+    /* === BORDER COLORS === */
+    --color-border-primary: rgba(255, 255, 255, 0.06);
+    --color-border-secondary: rgba(255, 255, 255, 0.08);
+    --color-border-tertiary: rgba(255, 255, 255, 0.12);
+    --color-border-input: rgba(255, 255, 255, 0.06);
+    --color-border-table: rgba(255, 255, 255, 0.08);
+    --color-border-shell: rgba(255, 255, 255, 0.08);
+    --color-border-active: rgba(255, 255, 255, 0.2);
+    --color-border-input-focus: rgba(255, 255, 255, 0.2);
+    --color-border-glass: rgba(255, 255, 255, 0.08);
+    --color-border-glass-strong: rgba(255, 255, 255, 0.12);
+    /* Input / composer pill hovers (must exist on :root.dark — invalid var → currentColor white) */
+    --color-bg-input-hover: rgba(255, 255, 255, 0.06);
+    --color-border-input-hover: rgba(255, 255, 255, 0.12);
+    --color-switch-off: rgba(255, 255, 255, 0.12);
+    --color-cta-button-bg: #0D90FF;
+    --color-cta-button-bg-hover: #0A73CC;
+    --color-cta-button-glow: rgba(13, 144, 255, 0.4);
+    --color-bg-address-copy-chip: #272727;
+    --color-bg-asset-picker-panel: rgba(20, 20, 20, 0.6);
+    --color-bg-swap-panel: var(--color-bg-primary);
+    --color-bg-swap-center-inner: #202020;
+    --color-border-swap-center: #121212;
+
+    /* === TEXT COLORS === */
+    --color-text-primary: #f2f2f2;
+    --color-text-secondary: #989898;
+    --color-text-muted: rgba(152, 152, 152, 0.8);
+    --color-text-placeholder: #525252;
+    --color-text-dimmed: rgba(152, 152, 152, 0.4);
+
+    /* === SURFACE COLORS === */
+    --color-surface-hover: rgba(255, 255, 255, 0.05);
+    --color-card-accent: #0D90FF;
+    --color-card-accent-muted: rgba(13, 144, 255, 0.4);
+
+    /* === SIDEBAR === */
+    --color-sidebar-bg: #171717;
+    /** Toolbar / icon controls on main canvas — same fill as nav shell */
+    --color-bg-chrome-on-canvas: var(--color-sidebar-bg);
+    --color-sidebar-active-bg: rgba(13, 144, 255, 0.1);
+    --color-sidebar-active-border: rgba(13, 144, 255, 0.2);
+    --color-sidebar-item-hover: rgba(255, 255, 255, 0.05);
+    --color-sidebar-item-hover-subtle: rgba(255, 255, 255, 0.02);
+    --color-sidebar-divider: #333333;
+    --sidebar-blur: 0px;
+
+    /* === SHADOW === */
+    --color-shadow-primary: rgba(0, 0, 0, 0.6);
+
+    /* === STATE COLORS === */
+    --color-success: #00C08B;
+    --color-success-text: #ffffff;
+    --color-error: #DE5555;
+    --color-error-light: #DE5555;
+    --color-warning: #FFAB00;
+    --color-info: #0D90FF;
+
+    /* === STATIC BLUR OVERRIDES === */
+    --widget-blur: 0px;
+
+    /* === UI COMPONENTS - FILTERS (Dark blue) === */
+    --filter-bg: rgba(255, 255, 255, 0.03);
+    --filter-border: transparent;
+    --filter-text: rgba(255, 255, 255, 0.65);
+    --filter-hover-bg: rgba(255, 255, 255, 0.05);
+    --filter-hover-border: rgba(255, 255, 255, 0.08);
+    --filter-hover-text: var(--color-text-secondary);
+    --filter-active-bg: rgba(13, 144, 255, 0.15);
+    --filter-active-bg-hover: rgba(13, 144, 255, 0.20);
+    --filter-active-border: #0D90FF;
+    --filter-active-text: #0D90FF;
+
+    /* === UI COMPONENTS - TABLE ROWS (modals) === */
+    --table-row-bg: rgba(255, 255, 255, 0.03);
+    --table-row-alt-bg: rgba(255, 255, 255, 0.06);
+    --table-header-bg: rgba(255, 255, 255, 0.06);
+    --color-bg-modal-table-row: rgba(255, 255, 255, 0.04);
+    --color-bg-modal-table-row-alt: rgba(255, 255, 255, 0.06);
+    --color-bg-modal-table-header: rgba(255, 255, 255, 0.10);
+    --color-bg-modal-table-header-hover: transparent;
+
+    /* === CRYPTO TOKEN COLORS (Reload/Withdraw modals — 5.4.26) === */
+    --color-usdc-blue: #2775ca;
+    --color-tether-green: #24a17b;
+    --color-dai-gold: #f5ac37;
+
+    /* === QR/Deposit (Reload/Withdraw modals — 5.4.26) === */
+    --color-bg-qr-container: #ffffff;
+    --color-bg-deposit-input: rgba(255, 255, 255, 0.03);
+    --color-border-deposit-input: rgba(255, 255, 255, 0.1);
+
+    /* === Modal overlay / info (5.4.26) === */
+    --color-bg-modal-info: rgba(255, 255, 255, 0.06);
+    --color-bg-modal-overlay: rgba(0, 0, 0, 0.5);
+    --color-bg-dropdown-hover: rgba(255, 255, 255, 0.04);
+
+    /** Dashboard main column horizontal gutter (see .main-content-gutter-x in theme.css) */
+    --main-content-gutter-x: 0.75rem;
+
+    /** Bottom pad for .scroll-fade-mask — last content clears the fade zone */
+    --scroll-fade-bottom-content-pad: 6rem;
+}
+
+/* Dark theme specific override for glass bursts to avoid purple leak */
+:root.dark .glass-burst {
+    background: 
+        radial-gradient(ellipse 135% 105% at 72% 8%,
+            rgba(13, 144, 255, 0.08) 0%,
+            rgba(13, 144, 255, 0.04) 48%,
+            transparent 84%),
+        radial-gradient(ellipse 110% 85% at 0% 100%,
+            rgba(0, 192, 139, 0.05) 0%,
+            rgba(0, 192, 139, 0.02) 40%,
+            transparent 80%);
+}

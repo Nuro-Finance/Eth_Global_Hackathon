@@ -1,0 +1,178 @@
+/**
+ * Theme CSS - Nuro brand (#846FFF) with CSS custom properties
+ * Using Tailwind CSS v4 @theme directive for design tokens
+ * This is the default/production theme
+ */
+
+/* ===== DEFAULT THEME (Nuro #846FFF) ===== */
+@theme {
+    /* Primary Brand Colors */
+    --color-primary: #846FFF;
+    --color-primary-light: #9d8aff;
+    --color-brand-primary: #846FFF;
+    --color-brand-primary-light: #9d8aff;
+    --color-brand-surface: rgba(132, 111, 255, 0.1);
+    --color-brand-border: rgba(132, 111, 255, 0.2);
+    --color-brand-glow: rgba(132, 111, 255, 0.15);
+    --color-accent: #9d8aff;
+    --color-nuro-brand: #846FFF;
+    /* Third-party: MoonPay app / on-ramp tile (see public/Moonpay Logo.svg) */
+    --color-moonpay-app: #7d00ff;
+    --color-card-base-bg: #171717;
+}
+
+/* Light Mode Colors (Default) */
+:root {
+    /* Primary Brand Colors - kept for backward compatibility */
+    --color-primary: #846FFF;
+    --color-primary-light: #9d8aff;
+
+    /* Background Colors - Light, clean grays */
+    --color-bg-primary: #f8fafc;
+    --color-bg-secondary: #ffffff;
+    --color-bg-tertiary: #f1f5f9;
+    --color-bg-card: #ffffff;
+    --color-card-base-bg: #171717;
+    --color-bg-picker-panel: var(--color-bg-secondary);
+    --color-bg-hover: rgba(0, 0, 0, 0.03);
+    --color-bg-input: #ffffff;
+
+    /* Border Colors - Transparent in light mode for cleaner look */
+    --color-border-primary: transparent;
+    --color-border-secondary: transparent;
+    --color-border-tertiary: #cbd5e1;
+    --color-border-input: #e2e8f0;
+    --color-border-input-focus: #846FFF;
+    --color-bg-input-hover: rgba(0, 0, 0, 0.05);
+    --color-border-table: #e2e8f0;
+
+    /* Shell (Header/Sidebar) borders - visible in light mode */
+    --color-border-shell: var(--color-border-input);
+
+    /* Text Colors - Dark text for light mode */
+    --color-text-primary: #0f172a;
+    --color-text-secondary: #475569;
+    --color-text-muted: #64748b;
+    --color-text-placeholder: #94a3b8;
+
+    /* State/Status Colors */
+    --color-error: #ff7a7a;
+    --color-success: #16e0a9;
+    --color-success-text: #ffffff;
+    --color-warning: #facc15;
+    --color-info: #3B82F6;
+
+    /* Reload Button Tokens (Light Mode fallback) */
+    --color-reload-button-bg: var(--color-nuro-brand);
+    --color-reload-button-text: #ffffff;
+
+    /* Fixed Nuro Global Brand Color */
+    --color-nuro-brand: #846FFF;
+
+    /* MoonPay (partner) — app icon / tile background; logo asset is two white circles on brand field */
+    --color-moonpay-app: #7d00ff;
+
+    /* Shadow */
+    --color-shadow-primary: rgba(0, 0, 0, 0.1);
+
+    /* Sidebar - Light background */
+    --color-sidebar-bg: #ffffff;
+    /** Toolbar / icon controls on main canvas — same fill as nav shell */
+    --color-bg-chrome-on-canvas: var(--color-sidebar-bg);
+    --color-sidebar-active-bg: var(--color-brand-surface);
+    --color-sidebar-active-border: var(--color-brand-border);
+
+    /* Brand Colors - Dynamic theming support */
+    --color-brand-primary: #846FFF;
+    --color-brand-primary-light: #9d8aff;
+    --color-brand-surface: rgba(132, 111, 255, 0.1);
+    --color-brand-border: rgba(132, 111, 255, 0.2);
+    --color-brand-glow: rgba(132, 111, 255, 0.15);
+    --color-accent: #9d8aff;
+    --color-button-text: #000000;
+
+    /* Card accent colors */
+    --color-card-accent: #9d8aff;
+    --color-card-accent-muted: #846FFF;
+
+    /* Map Colors - Light mode (lighter gray tones) */
+    --color-map-fill: #d1d5db;
+    --color-map-stroke: #e5e7eb;
+    --color-map-hover: #9ca3af;
+
+    /* Brand Image Filters (for logo color adjustment) */
+    --brand-hue-rotate: hue-rotate(0deg);
+    --brand-saturate: saturate(1);
+    --brand-brightness: brightness(1);
+
+    /* Radius scale - used across buttons, inputs, tabs, cards, tables */
+    --radius-xs: 6px;
+    --radius-sm: 10px;
+    --radius-md: 14px;
+    --radius-lg: 18px;
+    --radius-xl: 24px;
+
+    /* Component-specific radii */
+    --radius-tab: 16px;
+    --radius-card: 20px;
+    --radius-table: 18px;
+
+    /* Glass (light: no blur) */
+    --glass-blur: 0px;
+    --glass-blur-strong: 0px;
+}
+
+@media (min-width: 640px) {
+    :root {
+        --main-content-gutter-x: 1.25rem;
+    }
+}
+
+@media (min-width: 768px) {
+    :root {
+        --main-content-gutter-x: 1.5rem;
+    }
+}
+
+/**
+ * Dashboard main column only — horizontal gutter (do not add to every .scroll-fade-pad).
+ * Pair with .scroll-fade-pad in app/[locale]/dashboard/layout.tsx.
+ */
+.main-content-gutter-x {
+    padding-left: var(--main-content-gutter-x);
+    padding-right: var(--main-content-gutter-x);
+}
+
+/* Padding so bottom/top content can scroll out of the fade zone (match mask fade height). */
+.scroll-fade-pad {
+    padding-top: 1rem;
+    padding-bottom: var(--scroll-fade-bottom-content-pad);
+}
+
+/* Scroll fade – mask on the scroll container so content fades at top/bottom (no overlay, no hard line).
+   Keep --scroll-fade-bottom-content-pad ≥ distance from bottom until fade starts (opaque ends at calc(100% - 5rem)).
+   Bottom: ~5rem soft falloff + ~1.25rem fully clear lip. */
+.scroll-fade-mask {
+    -webkit-mask-image: linear-gradient(to bottom,
+            transparent 0,
+            black 2.5rem,
+            black calc(100% - 5rem),
+            rgba(0, 0, 0, 0.1) calc(100% - 2.5rem),
+            transparent calc(100% - 1.25rem),
+            transparent 100%);
+    mask-image: linear-gradient(to bottom,
+            transparent 0,
+            black 2.5rem,
+            black calc(100% - 5rem),
+            rgba(0, 0, 0, 0.1) calc(100% - 2.5rem),
+            transparent calc(100% - 1.25rem),
+            transparent 100%);
+    -webkit-mask-size: 100% 100%;
+    mask-size: 100% 100%;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+}
+
+/* Glass card inner: do not add a global inset `box-shadow` here — it reads as a “floor”
+   when zoomed. Use element-level `shadow-*` only where you want elevation. */
+/* Dark theme glass-burst lives in theme.dark.css */

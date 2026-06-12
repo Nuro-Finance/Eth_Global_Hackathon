@@ -1,0 +1,33 @@
+{
+  "name": "@nuro/agent",
+  "version": "0.1.0",
+  "description": "One-line install for the Nuro agent runtime — omnichain settlement + Mythos neural-net + policy stack.",
+  "bin": {
+    "nuro": "./index.js"
+  },
+  "main": "./index.js",
+  "files": [
+    "index.js",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "ai",
+    "agent",
+    "claude",
+    "openai",
+    "x402",
+    "usdc",
+    "omnichain",
+    "settlement",
+    "policy",
+    "nuro"
+  ],
+  "homepage": "https://app.nuro.finance/skills",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  }
+}

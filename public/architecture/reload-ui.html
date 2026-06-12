@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>03 · Reload Card UI · AFI Architecture</title>
+<link rel="stylesheet" href="/architecture/_style.css">
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+</head>
+<body>
+<div class="wrap">
+
+<nav class="top">
+  <a href="/architecture.html" class="back">← All diagrams</a>
+  <span class="spacer"></span>
+  <span class="label">Section</span><span class="index-num">03 / 10</span>
+</nav>
+
+<header class="page">
+  <span class="eyebrow">03 · Frontend flow</span>
+  <h1>Reload Card UI → Backend</h1>
+  <p class="lede">
+    What happens when a user opens the Reload Card modal. Three-category picker (<strong>Stables / Natives / Memecoins</strong>) driven by the live <code>erc20_allowlist</code> DB table. Live 0x quote preview as the user types. One-click wallet-send via wagmi, or copy-paste fallback for hardware wallets. <strong>Every user has a unique deterministic deposit address on every chain</strong> — the explainer below shows exactly how it's derived.
+  </p>
+</header>
+
+<div class="section-label">01 — Reload flow</div>
+<div class="diagram">
+<div class="mermaid">
+flowchart TD
+    User["User opens Reload Card"] --> FetchToks["GET /api/supported-tokens"]
+    FetchToks --> Pick{"Pick category"}
+    Pick -->|Stables| Direct["USDC · USDT · DAI<br/>direct deposit"]
+    Pick -->|Natives| NatPick["ETH · MATIC · BNB<br/>AVAX · S · HYPE"]
+    Pick -->|Memecoins| MemePick["SHIB · PEPE · PENGU · ANDY<br/>(gated)"]
+
+    NatPick --> ChainAuto["Auto-pick chain<br/>(MATIC → Polygon)"]
+    MemePick --> ChainAuto
+    Direct --> ChainManual["User picks chain<br/>(23 options)"]
+
+    ChainAuto --> Amount["User types amount"]
+    ChainManual --> Amount
+
+    Amount --> Quote["GET /api/quote/swap"]
+    Quote -->|ok| Preview["≈ USDC received<br/>+ worst-case slippage"]
+    Quote -->|degraded| Fallback["'quote unavailable'<br/>user can still proceed"]
+
+    Preview --> Send{"Send method"}
+    Fallback --> Send
+    Send -->|wagmi| Wagmi["WalletDepositButton"]
+    Send -->|copy-paste| QR["Deposit address + QR"]
+
+    Wagmi --> Tx["Wallet signs tx"]
+    QR --> Tx
+    Tx --> Monitor["Monitor cascade<br/>(diagram 02)"]
+</div>
+</div>
+
+<div class="section-label">02 — Where the deposit address comes from</div>
+<p class="section-sub">The deposit address the user sees is <strong>not</strong> a pre-provisioned pool address. It's derived on the fly from a master seed using BIP-44 HD derivation, scoped to the user's ID. Every user gets a unique address on every supported chain, and the backend can recover the private key at any time because the derivation is deterministic. No key storage, no rotation, no custody risk on deposit keys (spending keys are separate).</p>
+
+<div class="diagram">
+<div class="mermaid">
+flowchart LR
+    Seed["Master Seed<br/>BIP-39 mnemonic"]
+    Seed --> Root["HDNode root<br/>fromMnemonic()"]
+
+    Root --> EVMPath["EVM path<br/>m/44'/60'/0'/0/{userId}"]
+    Root --> SolPath["Solana path<br/>m/44'/501'/{userId}'/0'"]
+
+    EVMPath --> U42evm["User 42 EVM<br/>0xDEP…42A1<br/>(all 22 EVM chains)"]
+    EVMPath --> U43evm["User 43 EVM<br/>0xDEP…43B2"]
+    EVMPath --> U44evm["User 44 EVM<br/>0xDEP…44C3"]
+
+    SolPath --> U42sol["User 42 Solana<br/>5qDep…42S"]
+    SolPath --> U43sol["User 43 Solana<br/>5qDep…43S"]
+
+    classDef seed fill:#1a1a2e,stroke:#c770f0,stroke-width:2px,color:#fff
+    classDef path fill:#0a0a14,stroke:#16e0a9,color:#fff
+    classDef addr fill:#0a0a14,stroke:#f4a840,color:#fff
+    class Seed,Root seed
+    class EVMPath,SolPath path
+    class U42evm,U43evm,U44evm,U42sol,U43sol addr
+</div>
+</div>
+
+<div class="callout info">
+  <strong>Same address across EVM chains.</strong> Because all EVM chains share the secp256k1 curve and the same address encoding, User 42's address on Ethereum, Arbitrum, Polygon, Base, Optimism, etc. is the <em>same 20-byte address</em> <code>0xDEP…42A1</code>. We only need to derive once per user for all 22 EVM chains. Solana uses ed25519 + a different encoding, so it gets its own path and a separate base58-encoded address.
+</div>
+
+<div class="worked">
+  <div class="worked-header">Worked example — how User 42 got their deposit address</div>
+
+  <div class="worked-step">
+    <div class="worked-num">1</div>
+    <div class="worked-body">
+      <h4>User signs up, gets assigned userId=42</h4>
+      <p>Persisted to <code>users.id</code> (VARCHAR on prod). This integer becomes the HD derivation index for every subsequent address.</p>
+    </div>
+  </div>
+
+  <div class="worked-step">
+    <div class="worked-num">2</div>
+    <div class="worked-body">
+      <h4>Backend derives on first <code>/api/supported-tokens</code> call</h4>
+      <p>Inside <code>deposit.ts::deriveUserDepositAddress</code>:</p>
+      <code>const hdNode = HDNode.fromMnemonic(MASTER_SEED)</code>
+      <code>const userNode = hdNode.derivePath(`m/44'/60'/0'/0/42`)</code>
+      <code>const evmAddress = userNode.address  // 0xDEP...42A1</code>
+    </div>
+  </div>
+
+  <div class="worked-step">
+    <div class="worked-num">3</div>
+    <div class="worked-body">
+      <h4>Cached in <code>user_deposits</code> to skip re-derivation</h4>
+      <p>Row: <code>{ user_id: '42', chain: 'ethereum', address: '0xDEP...42A1' }</code>. Subsequent requests return from DB instead of re-deriving. The private key is never persisted — it's re-derived from the master seed whenever we need to sign a swap or bridge tx.</p>
+    </div>
+  </div>
+
+  <div class="worked-step">
+    <div class="worked-num">4</div>
+    <div class="worked-body">
+      <h4>FE displays <code>0xDEP…42A1</code> + QR</h4>
+      <p>The same address is shown regardless of which EVM chain the user picks. Only the chain-picker value changes, which dictates how Monitor routes the deposit downstream. Solana picks a different address derived from the Solana path.</p>
+    </div>
+  </div>
+
+  <div class="worked-step">
+    <div class="worked-num">5</div>
+    <div class="worked-body">
+      <h4>Recovery guarantee</h4>
+      <p>If the <code>user_deposits</code> table was nuked, we could re-derive every user's address from <code>MASTER_SEED + userId</code>. That's why the seed is rotated via a BIP-39 split with 3 officers (Richard + 2 backups), not left in a single <code>.env</code>.</p>
+      <div class="worked-meta">KMS rotation is a Sprint 3 priority — currently all signing still happens in-process with the raw seed in memory</div>
+    </div>
+  </div>
+</div>
+
+<div class="section-label">03 — Implementation notes</div>
+<section class="prose">
+  <h3>Two parallel reload UIs in the codebase</h3>
+  <ul>
+    <li><code>src/features/dashboard/my-card-1/components/ReloadFlow.tsx</code> — the side-panel reload on the My Card page. Wider canvas, chain picker opens a full-height sheet.</li>
+    <li><code>src/features/dashboard/my-card-v2/ReloadModal.tsx</code> — the popup reload on the Overview page. Modal style with category tabs in the token-pill dropdown.</li>
+  </ul>
+  <p>Both share the same backend endpoints (<code>/api/supported-tokens</code>, <code>/api/quote/swap</code>) and both implement dynamic chain filtering. Both were upgraded to the 3-category picker in Session 23 (commit <code>96513a1</code>) and cross-filter + style parity in Sessions 23–24.</p>
+
+  <h3>Dynamic chain filter — the bug-prevention move</h3>
+  <p>Prior to Session 23 the chain picker showed all 23 chains even when the user had picked a token that only existed on Ethereum. That led to silent "Quote unavailable" dead-ends. The fix derives an <em>allowed-chains set</em> from the <code>/api/supported-tokens</code> response per token, then filters the chain grid to that set + auto-bounces <code>selectedChain</code> if the user's current pick becomes invalid.</p>
+
+  <h3>Risk disclosure inline</h3>
+  <p>The estimate has a <code>≈</code> prefix, a worst-case-slippage line, and a below-threshold warning when the quote is under $5 USDC. No surprise for the user — they see the minimum they'll receive before they send.</p>
+</section>
+
+<nav class="pager">
+  <a href="/architecture/deposit-flow.html">
+    <div class="pager-label">← Prev</div>
+    <div class="pager-title">02 · Deposit flow</div>
+  </a>
+  <a href="/architecture/mythos-cycle.html" class="next">
+    <div class="pager-label">Next →</div>
+    <div class="pager-title">04 · Mythos cycle</div>
+  </a>
+</nav>
+
+<footer>AFI System Architecture · 03 / 10</footer>
+
+</div>
+
+<script>
+mermaid.initialize({
+  startOnLoad: true,
+  theme: 'dark',
+  themeVariables: { primaryColor: '#1a1a2e', primaryTextColor: '#e8e8e8', primaryBorderColor: '#16e0a9', lineColor: '#16e0a9', secondaryColor: '#2a2a4a', background: '#050510', mainBkg: '#1a1a2e', fontFamily: 'Inter, system-ui, sans-serif', fontSize: '16px', edgeLabelBackground: '#050510' },
+  flowchart: { curve: 'basis', padding: 24, useMaxWidth: true, nodeSpacing: 50, rankSpacing: 60, htmlLabels: true },
+});
+</script>
+</body>
+</html>

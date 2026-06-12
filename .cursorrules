@@ -1,0 +1,46 @@
+# 🏗️ Nuro.Finance - Studio Glassmorphism & Atmospheric Rules
+
+## 🧩 The Sync-Layered Environmental Masking Constraint
+In Chromium-based engines, parent-level `-webkit-mask-image` forces layer flattening, killing `backdrop-filter: blur(...)` on child cards.
+**NEVER** apply solid black masks or background-color fades to handle scroller exit points.
+
+### 🏗️ Mandatory Implementation:
+1. **NO SOLID BLACK Fills**: 
+   - Never use `bg-black` or solid dark-color plates for header/scroller occlusion.
+   - Never use `minimal={true}` on `GlobalBackground` components used in atmospheric overlays.
+
+2. **ATMOSPHERIC PLATES (Mirrored Layers)**:
+   - Use TWO fixed overlays for scroller exit-fades: **Top Plate (h-10)** and **Bottom Plate (h-14)**.
+   - These plates MUST **re-render the GlobalBackground** (Aurora + Grid + Texture) inside themselves at `z-[2]`.
+   - The illusion of transparency is achieved by **occlusion**, not alpha masking: the plate renders the background *on top* of the scrolling content.
+
+3. **SYNCED ANIMATION**:
+   - Ensure the Aurora and environmental layers inside the plates are 1:1 synced with the base background using global performance timers.
+
+4. **GLASSMORPHISM BASIS**:
+   - Primary Cards: `bg-white/[0.03]` (3% baseline).
+   - Interaction Hovers: `hover:bg-white/5` (5% subtle lift).
+   - Border Stroke: `1.5px` (standard weight).
+
+5. **ZERO-DRIFT INTERACTION**:
+   - All hover states, active states, and rename inputs MUST be stationary.
+   - NO `active:scale` transformations on wallet items or action buttons.
+   - NO vertical or horizontal layout reflow during inline edits (use absolute positioning).
+
+### 🏛️ Transactions Table Geometry & Layout:
+1. **MANDATORY TABLE-FIXED**:
+   - The primary Transactions table (`DesktopTable.tsx`) MUST ALWAYS use `table-fixed`.
+   - **NEVER** switch to `table-auto` for "flexibility." Flexibility causes horizontal data-shifting and is strictly prohibited.
+
+2. **IMMUTABLE COLUMN WIDTHS**:
+   - All `ColGroup` definitions in `DesktopTable.tsx` MUST use fixed percentage-based widths (adding up to 100%).
+   - These percentages are static anchors.
+   - NO edit should ever cause the table to recalculate its width based on the content of the data rows.
+
+3. **ZERO-DRIFT TOOLBAR**:
+   - The Search Bar and Filter Badge row MUST maintain a strict **32px height**.
+   - Use `border-transparent` on inactive badges to reserve pixel space, ensuring that toggling an active border (1px) does not cause a vertical or horizontal layout shift.
+   - All buttons in the filter bar MUST have fixed horizontal footprints to prevent reflowing the row during state changes.
+
+### 🔍 Architectural Intent:
+The goal is to maintain a geographically static UI where data is partitioned into slots that do not move, shrink, or grow when filtered or edited. The user's eye must never lose horizontal tracking because of a layout reflow.

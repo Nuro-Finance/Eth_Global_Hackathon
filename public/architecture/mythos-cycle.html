@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>04 · Mythos cycle · AFI Architecture</title>
+<link rel="stylesheet" href="/architecture/_style.css">
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+</head>
+<body>
+<div class="wrap">
+
+<nav class="top">
+  <a href="/architecture.html" class="back">← All diagrams</a>
+  <span class="spacer"></span>
+  <span class="label">Section</span><span class="index-num">04 / 10</span>
+</nav>
+
+<header class="page">
+  <span class="eyebrow">04 · Growth agent</span>
+  <h1>Mythos daily cycle</h1>
+  <p class="lede">
+    The state machine that powers our autonomous content agent. Perceives the market, thinks through options via Claude, generates content, runs it through quality + risk gates, queues medium/high-risk posts for Telegram approval, publishes, and (starting Session 24) seeds an engagement snapshot so future cycles can learn from what performed.
+  </p>
+</header>
+
+<div class="diagram">
+<div class="mermaid">
+stateDiagram-v2
+    [*] --> Perceive: daily cron fires
+    Perceive: Perceive market
+    Perceive --> Think
+    Think: Think via Claude
+    Think --> Generate
+    Generate: Generate content
+    Generate --> Gate
+    Gate: Quality gate
+    Gate --> Risk
+    Risk: Classify risk
+    Risk --> AutoApprove: low
+    Risk --> Queue: medium or high
+    AutoApprove: Auto-approved
+    AutoApprove --> Publish
+    Queue: Queue for Telegram
+    Queue --> Wait
+    Wait: Wait for admin tap
+    Wait --> Publish: Approve
+    Wait --> Reject: Reject
+    Wait --> Expire: 2h timeout
+    Publish: Post to platform
+    Publish --> Seed
+    Seed: Seed engagement row
+    Seed --> Track
+    Track: Hourly metrics fetch
+    Track --> Learn
+    Learn: Weight next cycle
+    Learn --> [*]
+    Reject --> LogRej
+    LogRej: Log rejection
+    LogRej --> [*]
+    Expire --> [*]
+</div>
+</div>
+
+<section class="prose">
+  <h3>Where each step lives</h3>
+  <ul>
+    <li><strong>Perceive</strong> — <code>src/growth-agent/skills/thought-engine.ts::perceiveMarket</code> pulls CoinGecko prices, Polymarket trending, recent sports events.</li>
+    <li><strong>Think + Generate</strong> — <code>thought-engine.ts</code> runs Claude with a system prompt keyed to Mythos's identity, produces structured content candidates (crypto alert / market prediction / educational thread).</li>
+    <li><strong>Gate</strong> — <code>quality-gate.ts</code> rejects boilerplate, dupes, or content that fails the 5-criteria quality check.</li>
+    <li><strong>Risk</strong> — classifier scores posts low/medium/high based on claims, topic sensitivity, financial advice proximity.</li>
+    <li><strong>Queue + Wait</strong> — <code>approval-pipeline.ts</code> posts Telegram message with inline Approve/Reject buttons. Session 23 moved the approval poll from 60-min to 10-second intervals.</li>
+    <li><strong>Publish</strong> — <code>processApprovedPosts</code> routes to <code>moltbook.ts</code>, <code>twitter.ts</code>, or <code>telegram.ts</code> per platform.</li>
+    <li><strong>Seed + Track</strong> — on publish, <code>seedPostEngagement</code> writes a t=0 row. Session 24's <code>engagement-fetcher.ts</code> cron samples metrics hourly.</li>
+    <li><strong>Learn</strong> — Session 25+ scope. Query <code>post_engagement</code> by (format, tone, category) to weight future generation toward high-engagement patterns.</li>
+  </ul>
+  <h3>Why the Telegram approval matters</h3>
+  <p>Mythos isn't fully autonomous. Medium/high-risk posts (financial claims, contentious takes) require admin approval before they go live. The 10-second polling interval means tap-to-publish latency is ~10-20s, not 60+ min like before the Session 23 fix. Session 25 TODO: wire <code>/telegram/webhook</code> through nginx for true real-time webhook instead of polling.</p>
+</section>
+
+<nav class="pager">
+  <a href="/architecture/reload-ui.html">
+    <div class="pager-label">← Prev</div>
+    <div class="pager-title">03 · Reload UI</div>
+  </a>
+  <a href="/architecture/db-schema.html" class="next">
+    <div class="pager-label">Next →</div>
+    <div class="pager-title">05 · DB schema</div>
+  </a>
+</nav>
+
+<footer>AFI System Architecture · 04 / 10</footer>
+
+</div>
+
+<script>
+mermaid.initialize({
+  startOnLoad: true, theme: 'dark',
+  themeVariables: { primaryColor: '#1a1a2e', primaryTextColor: '#e8e8e8', primaryBorderColor: '#16e0a9', lineColor: '#16e0a9', secondaryColor: '#2a2a4a', background: '#050510', mainBkg: '#1a1a2e', fontFamily: 'Inter, system-ui, sans-serif', fontSize: '17px' },
+  state: { useMaxWidth: true, nodeSpacing: 80, rankSpacing: 70 },
+});
+</script>
+</body>
+</html>

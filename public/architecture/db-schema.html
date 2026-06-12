@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>05 · Database schema · AFI Architecture</title>
+<link rel="stylesheet" href="/architecture/_style.css">
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<style>
+  /* Per-domain table card grid */
+  .domain-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; margin: 20px 0; }
+  .table-card {
+    background: rgba(10,10,20,0.6); border: 1px solid rgba(22,224,169,0.15);
+    border-radius: 12px; padding: 16px 18px;
+    transition: all 0.3s;
+    cursor: pointer;
+  }
+  .table-card:hover { border-color: rgba(22,224,169,0.4); background: rgba(22,224,169,0.04); }
+  .table-card .tname { font-size: 13px; color: #16e0a9; font-weight: 700; letter-spacing: 0.5px; font-family: 'SF Mono', Menlo, monospace; margin-bottom: 4px; }
+  .table-card .tmeta { font-size: 10px; color: #666; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 10px; }
+  .table-card .tcols { font-size: 11px; color: #aaa; line-height: 1.6; font-family: 'SF Mono', Menlo, monospace; }
+  .table-card .tcols .pk { color: #f5a623; font-weight: 600; }
+  .table-card .tcols .fk { color: #c770f0; }
+  .table-card .notes { margin-top: 8px; padding-top: 8px; border-top: 1px dashed rgba(255,255,255,0.08); font-size: 10.5px; color: #888; line-height: 1.6; font-family: inherit; }
+
+  .domain-title {
+    font-size: 12px; color: #16e0a9; font-weight: 700; letter-spacing: 2px;
+    text-transform: uppercase; margin: 28px 0 8px;
+    padding-bottom: 8px; border-bottom: 1px solid rgba(22,224,169,0.2);
+  }
+  .domain-title .count { color: #666; font-weight: 400; margin-left: 10px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<nav class="top">
+  <a href="/architecture.html" class="back">← All diagrams</a>
+  <span class="spacer"></span>
+  <span class="label">Section</span><span class="index-num">05 / 10</span>
+</nav>
+
+<header class="page">
+  <span class="eyebrow">05 · Postgres</span>
+  <h1>Database schema</h1>
+  <p class="lede">
+    25 migrations applied. Broken into <strong>4 logical domains</strong> below — identity, money movement, agent economy, and operational telemetry. Each domain gets its own focused ER diagram so nothing is cramped. Every table's columns, key constraints, and gotchas are called out in the card grid below each diagram.
+  </p>
+</header>
+
+<!-- DOMAIN 1: IDENTITY + CARDS -->
+<div class="domain-title">Domain 1 · Identity + Cards <span class="count">· 3 tables</span></div>
+
+<div class="diagram">
+<div class="mermaid">
+erDiagram
+    users ||--o{ cards : "owns"
+    cards ||--o{ card_transactions : "records"
+    users {
+        varchar id PK
+        varchar email
+        varchar issuer_user_id
+        varchar sd3_user_id
+        varchar payout_destination
+    }
+    cards {
+        varchar id PK
+        varchar user_id FK
+        varchar issuer_card_id
+        numeric balance
+        varchar status
+    }
+    card_transactions {
+        varchar id PK
+        varchar card_id FK
+        numeric amount
+        varchar status
+        varchar merchant
+    }
+</div>
+</div>
+
+<div class="domain-grid">
+  <div class="table-card">
+    <div class="tname">users</div>
+    <div class="tmeta">identity root · VARCHAR id (not UUID)</div>
+    <div class="tcols">
+      <span class="pk">id</span> VARCHAR PK<br/>
+      email VARCHAR<br/>
+      issuer_user_id VARCHAR<br/>
+      sd3_user_id VARCHAR<br/>
+      payout_destination VARCHAR<br/>
+      solana_deposit_address VARCHAR
+    </div>
+    <div class="notes">⚠ <code>users.id</code> is VARCHAR, not UUID. Beware when writing FK migrations.</div>
+  </div>
+
+  <div class="table-card">
+    <div class="tname">cards</div>
+    <div class="tmeta">Issuer Visa cards · 1 per user today</div>
+    <div class="tcols">
+      <span class="pk">id</span> VARCHAR PK<br/>
+      <span class="fk">user_id</span> VARCHAR(36) FK<br/>
+      issuer_card_id VARCHAR<br/>
+      balance NUMERIC<br/>
+      status VARCHAR<br/>
+      is_frozen BOOLEAN
+    </div>
+    <div class="notes">💰 Balance comes from Issuer sync ONLY. Never <code>UPDATE balance</code> outside <code>card-balance-sync.ts</code>.</div>
+  </div>
+
+  <div class="table-card">
+    <div class="tname">card_transactions</div>
+    <div class="tmeta">Issuer webhook + sync destination</div>
+    <div class="tcols">
+      <span class="pk">id</span> VARCHAR PK<br/>
+      <span class="fk">card_id</span> VARCHAR FK<br/>
+      amount NUMERIC<br/>
+      status VARCHAR<br/>
+      merchant VARCHAR<br/>
+      mcc VARCHAR
+    </div>
+    <div class="notes">📥 Populated by <code>owen_webhook</code> → <code>syncIssuerTransactions</code>. HMAC-verified.</div>
+  </div>
+</div>
+
+<!-- DOMAIN 2: MONEY MOVEMENT -->
+<div class="domain-title">Domain 2 · Money movement <span class="count">· 4 tables</span></div>
+
+<div class="diagram">
+<div class="mermaid">
+erDiagram
+    users ||--o{ transactions : "deposits"
+    users ||--o{ transfers : "P2P sends"
+    users ||--o{ withdrawals : "requests"
+    transactions }o--|| erc20_allowlist : "optional ref"
+    transactions {
+        varchar id PK
+        varchar user_id FK
+        numeric amount
+        varchar status
+        int source_chain
+        int dest_chain
+        varchar tx_hash
+    }
+    transfers {
+        varchar id PK
+        varchar from_user_id FK
+        varchar to_user_id FK
+        numeric amount
+        varchar destination
+        varchar status
+    }
+    withdrawals {
+        varchar id PK
+        varchar user_id FK
+        numeric amount
+        varchar to_address
+        varchar status
+    }
+    erc20_allowlist {
+        uuid id PK
+        int chain_id
+        varchar symbol
+        varchar category
+        boolean enabled
+    }
+</div>
+</div>
+
+<div class="domain-grid">
+  <div class="table-card">
+    <div class="tname">transactions</div>
+    <div class="tmeta">On-chain deposits · the bridge ledger</div>
+    <div class="tcols">
+      <span class="pk">id</span> VARCHAR PK<br/>
+      <span class="fk">user_id</span> VARCHAR FK<br/>
+      amount NUMERIC<br/>
+      status VARCHAR<br/>
+      source_chain INT · dest_chain INT<br/>
+      tx_hash VARCHAR
+    </div>
+    <div class="notes">Status values: <code>pending · detected · bridging · complete · failed · failed_restart</code>. Sprint 6.4 added the last for mid-restart safety.</div>
+  </div>
+
+  <div class="table-card">
+    <div class="tname">transfers</div>
+    <div class="tmeta">P2P transfers between Nuro users</div>
+    <div class="tcols">
+      <span class="pk">id</span> VARCHAR PK<br/>
+      <span class="fk">from_user_id</span> VARCHAR FK<br/>
+      <span class="fk">to_user_id</span> VARCHAR FK<br/>
+      amount NUMERIC<br/>
+      destination VARCHAR<br/>
+      scheduled_at TIMESTAMP
+    </div>
+    <div class="notes">destination is a prefix:args string (<code>wallet</code>, <code>card</code>, <code>agent:&lt;uuid&gt;</code>).</div>
+  </div>
+
+  <div class="table-card">
+    <div class="tname">withdrawals</div>
+    <div class="tmeta">User-requested off-ramps</div>
+    <div class="tcols">
+      <span class="pk">id</span> VARCHAR PK<br/>
+      <span class="fk">user_id</span> VARCHAR FK<br/>
+      amount NUMERIC<br/>
+      to_address VARCHAR<br/>
+      status VARCHAR<br/>
+      tx_hash VARCHAR
+    </div>
+    <div class="notes">Double-spend prevention via <code>payout_status</code> state machine.</div>
+  </div>
+
+  <div class="table-card">
+    <div class="tname">erc20_allowlist</div>
+    <div class="tmeta">DB-backed swap allowlist · Session 23</div>
+    <div class="tcols">
+      <span class="pk">id</span> UUID PK<br/>
+      chain_id INT<br/>
+      symbol VARCHAR<br/>
+      contract_address VARCHAR<br/>
+      category VARCHAR (bluechip / memecoin)<br/>
+      enabled BOOLEAN<br/>
+      audited_at DATE
+    </div>
+    <div class="notes">Admin toggles <code>enabled</code> without redeploy. 60s in-memory cache in <code>swap.ts</code>.</div>
+  </div>
+</div>
+
+<!-- DOMAIN 3: AGENT ECONOMY -->
+<div class="domain-title">Domain 3 · Agent economy <span class="count">· 5 tables · Sprint 2.3</span></div>
+
+<div class="diagram">
+<div class="mermaid">
+erDiagram
+    users ||--o{ agents : "controls"
+    agents ||--o{ agent_fundings : "receives"
+    agents ||--o{ agent_bets : "places"
+    agents ||--o{ agent_profits : "earns"
+    agents ||--o{ agent_profit_sweeps : "harvests"
+    agents {
+        uuid id PK
+        varchar user_id FK
+        varchar wallet_address
+        varchar status
+        numeric total_funded
+    }
+    agent_fundings {
+        uuid id PK
+        uuid agent_id FK
+        numeric amount
+        varchar cctp_tx_hash
+    }
+    agent_bets {
+        uuid id PK
+        uuid agent_id FK
+        varchar market_id
+        numeric stake
+        numeric pnl
+        timestamp settled_at
+    }
+    agent_profits {
+        uuid id PK
+        uuid agent_id FK
+        numeric amount
+    }
+    agent_profit_sweeps {
+        uuid id PK
+        uuid agent_id FK
+        numeric amount
+        varchar cctp_tx_hash
+    }
+</div>
+</div>
+
+<div class="domain-grid">
+  <div class="table-card">
+    <div class="tname">agents</div>
+    <div class="tmeta">Bot wallets · UUID id</div>
+    <div class="tcols">
+      <span class="pk">id</span> UUID PK<br/>
+      <span class="fk">user_id</span> VARCHAR FK<br/>
+      wallet_address VARCHAR<br/>
+      status VARCHAR<br/>
+      total_funded NUMERIC
+    </div>
+    <div class="notes">⚠ <code>agents.id</code> is UUID, but <code>users.id</code> is VARCHAR. Cross-type FKs caused Session 21 migration 021 incident.</div>
+  </div>
+
+  <div class="table-card">
+    <div class="tname">agent_fundings</div>
+    <div class="tmeta">Vault → Polygon via reverse CCTP</div>
+    <div class="tcols">
+      <span class="pk">id</span> UUID PK<br/>
+      <span class="fk">agent_id</span> UUID FK<br/>
+      amount NUMERIC<br/>
+      cctp_tx_hash VARCHAR<br/>
+      status VARCHAR
+    </div>
+    <div class="notes">Gated by <code>AGENT_FUNDING_OBSERVE_ONLY</code> until Sprint 2.3 flag-flip.</div>
+  </div>
+
+  <div class="table-card">
+    <div class="tname">agent_bets</div>
+    <div class="tmeta">Polymarket CLOB positions</div>
+    <div class="tcols">
+      <span class="pk">id</span> UUID PK<br/>
+      <span class="fk">agent_id</span> UUID FK<br/>
+      market_id VARCHAR<br/>
+      stake NUMERIC · pnl NUMERIC<br/>
+      settled_at TIMESTAMP
+    </div>
+    <div class="notes">Sprint 2.3 added <code>pnl</code> + <code>settled_at</code> retroactively (migration 010 no-op'd).</div>
+  </div>
+
+  <div class="table-card">
+    <div class="tname">agent_profits</div>
+    <div class="tmeta">Rolled-up P&L per agent</div>
+    <div class="tcols">
+      <span class="pk">id</span> UUID PK<br/>
+      <span class="fk">agent_id</span> UUID FK<br/>
+      amount NUMERIC<br/>
+      period VARCHAR
+    </div>
+    <div class="notes">Updated by <code>reconcileAgentPnL</code> sweep.</div>
+  </div>
+
+  <div class="table-card">
+    <div class="tname">agent_profit_sweeps</div>
+    <div class="tmeta">Polygon → Base via CCTP</div>
+    <div class="tcols">
+      <span class="pk">id</span> UUID PK<br/>
+      <span class="fk">agent_id</span> UUID FK<br/>
+      amount NUMERIC<br/>
+      cctp_tx_hash VARCHAR
+    </div>
+    <div class="notes">Gated by <code>AGENT_PROFIT_SWEEP_ENABLED</code>.</div>
+  </div>
+</div>
+
+<!-- DOMAIN 4: OPERATIONAL TELEMETRY -->
+<div class="domain-title">Domain 4 · Operational telemetry <span class="count">· 5 tables</span></div>
+
+<div class="diagram">
+<div class="mermaid">
+erDiagram
+    execution_log ||..o{ users : "optional ref"
+    growth_agent_memory }o..|| execution_log : "context"
+    growth_agent_posts ||--o{ post_engagement : "tracked"
+    execution_log {
+        uuid id PK
+        varchar entity_type
+        varchar entity_id
+        varchar action
+        varchar status
+        timestamp created_at
+    }
+    growth_agent_memory {
+        uuid id PK
+        varchar category
+        varchar key
+        jsonb value
+    }
+    growth_agent_posts {
+        uuid id PK
+        varchar platform
+        varchar post_id
+        varchar content_type
+        timestamp posted_at
+    }
+    post_engagement {
+        uuid id PK
+        uuid post_uuid FK
+        varchar platform
+        int likes
+        int retweets
+        int impressions
+        timestamp sampled_at
+    }
+    schema_migrations {
+        varchar version PK
+        varchar filename
+        timestamp applied_at
+    }
+</div>
+</div>
+
+<div class="domain-grid">
+  <div class="table-card">
+    <div class="tname">execution_log</div>
+    <div class="tmeta">Append-only audit trail · every sweep logs</div>
+    <div class="tcols">
+      <span class="pk">id</span> UUID PK<br/>
+      entity_type VARCHAR<br/>
+      entity_id VARCHAR<br/>
+      action VARCHAR · status VARCHAR<br/>
+      detail TEXT<br/>
+      created_at TIMESTAMPTZ
+    </div>
+    <div class="notes">Indexed on (entity_type, status, created_at). Feeds <code>/api/skill-health</code> and admin panels.</div>
+  </div>
+
+  <div class="table-card">
+    <div class="tname">growth_agent_memory</div>
+    <div class="tmeta">Mythos's working memory · key/value</div>
+    <div class="tcols">
+      <span class="pk">id</span> UUID PK<br/>
+      category VARCHAR<br/>
+      key VARCHAR<br/>
+      value JSONB<br/>
+      updated_at TIMESTAMPTZ
+    </div>
+    <div class="notes">JSONB for flexible schema. Categories: <code>identity · mood · knowledge · approval</code>.</div>
+  </div>
+
+  <div class="table-card">
+    <div class="tname">growth_agent_posts</div>
+    <div class="tmeta">Published content ledger</div>
+    <div class="tcols">
+      <span class="pk">id</span> UUID PK<br/>
+      platform VARCHAR<br/>
+      post_id VARCHAR (external)<br/>
+      content_type VARCHAR<br/>
+      posted_at TIMESTAMPTZ
+    </div>
+    <div class="notes">post_id is the platform's own id (tweet id, Moltbook post id, telegram message id).</div>
+  </div>
+
+  <div class="table-card">
+    <div class="tname">post_engagement</div>
+    <div class="tmeta">Time-series metrics · Session 24</div>
+    <div class="tcols">
+      <span class="pk">id</span> UUID PK<br/>
+      <span class="fk">post_uuid</span> UUID FK<br/>
+      platform VARCHAR<br/>
+      likes · retweets · replies · impressions INT<br/>
+      sampled_at TIMESTAMPTZ
+    </div>
+    <div class="notes">Insert-only, append time-series. Hourly cron writes fresh snapshots. Powers the learning loop.</div>
+  </div>
+
+  <div class="table-card">
+    <div class="tname">schema_migrations</div>
+    <div class="tmeta">Source of truth for what's applied</div>
+    <div class="tcols">
+      <span class="pk">version</span> VARCHAR PK<br/>
+      filename VARCHAR<br/>
+      applied_at TIMESTAMPTZ<br/>
+      notes TEXT
+    </div>
+    <div class="notes">Session 21: added to prevent silent <code>CREATE TABLE IF NOT EXISTS</code> drift. Self-registering on every new migration.</div>
+  </div>
+</div>
+
+<section class="prose">
+  <h3>Cross-domain gotchas (things that burned us)</h3>
+  <ul>
+    <li><strong>Mixed id types</strong> — <code>users.id</code> is VARCHAR, <code>agents.id</code> is UUID, <code>cards.user_id</code> is VARCHAR(36). Cross-type FKs fail at DDL time. Always query <code>information_schema.columns</code> before writing a new FK.</li>
+    <li><strong><code>CREATE TABLE IF NOT EXISTS</code> silently no-ops on pre-existing tables</strong> — if the table exists but columns differ, your migration is a liar. Session 21 migration 010 incident: agents pre-existed with different id type; migration silently did nothing; three hotfix migrations required.</li>
+    <li><strong>String-valued taxonomy columns</strong> — no CHECK constraints on <code>status</code>, <code>category</code>, <code>destination</code>, <code>payout_destination</code>. The app layer owns the taxonomy; new values add zero migrations. Parse <code>prefix:args</code> compound strings (<code>agent:&lt;uuid&gt;</code>, <code>community:&lt;id&gt;</code>, <code>external:0x&lt;addr&gt;</code>) in handler code.</li>
+    <li><strong><code>metadata JSONB</code></strong> on every table where future enrichment is plausible (card_settlements, agent_bets, user preferences). Avoids the "ALTER TABLE ADD COLUMN" migration tax.</li>
+  </ul>
+</section>
+
+<nav class="pager">
+  <a href="/architecture/mythos-cycle.html">
+    <div class="pager-label">← Prev</div>
+    <div class="pager-title">04 · Mythos cycle</div>
+  </a>
+  <a href="/architecture/external-services.html" class="next">
+    <div class="pager-label">Next →</div>
+    <div class="pager-title">06 · External services</div>
+  </a>
+</nav>
+
+<footer>AFI System Architecture · 05 / 10</footer>
+
+</div>
+
+<script>
+mermaid.initialize({
+  startOnLoad: true, theme: 'dark',
+  themeVariables: { primaryColor: '#1a1a2e', primaryTextColor: '#e8e8e8', primaryBorderColor: '#16e0a9', lineColor: '#16e0a9', secondaryColor: '#2a2a4a', background: '#050510', mainBkg: '#1a1a2e', fontFamily: 'Inter, system-ui, sans-serif', fontSize: '15px' },
+  er: { useMaxWidth: true, fontSize: 14, entityPadding: 14, minEntityWidth: 170, minEntityHeight: 65, diagramPadding: 16 },
+});
+</script>
+</body>
+</html>

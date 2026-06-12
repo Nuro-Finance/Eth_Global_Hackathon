@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>07 · On-chain · AFI Architecture</title>
+<link rel="stylesheet" href="/architecture/_style.css">
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+</head>
+<body>
+<div class="wrap">
+
+<nav class="top">
+  <a href="/architecture.html" class="back">← All diagrams</a>
+  <span class="spacer"></span>
+  <span class="label">Section</span><span class="index-num">07 / 10</span>
+</nav>
+
+<header class="page">
+  <span class="eyebrow">07 · On-chain</span>
+  <h1>On-chain infrastructure — 23 chains</h1>
+  <p class="lede">
+    <strong>13 chains</strong> support native-token auto-swap (Marathon 7): Ethereum, Base, Arbitrum, Optimism, Polygon, BSC, Avalanche, Linea, Scroll, Unichain, World Chain, Sonic, HyperEVM. <strong>23 chains total</strong> accept USDC deposits — add zkSync, Celo, Gnosis, Sei, XDC, Codex, Ink, Plume, Monad, and Solana (via Circle Bridge Kit). Every route ends at the user's Issuer-linked Base address. Below: the routing decision, the actual contracts involved, and a worked example of the most complex path (LZ hop).
+  </p>
+</header>
+
+<div class="section-label">01 — Routing by what arrives</div>
+<div class="diagram tall">
+<div class="mermaid">
+flowchart TD
+    Deposit["User deposit address<br/>(HD-derived, same on all EVM chains)"]
+
+    Deposit --> What{"What token<br/>+ what chain?"}
+
+    What -->|USDC on Base| R1["Base-direct<br/>no bridge needed"]
+    What -->|USDC on CCTP chain| R2["CCTP burn → Base mint<br/>22 chains supported"]
+    What -->|USDC on LZ-only chain<br/>e.g. HyperEVM| R3["LayerZero V2 OFT<br/>→ Arbitrum hub<br/>→ CCTP burn to Base"]
+    What -->|Native token<br/>e.g. ETH, MATIC, BNB| R4["0x swap → USDC<br/>then route as R2/R3"]
+    What -->|Allowlist ERC-20<br/>SHIB, PEPE, LINK...| R5["approve + 0x swap<br/>then route as R2/R3"]
+    What -->|Solana USDC| R6["Circle Bridge Kit<br/>burn → Base mint"]
+
+    R1 --> Issuer
+    R2 --> Issuer
+    R3 --> Issuer
+    R4 --> Issuer
+    R5 --> Issuer
+    R6 --> Issuer
+
+    Issuer["Issuer-linked Base address<br/>→ SD3 webhook → card credit"]
+
+    classDef fast fill:#1a1a2e,stroke:#16e0a9,color:#fff
+    classDef slow fill:#1a1a2e,stroke:#f4a840,color:#fff
+    classDef solana fill:#1a1a2e,stroke:#c770f0,color:#fff
+    class R1,R2 fast
+    class R3,R4,R5 slow
+    class R6 solana
+</div>
+</div>
+
+<div class="callout info">
+  <strong>Reading the colors.</strong>
+  <span style="color:#16e0a9">Green</span> = fast path, ~1–3 min user-perceived.
+  <span style="color:#f4a840">Amber</span> = multi-step (swap or 2-hop bridge), ~15–25 min including CCTP attestation.
+  <span style="color:#c770f0">Purple</span> = Solana-specific route via <code>@circle-fin/bridge-kit</code>, ~10–15 min.
+</div>
+
+<div class="section-label">02 — Key on-chain contracts</div>
+<p class="section-sub">The addresses the backend actually calls. All are checked into <code>src/chains.ts</code>, <code>src/cctp-domains.ts</code>, and <code>src/bridge.ts</code>. Never hard-coded in more than one place — the config table is authoritative.</p>
+
+<div class="service-grid">
+  <div class="service-card live">
+    <div class="service-title">0x AllowanceHolder v2 <span class="service-badge badge-live">live · 13 chains</span></div>
+    <div class="service-purpose">Executes native + ERC-20 → USDC swaps at the deposit address.</div>
+    <div class="service-meta">
+      <dt>Endpoint</dt><dd><code>GET /swap/allowance-holder/quote</code></dd>
+      <dt>Per-chain address</dt><dd>Different on each chain; pulled from 0x at runtime</dd>
+      <dt>Backend caller</dt><dd><code>src/swap.ts::executeNativeToUsdcSwap</code>, <code>executeErc20ToUsdcSwap</code></dd>
+      <dt>Gated by</dt><dd><code>ERC20_SWAP_ENABLED</code> (memecoins: <code>ERC20_MEMECOIN_SWAP_ENABLED</code>)</dd>
+    </div>
+  </div>
+
+  <div class="service-card live">
+    <div class="service-title">Circle CCTP v2 TokenMessenger <span class="service-badge badge-live">live · 22 chains</span></div>
+    <div class="service-purpose">Burns USDC on source chain, Circle attests, mints on destination.</div>
+    <div class="service-meta">
+      <dt>Call</dt><dd><code>TokenMessenger.depositForBurn(amount, destDomain, mintRecipient, burnToken)</code></dd>
+      <dt>Destination for us</dt><dd><code>destDomain = 6</code> (Base) always</dd>
+      <dt>Attestation API</dt><dd><code>iris-api.circle.com/attestations/:msgHash</code></dd>
+      <dt>Backend caller</dt><dd><code>src/bridge.ts::bridgeToBase</code>, finalized by <code>cctp-finalize</code> reconciler</dd>
+    </div>
+  </div>
+
+  <div class="service-card live">
+    <div class="service-title">LayerZero V2 OFT Adapter <span class="service-badge badge-live">live · LZ-only chains</span></div>
+    <div class="service-purpose">Hub-and-spoke bridge from non-CCTP chains (HyperEVM, etc.) to our Arbitrum USDC hub.</div>
+    <div class="service-meta">
+      <dt>Hub address</dt><dd><code>0xd58C1412e50fF00212770B170D86e2387D2d2b18</code> (Arbitrum)</dd>
+      <dt>Call</dt><dd><code>OFTAdapter.send(SendParam, MessagingFee, refundAddress)</code></dd>
+      <dt>Then</dt><dd>Arbitrum USDC → CCTP to Base (domain 3 → 6)</dd>
+      <dt>Backend caller</dt><dd><code>src/bridge.ts::bridgeFromLZChain</code></dd>
+    </div>
+  </div>
+
+  <div class="service-card live">
+    <div class="service-title">Circle Bridge Kit (Solana) <span class="service-badge badge-live">live</span></div>
+    <div class="service-purpose">Solana-native CCTP route, replaces the public SDK which lacks remote domains.</div>
+    <div class="service-meta">
+      <dt>Package</dt><dd><code>@circle-fin/bridge-kit@1.8.2</code></dd>
+      <dt>Called from</dt><dd><code>src/solana/bridge.ts</code></dd>
+      <dt>Source domain</dt><dd>5 · Destination: 6 (Base)</dd>
+      <dt>Notes</dt><dd>Owen's recommendation; do not revert to public Circle SDK</dd>
+    </div>
+  </div>
+
+  <div class="service-card live">
+    <div class="service-title">Deployer signer (EVM) <span class="service-badge badge-live">live</span></div>
+    <div class="service-purpose">Single key that signs all approve/swap/bridge txs across 22 EVM chains.</div>
+    <div class="service-meta">
+      <dt>Address</dt><dd><code>0x27FbEAD2B527AaDAf4EA7B3Af065244A3964ECBC</code></dd>
+      <dt>Nonce policy</dt><dd>Fresh nonce fetched per tx (per-address lock + advisory)</dd>
+      <dt>Gas buffer</dt><dd>Per-chain in <code>GAS_BUFFER_BY_CHAIN</code> (see below)</dd>
+    </div>
+  </div>
+
+  <div class="service-card live">
+    <div class="service-title">Fee Vault <span class="service-badge badge-live">live</span></div>
+    <div class="service-purpose">Collects the 5% bridge fee skimmed from each reload.</div>
+    <div class="service-meta">
+      <dt>Address</dt><dd><code>0x749edFC84A28793ce150d4E7E71bcEe73C454b56</code></dd>
+      <dt>Settlement chain</dt><dd>Base (fees consolidated there for accounting)</dd>
+    </div>
+  </div>
+</div>
+
+<div class="section-label">03 — Worked example: HyperEVM native path (most complex)</div>
+<p class="section-sub">Deposits on HyperEVM take the longest route: native swap → LZ hop to Arbitrum → CCTP burn to Base. Here's what that looks like end-to-end.</p>
+
+<div class="worked">
+  <div class="worked-header">Scenario — User 42 sends 5 HYPE from their wallet to deposit address 0xDEP…42A1</div>
+
+  <div class="worked-step">
+    <div class="worked-num">1</div>
+    <div class="worked-body">
+      <h4>HYPE lands at deposit address</h4>
+      <p>Wallet signs a native transfer. HyperEVM confirms in ~2s.</p>
+      <div class="worked-meta">chain: HyperEVM · tx hash pattern: <code>0xhy…pe1</code></div>
+    </div>
+  </div>
+
+  <div class="worked-step">
+    <div class="worked-num">2</div>
+    <div class="worked-body">
+      <h4>Monitor poll detects native balance</h4>
+      <p>Balance exceeds <code>GAS_BUFFER_BY_CHAIN['hyperevm'] = 0.002 HYPE</code> → swap-eligible. Backend fetches fresh quote from 0x for HyperEVM.</p>
+    </div>
+  </div>
+
+  <div class="worked-step">
+    <div class="worked-num">3</div>
+    <div class="worked-body">
+      <h4>0x swap executes → USDC lands at same address</h4>
+      <p>Deployer signs:</p>
+      <code>0xAllowanceHolderHyperEVM.swap(HYPE → USDC, 5e18, recipient=0xDEP…42A1)</code>
+      <p>~$10 USDC arrives. <code>swapInflight</code> TTL expires, next poll tick sees USDC.</p>
+    </div>
+  </div>
+
+  <div class="worked-step">
+    <div class="worked-num">4</div>
+    <div class="worked-body">
+      <h4>Bridge decision → HyperEVM not CCTP-enabled → LZ path</h4>
+      <p>Backend calls:</p>
+      <code>USDC.approve(OFTAdapter, amount)</code>
+      <code>OFTAdapter.send(SendParam{dstEid: 30110, to: 0xd58C…2b18, amount}, fee, refund=0xDEP…42A1)</code>
+      <div class="worked-meta">dstEid 30110 = Arbitrum · arrival time: ~3–5 min</div>
+    </div>
+  </div>
+
+  <div class="worked-step">
+    <div class="worked-num">5</div>
+    <div class="worked-body">
+      <h4>USDC lands at Arbitrum hub → CCTP burn to Base</h4>
+      <p>Reconciler detects hub balance increase attributed to this correlation_id. Backend calls:</p>
+      <code>TokenMessenger.depositForBurn(amount, destDomain=6, mintRecipient=userIssuerAddr, burnToken=USDC)</code>
+    </div>
+  </div>
+
+  <div class="worked-step">
+    <div class="worked-num">6</div>
+    <div class="worked-body">
+      <h4>Circle attestation → Base mint → card credit</h4>
+      <p>10–15 min for Circle to attest, then <code>messageTransmitter.receiveMessage(msg, sig)</code> on Base mints USDC at the Issuer-linked address. SD3 webhook fires, card balance updated.</p>
+      <div class="worked-meta">total user-perceived time from signing the HYPE transfer: ~20–30 min</div>
+    </div>
+  </div>
+</div>
+
+<div class="section-label">04 — Gas buffers &amp; edge cases</div>
+<section class="prose">
+  <h3>Gas buffers are per-chain (not binary)</h3>
+  <p>The Arbitrum gas incident (Session 23) taught us that a binary <code>chainId === 1 ? mainnet : other</code> split misses real behavior. Now <code>GAS_BUFFER_BY_CHAIN</code> in <code>monitor.ts</code> has explicit entries per chain:</p>
+  <ul>
+    <li>ETH mainnet — <strong>0.001 ETH</strong></li>
+    <li>Polygon — <strong>0.5 MATIC</strong></li>
+    <li>BSC — <strong>0.002 BNB</strong></li>
+    <li>L2s (Base, Op, Scroll, Linea, Unichain, World) — <strong>0.0002 ETH</strong></li>
+    <li>Arbitrum — <strong>0.003 ETH</strong> (bumped after the Session 23 incident)</li>
+    <li>Avalanche — <strong>0.05 AVAX</strong></li>
+    <li>Sonic — <strong>0.5 S</strong></li>
+    <li>HyperEVM — <strong>0.002 HYPE</strong></li>
+  </ul>
+
+  <h3>Why 13 chains for native swap, not all 23</h3>
+  <p>0x Aggregator's v2 <code>allowance-holder</code> endpoint doesn't have routes on every chain we support. We verified each chain live during Session 23 (commit <code>b8cb173</code>). Confirmed supported: the 13 listed above. Confirmed unsupported: zkSync, Celo, Gnosis (0x returned 'Invalid chain ID'). Too new for routing: Sei, XDC, Codex, Ink, Plume, Monad.</p>
+  <p>Chains without 0x routes still accept <strong>USDC deposits</strong> — they route through CCTP or LayerZero to Base. Native token deposits on those chains are un-swappable and sit in the user's deposit address.</p>
+
+  <h3>23-chain E2E test matrix</h3>
+  <p>Live bridge testing confirmed 6/23 as of Session 19 (Base, Ethereum, Arbitrum, Solana, zkSync, HyperEVM). Richard's expected funding arrival unblocks the remaining 17 across Q2. Each chain needs: (a) native-token swap dry-run, (b) $1 USDC round-trip to Base, (c) card-credit confirmation.</p>
+</section>
+
+<nav class="pager">
+  <a href="/architecture/external-services.html">
+    <div class="pager-label">← Prev</div>
+    <div class="pager-title">06 · External services</div>
+  </a>
+  <a href="/architecture/neural-net.html" class="next">
+    <div class="pager-label">Next →</div>
+    <div class="pager-title">08 · Neural Net</div>
+  </a>
+</nav>
+
+<footer>AFI System Architecture · 07 / 10</footer>
+
+</div>
+
+<script>
+mermaid.initialize({
+  startOnLoad: true, theme: 'dark',
+  themeVariables: { primaryColor: '#1a1a2e', primaryTextColor: '#e8e8e8', primaryBorderColor: '#16e0a9', lineColor: '#16e0a9', secondaryColor: '#2a2a4a', background: '#050510', mainBkg: '#1a1a2e', fontFamily: 'Inter, system-ui, sans-serif', fontSize: '17px' },
+  flowchart: { curve: 'basis', padding: 32, useMaxWidth: true, nodeSpacing: 75, rankSpacing: 95, htmlLabels: true },
+});
+</script>
+</body>
+</html>

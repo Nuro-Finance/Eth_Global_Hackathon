@@ -1,0 +1,26 @@
+{
+  "address": "0xa150ec8b718c22e12036f916d90ff72af14b3e96",
+  "abi": [],
+  "transactionHash": "0x0fdc88a7889165a27b97d6114ba25bf3042d0ce47694c7d5eb87bfbd4e2426b9",
+  "receipt": {
+    "to": null,
+    "contractAddress": "0xa150ec8b718c22e12036f916d90ff72af14b3e96",
+    "transactionIndex": 0,
+    "blockHash": "",
+    "transactionHash": "0x0fdc88a7889165a27b97d6114ba25bf3042d0ce47694c7d5eb87bfbd4e2426b9",
+    "blockNumber": 85281678,
+    "status": 1
+  },
+  "args": [
+    "USD Coin",
+    "USDC",
+    "0x1a44076050125825900e736c501f859c50fE728c",
+    "0x27FbEAD2B527AaDAf4EA7B3Af065244A3964ECBC"
+  ],
+  "solcInputHash": "",
+  "metadata": "",
+  "bytecode": "",
+  "deployedBytecode": "",
+  "devdoc": {},
+  "userdoc": {}
+}
