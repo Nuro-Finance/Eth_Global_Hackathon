@@ -52,7 +52,7 @@ jobs:
         run: npx hardhat compile
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: contract-artifacts
           path: ${{ env.WORKING_DIR }}/artifacts
@@ -159,7 +159,7 @@ jobs:
           CHAINLINK_VRF_SUBSCRIPTION_ID:    ${{ secrets.CHAINLINK_VRF_SUBSCRIPTION_ID }}
 
       - name: Save deployment addresses
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: deployments-baseSepolia
           path: ${{ env.WORKING_DIR }}/deployments/baseSepolia.json
@@ -226,7 +226,7 @@ jobs:
           CHAINLINK_VRF_SUBSCRIPTION_ID:    ${{ secrets.CHAINLINK_VRF_SUBSCRIPTION_ID }}
 
       - name: Save deployment addresses
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: deployments-base-mainnet
           path: ${{ env.WORKING_DIR }}/deployments/base.json
