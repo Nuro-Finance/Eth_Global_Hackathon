@@ -30,7 +30,7 @@ const SettingsIcon = () => <Settings className="w-5 h-5" />;
 const UIComponentIcon = () => <Component className="w-5 h-5" />;
 
 export const NAVIGATION_ROUTES = {
-  DASHBOARD: "/dashboard/home-responsive",
+  DASHBOARD: "/dashboard",
   OVERVIEW_2: "/dashboard/overview-2",
   OVERVIEW_3: "/dashboard",
   MY_CARD: "/dashboard/my-card",

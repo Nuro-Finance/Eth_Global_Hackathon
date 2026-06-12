@@ -18,7 +18,8 @@ export function isDevPreviewAvailable(): boolean {
 
 /** Read populated demo flag (dev only). Defaults to ON for design work. */
 export function readDevPopulatedPreview(): boolean {
-  if (!isDevPreviewAvailable() || typeof window === "undefined") return false;
+  if (!isDevPreviewAvailable()) return false;
+  if (typeof window === "undefined") return true;
   try {
     const stored = window.localStorage.getItem(NURO_DEV_PREVIEW_POPULATED_KEY);
     if (stored !== null) return stored === "1";

@@ -2,6 +2,7 @@
     "Transactions": {
         "title": "Transactions",
         "subtitle": "View your transaction history",
+        "subtitleCompact": "Recent activity",
         "allTransactions": "All Transactions",
         "search": "Search...",
         "filter": "Filter",

@@ -5,8 +5,7 @@ import { Button } from "@/components/ui/button";
 import {
   TooltipProvider,
 } from "@/components/ui/tooltip";
-import { cn } from "@/lib/utils";
-import { SOCIAL_PROVIDERS } from "./config";
+import GoogleGMark from "./GoogleGMark";
 
 interface SocialLoginButtonsProps {
   onGoogleLogin: () => void;
@@ -32,44 +31,23 @@ function Divider({ label }: { label: string }) {
 
 export default function SocialLoginButtons({
   onGoogleLogin,
-  onAppleLogin,
-  onTelegramLogin,
 }: SocialLoginButtonsProps) {
   const t = useTranslations("Login");
-
-  const onTelegram = onTelegramLogin ?? onAppleLogin ?? (() => {});
-
-  const handlers: Record<string, () => void> = {
-    google: onGoogleLogin,
-    telegram: onTelegram,
-  };
 
   return (
     <TooltipProvider delayDuration={0}>
       <div className="space-y-3">
         <Divider label={t("orContinueWith")} />
 
-        <div className="grid grid-cols-2 gap-3">
-          {SOCIAL_PROVIDERS.map((provider) => {
-            const Icon = provider.icon;
-            return (
-              <Button
-                key={provider.id}
-                type="button"
-                variant="outline"
-                className="w-full hover:bg-white/10 dark:hover:bg-white/10 hover:text-white dark:hover:text-white border-[var(--color-border-input)] transition-all duration-200 backdrop-blur-none"
-                onClick={handlers[provider.id]}
-                icon={
-                  <Icon
-                    className={cn("w-4 h-4 shrink-0", provider.iconClassName)}
-                  />
-                }
-              >
-                {provider.name}
-              </Button>
-            );
-          })}
-        </div>
+        <Button
+          type="button"
+          variant="outline"
+          className="w-full hover:bg-white/10 dark:hover:bg-white/10 hover:text-white dark:hover:text-white border-[var(--color-border-input)] transition-all duration-200 backdrop-blur-none"
+          onClick={onGoogleLogin}
+          icon={<GoogleGMark className="w-4 h-4 shrink-0" />}
+        >
+          Google
+        </Button>
       </div>
     </TooltipProvider>
   );

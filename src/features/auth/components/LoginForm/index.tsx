@@ -184,7 +184,7 @@ export default function LoginForm({
 
  // High-fidelity height-locking variants to eliminate jitter and flickering
   const cardVariants: any = {
-    signin: { height: 624, transition: { duration: 0.6, ease: [0.4, 0, 0.2, 1] } },
+    signin: { height: 572, transition: { duration: 0.6, ease: [0.4, 0, 0.2, 1] } },
     forgot: { height: 528, transition: { duration: 0.6, ease: [0.4, 0, 0.2, 1] } },
     success: { height: 528, transition: { duration: 0.6, ease: [0.4, 0, 0.2, 1] } }
   };

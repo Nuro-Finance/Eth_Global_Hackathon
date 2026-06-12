@@ -1,24 +1,20 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
 import { SessionProvider } from "next-auth/react";
 import { ThemeProvider } from "./ThemeContext";
 import ReduxProvider from "./ReduxProvider";
 import ProgressProviderWrapper from "./progressBarProvider";
-import { PrivyProvider } from "@privy-io/react-auth";
-import { base, mainnet, arbitrum } from "viem/chains";
-import { WagmiProvider } from "wagmi";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { wagmiConfig } from "@/lib/wagmi.config";
-import {
-  PrivyInnerProviders,
-  PrivyAuthSync,
-  PrivyRuntimeProvider,
-} from "./index";
-import BackendUserSync from "./BackendUserSync";
+import { PrivyRuntimeProvider } from "./index";
 import { ErrorBoundary, installGlobalErrorHandlers } from "@/components/ErrorBoundary";
+import { DESIGN_MODE } from "@/config/design-mode";
 
-const privyAppId = process.env.NEXT_PUBLIC_PRIVY_APP_ID;
+const WalletProviders = dynamic(
+  () => import("./WalletProviders").then((m) => m.WalletProviders),
+  { ssr: false },
+);
 
 function GlobalErrorInstaller({ children }: { children: React.ReactNode }) {
   useEffect(() => {
@@ -45,10 +41,17 @@ export function Providers({
 }: {
   children: React.ReactNode;
 }) {
- // Session 23 Marathon 7 — wagmi + react-query wired for wallet-prompt UX.
- // Lazy-init QueryClient so it's a stable singleton per mount (Next.js SSR
- // pattern). wagmiConfig imported from @/lib/wagmi.config.
   const [queryClient] = useState(() => new QueryClient());
+  const walletTree = DESIGN_MODE ? (
+    <QueryClientProvider client={queryClient}>
+      <PrivyRuntimeProvider value={{ privyEnabled: false, ready: true }}>
+        {children}
+      </PrivyRuntimeProvider>
+    </QueryClientProvider>
+  ) : (
+    <WalletProviders queryClient={queryClient}>{children}</WalletProviders>
+  );
+
   return (
     <ThemeProvider>
     <ErrorBoundary>
@@ -57,66 +60,7 @@ export function Providers({
       <ProgressProviderWrapper>
         <SessionProvider>
           <ReduxProvider>
-            <WagmiProvider config={wagmiConfig}>
-              <QueryClientProvider client={queryClient}>
-            {privyAppId ? (
-              <PrivyProvider
-                appId={privyAppId}
-                config={{
-                  appearance: {
-                    theme: "dark",
-                    accentColor: "#05fb81", // Nuro Primary Green
-                    logo: "/Nuro Horizontal Logo.svg",
-                    showWalletLoginFirst: true,
- // 2026-05-25 Connect Wallet — final fix.
- // Per Privy v3.22 types (verified against installed
- // node_modules), `walletList` lives at appearance, not
- // at top-level externalWallets. The earlier `externalWallets`
- // block was wrong shape and `as any` masked the bug.
- // Without a walletList anywhere, useConnectWallet() opens
- // an EMPTY modal and silently closes — that was the 2-day
- // dead-click. detected_ethereum_wallets auto-detects
- // MetaMask / Brave / Rabby / any injected EVM wallet.
-                    walletList: [
-                      "detected_ethereum_wallets",
-                      "metamask",
-                      "coinbase_wallet",
-                      "wallet_connect",
-                      "phantom",
-                      "rainbow",
-                    ],
-                  },
-                  loginMethods: ["wallet", "email", "google"],
- // No embedded wallets on login — shells sign up with email/Google only.
- // External connect (walletList + useConnectWallet) unchanged.
- // Embedded create only via explicit flows (e.g. Create Nuro Wallet modal).
-                  embeddedWallets: {
-                    ethereum: {
-                      createOnLogin: "off",
-                    },
-                    solana: {
-                      createOnLogin: "off",
-                    },
-                  },
-                  supportedChains: [mainnet, base, arbitrum],
-                }}
-              >
-                <PrivyInnerProviders>
-                  <PrivyAuthSync />
-                  <BackendUserSync />
-                  {children}
-                </PrivyInnerProviders>
-              </PrivyProvider>
-            ) : (
-              <PrivyRuntimeProvider
-                value={{ privyEnabled: false, ready: true }}
-              >
-                <BackendUserSync />
-                {children}
-              </PrivyRuntimeProvider>
-            )}
-              </QueryClientProvider>
-            </WagmiProvider>
+            {walletTree}
           </ReduxProvider>
         </SessionProvider>
       </ProgressProviderWrapper>

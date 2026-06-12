@@ -1,6 +1,5 @@
 import { ComponentType } from "react";
 import GoogleGMark from "./GoogleGMark";
-import TelegramPlaneMark from "./TelegramPlaneMark";
 
 export interface SocialProvider {
     id: string;
@@ -15,10 +14,5 @@ export const SOCIAL_PROVIDERS: SocialProvider[] = [
         id: "google",
         name: "Google",
         icon: GoogleGMark,
-    },
-    {
-        id: "telegram",
-        name: "Telegram",
-        icon: TelegramPlaneMark,
     },
 ];

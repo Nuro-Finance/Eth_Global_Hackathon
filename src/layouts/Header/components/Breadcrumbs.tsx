@@ -60,6 +60,11 @@ export function Breadcrumbs({ scrolled = false }: { scrolled?: boolean }) {
  // Skip the "dashboard" segment if it's the first one, as "Home" covers it
     if (segment.toLowerCase() === "dashboard" && index === 0) return;
 
+ // /dashboard/home-responsive lab URL — Home crumb already points at /dashboard
+    if (segment === "home-responsive") return;
+
+    if (breadcrumbTrail.some((crumb) => crumb.href === currentPath)) return;
+
  // Find label from sidebar config
     const configItem = sidebarNavigationConfig.find(item => item.href === currentPath || item.href.includes(currentPath));
     
@@ -97,7 +102,7 @@ export function Breadcrumbs({ scrolled = false }: { scrolled?: boolean }) {
       }}
     >
       {breadcrumbTrail.map((crumb, i) => (
-        <div key={crumb.href} className="flex items-center gap-1.5 shrink-0">
+        <div key={`${crumb.href}-${i}`} className="flex items-center gap-1.5 shrink-0">
           <Link
             href={crumb.href}
             className={`flex items-center gap-1.5 text-[13px] transition-[opacity,transform] hover:text-[var(--color-text-primary)] ${

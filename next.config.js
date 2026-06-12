@@ -3,6 +3,9 @@ import createNextIntlPlugin from 'next-intl/plugin';
 const withNextIntl = createNextIntlPlugin();
 
 const nextConfig = {
+  env: {
+    NURO_DESIGN_MODE: process.env.NURO_DESIGN_MODE ?? "",
+  },
   serverExternalPackages: ["pino", "thread-stream"],
   turbopack: {
     root: '.',

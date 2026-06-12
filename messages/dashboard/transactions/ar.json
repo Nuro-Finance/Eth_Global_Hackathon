@@ -2,6 +2,7 @@
     "Transactions": {
         "title": "المعاملات",
         "subtitle": "عرض سجل معاملاتك",
+        "subtitleCompact": "النشاط الأخير",
         "allTransactions": "جميع المعاملات",
         "search": "بحث...",
         "filter": "تصفية",

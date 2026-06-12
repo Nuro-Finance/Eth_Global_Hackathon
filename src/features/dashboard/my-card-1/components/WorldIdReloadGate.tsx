@@ -1,13 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import {
-  IDKitRequestWidget,
-  orbLegacy,
-  type IDKitResult,
-  type RpContext,
-} from "@worldcoin/idkit";
+import { useCallback, useEffect, useState, type ComponentType } from "react";
 import { WORLD_APP_ID, WORLD_RELOAD_ACTION } from "@/lib/world-id";
+
+type IDKitResult = import("@worldcoin/idkit").IDKitResult;
+type RpContext = import("@worldcoin/idkit").RpContext;
 
 type RpSignatureResponse = {
   rp_id: string;
@@ -15,6 +12,18 @@ type RpSignatureResponse = {
   nonce: string;
   created_at: number;
   expires_at: number;
+};
+
+type IdKitWidgetProps = {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  app_id: string;
+  action: string;
+  rp_context: RpContext;
+  allow_legacy_proofs: boolean;
+  preset: unknown;
+  handleVerify: (result: IDKitResult) => Promise<void>;
+  onSuccess: () => void;
 };
 
 interface WorldIdReloadGateProps {
@@ -33,6 +42,25 @@ export function WorldIdReloadGate({
   const [rpContext, setRpContext] = useState<RpContext | null>(null);
   const [rpId, setRpId] = useState<string | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [idKit, setIdKit] = useState<{
+    IDKitRequestWidget: ComponentType<IdKitWidgetProps>;
+    orbLegacy: (opts: { signal: string }) => unknown;
+  } | null>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    let cancelled = false;
+    void import("@worldcoin/idkit").then((mod) => {
+      if (cancelled) return;
+      setIdKit({
+        IDKitRequestWidget: mod.IDKitRequestWidget as ComponentType<IdKitWidgetProps>,
+        orbLegacy: mod.orbLegacy,
+      });
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [open]);
 
   useEffect(() => {
     if (!open) {
@@ -113,9 +141,11 @@ export function WorldIdReloadGate({
     }
   }, [loadError, open, onOpenChange]);
 
-  if (!WORLD_APP_ID || !rpContext) {
+  if (!WORLD_APP_ID || !rpContext || !idKit) {
     return null;
   }
+
+  const { IDKitRequestWidget, orbLegacy } = idKit;
 
   return (
     <IDKitRequestWidget

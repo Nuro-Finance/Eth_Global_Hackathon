@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, Children } from "react";
 import { DASHBOARD_SM_MAX_PX } from "@/features/dashboard/responsive/constants";
 import { createPortal } from "react-dom";
 import SidebarProof from "@/layouts/Sidebar/SidebarProof";
@@ -24,6 +24,71 @@ const ASSISTANT_CHAT_ASIDE_INSET_PX = 10;
 const ASSISTANT_CHAT_ASIDE_HORIZONTAL_PAD_PX = ASSISTANT_CHAT_ASIDE_INSET_PX * 2;
 /** Max width of the whole chat drawer (nav + gap + chat column + aside padding). */
 const ASSISTANT_CHAT_MAX_VIEWPORT_RATIO = 0.75;
+
+type DashboardAssistantChatV2LayerProps = {
+  panelWidth: number;
+  onClose: () => void;
+  onDragStart: (e: React.MouseEvent) => void;
+  chatV2ResizeHandleRef: React.RefObject<HTMLDivElement | null>;
+  onResizeHandleEnter: (e: React.MouseEvent) => void;
+  onResizeHandleMove: (e: React.MouseEvent) => void;
+  onResizeHandleLeave: () => void;
+};
+
+function DashboardAssistantChatV2Layer({
+  panelWidth,
+  onClose,
+  onDragStart,
+  chatV2ResizeHandleRef,
+  onResizeHandleEnter,
+  onResizeHandleMove,
+  onResizeHandleLeave,
+}: DashboardAssistantChatV2LayerProps) {
+  return (
+    <>
+      <motion.div
+        key="chat-backdrop"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 bg-black/40 z-[90] xl:bg-black/20"
+        onClick={onClose}
+      />
+      <motion.aside
+        key="chat-v2-aside"
+        initial={{ x: "100%" }}
+        animate={{ x: 0 }}
+        exit={{ x: "100%" }}
+        transition={{ type: "spring", damping: 25, stiffness: 200 }}
+        className="fixed inset-y-4 right-4 z-[100] flex min-h-0 flex-col overflow-hidden rounded-[34px] border border-white/5 bg-transparent p-[10px]"
+        style={{
+          width: `${panelWidth + ASSISTANT_CHAT_NAV_RAIL_WIDTH_PX + ASSISTANT_CHAT_NAV_CHROME_GAP_PX + ASSISTANT_CHAT_ASIDE_HORIZONTAL_PAD_PX}px`,
+          maxWidth: `${ASSISTANT_CHAT_MAX_VIEWPORT_RATIO * 100}vw`,
+          minWidth: `${360 + ASSISTANT_CHAT_NAV_RAIL_WIDTH_PX + ASSISTANT_CHAT_NAV_CHROME_GAP_PX + ASSISTANT_CHAT_ASIDE_HORIZONTAL_PAD_PX}px`,
+        }}
+      >
+        <div
+          className="absolute -inset-[10px] rounded-[inherit] -z-10 shadow-[0_20px_60px_rgba(0,0,0,0.5)] bg-[#141414]/30 border border-white/5"
+          style={{ backdropFilter: "blur(30px)", WebkitBackdropFilter: "blur(30px)" }}
+        />
+        <div className="relative flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+          <AssistantChatPanelV2 onClose={onClose} />
+        </div>
+        <div
+          ref={chatV2ResizeHandleRef}
+          onMouseDown={onDragStart}
+          onMouseEnter={onResizeHandleEnter}
+          onMouseMove={onResizeHandleMove}
+          onMouseLeave={onResizeHandleLeave}
+          className="group/drag pointer-events-auto absolute left-0 top-0 bottom-0 z-[5000] w-2 cursor-none select-none touch-none"
+          style={{ touchAction: "none" }}
+        >
+          <div className="absolute left-0 top-0 bottom-0 w-[2px] bg-[var(--color-primary)]/50 opacity-0 transition-opacity duration-200 group-hover/drag:opacity-100" />
+        </div>
+      </motion.aside>
+    </>
+  );
+}
 
 export default function DashboardLayout({
   children,
@@ -209,12 +274,6 @@ export default function DashboardLayout({
     }
   }, [isChatV2Open]);
 
-  if (!mounted) {
-    return (
-      <div className="h-screen w-screen bg-[#111111] relative overflow-hidden" />
-    );
-  }
-
  // MATHEMATICAL MIRROR CONSTANTS
   const sidebarExpanded = isSmViewport ? false : isSidebarExpanded;
   const sidebarWidth = sidebarExpanded ? 240 : 64;
@@ -349,97 +408,65 @@ export default function DashboardLayout({
               }}
             >
               <KycBanner />
-              {children}
+              {Children.toArray(children)}
             </div>
           </div>
         </main>
 
         {/* Nuro AI chat (V2) */}
         <AnimatePresence>
-          {isChatV2Open && (
-            <>
-              <motion.div
-                key="chat-backdrop"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="fixed inset-0 bg-black/40 z-[90] xl:bg-black/20"
-                onClick={() => setIsChatV2Open(false)}
-              />
-
-              <motion.aside
-                key="chat-v2-aside"
-                initial={{ x: "100%" }}
-                animate={{ x: 0 }}
-                exit={{ x: "100%" }}
-                transition={{ type: "spring", damping: 25, stiffness: 200 }}
-                className="fixed inset-y-4 right-4 z-[100] flex min-h-0 flex-col overflow-hidden rounded-[34px] border border-white/5 bg-transparent p-[10px]"
-                style={{
-                  width: `${panelWidth + ASSISTANT_CHAT_NAV_RAIL_WIDTH_PX + ASSISTANT_CHAT_NAV_CHROME_GAP_PX + ASSISTANT_CHAT_ASIDE_HORIZONTAL_PAD_PX}px`,
-                  maxWidth: `${ASSISTANT_CHAT_MAX_VIEWPORT_RATIO * 100}vw`,
-                  minWidth: `${360 + ASSISTANT_CHAT_NAV_RAIL_WIDTH_PX + ASSISTANT_CHAT_NAV_CHROME_GAP_PX + ASSISTANT_CHAT_ASIDE_HORIZONTAL_PAD_PX}px`,
-                }}
-              >
-                <div
-                  className="absolute -inset-[10px] rounded-[inherit] -z-10 shadow-[0_20px_60px_rgba(0,0,0,0.5)] bg-[#141414]/30 border border-white/5"
-                  style={{ backdropFilter: "blur(30px)", WebkitBackdropFilter: "blur(30px)" }}
-                />
-                <div className="relative flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-                  <AssistantChatPanelV2 onClose={() => setIsChatV2Open(false)} />
-                </div>
-                <div
-                  ref={chatV2ResizeHandleRef}
-                  onMouseDown={onDragStart}
-                  onMouseEnter={(e) => {
-                    if (isDragging.current) return;
-                    lastPointerRef.current = { x: e.clientX, y: e.clientY };
-                    setAssistantResizeFake({ show: true, x: e.clientX, y: e.clientY });
-                  }}
-                  onMouseMove={(e) => {
-                    lastPointerRef.current = { x: e.clientX, y: e.clientY };
-                    setAssistantResizeFake({ show: true, x: e.clientX, y: e.clientY });
-                  }}
-                  onMouseLeave={() => {
-                    if (!isDragging.current) {
-                      setAssistantResizeFake({ show: false, x: 0, y: 0 });
-                    }
-                  }}
-                  className="group/drag pointer-events-auto absolute left-0 top-0 bottom-0 z-[5000] w-2 cursor-none select-none touch-none"
-                  style={{ touchAction: "none" }}
-                >
-                  <div className="absolute left-0 top-0 bottom-0 w-[2px] bg-[var(--color-primary)]/50 opacity-0 transition-opacity duration-200 group-hover/drag:opacity-100" />
-                </div>
-              </motion.aside>
-
-              {mounted &&
-                assistantResizeFake.show &&
-                createPortal(
-                  <div
-                    className="pointer-events-none"
-                    style={{
-                      position: "fixed",
-                      left: assistantResizeFake.x,
-                      top: assistantResizeFake.y,
-                      transform: "translate(-50%, -50%)",
-                      zIndex: 2147483647,
-                    }}
-                    aria-hidden
-                  >
-                    <img
-                      src="/Drag Cursor - Updated.svg"
-                      width={34}
-                      height={24}
-                      alt=""
-                      aria-hidden
-                      className="rounded-2xl drop-shadow-[0_1px_2px_rgba(0,0,0,0.55)]"
-                      draggable={false}
-                    />
-                  </div>,
-                  document.body
-                )}
-            </>
-          )}
+          {isChatV2Open ? (
+            <DashboardAssistantChatV2Layer
+              key="dashboard-chat-v2"
+              panelWidth={panelWidth}
+              onClose={() => setIsChatV2Open(false)}
+              onDragStart={onDragStart}
+              chatV2ResizeHandleRef={chatV2ResizeHandleRef}
+              onResizeHandleEnter={(e) => {
+                if (isDragging.current) return;
+                lastPointerRef.current = { x: e.clientX, y: e.clientY };
+                setAssistantResizeFake({ show: true, x: e.clientX, y: e.clientY });
+              }}
+              onResizeHandleMove={(e) => {
+                lastPointerRef.current = { x: e.clientX, y: e.clientY };
+                setAssistantResizeFake({ show: true, x: e.clientX, y: e.clientY });
+              }}
+              onResizeHandleLeave={() => {
+                if (!isDragging.current) {
+                  setAssistantResizeFake({ show: false, x: 0, y: 0 });
+                }
+              }}
+            />
+          ) : null}
         </AnimatePresence>
+
+        {mounted &&
+          isChatV2Open &&
+          assistantResizeFake.show &&
+          createPortal(
+            <div
+              className="pointer-events-none"
+              style={{
+                position: "fixed",
+                left: assistantResizeFake.x,
+                top: assistantResizeFake.y,
+                transform: "translate(-50%, -50%)",
+                zIndex: 2147483647,
+              }}
+              aria-hidden
+            >
+              <img
+                src="/Drag Cursor - Updated.svg"
+                width={34}
+                height={24}
+                alt=""
+                aria-hidden
+                className="rounded-2xl drop-shadow-[0_1px_2px_rgba(0,0,0,0.55)]"
+                draggable={false}
+              />
+            </div>,
+            document.body
+          )}
       </div>
       </DevPreviewModeProvider>
       </WelcomeOnboardingGate>

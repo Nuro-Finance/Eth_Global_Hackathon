@@ -8,11 +8,16 @@ import { Search, Copy, X, ChevronLeft, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/Input";
 import { cn } from "@/lib/utils";
+import dynamic from "next/dynamic";
 import { emitDashboardInFlightOperation, emitFirstDepositSuccess } from "@/lib/dashboardInFlightOperation";
 import { useFitMonospaceAddressRow } from "./useFitMonospaceAddressRow";
-import { WorldIdReloadGate } from "./WorldIdReloadGate";
 import { ReloadSwapFunds } from "./ReloadSwapFunds";
 import { isWorldIdConfigured, worldReloadSessionKey } from "@/lib/world-id";
+
+const WorldIdReloadGate = dynamic(
+  () => import("./WorldIdReloadGate").then((m) => m.WorldIdReloadGate),
+  { ssr: false },
+);
 
 /** Same success illustration as wallet send-complete (`ConnectedWalletDashboard`). */
 const FLOW_SUCCESS_ILLUSTRATION_SRC = "/Success_Square.svg";
