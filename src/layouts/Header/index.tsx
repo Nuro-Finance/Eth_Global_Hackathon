@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { IconMenu2 } from "@tabler/icons-react";
@@ -15,6 +15,7 @@ import {
 import { HeaderMenuProvider } from "./HeaderMenuContext";
 import { restoreDemoSampleForSwitchOff } from "@/features/dashboard/overview/hooks/designSampleData";
 import { useDevPreviewMode } from "@/providers/DevPreviewModeProvider";
+import { AccountOnboardingModal } from "@/features/onboarding";
 
 interface HeaderProps {
   className?: string;
@@ -36,6 +37,7 @@ export default function Header({
   const t = useTranslations();
   const { isDevAvailable, populated, togglePopulated } = useDevPreviewMode();
   const didInitDevPreview = useRef(false);
+  const [onboardingOpen, setOnboardingOpen] = useState(false);
 
   useEffect(() => {
     if (!isDevAvailable) return;
@@ -48,6 +50,7 @@ export default function Header({
   }, [isDevAvailable]);
 
   const cleanPath = pathname.replace(/^\/[a-z]{2}/, "") || "/dashboard";
+  const isDashboardHome = cleanPath === "/dashboard";
 
  // Get dynamic page title based on current pathname
   const getPageTitle = () => {
@@ -102,6 +105,11 @@ export default function Header({
               onToggleDevPopulatedPreview={
                 isDevAvailable ? togglePopulated : undefined
               }
+              onOpenOnboarding={
+                isDevAvailable && isDashboardHome
+                  ? () => setOnboardingOpen(true)
+                  : undefined
+              }
             />
           </div>
           {/* 2026-05-25: ThemeToggle removed. Dark-only. The
@@ -127,6 +135,7 @@ export default function Header({
           <ConnectWallet />
         </div>
       </HeaderMenuProvider>
+      <AccountOnboardingModal open={onboardingOpen} onOpenChange={setOnboardingOpen} />
     </div>
   );
 }

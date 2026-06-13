@@ -1,6 +1,17 @@
 export const FULL_MODAL_OVERLAY_CLASS =
   "notifications-modal-overlay z-[110] bg-[var(--color-bg-modal-overlay)]";
 
+/** Opaque solid gray plate — required for two-layer shell to read correctly. */
+export const ONBOARDING_MODAL_OVERLAY_CLASS =
+  "notifications-modal-overlay z-[110] bg-[var(--color-bg-primary)]";
+
+/** Stripe-style wide double-layer shell. */
+export const ONBOARDING_MODAL_SHELL_CLASS =
+  "notifications-full-dialog z-[110] flex min-h-0 flex-col gap-0 overflow-hidden p-[12px] w-[calc(100vw-8rem)] max-w-[calc(100vw-8rem)] h-[calc(100dvh-6rem)] !rounded-[56px] backdrop-blur-md shadow-xl";
+
+export const ONBOARDING_MODAL_INNER_CLASS =
+  "relative flex h-full min-h-0 w-full flex-col overflow-hidden rounded-[44px] border !backdrop-blur-none";
+
 export const FULL_MODAL_SURFACE_CLASS =
   "notifications-full-dialog z-[110] flex min-h-0 flex-col gap-0 overflow-hidden p-0 rounded-[var(--radius-card)] border border-[var(--color-border-table)] bg-[var(--color-bg-glass)] backdrop-blur-[var(--glass-blur)] dark:bg-[var(--color-bg-glass-strong)] dark:backdrop-blur-[var(--glass-blur-modal)] dark:shadow-lg";
 
