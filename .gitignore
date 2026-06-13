@@ -25,6 +25,7 @@ pnpm-error.log
 .cursorrules
 .claude/
 .yarn/
+Sponsor Docs/
 
 # TypeScript incremental build cache
 tsconfig.tsbuildinfo
