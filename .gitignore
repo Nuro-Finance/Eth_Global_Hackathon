@@ -36,6 +36,10 @@ tsconfig.tsbuildinfo
 .next/
 build/
 
+# Cloudflare Worker secrets (nuro-ens-gateway)
+workers/nuro-ens-gateway/.dev.vars
+workers/nuro-ens-gateway/.wrangler/
+
 # Node logs
 npm-debug.log*
 yarn-debug.log*

@@ -1,0 +1,13 @@
+name = "nuro-ens-gateway"
+main = "src/index.ts"
+compatibility_date = "2023-03-15"
+
+# After: npx wrangler d1 create nuro-ens-names
+# Paste database_id below.
+[[d1_databases]]
+binding = "DB"
+database_name = "nuro-ens-names"
+database_id = "6eb2cdda-1b23-4feb-a1db-734e746e7e90"
+
+# Run: echo <PRIVATE_KEY> | npx wrangler secret put PRIVATE_KEY
+# Must match a signer on your offchain resolver contract (deploy via ccip-tools later).

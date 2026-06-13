@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useAppSession } from "@/hooks/useAppSession";
 import { Bot, Wallet, TrendingUp, TrendingDown, Copy, Check, CreditCard, Pause, Play, DollarSign, ChevronDown, ChevronUp, Trash2 } from "lucide-react";
+import { EnsIdentityWizard } from "@/features/ens/components/EnsIdentityWizard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -322,6 +323,7 @@ export default function AgentWalletPage() {
   const [userCards, setUserCards] = useState<UserCard[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filter, setFilter] = useState<"all" | "active" | "paused">("all");
+  const [ensWizardOpen, setEnsWizardOpen] = useState(false);
 
   const fetchAgents = useCallback(async () => {
     if (!token) return;
@@ -386,9 +388,9 @@ export default function AgentWalletPage() {
           <CardContent className="py-12 text-center">
             <Bot className="w-16 h-16 mx-auto mb-4 text-[var(--color-text-muted)] opacity-30" />
             <p className="text-lg font-semibold text-[var(--color-text-primary)]">No Agents Yet</p>
-            <p className="text-sm text-[var(--color-text-muted)] mt-1">Go to Yield Agents to deploy your first trading bot</p>
-            <Button className="mt-4 bg-[var(--color-primary)] text-white" onClick={() => window.location.href = "/en/dashboard/yield-agents"}>
-              Deploy Agent
+            <p className="text-sm text-[var(--color-text-muted)] mt-1">Claim an ENS agent identity, then deploy your trading bot</p>
+            <Button className="mt-4 bg-[var(--color-primary)] text-white" onClick={() => setEnsWizardOpen(true)}>
+              Name your agent
             </Button>
           </CardContent>
         </Card>
@@ -399,6 +401,7 @@ export default function AgentWalletPage() {
           ))}
         </div>
       )}
+      <EnsIdentityWizard open={ensWizardOpen} onOpenChange={setEnsWizardOpen} />
     </div>
   );
 }
