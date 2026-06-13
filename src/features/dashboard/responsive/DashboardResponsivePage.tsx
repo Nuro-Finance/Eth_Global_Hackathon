@@ -23,8 +23,8 @@ type DashboardResponsivePageProps = {
   className?: string;
 };
 
-function useDashboardLayoutTier(): DashboardLayoutTier {
-  const [tier, setTier] = useState<DashboardLayoutTier>("sm");
+function useDashboardLayoutTier(): DashboardLayoutTier | null {
+  const [tier, setTier] = useState<DashboardLayoutTier | null>(null);
 
   useLayoutEffect(() => {
     const sync = () => setTier(resolveDashboardLayoutTier(window.innerWidth));
@@ -49,6 +49,11 @@ export function DashboardResponsivePage({
 }: DashboardResponsivePageProps) {
   const tier = useDashboardLayoutTier();
   const slots: Record<DashboardLayoutTier, ReactNode> = { sm, md1, md2, md3, xl };
+
+  if (tier === null) {
+    return <div className={cn("min-h-0 w-full min-w-0", className)} />;
+  }
+
   const active = slots[tier];
 
   return (
