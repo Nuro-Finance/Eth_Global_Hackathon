@@ -1,0 +1,27 @@
+{
+  "name": "nuro-ens-gateway",
+  "version": "1.0.0",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "dev:create-tables": "wrangler d1 execute nuro-ens-names --local --file=./src/db/create-tables.sql",
+    "prod:create-tables": "wrangler d1 execute nuro-ens-names --remote --file=./src/db/create-tables.sql"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20240903.0",
+    "@types/node": "^18.15.3",
+    "prettier": "^2.8.4",
+    "typescript": "^4.9.5",
+    "wrangler": "^3.75.0"
+  },
+  "dependencies": {
+    "@trivago/prettier-plugin-sort-imports": "^4.1.1",
+    "itty-router": "^4.0.14",
+    "kysely": "^0.26.1",
+    "kysely-d1": "^0.3.0",
+    "viem": "^2.21.3",
+    "zod": "^3.21.4"
+  }
+}
