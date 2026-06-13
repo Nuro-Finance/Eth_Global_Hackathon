@@ -44,7 +44,21 @@ type ChartMode = "bar" | "area";
  * `computeYAxisFromData()` below to scale labels to the actual data range —
  * was hardcoded to $0–$6K which made $200 real bars overflow the $2 tick line.
  */
-const Y_AXIS_LABELS = ["$6", "$4", "$2", "$0"] as const;
+function formatAxisTick(v: number): string {
+  if (v >= 1000) {
+    const k = v / 1000;
+    return `$${k % 1 === 0 ? k.toFixed(0) : k.toFixed(1)}K`;
+  }
+  return `$${v}`;
+}
+
+function buildYAxisLabels(niceMax: number): readonly string[] {
+  const tick3 = niceMax;
+  const tick2 = Math.round((niceMax * 2) / 3);
+  const tick1 = Math.round(niceMax / 3);
+  return [formatAxisTick(tick3), formatAxisTick(tick2), formatAxisTick(tick1), "$0"];
+}
+
 const CHART_MAX = 6000;
 
 /**
@@ -63,7 +77,7 @@ const CHART_MAX = 6000;
 function computeYAxisFromData(allValues: readonly number[]): { max: number; labels: readonly string[] } {
   const dataMax = allValues.reduce((m, v) => (v > m ? v : m), 0);
   if (dataMax === 0) {
-    return { max: CHART_MAX, labels: Y_AXIS_LABELS };
+    return { max: CHART_MAX, labels: buildYAxisLabels(CHART_MAX) };
   }
   let step: number;
   if (dataMax < 100) step = 25;
@@ -72,19 +86,9 @@ function computeYAxisFromData(allValues: readonly number[]): { max: number; labe
   else if (dataMax < 5000) step = 1000;
   else step = 2000;
   const niceMax = Math.ceil(dataMax / step) * step;
-  const tick3 = niceMax;
-  const tick2 = Math.round((niceMax * 2) / 3);
-  const tick1 = Math.round(niceMax / 3);
-  const fmt = (v: number) => {
-    if (v >= 1000) {
-      const k = v / 1000;
-      return `$${k % 1 === 0 ? k.toFixed(0) : k.toFixed(1)}K`;
-    }
-    return `$${v}`;
-  };
   return {
     max: niceMax,
-    labels: [fmt(tick3), fmt(tick2), fmt(tick1), "$0"] as readonly string[],
+    labels: buildYAxisLabels(niceMax),
   };
 }
 
@@ -491,7 +495,7 @@ export function HeroCashFlowPanel() {
  // from union of BOTH tabs' data so toggling income/expense doesn't shift
  // the axis. Falls back to mock-scale ($0-$6K) when sample is active.
   const dynamicYAxis = useMemo(() => {
-    if (sampleActive) return { max: CHART_MAX, labels: Y_AXIS_LABELS };
+    if (sampleActive) return { max: CHART_MAX, labels: buildYAxisLabels(CHART_MAX) };
     return computeYAxisFromData([...effectiveIncomeForRange, ...effectiveExpenseForRange]);
   }, [sampleActive, effectiveIncomeForRange, effectiveExpenseForRange]);
 
@@ -685,7 +689,7 @@ export function HeroCashFlowPanel() {
         </div>
       </div>
 
-      <div className="flex min-h-0 flex-1 flex-col overflow-x-clip overflow-y-visible px-4 pt-0 sm:px-6 sm:pt-1">
+      <div className="flex min-h-0 flex-1 flex-col overflow-x-clip overflow-y-visible px-4 pb-4 pt-0 sm:px-6 sm:pb-5 sm:pt-1">
         <div className="grid min-h-[204px] flex-1 grid-cols-[auto_minmax(0,1fr)] gap-x-2 sm:min-h-[228px] sm:gap-x-3">
           <div className="flex min-h-0 h-full min-w-0 flex-col pt-1">
             <div className="flex min-h-0 flex-1 flex-col justify-between text-right pb-1">
