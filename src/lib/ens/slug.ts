@@ -13,11 +13,11 @@ const RESERVED = new Set([
 ]);
 
 export function ensParentDomain(): string {
-  return (
-    process.env.ENS_PARENT_NAME ??
-    process.env.NEXT_PUBLIC_ENS_PARENT_NAME ??
-    "nurofi.eth"
-  );
+  const fromServer = process.env.ENS_PARENT_NAME?.trim();
+  if (fromServer) return fromServer;
+  const fromPublic = process.env.NEXT_PUBLIC_ENS_PARENT_NAME?.trim();
+  if (fromPublic) return fromPublic;
+  return "nurofi.eth";
 }
 
 export function normalizeEnsSlug(raw: string): string {

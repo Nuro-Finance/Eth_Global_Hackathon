@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { DESIGN_MODE } from "@/config/design-mode";
 import { ensUserIdFromRequest } from "@/lib/ens/apiAuth";
-import { checkEnsSlug } from "@/lib/ens/mockRegistry";
+import { checkEnsSlug } from "@/lib/ens/registry";
 import type { EnsRecordKind } from "@/lib/ens/types";
 import { normalizeEnsSlug } from "@/lib/ens/slug";
 
@@ -16,6 +16,6 @@ export async function GET(request: NextRequest) {
   const businessSlug = url.searchParams.get("businessSlug") ?? undefined;
   const userId = ensUserIdFromRequest(request);
 
-  const result = checkEnsSlug({ userId, kind, slug, businessSlug });
+  const result = await checkEnsSlug({ userId, kind, slug, businessSlug });
   return NextResponse.json(result);
 }

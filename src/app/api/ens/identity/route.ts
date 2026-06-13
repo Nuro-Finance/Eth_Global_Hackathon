@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { DESIGN_MODE } from "@/config/design-mode";
 import { ensUserIdFromRequest } from "@/lib/ens/apiAuth";
-import { getEnsIdentity } from "@/lib/ens/mockRegistry";
+import { getEnsIdentity } from "@/lib/ens/registry";
 
 export async function GET(request: NextRequest) {
   if (!DESIGN_MODE) {
@@ -9,5 +9,5 @@ export async function GET(request: NextRequest) {
   }
 
   const userId = ensUserIdFromRequest(request);
-  return NextResponse.json(getEnsIdentity(userId));
+  return NextResponse.json(await getEnsIdentity(userId));
 }

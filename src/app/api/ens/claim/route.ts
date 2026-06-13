@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { DESIGN_MODE } from "@/config/design-mode";
 import { ensUserIdFromRequest } from "@/lib/ens/apiAuth";
-import { claimEnsName } from "@/lib/ens/mockRegistry";
+import { claimEnsName } from "@/lib/ens/registry";
 import type { EnsRecordKind, EnsVisibility } from "@/lib/ens/types";
 
 export async function POST(request: NextRequest) {
@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
     const address = typeof body.address === "string" ? body.address : undefined;
     const userId = ensUserIdFromRequest(request);
 
-    const result = claimEnsName({ userId, kind, slug, visibility, address });
+    const result = await claimEnsName({ userId, kind, slug, visibility, address });
     return NextResponse.json(result, { status: 201 });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Claim failed";
