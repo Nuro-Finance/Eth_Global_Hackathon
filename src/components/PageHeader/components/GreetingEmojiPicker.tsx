@@ -185,6 +185,7 @@ export function GreetingEmojiPicker({ emoji, onSelect }: GreetingEmojiPickerProp
   const panelRef = useRef<HTMLDivElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
   const [viewportHeight, setViewportHeight] = useState(320);
+  const [emojiScrollFade, setEmojiScrollFade] = useState<"bottom" | "both" | "none">("bottom");
 
   const activeEmojis = useMemo(() => {
     const q = query.trim();
@@ -197,6 +198,19 @@ export function GreetingEmojiPicker({ emoji, onSelect }: GreetingEmojiPickerProp
   const close = useCallback(() => {
     setOpen(false);
     setQuery("");
+  }, []);
+
+  const updateEmojiScrollFade = useCallback(() => {
+    const el = gridRef.current;
+    if (!el) return;
+    const maxScrollTop = el.scrollHeight - el.clientHeight;
+    if (maxScrollTop <= 1) {
+      setEmojiScrollFade("none");
+      return;
+    }
+    const atTop = el.scrollTop <= 1;
+    const atBottom = el.scrollTop >= maxScrollTop - 1;
+    setEmojiScrollFade(atBottom ? "none" : atTop ? "bottom" : "both");
   }, []);
 
   const updatePosition = useCallback(() => {
@@ -248,9 +262,12 @@ export function GreetingEmojiPicker({ emoji, onSelect }: GreetingEmojiPickerProp
 
   useLayoutEffect(() => {
     if (!open || !gridRef.current) return;
-    const next = Math.min(gridRef.current.scrollHeight, 320);
+    const el = gridRef.current;
+    const contentHeight = el.scrollHeight;
+    const next = Math.min(contentHeight, 320);
     setViewportHeight(next);
-  }, [open, activeEmojis]);
+    requestAnimationFrame(updateEmojiScrollFade);
+  }, [open, activeEmojis, updateEmojiScrollFade]);
 
   const handleSelect = (next: string) => {
     setRecent((prev) => [next, ...prev.filter((item) => item !== next)].slice(0, 24));
@@ -310,14 +327,22 @@ export function GreetingEmojiPicker({ emoji, onSelect }: GreetingEmojiPickerProp
               </div>
 
               <div
-                className="overflow-hidden px-4 pb-4 transition-[height] duration-300 ease-[cubic-bezier(0.33,1,0.68,1)]"
+                className="overflow-hidden transition-[height] duration-300 ease-[cubic-bezier(0.33,1,0.68,1)]"
                 style={{ height: viewportHeight }}
               >
                 <div
                   ref={gridRef}
-                  className="max-h-[320px] overflow-y-auto overflow-x-hidden"
+                  onScroll={updateEmojiScrollFade}
+                  className={cn(
+                    "scrollbar-autohide scroll-gutter-stable h-full max-h-[320px] overflow-y-auto overflow-x-hidden overscroll-contain",
+                    emojiScrollFade === "both" &&
+                      "[mask-image:linear-gradient(to_bottom,transparent_0,black_16px,black_calc(100%-16px),transparent_100%)] [-webkit-mask-image:linear-gradient(to_bottom,transparent_0,black_16px,black_calc(100%-16px),transparent_100%)]",
+                    emojiScrollFade === "bottom" &&
+                      "[mask-image:linear-gradient(to_bottom,black_0,black_calc(100%-16px),transparent_100%)] [-webkit-mask-image:linear-gradient(to_bottom,black_0,black_calc(100%-16px),transparent_100%)]",
+                    emojiScrollFade === "none" && "[mask-image:none] [-webkit-mask-image:none]",
+                  )}
                 >
-                  <div className="grid w-full grid-cols-8 gap-0.5">
+                  <div className="grid w-full grid-cols-8 gap-0.5 px-4 pb-4">
                     {activeEmojis.map((item, index) => (
                       <button
                         key={`${item}-${index}`}
