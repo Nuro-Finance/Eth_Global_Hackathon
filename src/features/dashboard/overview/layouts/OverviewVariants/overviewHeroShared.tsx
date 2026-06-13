@@ -367,6 +367,10 @@ const SM_DECK_TO_ACTIONS_GAP_PX = 16;
 /** Layout 3 hero band: always 16px between blocks (not `gap-4` / viewport-driven grid rows). */
 const LAYOUT3_HERO_GUTTER_CLASS = "gap-[16px]";
 
+/** Layout 3 row 3: Cash Flow fills row height; chart grows inside the panel. */
+const LAYOUT3_CASH_FLOW_REGION_CLASS =
+  "min-h-0 min-w-0 xl:col-span-8 xl:row-start-3 xl:flex xl:h-full xl:min-h-0 xl:flex-col xl:self-stretch";
+
 /** Tier absolute scale factors */
 const PRIMARY_DECK_SCALE_MID = 82 / 92;
 const PRIMARY_DECK_SCALE_BACK = 72 / 92;
@@ -2145,7 +2149,10 @@ export function OverviewTopThreeHeroRow({
     const topEl = layout3HeroBandTopRef.current;
     const bottomEl = layout3HeroBandBottomRef.current;
     if (!topEl || !bottomEl) return;
-    const h = Math.round(bottomEl.getBoundingClientRect().bottom - topEl.getBoundingClientRect().top);
+    const h =
+      topEl === bottomEl
+        ? Math.round(topEl.getBoundingClientRect().height)
+        : Math.round(bottomEl.getBoundingClientRect().bottom - topEl.getBoundingClientRect().top);
     if (h > 0) setLayout3SvgDeckPaintHeightPx(h);
   }, [homeResponsiveSvgDeck, overviewLayout, layout3TwoLeft]);
 
@@ -2461,7 +2468,7 @@ export function OverviewTopThreeHeroRow({
     overviewLayout === "3" && !layout3TwoLeft ? (
       <div
         className={cn(
-          "hidden min-h-0 shrink-0 flex-col xl:col-span-4 xl:col-start-9 xl:row-start-3 xl:flex",
+          "hidden min-h-0 flex-col xl:col-span-4 xl:col-start-9 xl:row-start-3 xl:flex xl:self-stretch",
           LAYOUT3_HERO_GUTTER_CLASS,
         )}
       >
@@ -2906,41 +2913,38 @@ export function OverviewTopThreeHeroRow({
       <SortableContext items={topIdsL3} strategy={rectSortingStrategy}>
         <div
           className={cn(
-            "grid w-full grid-cols-1 xl:grid-cols-12 xl:items-stretch",
+            "grid w-full grid-cols-1 xl:grid-cols-12",
             overviewLayout === "3" && !layout3TwoLeft
               ? cn(
                   LAYOUT3_HERO_GUTTER_CLASS,
-                  "min-h-0 xl:grid-rows-[auto_auto_minmax(0,1fr)] xl:items-start",
+                  "min-h-0 xl:grid-rows-[auto_auto_auto] xl:items-start",
                 )
-              : overviewLayout === "3"
-                ? "gap-4 min-h-0"
-                : "gap-4",
+              : "gap-4 xl:items-stretch",
+            overviewLayout !== "3" || layout3TwoLeft ? "gap-4" : null,
           )}
         >
           {newUserPrimaryCardCta ? (
-            <div
-              ref={bindLayout3HeroBandTopRef}
-              className={cn(
-                "relative grid min-h-0 min-w-0 grid-cols-1 gap-4 self-stretch xl:col-span-8 xl:h-full",
-                "xl:grid-rows-[auto_auto_minmax(0,1fr)]",
-              )}
-            >
+            <>
               <div
-                ref={bindLayout3HeroBandBottomRef}
+                ref={(node) => {
+                  layout3HeroBandTopRef.current = node;
+                  layout3HeroBandBottomRef.current = node;
+                  measureLayout3SvgDeckHeight();
+                }}
                 className={cn(
-                  "grid min-w-0 shrink-0 grid-cols-1 gap-4 xl:col-span-1 xl:row-span-2 xl:row-start-1 xl:grid-cols-2 xl:items-start xl:self-start",
+                  "grid min-w-0 shrink-0 grid-cols-1 gap-4 xl:col-span-8 xl:row-span-2 xl:row-start-1 xl:grid-cols-2 xl:items-start xl:self-start",
                   overviewLayout === "3" && "min-h-0 min-w-0",
                 )}
               >
                 <NewUserOnboardingSteps onDeposit={() => setReloadModalOpen(true)} />
               </div>
               <DemoSurfaceRegion
-                className="hidden min-h-0 min-w-0 xl:row-start-3 xl:block xl:h-full xl:min-h-0"
+                className={cn("hidden xl:block", LAYOUT3_CASH_FLOW_REGION_CLASS)}
                 showActions
               >
                 <HeroCashFlowPanel />
               </DemoSurfaceRegion>
-            </div>
+            </>
           ) : layout3TwoLeft ? (
             <div
               className={cn(
@@ -3020,7 +3024,7 @@ export function OverviewTopThreeHeroRow({
                 </div>
               </div>
               <DemoSurfaceRegion
-                className="min-h-0 min-w-0 xl:col-span-8 xl:row-start-3 xl:h-full xl:min-h-0 xl:self-stretch"
+                className={LAYOUT3_CASH_FLOW_REGION_CLASS}
                 showActions
               >
                 <HeroCashFlowPanel />
@@ -3039,8 +3043,8 @@ export function OverviewTopThreeHeroRow({
                   ? "xl:!h-auto xl:self-start"
                   : overviewLayout === "3"
                     ? homeResponsiveSvgDeck
-                      ? "xl:!h-auto xl:self-start xl:col-start-9 xl:row-span-3 xl:row-start-1 xl:min-h-0 xl:overflow-hidden"
-                      : "xl:col-start-9 xl:row-span-3 xl:row-start-1 xl:self-end [&>div]:!h-auto [&>div]:min-h-0"
+                      ? "xl:!h-auto xl:self-start xl:col-start-9 xl:row-span-2 xl:row-start-1 xl:min-h-0 xl:overflow-hidden"
+                      : "xl:col-start-9 xl:row-span-2 xl:row-start-1 xl:self-end [&>div]:!h-auto [&>div]:min-h-0"
                     : undefined
               }
               shellCallbackRef={(node) => {
