@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
+import { motion } from "framer-motion";
 import { X } from "lucide-react";
 import {
   Dialog,
@@ -131,13 +132,33 @@ export function AccountOnboardingModal({ open, onOpenChange }: AccountOnboarding
                     This is how you&apos;ll appear across your dashboard.
                   </p>
                 </div>
-                <div className="mx-auto mt-10 w-full max-w-xs">
+                <div className="relative mx-auto mt-10 w-full max-w-xs">
                   <Input
                     placeholder="Your Name"
                     className={ONBOARDING_INPUT_CLASS}
                     value={displayName}
                     onChange={(e) => setDisplayName(e.target.value)}
                   />
+                  <div
+                    className="pointer-events-none absolute inset-0 overflow-hidden rounded-[var(--radius-md)]"
+                    style={{
+                      containerType: "size",
+                      mask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
+                      maskComposite: "exclude",
+                      WebkitMaskComposite: "xor",
+                      padding: "1px",
+                    }}
+                  >
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+                      className="absolute left-1/2 top-1/2 aspect-square h-[200cqmax] w-[200cqmax] -translate-x-1/2 -translate-y-1/2 rounded-full will-change-transform"
+                      style={{
+                        background:
+                          "conic-gradient(from 0deg, transparent 0%, transparent 65%, var(--color-primary) 85%, var(--color-text-primary) 92%, var(--color-primary) 98%, transparent 100%)",
+                      }}
+                    />
+                  </div>
                 </div>
               </div>
             ) : null}
