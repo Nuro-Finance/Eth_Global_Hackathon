@@ -98,11 +98,11 @@ export function UpgradeModal({ open, onOpenChange }: UpgradeModalProps) {
     },
     {
       id: "pro",
-      name: "Nuro Pro",
+      name: "Nuro Teams",
       price: "49.00",
       description: "Full infrastructure for teams and operators running agents at scale.",
       icon: Gem,
-      buttonLabel: "Upgrade to Nuro Pro",
+      buttonLabel: "Upgrade to Nuro Teams",
       features: [
         { text: "10 Virtual cards", included: true },
         { text: "3.5% Reload fee", included: true },
