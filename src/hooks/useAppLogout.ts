@@ -3,9 +3,9 @@
 import { useCallback } from "react";
 import { useDispatch } from "react-redux";
 import { useRouter } from "@/i18n/navigation";
-import { logoutUser } from "@/store/slices/authSlice";
 import type { AppDispatch } from "@/store/store";
 import { usePrivyRuntime } from "@/providers/PrivyRuntimeContext";
+import { completeAppLogout } from "@/lib/completeAppLogout";
 
 export function useAppLogout() {
   const dispatch = useDispatch<AppDispatch>();
@@ -13,10 +13,7 @@ export function useAppLogout() {
   const { logoutPrivy } = usePrivyRuntime();
 
   return useCallback(async () => {
-    if (logoutPrivy) {
-      await logoutPrivy();
-    }
-    await dispatch(logoutUser());
+    await completeAppLogout(dispatch, { logoutPrivy: logoutPrivy ?? undefined });
     router.push("/login");
   }, [dispatch, router, logoutPrivy]);
 }

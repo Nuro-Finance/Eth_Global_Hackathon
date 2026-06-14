@@ -1,4 +1,7 @@
-import { RegisterLayout } from "@/features/auth/layouts/RegisterLayout";
+"use client";
+
+import { LoginLayout } from "@/features/auth";
+
 export default function RegisterPage() {
-  return <RegisterLayout />;
+  return <LoginLayout initialSignUp />;
 }

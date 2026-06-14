@@ -17,8 +17,8 @@ import { InputOTP } from "@/components/ui/input-otp";
  * 1. Brand-new signup via the inline "create account" toggle
  * 2. Existing user logging in whose account isn't yet verified
  */
-export function LoginLayout() {
-  const [isSignUp, setIsSignUp] = useState(false);
+export function LoginLayout({ initialSignUp = false }: { initialSignUp?: boolean }) {
+  const isSignUp = initialSignUp;
   const [isForgot, setIsForgot] = useState(false);
   const {
     isLoading, error, onSubmit, handleGoogleLogin, handleAppleLogin,
@@ -145,7 +145,6 @@ export function LoginLayout() {
           <>
             <LoginForm
               isSignUp={isSignUp}
-              setIsSignUp={setIsSignUp}
               onSubmit={onSubmit}
               isLoading={isLoading}
               error={error}

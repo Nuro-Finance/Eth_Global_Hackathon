@@ -161,15 +161,10 @@ const authSlice = createSlice({
         if (action.payload) {
           state.user = action.payload;
           state.isAuthenticated = true;
-        } else {
-          state.user = null;
-          state.isAuthenticated = false;
         }
         state.isLoading = false;
       })
       .addCase(checkAuthStatus.rejected, (state) => {
-        state.user = null;
-        state.isAuthenticated = false;
         state.isLoading = false;
       });
   },

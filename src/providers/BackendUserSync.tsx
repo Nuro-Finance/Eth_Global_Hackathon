@@ -25,6 +25,7 @@ import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { useSession } from "next-auth/react";
 import { updateUser } from "@/store/slices/authSlice";
+import { isDemoPlaceholderName } from "@/lib/displayName";
 import type { AppDispatch } from "@/store/store";
 
 export default function BackendUserSync() {
@@ -49,14 +50,26 @@ export default function BackendUserSync() {
  // Prefer explicit first/last (migration 028), fall back to full name.
         const first = typeof u.firstName === "string" ? u.firstName.trim() : "";
         const last = typeof u.lastName === "string" ? u.lastName.trim() : "";
+        const email =
+          typeof u.email === "string" ? u.email.trim() : "";
         const full =
           (first && last ? `${first} ${last}` : first || last) ||
-          (typeof u.name === "string" ? u.name.trim() : "");
+          (typeof u.name === "string" ? u.name.trim() : "") ||
+          email.split("@")[0] ||
+          "";
 
- // Skip if backend name looks like our own Privy fallback or is blank.
-        if (!full || full.startsWith("Nuro User")) return;
+        if (!full || full.startsWith("Nuro User") || isDemoPlaceholderName(full)) {
+          if (!email) return;
+        }
 
-        const patch: Record<string, string> = { name: full };
+        const displayName =
+          full && !isDemoPlaceholderName(full) && !full.startsWith("Nuro User")
+            ? full
+            : email.split("@")[0] || full;
+
+        if (!displayName) return;
+
+        const patch: Record<string, string> = { name: displayName };
         if (typeof u.email === "string" && u.email) patch.email = u.email;
         if (typeof u.id === "string" && u.id) patch.id = u.id;
         dispatch(updateUser(patch));

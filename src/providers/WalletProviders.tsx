@@ -11,6 +11,7 @@ import {
   PrivyRuntimeProvider,
 } from "./index";
 import BackendUserSync from "./BackendUserSync";
+import PrivyNuroSessionSync from "./PrivyNuroSessionSync";
 import { DESIGN_MODE } from "@/config/design-mode";
 
 const privyAppId = process.env.NEXT_PUBLIC_PRIVY_APP_ID;
@@ -60,6 +61,7 @@ export function WalletProviders({
             }}
           >
             <PrivyInnerProviders>
+              {!designModePrivyOnly ? <PrivyNuroSessionSync /> : null}
               {!designModePrivyOnly ? <PrivyAuthSync /> : null}
               {!designModePrivyOnly ? <BackendUserSync /> : null}
               {children}

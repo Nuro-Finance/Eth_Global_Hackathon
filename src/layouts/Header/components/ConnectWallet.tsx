@@ -1,12 +1,38 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import { useSession } from "next-auth/react";
 import { usePrivy, useWallets } from "@privy-io/react-auth";
 import { Wallet, Copy, RefreshCw, LogOut } from "lucide-react";
 import Dropdown from "@/components/dropdown";
 import { useHeaderMenu } from "@/layouts/Header/HeaderMenuContext";
 import { usePrivyRuntime } from "@/providers/PrivyRuntimeContext";
 import { DESIGN_MODE } from "@/config/design-mode";
+import { mapPrivyUserToAppUser } from "@/lib/mapPrivyUser";
+import {
+  clearRequireWalletRelinkClient,
+  requiresWalletRelinkClient,
+} from "@/lib/welcome-onboarding";
+
+function isWalletOnlyPrivyEmail(email: string): boolean {
+  const normalized = email.trim().toLowerCase();
+  return (
+    normalized.startsWith("privy_") ||
+    normalized.endsWith("@privy.local") ||
+    normalized.endsWith("@telegram.local")
+  );
+}
+
+function shouldSuppressWalletForSession(
+  nuroEmail: string | undefined,
+  privyUser: ReturnType<typeof usePrivy>["user"],
+): boolean {
+  if (requiresWalletRelinkClient()) return true;
+  if (!nuroEmail || !privyUser) return false;
+  const privyEmail = mapPrivyUserToAppUser(privyUser).email.trim().toLowerCase();
+  if (isWalletOnlyPrivyEmail(privyEmail)) return false;
+  return privyEmail !== nuroEmail.trim().toLowerCase();
+}
 
 /** Must match `appearance.walletList` in Providers.tsx */
 const EXTERNAL_WALLET_LIST = [
@@ -112,9 +138,20 @@ function ConnectWalletPrivy({
   onOpenChange: (open: boolean) => void;
 }) {
   const headerMenu = useHeaderMenu();
+  const { data: session } = useSession();
   const { ready, authenticated, login, logout, user, linkWallet } = usePrivy();
   const { wallets } = useWallets();
   const pendingConnectRef = useRef(false);
+  const userInitiatedConnectRef = useRef(false);
+  const [suppressStaleWallet, setSuppressStaleWallet] = useState(() =>
+    shouldSuppressWalletForSession(undefined, null),
+  );
+
+  useEffect(() => {
+    setSuppressStaleWallet(
+      shouldSuppressWalletForSession(session?.user?.email ?? undefined, user),
+    );
+  }, [session?.user?.email, user]);
 
  // Day-6: prefer external wallets (MetaMask/Rabby/Coinbase/etc.) over
  // the Privy-auto-created embedded wallet.
@@ -139,7 +176,8 @@ function ConnectWalletPrivy({
 
   const resolvedAddress = externalWallet?.address ?? externalLinkedWalletAddress ?? "";
 
-  const address = authenticated ? (resolvedAddress || "") : "";
+  const address =
+    authenticated && !suppressStaleWallet ? (resolvedAddress || "") : "";
 
   const runConnect = useCallback(() => {
     if (!ready) {
@@ -147,6 +185,7 @@ function ConnectWalletPrivy({
       return;
     }
     pendingConnectRef.current = false;
+    userInitiatedConnectRef.current = true;
 
     const walletList = [...EXTERNAL_WALLET_LIST];
 
@@ -170,6 +209,13 @@ function ConnectWalletPrivy({
     pendingConnectRef.current = false;
     runConnect();
   }, [ready, runConnect]);
+
+  useEffect(() => {
+    if (!userInitiatedConnectRef.current || !resolvedAddress) return;
+    userInitiatedConnectRef.current = false;
+    clearRequireWalletRelinkClient();
+    setSuppressStaleWallet(false);
+  }, [resolvedAddress]);
 
   const handleConnect = () => {
     runConnect();
@@ -205,7 +251,11 @@ function ConnectWalletPrivy({
       id: "disconnect",
       label: "Disconnect wallet",
       icon: <LogOut className="h-4 w-4" />,
-      onClick: () => { void logout().catch(() => {}); },
+      onClick: () => {
+        clearRequireWalletRelinkClient();
+        setSuppressStaleWallet(false);
+        void logout().catch(() => {});
+      },
       variant: "danger",
     },
   ];

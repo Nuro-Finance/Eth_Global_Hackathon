@@ -1,16 +1,23 @@
 import { useState, useCallback, useEffect } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { signIn } from "next-auth/react";
+import { completeAppLogout } from "@/lib/completeAppLogout";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "@/store/store";
 import { hydrateFromPrivyUser } from "@/store/slices/authSlice";
 import type { LoginFormData } from "../../../components";
 import { DESIGN_MODE, isDevDesignLoginBypass } from "@/config/design-mode";
 import { isDemoLoginEmail } from "../../../components/DemoCredentialsCard/config";
+import { markPendingOnboardingClient, markRequireWalletRelinkClient } from "@/lib/welcome-onboarding";
+import {
+  DEMO_USER_EMAIL,
+  DEMO_USER_FULL_NAME,
+  DEMO_USER_ID,
+} from "@/config/demo-user";
+import { persistAppUser } from "@/lib/persistAppUser";
 
 function shouldBypassApiLogin(data: LoginFormData): boolean {
     if (!isDevDesignLoginBypass()) return false;
-    if (DESIGN_MODE) return true;
     return isDemoLoginEmail(data.email);
 }
 
@@ -80,18 +87,25 @@ export function useLogin() {
 
  // ── Design / dev demo: skip API preflight (demo@nuro.finance on localhost) ──
             if (shouldBypassApiLogin(data)) {
-                const email = data.email.trim();
+                await completeAppLogout(dispatch);
+                const email = DEMO_USER_EMAIL;
                 const result = await signIn("credentials", {
                     redirect: false,
                     email,
                     password: data.password,
                 });
                 dispatch(hydrateFromPrivyUser({
-                    id: email,
-                    email,
-                    name: email.split("@")[0] || "Demo",
+                    id: DEMO_USER_ID,
+                    email: DEMO_USER_EMAIL,
+                    name: DEMO_USER_FULL_NAME,
                     role: "admin",
                 }));
+                persistAppUser({
+                    id: DEMO_USER_ID,
+                    email: DEMO_USER_EMAIL,
+                    name: DEMO_USER_FULL_NAME,
+                    role: "admin",
+                }, "demo");
                 if (result?.error && !DESIGN_MODE) {
                     setError("Design login failed. Check NextAuth is configured.");
                     setIsLoading(false);
@@ -147,6 +161,12 @@ export function useLogin() {
                 name: data.email.split("@")[0],
                 role: "user",
             }));
+            persistAppUser({
+                id: data.email,
+                email: data.email,
+                name: data.email.split("@")[0],
+                role: "user",
+            });
 
             router.push("/dashboard");
             setIsLoading(false);
@@ -179,11 +199,13 @@ export function useLogin() {
                 setIsLoading(false);
                 return res.status === 400 && /expired/i.test(data.error || "") ? "EXPIRED" : "INVALID";
             }
- // OTP good — finish with NextAuth signIn for the session cookie
+ // OTP good — mint session from verify-otp JWT (skip redundant /auth/login round-trip)
             const result = await signIn("credentials", {
                 redirect: false,
                 email: pendingVerification.email,
                 password: pendingVerification.password,
+                accessToken: data.accessToken,
+                verifiedUser: JSON.stringify(data.user),
             });
             if (result?.error) {
                 setError("Verified but session creation failed. Please log in.");
@@ -191,11 +213,21 @@ export function useLogin() {
                 return "ERROR";
             }
             dispatch(hydrateFromPrivyUser({
-                id: pendingVerification.email,
+                id: data.user?.id ?? pendingVerification.email,
                 email: pendingVerification.email,
-                name: pendingVerification.email.split("@")[0],
+                name: data.user?.name ?? pendingVerification.email.split("@")[0],
                 role: "user",
             }));
+            persistAppUser({
+                id: data.user?.id ?? pendingVerification.email,
+                email: pendingVerification.email,
+                name: data.user?.name ?? pendingVerification.email.split("@")[0],
+                role: "user",
+            });
+            markPendingOnboardingClient();
+            markRequireWalletRelinkClient();
+            setPendingVerification(null);
+            setIsLoading(false);
             router.push("/dashboard");
             return "SUCCESS";
         } catch (err) {

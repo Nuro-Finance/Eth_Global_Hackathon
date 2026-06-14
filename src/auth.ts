@@ -1,17 +1,26 @@
 import NextAuth from "next-auth"
 import Credentials from "next-auth/providers/credentials"
 import Google from "next-auth/providers/google"
-import { DESIGN_MODE, isDevDesignLoginBypass } from "@/config/design-mode"
+import { isDevDesignLoginBypass } from "@/config/design-mode"
 import {
   DEMO_CREDENTIALS,
   isDemoLoginEmail,
 } from "@/features/auth/components/DemoCredentialsCard/config"
+import { DEMO_USER_EMAIL, DEMO_USER_FULL_NAME, DEMO_USER_ID } from "@/config/demo-user"
+
+const AUTH_BACKEND_URL =
+  process.env.CASHLY_API_URL ??
+  process.env.BACKEND_URL ??
+  process.env.NEXT_PUBLIC_BACKEND_URL ??
+  "http://localhost:3000"
 
 function designModeAuthorizeUser(email: string) {
+  const normalized = email.trim().toLowerCase()
+  const isDemo = normalized === DEMO_USER_EMAIL.toLowerCase()
   return {
-    id: "design-demo-user",
-    name: email.split("@")[0] || "Demo",
-    email,
+    id: isDemo ? DEMO_USER_ID : "design-demo-user",
+    name: isDemo ? DEMO_USER_FULL_NAME : email.split("@")[0] || "Demo",
+    email: email.trim() || DEMO_USER_EMAIL,
     accessToken: "design-mode-session-token",
   }
 }
@@ -29,13 +38,28 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       credentials: {
         email: {},
         password: {},
+        accessToken: {},
+        verifiedUser: {},
       },
       async authorize(credentials) {
         const email = String(credentials?.email ?? "")
         const password = String(credentials?.password ?? "")
+        const accessToken = String(credentials?.accessToken ?? "")
+        const verifiedUserRaw = String(credentials?.verifiedUser ?? "")
 
-        if (DESIGN_MODE && isDevDesignLoginBypass()) {
-          return designModeAuthorizeUser(email || DEMO_CREDENTIALS.email)
+        if (accessToken && verifiedUserRaw) {
+          try {
+            const user = JSON.parse(verifiedUserRaw) as {
+              id?: string
+              email?: string
+              name?: string
+            }
+            if (user?.id && user?.email) {
+              return { ...user, accessToken }
+            }
+          } catch {
+            return null
+          }
         }
 
         if (isDevDesignLoginBypass() && isDemoLoginEmail(email)) {
@@ -43,7 +67,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         }
 
         try {
-          const res = await fetch(`${process.env.CASHLY_API_URL}/auth/login`, {
+          const res = await fetch(`${AUTH_BACKEND_URL}/auth/login`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -76,7 +100,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           return token
         }
         try {
-          const res = await fetch(`${process.env.CASHLY_API_URL}/auth/social-login`, {
+          const res = await fetch(`${AUTH_BACKEND_URL}/auth/social-login`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({

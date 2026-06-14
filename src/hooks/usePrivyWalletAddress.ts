@@ -5,6 +5,7 @@ import { usePrivyRuntime } from "@/providers/PrivyRuntimeContext";
 import { useDevPreviewMode } from "@/providers/DevPreviewModeProvider";
 import { DESIGN_MODE } from "@/config/design-mode";
 import { DEV_MOCK_CONNECTED_WALLET_ADDRESS } from "@/lib/devPreviewMode";
+import { requiresWalletRelinkClient } from "@/lib/welcome-onboarding";
 
 /**
  * Same address / chain resolution as the header ConnectWallet control.
@@ -27,12 +28,14 @@ export function usePrivyWalletAddress() {
   const { ready, authenticated, user } = usePrivy();
   const { wallets } = useWallets();
 
+  const suppressStaleWallet = requiresWalletRelinkClient();
+
  // Design-mode mock only when Privy is not mounted (wallet-connect UX testing uses real Privy).
   if (isDesignMode && !privyEnabled) {
     return DEV_MOCK_WALLET_STATE;
   }
 
-  if (isDevAvailable && devPopulatedPreview) {
+  if (isDevAvailable && devPopulatedPreview && !requiresWalletRelinkClient()) {
     return DEV_MOCK_WALLET_STATE;
   }
 
@@ -84,7 +87,7 @@ export function usePrivyWalletAddress() {
     primaryWallet?.address ?? externalLinkedWalletAddress ?? "";
 
  // ⚠️ Force clear ONLY if not authenticated
-  const address = authenticated ? (resolvedAddress || "") : "";
+  const address = authenticated && !suppressStaleWallet ? (resolvedAddress || "") : "";
 
   const linkedChainType =
     linkedWalletAccount &&

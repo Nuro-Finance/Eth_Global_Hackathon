@@ -16,6 +16,8 @@ import { HeaderMenuProvider } from "./HeaderMenuContext";
 import { restoreDemoSampleForSwitchOff } from "@/features/dashboard/overview/hooks/designSampleData";
 import { useDevPreviewMode } from "@/providers/DevPreviewModeProvider";
 import { AccountOnboardingModal } from "@/features/onboarding";
+import { consumePendingOnboardingClient } from "@/lib/welcome-onboarding";
+import { useDemoDevSession } from "@/hooks/useDemoDevSession";
 
 interface HeaderProps {
   className?: string;
@@ -36,6 +38,7 @@ export default function Header({
   const pathname = usePathname();
   const t = useTranslations();
   const { isDevAvailable, populated, togglePopulated } = useDevPreviewMode();
+  const showDevControls = useDemoDevSession();
   const didInitDevPreview = useRef(false);
   const [onboardingOpen, setOnboardingOpen] = useState(false);
 
@@ -52,7 +55,14 @@ export default function Header({
   const cleanPath = pathname.replace(/^\/[a-z]{2}/, "") || "/dashboard";
   const isDashboardHome = cleanPath === "/dashboard";
 
- // Get dynamic page title based on current pathname
+  useEffect(() => {
+    if (!isDashboardHome) return;
+    if (consumePendingOnboardingClient()) {
+      setOnboardingOpen(true);
+    }
+  }, [isDashboardHome]);
+
+  // Get dynamic page title based on current pathname
   const getPageTitle = () => {
     switch (cleanPath) {
       case "/dashboard":
@@ -100,13 +110,13 @@ export default function Header({
           <div className="hidden md:block">
             <HeaderActions
               devPopulatedPreview={
-                isDevAvailable ? populated : undefined
+                showDevControls ? populated : undefined
               }
               onToggleDevPopulatedPreview={
-                isDevAvailable ? togglePopulated : undefined
+                showDevControls ? togglePopulated : undefined
               }
               onOpenOnboarding={
-                isDevAvailable && isDashboardHome
+                showDevControls && isDashboardHome
                   ? () => setOnboardingOpen(true)
                   : undefined
               }

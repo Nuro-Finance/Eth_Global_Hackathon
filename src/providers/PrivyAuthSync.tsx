@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { useDispatch } from "react-redux";
+import { useSession } from "next-auth/react";
 import { usePrivy } from "@privy-io/react-auth";
 import { mapPrivyUserToAppUser } from "@/lib/mapPrivyUser";
 import {
@@ -16,6 +17,7 @@ import type { AppDispatch } from "@/store/store";
  */
 export default function PrivyAuthSync() {
   const dispatch = useDispatch<AppDispatch>();
+  const { data: session, status: sessionStatus } = useSession();
   const { ready, authenticated, user } = usePrivy();
   const lastSyncedPrivyId = useRef<string | null>(null);
 
@@ -25,6 +27,7 @@ export default function PrivyAuthSync() {
     if (!authenticated) {
       lastSyncedPrivyId.current = null;
       if (
+        sessionStatus !== "authenticated" &&
         typeof window !== "undefined" &&
         localStorage.getItem("auth_token") === "privy"
       ) {
@@ -34,6 +37,13 @@ export default function PrivyAuthSync() {
     }
 
     if (!user) return;
+
+    const nuroEmail = session?.user?.email?.trim().toLowerCase();
+    if (sessionStatus === "authenticated" && nuroEmail) {
+      // Email/password or OAuth Nuro session owns identity — Privy is wallet-only.
+      return;
+    }
+
     if (lastSyncedPrivyId.current === user.id) {
  // Day-5 fix: previously re-fired hydrateFromPrivyUser on every Privy
  // re-render, which fully REPLACED the Redux user — clobbering the
@@ -50,7 +60,7 @@ export default function PrivyAuthSync() {
     dispatch(hydrateFromPrivyUser(appUser));
     localStorage.setItem("auth_token", "privy");
     localStorage.setItem("user", JSON.stringify(appUser));
-  }, [ready, authenticated, user, dispatch]);
+  }, [ready, authenticated, user, dispatch, session?.user?.email, sessionStatus]);
 
   return null;
 }

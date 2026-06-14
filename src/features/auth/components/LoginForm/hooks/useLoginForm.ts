@@ -17,7 +17,7 @@ export function useLoginForm(options?: { startInForgotMode?: boolean }) {
         options?.startInForgotMode ?? false
     );
     const [isSent, setIsSent] = useState(false);
- /** Safari: avoid Keychain/password UI until user focuses credentials (defaults are prefilled via RHF). */
+ /** Safari: avoid Keychain/password UI until user focuses credentials (sign-in only). */
     const [credentialFieldsActivated, setCredentialFieldsActivated] = useState(false);
     const activateCredentialFields = useCallback(() => setCredentialFieldsActivated(true), []);
     const resetCredentialFieldsActivation = useCallback(() => setCredentialFieldsActivated(false), []);
@@ -32,14 +32,22 @@ export function useLoginForm(options?: { startInForgotMode?: boolean }) {
     const togglePasswordVisibility = () => setShowPassword((prev) => !prev);
     const toggleForgotPassword = () => {
         setIsForgotPassword((prev) => !prev);
-        setIsSent(false); // Reset sent state if toggling
+        setIsSent(false);
     };
     
- // Deterministic state wipe to guarantee safe return to Page A without boolean toggle misfires
     const resetToAuth = () => {
         setIsForgotPassword(false);
         setIsSent(false);
     };
+ 
+    const {
+        register,
+        handleSubmit,
+        watch,
+        setError,
+        clearErrors,
+        formState: { errors, isValid },
+    } = form;
  
     return {
         form,
@@ -53,12 +61,12 @@ export function useLoginForm(options?: { startInForgotMode?: boolean }) {
         resetCredentialFieldsActivation,
         isSent,
         setIsSent,
-        errors: form.formState.errors,
-        isValid: form.formState.isValid,
-        register: form.register,
-        handleSubmit: form.handleSubmit,
-        setError: form.setError,
-        clearErrors: form.clearErrors,
-        watch: form.watch,
+        errors,
+        isValid,
+        register,
+        handleSubmit,
+        setError,
+        clearErrors,
+        watch,
     };
 }

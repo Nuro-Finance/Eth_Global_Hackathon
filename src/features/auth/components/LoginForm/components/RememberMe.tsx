@@ -5,19 +5,21 @@ import { useTranslations } from "next-intl";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import type { LoginFormData } from "../hooks";
 
 interface RememberMeProps {
   control: Control<LoginFormData>;
   onForgot?: () => void;
+  showForgotLink?: boolean;
 }
  
-export function RememberMe({ control, onForgot }: RememberMeProps) {
+export function RememberMe({ control, onForgot, showForgotLink = true }: RememberMeProps) {
   const t = useTranslations("Login");
   const { field } = useController({ name: "rememberMe", control });
 
   return (
-    <div className="flex items-center justify-between">
+    <div className={cn("flex items-center", showForgotLink ? "justify-between" : "justify-start")}>
       <div className="flex items-center gap-2">
         <Checkbox
           id="rememberMe"
@@ -31,15 +33,17 @@ export function RememberMe({ control, onForgot }: RememberMeProps) {
           {t("rememberMe")}
         </Label>
       </div>
-      <Button
-        type="button"
-        variant="link"
-        size="sm"
-        className="text-xs px-0 h-auto"
-        onClick={onForgot}
-      >
-        {t("forgotPassword")}
-      </Button>
+      {showForgotLink && (
+        <Button
+          type="button"
+          variant="link"
+          size="sm"
+          className="text-xs px-0 h-auto"
+          onClick={onForgot}
+        >
+          {t("forgotPassword")}
+        </Button>
+      )}
     </div>
   );
 }

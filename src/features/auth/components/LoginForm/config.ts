@@ -9,17 +9,9 @@ export const loginSchema = z.object({
     rememberMe: z.boolean(),
 });
 
-import { DEMO_CREDENTIALS } from "../DemoCredentialsCard/config";
-
-export const DEFAULT_CREDENTIALS =
-    process.env.NODE_ENV === "development"
-        ? {
-              email: DEMO_CREDENTIALS.email,
-              password: DEMO_CREDENTIALS.password,
-              rememberMe: false,
-          }
-        : {
-              email: "",
-              password: "",
-              rememberMe: false,
-          };
+/** Empty by default — demo prefill only via DemoCredentialsCard when shown. */
+export const DEFAULT_CREDENTIALS = {
+    email: "",
+    password: "",
+    rememberMe: false,
+};

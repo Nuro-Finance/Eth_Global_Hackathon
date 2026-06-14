@@ -5,7 +5,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const inputVariants = cva(
-  "flex w-full border transition-all file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-[var(--color-text-placeholder)] focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 autofill:bg-transparent [&:-webkit-autofill]:[transition:background-color_9999s_ease-in-out_0s] [&:-webkit-autofill]:[box-shadow:0_0_0_1000px_transparent_inset] [&:-webkit-autofill]:[text-fill-color:var(--color-text-primary)] [&:-webkit-autofill]:[-webkit-text-fill-color:var(--color-text-primary)]",
+  "flex w-full border transition-all file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-[var(--color-text-placeholder)] focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 autofill:bg-transparent [&:-webkit-autofill]:[transition:background-color_9999s_ease-in-out_0s] [&:-webkit-autofill]:[-webkit-box-shadow:0_0_0_1000px_var(--color-bg-input)_inset] [&:-webkit-autofill:hover]:[-webkit-box-shadow:0_0_0_1000px_var(--color-bg-input)_inset] [&:-webkit-autofill:focus]:[-webkit-box-shadow:0_0_0_1000px_var(--color-bg-input)_inset] [&:-webkit-autofill]:[text-fill-color:var(--color-text-primary)] [&:-webkit-autofill]:[-webkit-text-fill-color:var(--color-text-primary)]",
   {
     variants: {
       variant: {

@@ -1,6 +1,58 @@
 /** Interim first-login onboarding — replace with real flow + DB flag later. */
 
 export const WELCOME_COOKIE = "nuro_welcome_seen";
+export const PENDING_ONBOARDING_KEY = "nuro_pending_onboarding";
+/** Fresh email signup — ignore stale Privy wallet until user connects explicitly. */
+export const REQUIRE_WALLET_RELINK_KEY = "nuro_require_wallet_relink";
+
+export function markRequireWalletRelinkClient(): void {
+  if (typeof sessionStorage === "undefined") return;
+  try {
+    sessionStorage.setItem(REQUIRE_WALLET_RELINK_KEY, "1");
+  } catch {
+    /* private mode / disabled storage */
+  }
+}
+
+export function clearRequireWalletRelinkClient(): void {
+  if (typeof sessionStorage === "undefined") return;
+  try {
+    sessionStorage.removeItem(REQUIRE_WALLET_RELINK_KEY);
+  } catch {
+    /* private mode / disabled storage */
+  }
+}
+
+export function requiresWalletRelinkClient(): boolean {
+  if (typeof sessionStorage === "undefined") return false;
+  try {
+    return sessionStorage.getItem(REQUIRE_WALLET_RELINK_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+export function markPendingOnboardingClient(): void {
+  if (typeof sessionStorage === "undefined") return;
+  try {
+    sessionStorage.setItem(PENDING_ONBOARDING_KEY, "1");
+  } catch {
+    /* private mode / disabled storage */
+  }
+}
+
+export function consumePendingOnboardingClient(): boolean {
+  if (typeof sessionStorage === "undefined") return false;
+  try {
+    if (sessionStorage.getItem(PENDING_ONBOARDING_KEY) === "1") {
+      sessionStorage.removeItem(PENDING_ONBOARDING_KEY);
+      return true;
+    }
+  } catch {
+    /* private mode / disabled storage */
+  }
+  return false;
+}
 
 export function getWelcomeUserId(user: {
   id?: string;

@@ -24,11 +24,20 @@ const MOCK_DESIGN_SESSION = {
 } as const;
 
 /**
- * useAppSession - The Absolute Kernel 28 Bypass Hook
- * If DESIGN_MODE is true, it returns a mock session instantly with ZERO network overhead.
- * If DESIGN_MODE is false, it falls back to the real NextAuth session.
+ * App session hook. In dev design mode, use the real NextAuth session when
+ * the user is logged in; only fall back to the mock demo session when logged out.
  */
 export function useAppSession() {
   const nextAuthSession = useNextAuthSession();
-  return DESIGN_MODE ? (MOCK_DESIGN_SESSION as any) : nextAuthSession;
+
+  if (!DESIGN_MODE) return nextAuthSession;
+
+  if (
+    nextAuthSession.status === "authenticated" &&
+    nextAuthSession.data?.user?.email
+  ) {
+    return nextAuthSession;
+  }
+
+  return MOCK_DESIGN_SESSION as typeof nextAuthSession;
 }

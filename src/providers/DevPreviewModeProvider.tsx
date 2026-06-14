@@ -15,6 +15,7 @@ import {
   readDevPopulatedPreview,
   writeDevPopulatedPreview,
 } from "@/lib/devPreviewMode";
+import { useDemoDevSession } from "@/hooks/useDemoDevSession";
 import { restoreDemoSampleForSwitchOff } from "@/features/dashboard/overview/hooks/designSampleData";
 import { clearMyCardFirstTimeSampleData } from "@/features/dashboard/my-card-1/hooks/myCardDesignSampleData";
 
@@ -36,6 +37,7 @@ const DevPreviewModeContext = createContext<DevPreviewModeContextValue>({
 
 export function DevPreviewModeProvider({ children }: { children: ReactNode }) {
   const isDevAvailable = isDevPreviewAvailable();
+  const isDemoAccount = useDemoDevSession();
   const [populated, setPopulatedState] = useState(false);
 
   const syncFromStorage = useCallback(() => {
@@ -52,13 +54,13 @@ export function DevPreviewModeProvider({ children }: { children: ReactNode }) {
 
   const setPopulated = useCallback(
     (next: boolean) => {
-      if (!isDevAvailable) return;
+      if (!isDevAvailable || !isDemoAccount) return;
       writeDevPopulatedPreview(next);
       setPopulatedState(next);
       if (!next) clearMyCardFirstTimeSampleData();
       restoreDemoSampleForSwitchOff();
     },
-    [isDevAvailable],
+    [isDevAvailable, isDemoAccount],
   );
 
   const togglePopulated = useCallback(() => {
@@ -68,12 +70,12 @@ export function DevPreviewModeProvider({ children }: { children: ReactNode }) {
   const value = useMemo(
     () => ({
       isDevAvailable,
-      populated: isDevAvailable && populated,
-      newUserEmpty: isDevAvailable && !populated,
+      populated: isDevAvailable && isDemoAccount && populated,
+      newUserEmpty: isDevAvailable && (!isDemoAccount || !populated),
       setPopulated,
       togglePopulated,
     }),
-    [isDevAvailable, populated, setPopulated, togglePopulated],
+    [isDevAvailable, isDemoAccount, populated, setPopulated, togglePopulated],
   );
 
   return (

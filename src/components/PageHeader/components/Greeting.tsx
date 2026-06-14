@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
-import { useAppSession } from "@/hooks/useAppSession";
 import { RootState } from "@/store/store";
 import { useTranslations } from "next-intl";
-import { DEMO_USER_FULL_NAME, DEMO_USER_SHORT_NAME } from "@/config/demo-user";
+import { resolveDisplayFirstName } from "@/lib/displayName";
+import { useSessionDisplayIdentity } from "@/hooks/useSessionDisplayIdentity";
 import {
   DEFAULT_GREETING_EMOJI,
   readGreetingEmoji,
@@ -15,13 +15,12 @@ import { GreetingEmojiPicker } from "./GreetingEmojiPicker";
 
 export function Greeting() {
   const { user } = useSelector((state: RootState) => state.auth);
-  const { data: session } = useAppSession();
+  const identity = useSessionDisplayIdentity();
   const t = useTranslations();
   const [greeting, setGreeting] = useState("");
   const [emoji, setEmoji] = useState(DEFAULT_GREETING_EMOJI);
 
-  const userId =
-    user?.id || (session?.user as { id?: string } | undefined)?.id || "guest";
+  const userId = user?.id || identity.email || "guest";
 
   useEffect(() => {
     const getGreeting = () => {
@@ -38,10 +37,10 @@ export function Greeting() {
     setEmoji(readGreetingEmoji(userId));
   }, [userId]);
 
-  const fullName = (session?.user as any)?.name
-    || (user?.name && !user.name.startsWith("Nuro User") ? user.name : null);
-  const firstName =
-    fullName === DEMO_USER_FULL_NAME ? DEMO_USER_SHORT_NAME : fullName?.split(" ")[0] || "User";
+  const firstName = resolveDisplayFirstName({
+    name: identity.name,
+    email: identity.email,
+  });
 
   const handleEmojiSelect = (next: string) => {
     setEmoji(next);

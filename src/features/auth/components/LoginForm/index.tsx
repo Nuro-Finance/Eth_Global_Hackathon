@@ -13,6 +13,7 @@ import {
   LoginFormFooter,
 } from "./components";
 import SocialLoginButtons from "../SocialLoginButtons";
+import { Link } from "@/i18n/navigation";
 import { CheckCircle2 } from "lucide-react";
 import { InputOTP } from "@/components/ui/input-otp";
 
@@ -56,7 +57,6 @@ export default function LoginForm({
   onGoogleLogin,
   onAppleLogin,
   onForgotPasswordChange,
-  setIsSignUp,
   startInForgotMode,
 }: LoginFormProps) {
   const {
@@ -80,8 +80,35 @@ export default function LoginForm({
     watch,
   } = useLoginForm({ startInForgotMode });
 
+ /** Safari autofill fills DOM without firing RHF onChange — sync so isValid updates. */
+  React.useEffect(() => {
+    if (!isSignUp) return;
+    const syncAutofill = () => {
+      const emailEl = document.getElementById("username") as HTMLInputElement | null;
+      const passwordEl = document.getElementById("new-password") as HTMLInputElement | null;
+      if (emailEl?.value && emailEl.value !== form.getValues("email")) {
+        form.setValue("email", emailEl.value, { shouldValidate: true, shouldDirty: true });
+      }
+      if (passwordEl?.value && passwordEl.value !== form.getValues("password")) {
+        form.setValue("password", passwordEl.value, { shouldValidate: true, shouldDirty: true });
+      }
+    };
+    syncAutofill();
+    const interval = window.setInterval(syncAutofill, 300);
+    const stop = window.setTimeout(() => window.clearInterval(interval), 5000);
+    window.addEventListener("focus", syncAutofill);
+    return () => {
+      window.clearInterval(interval);
+      window.clearTimeout(stop);
+      window.removeEventListener("focus", syncAutofill);
+    };
+  }, [isSignUp, form]);
+
   const watchedEmail = watch("email");
   const watchedPassword = watch("password");
+  const canSubmitSignUp =
+    Boolean(watchedEmail?.includes("@")) &&
+    (watchedPassword?.length ?? 0) >= 6;
   const prevCredentialsRef = React.useRef({
     email: watchedEmail,
     password: watchedPassword,
@@ -142,7 +169,7 @@ export default function LoginForm({
   React.useEffect(() => {
     resetCredentialFieldsActivation();
     form.reset(DEFAULT_CREDENTIALS);
-  }, [isSignUp, resetCredentialFieldsActivation, form.reset]);
+  }, [isSignUp, resetCredentialFieldsActivation]);
 
  // Imperative toggle wrapper to prevent infinite re-render loops with parent
   const handleToggleForgot = React.useCallback(() => {
@@ -302,11 +329,14 @@ export default function LoginForm({
                     <form
                       onSubmit={handleSubmit(handleSubmission)}
                       className="space-y-4"
-                      autoComplete={credentialFieldsActivated ? "on" : "off"}
+                      method={isSignUp ? "post" : undefined}
+                      action={isSignUp ? "/api/auth/register" : undefined}
+                      autoComplete={isSignUp || credentialFieldsActivated ? "on" : "off"}
                     >
                       <motion.div variants={cascadeVariants}>
                         <LoginFormFields
                           register={register}
+                          control={form.control}
                           errors={errors}
                           showPassword={showPassword}
                           togglePasswordVisibility={togglePasswordVisibility}
@@ -318,7 +348,7 @@ export default function LoginForm({
                       </motion.div>
 
                       <motion.div variants={cascadeVariants}>
-                        <RememberMe control={form.control} onForgot={handleToggleForgot} />
+                        <RememberMe control={form.control} onForgot={handleToggleForgot} showForgotLink={!isSignUp} />
                       </motion.div>
 
                       <div className="space-y-4">
@@ -326,7 +356,7 @@ export default function LoginForm({
                           <SubmitButton
                             isLoading={isSignUp ? isSigningUp : isLoading}
                             isSignUp={isSignUp}
-                            isValid={isSignUp ? isValid : canSubmitSignIn}
+                            isValid={isSignUp ? canSubmitSignUp : canSubmitSignIn}
                             isSent={isSent}
                             onCountdownEnd={handleToggleForgot}
                           />
@@ -394,6 +424,7 @@ export default function LoginForm({
                       <motion.div variants={cascadeVariants} className="translate-y-[96px] z-10 relative">
                         <LoginFormFields
                           register={register}
+                          control={form.control}
                           errors={errors}
                           showPassword={false}
                           togglePasswordVisibility={() => { }}
@@ -549,6 +580,7 @@ export default function LoginForm({
                       )}>
                         <LoginFormFields
                           register={register}
+                          control={form.control}
                           errors={errors}
                           showPassword={false}
                           togglePasswordVisibility={() => { }}
@@ -633,19 +665,23 @@ export default function LoginForm({
       </motion.div>
 
       {/* Toggle Mode Button (Bottom Right) - Now integrated inside the form's grid to stay perfect 8px below the boundary */}
-      {!isForgotPassword && !isSent && !isVerifying && !isVerified && setIsSignUp && (
+      {!isForgotPassword && !isSent && !isVerifying && !isVerified && (
         <div className="absolute top-[calc(100%+8px)] right-10 z-20">
-          <button
-            type="button"
-            onClick={() => {
-              setIsSignUp?.(!isSignUp);
-              setIsSigningUp(false);
-              setIsSimulatingNetwork(false);
-            }}
-            className="text-[var(--color-primary)] text-[13px] font-medium hover:underline transition-colors focus:outline-none bg-transparent border-none p-0 shadow-none"
-          >
-            {isSignUp ? "Sign In" : "Create Account"}
-          </button>
+          {isSignUp ? (
+            <Link
+              href="/login"
+              className="text-[var(--color-primary)] text-[13px] font-medium hover:underline transition-colors focus:outline-none bg-transparent border-none p-0 shadow-none"
+            >
+              Sign In
+            </Link>
+          ) : (
+            <Link
+              href="/register"
+              className="text-[var(--color-primary)] text-[13px] font-medium hover:underline transition-colors focus:outline-none bg-transparent border-none p-0 shadow-none"
+            >
+              Create Account
+            </Link>
+          )}
         </div>
       )}
     </div>

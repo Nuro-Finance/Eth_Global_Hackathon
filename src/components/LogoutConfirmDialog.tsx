@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "@/i18n/navigation";
-import { logoutUser } from "@/store/slices/authSlice";
+import { completeAppLogout } from "@/lib/completeAppLogout";
 import type { AppDispatch } from "@/store/store";
 import { usePrivyRuntime } from "@/providers/PrivyRuntimeContext";
 
@@ -48,12 +48,7 @@ export function useLogoutWithConfirm(): {
   const handleConfirm = useCallback(async () => {
     setPending(true);
     try {
-      if (logoutPrivy) {
-        await logoutPrivy().catch((e) => {
-          console.warn("[useLogoutWithConfirm] Privy logout failed", e);
-        });
-      }
-      await dispatch(logoutUser());
+      await completeAppLogout(dispatch, { logoutPrivy: logoutPrivy ?? undefined });
       router.push("/login");
     } finally {
  // Don't reset `pending` -- by the time we get here the route is

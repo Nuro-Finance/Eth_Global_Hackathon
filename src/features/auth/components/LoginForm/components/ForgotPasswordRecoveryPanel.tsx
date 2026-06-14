@@ -161,6 +161,7 @@ export function ForgotPasswordRecoveryPanel({
               <motion.div variants={cascadeVariants} className="translate-y-[96px] z-10 relative">
                 <LoginFormFields
                   register={register}
+                  control={form.control}
                   errors={errors}
                   showPassword={showPassword}
                   togglePasswordVisibility={togglePasswordVisibility}
@@ -251,6 +252,7 @@ export function ForgotPasswordRecoveryPanel({
               <div className="translate-y-[96px] z-10 relative invisible pointer-events-none">
                 <LoginFormFields
                   register={register}
+                  control={form.control}
                   errors={errors}
                   showPassword={false}
                   togglePasswordVisibility={() => {}}

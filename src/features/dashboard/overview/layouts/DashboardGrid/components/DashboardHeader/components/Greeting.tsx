@@ -1,14 +1,14 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
-import { useAppSession } from "@/hooks/useAppSession";
 import { RootState } from "@/store/store";
 import { useTranslations } from "next-intl";
-import { DEMO_USER_FULL_NAME, DEMO_USER_SHORT_NAME } from "@/config/demo-user";
+import { resolveDisplayFirstName } from "@/lib/displayName";
+import { useSessionDisplayIdentity } from "@/hooks/useSessionDisplayIdentity";
 
 export default function Greeting() {
   const { user } = useSelector((state: RootState) => state.auth);
-  const { data: session } = useAppSession();
+  const identity = useSessionDisplayIdentity();
   const t = useTranslations();
   const [greeting, setGreeting] = useState("");
 
@@ -24,10 +24,10 @@ export default function Greeting() {
   }, [t]);
 
  // Prefer NextAuth session name, fall back to Redux — extract first name
-  const fullName = (session?.user as any)?.name
-    || (user?.name && !user.name.startsWith("Nuro User") ? user.name : null);
-  const displayName =
-    fullName === DEMO_USER_FULL_NAME ? DEMO_USER_SHORT_NAME : fullName?.split(" ")[0] || "User";
+  const displayName = resolveDisplayFirstName({
+    name: identity.name,
+    email: identity.email,
+  });
 
   return (
     <div>
