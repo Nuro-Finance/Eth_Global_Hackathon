@@ -8,7 +8,6 @@ import { Briefcase, Check, CircleHelp, Copy, LogOut, User, Wallet, X } from "luc
 import type { Country } from "react-phone-number-input";
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -209,6 +208,7 @@ export function AccountOnboardingModal({
 
   /** Block onboarding dismiss briefly after Privy closes (Radix races Privy unmount). */
   const suppressOnboardingCloseRef = useRef(false);
+  const explicitCloseRef = useRef(false);
   const privyModalOpenRef = useRef(false);
   const wasOpenRef = useRef(false);
 
@@ -248,6 +248,12 @@ export function AccountOnboardingModal({
           suppressOnboardingCloseRef.current)
       ) {
         return;
+      }
+      if (!nextOpen && step !== "complete" && !explicitCloseRef.current) {
+        return;
+      }
+      if (!nextOpen) {
+        explicitCloseRef.current = false;
       }
       if (!nextOpen && userId && step !== "complete") {
         const saved = readOnboardingProgress(userId);
@@ -346,7 +352,9 @@ export function AccountOnboardingModal({
       }
 
       try {
-        await updateSession?.({ name: trimmed });
+        window.setTimeout(() => {
+          void updateSession?.({ name: trimmed }).catch(() => {});
+        }, 0);
       } catch {
         /* session update is best-effort */
       }
@@ -664,19 +672,21 @@ export function AccountOnboardingModal({
                   style={{ width: `${progressPct}%` }}
                 />
               </div>
-              <DialogClose asChild>
-                <button
-                  type="button"
-                  className={cn(
-                    "flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] p-1.5 text-[var(--color-text-muted)] outline-none transition-all",
-                    "hover:bg-white/5 hover:text-[var(--color-text-primary)]",
-                    "focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]/25",
-                  )}
-                  aria-label="Close"
-                >
-                  <X className="h-full w-full" strokeWidth={2} />
-                </button>
-              </DialogClose>
+              <button
+                type="button"
+                className={cn(
+                  "flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] p-1.5 text-[var(--color-text-muted)] outline-none transition-all",
+                  "hover:bg-white/5 hover:text-[var(--color-text-primary)]",
+                  "focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]/25",
+                )}
+                aria-label="Close"
+                onClick={() => {
+                  explicitCloseRef.current = true;
+                  handleOpenChange(false);
+                }}
+              >
+                <X className="h-full w-full" strokeWidth={2} />
+              </button>
             </div>
           </header>
 

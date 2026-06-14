@@ -16,7 +16,7 @@ import {
   readOnboardingProgress,
   shouldShowOnboardingSetupGuide,
 } from "@/lib/account-onboarding-progress";
-import { consumePendingOnboardingClient, getWelcomeUserId } from "@/lib/welcome-onboarding";
+import { consumePendingOnboardingClient, getWelcomeUserId, ONBOARDING_MODAL_OPEN_KEY } from "@/lib/welcome-onboarding";
 import { useAppSession } from "@/hooks/useAppSession";
 import { useDemoDevSession } from "@/hooks/useDemoDevSession";
 
@@ -66,8 +66,28 @@ export function AccountOnboardingProvider({ children }: { children: ReactNode })
     if (!isDashboardHome) return;
     if (consumePendingOnboardingClient()) {
       setOpen(true);
+      return;
+    }
+    try {
+      if (sessionStorage.getItem(ONBOARDING_MODAL_OPEN_KEY) === "1") {
+        setOpen(true);
+      }
+    } catch {
+      /* private mode / disabled storage */
     }
   }, [isDashboardHome]);
+
+  useEffect(() => {
+    try {
+      if (open) {
+        sessionStorage.setItem(ONBOARDING_MODAL_OPEN_KEY, "1");
+      } else {
+        sessionStorage.removeItem(ONBOARDING_MODAL_OPEN_KEY);
+      }
+    } catch {
+      /* private mode / disabled storage */
+    }
+  }, [open]);
 
   const openOnboarding = useCallback(() => {
     setOpen(true);

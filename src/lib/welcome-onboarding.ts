@@ -2,6 +2,8 @@
 
 export const WELCOME_COOKIE = "nuro_welcome_seen";
 export const PENDING_ONBOARDING_KEY = "nuro_pending_onboarding";
+/** Keeps onboarding modal open across session refresh / layout remount. */
+export const ONBOARDING_MODAL_OPEN_KEY = "nuro_onboarding_modal_open";
 /** Fresh email signup - ignore stale Privy wallet until user connects explicitly. */
 export const REQUIRE_WALLET_RELINK_KEY = "nuro_require_wallet_relink";
 
