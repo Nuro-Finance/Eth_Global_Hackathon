@@ -20,11 +20,20 @@ export function ensParentDomain(): string {
   return "nurofi.eth";
 }
 
+export function sanitizeEnsSlugInput(raw: string): string {
+  return raw
+    .toLowerCase()
+    .replace(/[\s_]+/g, "")
+    .replace(/[^a-z0-9-]/g, "")
+    .replace(/-+/g, "-")
+    .replace(/^-+/g, "");
+}
+
 export function normalizeEnsSlug(raw: string): string {
   return raw
     .trim()
     .toLowerCase()
-    .replace(/[\s_]+/g, "-")
+    .replace(/[\s_]+/g, "")
     .replace(/[^a-z0-9-]/g, "")
     .replace(/-+/g, "-")
     .replace(/^-|-$/g, "");

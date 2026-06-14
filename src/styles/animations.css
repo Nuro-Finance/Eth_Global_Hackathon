@@ -179,6 +179,17 @@
     animation: chat-panel-confirm-content-out 0.28s cubic-bezier(0.33, 1, 0.68, 1) forwards !important;
 }
 
+/* Onboarding — synced overlay + shell; faster close than notifications full modal */
+.onboarding-modal-dialog[data-state="open"],
+.onboarding-modal-overlay[data-state="open"] {
+    animation: header-portal-modal-fade-in 0.55s ease-out forwards !important;
+}
+
+.onboarding-modal-dialog[data-state="closed"],
+.onboarding-modal-overlay[data-state="closed"] {
+    animation: header-portal-modal-fade-out 0.28s cubic-bezier(0.33, 1, 0.68, 1) forwards !important;
+}
+
 @keyframes candy-shimmer {
     0% {
         background-position: 0% 50%;

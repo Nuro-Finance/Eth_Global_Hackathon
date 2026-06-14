@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { Briefcase, CircleHelp, User, Wallet, X } from "lucide-react";
+import { Briefcase, Check, CircleHelp, User, Wallet, X } from "lucide-react";
 import type { Country } from "react-phone-number-input";
 import {
   Dialog,
@@ -15,8 +15,13 @@ import {
   COMPACT_GLASS_SHELL_OUTER_STYLE,
   FORM_MODAL_SUBMIT_BUTTON_CLASS,
   ONBOARDING_MODAL_INNER_CLASS,
+  ONBOARDING_MODAL_OVERLAY_CLASS,
   ONBOARDING_MODAL_SHELL_CLASS,
 } from "@/components/ui/modalPresets";
+import {
+  walletModalFlowLayerVariants,
+  walletModalItemCascadeVariants,
+} from "@/components/createWalletModalMotion";
 import { CountrySelect } from "@/components/country-select";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/button";
@@ -102,13 +107,23 @@ function ThemePreviewButton({
       className="flex shrink-0 flex-col items-center gap-3 border-0 bg-transparent p-0 outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]/40"
       style={{ width: THEME_PREVIEW_WIDTH }}
     >
-      <div
-        className={cn(
-          "overflow-hidden rounded-2xl",
-          selected && "ring-2 ring-[var(--color-primary)]",
-        )}
-      >
-        {variant === "light" ? <LightThemeDashboardPreview /> : <DarkThemeDashboardPreview />}
+      <div className="relative w-full shrink-0">
+        <div
+          className={cn(
+            "overflow-hidden rounded-2xl",
+            selected && "ring-2 ring-[var(--color-primary)]",
+          )}
+        >
+          {variant === "light" ? <LightThemeDashboardPreview /> : <DarkThemeDashboardPreview />}
+        </div>
+        {selected ? (
+          <span
+            className="absolute -right-2 -top-2 z-10 flex aspect-square size-5 items-center justify-center rounded-[6px] bg-[var(--color-primary)]"
+            aria-hidden
+          >
+            <Check className="size-3 text-white" strokeWidth={2.5} />
+          </span>
+        ) : null}
       </div>
       <span
         className={cn(
@@ -141,7 +156,7 @@ export function AccountOnboardingModal({ open, onOpenChange }: AccountOnboarding
     useEnsNameAvailability(ensSlug);
 
   useEffect(() => {
-    if (open) return;
+    if (!open) return;
     setStep("accountType");
     setAccountType(null);
     setDisplayName("");
@@ -153,20 +168,13 @@ export function AccountOnboardingModal({ open, onOpenChange }: AccountOnboarding
   }, [open]);
 
   const progressStep = useMemo(() => {
-    if (accountType === "personal") {
-      if (step === "accountType") return 1;
-      if (step === "welcome") return 2;
-      if (step === "ens") return 4;
-      if (step === "wallet") return 5;
-      if (step === "theme") return 6;
-      return 1;
-    }
     if (step === "accountType") return 1;
     if (step === "welcome") return 2;
-    if (step === "team") return 3;
     if (step === "ens") return 4;
+    if (step === "wallet") return 5;
+    if (step === "theme") return 6;
     return 1;
-  }, [step, accountType]);
+  }, [step]);
 
   const progressPct = (progressStep / PLANNED_STEP_COUNT) * 100;
 
@@ -182,13 +190,13 @@ export function AccountOnboardingModal({ open, onOpenChange }: AccountOnboarding
     return false;
   }, [step, accountType, displayName, teamName, country, ensSlug, ensCheckAvailability, walletConnected, themeChoice]);
 
-  const showSkip = step === "wallet" && accountType === "personal";
+  const showSkip = step === "wallet";
+  const reserveSkipSlot = step === "wallet" || step === "theme";
 
   const goBack = () => {
     if (step === "theme") setStep("wallet");
     else if (step === "wallet") setStep("ens");
     else if (step === "ens") setStep("welcome");
-    else if (step === "team") setStep("welcome");
     else if (step === "welcome") setStep("accountType");
   };
 
@@ -200,21 +208,15 @@ export function AccountOnboardingModal({ open, onOpenChange }: AccountOnboarding
       return;
     }
     if (step === "welcome") {
-      if (accountType === "personal") {
-        if (!ensSlug.trim()) {
-          setEnsSlug(normalizeEnsSlug(displayName));
-        }
-        setStep("ens");
-        return;
+      if (!ensSlug.trim()) {
+        setEnsSlug(normalizeEnsSlug(displayName));
       }
-      setStep("team");
+      setStep("ens");
       return;
     }
     if (step === "ens") {
-      if (accountType === "personal") {
-        setStep("wallet");
-        return;
-      }
+      setStep("wallet");
+      return;
     }
     if (step === "wallet") {
       setStep("theme");
@@ -232,9 +234,11 @@ export function AccountOnboardingModal({ open, onOpenChange }: AccountOnboarding
   };
 
   const goSkip = () => {
-    if (step === "wallet") {
-      setStep("theme");
+    if (step !== "wallet") return;
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
     }
+    setStep("theme");
   };
 
   const isLastStep = step === "theme";
@@ -243,7 +247,7 @@ export function AccountOnboardingModal({ open, onOpenChange }: AccountOnboarding
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         hideClose
-        overlayClassName="bg-black/30"
+        overlayClassName={ONBOARDING_MODAL_OVERLAY_CLASS}
         className={ONBOARDING_MODAL_SHELL_CLASS}
         style={COMPACT_GLASS_SHELL_OUTER_STYLE}
       >
@@ -284,22 +288,35 @@ export function AccountOnboardingModal({ open, onOpenChange }: AccountOnboarding
           </header>
 
           <div className="flex min-h-0 flex-1 flex-col justify-center px-6 py-8 sm:px-12 sm:py-10">
+            <div className="mx-auto flex w-full min-h-[min(420px,50dvh)] flex-col justify-center">
             {step === "accountType" ? (
-              <div className="mx-auto w-full max-w-3xl">
-                <div className="flex flex-col items-center text-center">
-                  <p className="-mt-2 text-[22px] font-bold leading-snug text-[var(--color-text-primary)] sm:text-[26px]">
-                    Welcome to Nuro Finance!
+              <motion.div
+                className="mx-auto w-full max-w-3xl"
+                variants={walletModalFlowLayerVariants}
+                initial="initial"
+                animate="animate"
+              >
+                <motion.p
+                  className="-mt-2 text-center text-[22px] font-bold leading-snug text-[var(--color-text-primary)] sm:text-[26px]"
+                  variants={walletModalItemCascadeVariants}
+                >
+                  Welcome to Nuro Finance!
+                </motion.p>
+                <motion.div
+                  className="mt-8 flex flex-col items-center gap-2 text-center"
+                  variants={walletModalItemCascadeVariants}
+                >
+                  <DialogTitle className="text-[22px] font-normal leading-snug text-[var(--color-text-primary)] sm:text-[26px]">
+                    Choose your account type
+                  </DialogTitle>
+                  <p className={cn(ONBOARDING_COPY_CLASS, "text-sm text-[var(--color-text-muted)]")}>
+                    We&apos;ll help tailor your onboarding
                   </p>
-                  <div className="mt-8 flex flex-col items-center gap-2">
-                    <DialogTitle className="text-[22px] font-normal leading-snug text-[var(--color-text-primary)] sm:text-[26px]">
-                      Choose your account type
-                    </DialogTitle>
-                    <p className={cn(ONBOARDING_COPY_CLASS, "text-sm text-[var(--color-text-muted)]")}>
-                      We&apos;ll help tailor your onboarding
-                    </p>
-                  </div>
-                </div>
-                <div className="mt-8 flex flex-wrap justify-center gap-4">
+                </motion.div>
+                <motion.div
+                  className="mt-8 flex flex-wrap justify-center gap-4"
+                  variants={walletModalItemCascadeVariants}
+                >
                   {ACCOUNT_TYPE_OPTIONS.map(({ id, title, description, icon: Icon }) => {
                     const selected = accountType === id;
                     return (
@@ -349,21 +366,28 @@ export function AccountOnboardingModal({ open, onOpenChange }: AccountOnboarding
                       </button>
                     );
                   })}
-                </div>
-              </div>
+                </motion.div>
+              </motion.div>
             ) : null}
 
             {step === "welcome" ? (
-              <div className="mx-auto w-full max-w-xl">
-                <DialogTitle className="mx-auto max-w-xl text-center text-[22px] font-normal leading-snug text-[var(--color-text-primary)] sm:text-[26px]">
-                  <span className="font-semibold text-[var(--color-primary)]">Welcome to Nuro.</span>{" "}
-                  Tell us a bit about
-                  <br />
-                  {accountType === "business" ? "your business" : "yourself"} and we&apos;ll set things up
-                </DialogTitle>
+              <motion.div
+                className="mx-auto w-full max-w-xl"
+                variants={walletModalFlowLayerVariants}
+                initial="initial"
+                animate="animate"
+              >
+                <motion.div variants={walletModalItemCascadeVariants}>
+                  <DialogTitle className="mx-auto max-w-xl text-center text-[22px] font-normal leading-snug text-[var(--color-text-primary)] sm:text-[26px]">
+                    <span className="font-semibold text-[var(--color-primary)]">Welcome to Nuro.</span>{" "}
+                    Tell us a bit about
+                    <br />
+                    {accountType === "business" ? "your business" : "yourself"} and we&apos;ll set things up
+                  </DialogTitle>
+                </motion.div>
 
                 <div className="mx-auto mt-10 max-w-sm space-y-8">
-                  <div>
+                  <motion.div variants={walletModalItemCascadeVariants}>
                     <label
                       htmlFor="onboarding-name"
                       className="mb-2 block text-sm font-medium text-[var(--color-text-secondary)]"
@@ -399,9 +423,9 @@ export function AccountOnboardingModal({ open, onOpenChange }: AccountOnboarding
                         />
                       </div>
                     </div>
-                  </div>
+                  </motion.div>
 
-                  <div>
+                  <motion.div variants={walletModalItemCascadeVariants}>
                     <div className="mb-2 flex items-center gap-1.5">
                       <label
                         htmlFor="onboarding-country"
@@ -422,31 +446,44 @@ export function AccountOnboardingModal({ open, onOpenChange }: AccountOnboarding
                       placeholder="Select country"
                       className={cn("backdrop-blur-none", ONBOARDING_COUNTRY_SELECT_CLASS)}
                     />
-                  </div>
+                  </motion.div>
                 </div>
-              </div>
+              </motion.div>
             ) : null}
 
             {step === "ens" ? (
-              <div className="relative mx-auto w-full max-w-xl">
-                <div className="absolute bottom-[calc(100%+1rem)] left-1/2 flex -translate-x-1/2 flex-col items-center">
+              <motion.div
+                className="relative mx-auto w-full max-w-xl"
+                variants={walletModalFlowLayerVariants}
+                initial="initial"
+                animate="animate"
+              >
+                <motion.div
+                  className="absolute bottom-[calc(100%+1rem)] left-1/2 flex -translate-x-1/2 flex-col items-center"
+                  variants={walletModalItemCascadeVariants}
+                >
                   <img
                     src="/ens-logo-Blue.svg"
                     alt="ENS"
                     className="h-10 w-auto brightness-0 invert sm:h-11"
                   />
-                </div>
-                <DialogTitle className="mx-auto max-w-xl text-center text-[22px] font-normal leading-snug text-[var(--color-text-primary)] sm:text-[26px]">
-                  <span className="inline font-semibold text-[var(--color-primary)]">
-                    Choose your ETH username.
-                  </span>
-                  <br />
-                  <span className="inline font-normal text-[var(--color-text-primary)]">
-                    You can use this for easy deposits.
-                  </span>
-                </DialogTitle>
+                </motion.div>
+                <motion.div variants={walletModalItemCascadeVariants}>
+                  <DialogTitle className="mx-auto max-w-xl text-center text-[22px] font-normal leading-snug text-[var(--color-text-primary)] sm:text-[26px]">
+                    <span className="inline font-semibold text-[var(--color-primary)]">
+                      Choose your ETH username.
+                    </span>
+                    <br />
+                    <span className="inline font-normal text-[var(--color-text-primary)]">
+                      You can use this for easy deposits.
+                    </span>
+                  </DialogTitle>
+                </motion.div>
 
-                <div className="mx-auto mt-10 max-w-sm space-y-8">
+                <motion.div
+                  className="mx-auto mt-10 max-w-sm space-y-8"
+                  variants={walletModalItemCascadeVariants}
+                >
                   <div>
                     <EnsUsernameField slug={ensSlug} onSlugChange={setEnsSlug} />
                     <EnsAvailabilityPanel
@@ -455,23 +492,30 @@ export function AccountOnboardingModal({ open, onOpenChange }: AccountOnboarding
                       availabilityError={ensCheckError}
                     />
                   </div>
-                </div>
-              </div>
+                </motion.div>
+              </motion.div>
             ) : null}
 
             {step === "wallet" ? (
-              <div className="mx-auto w-fit max-w-xl">
-                <DialogTitle className="text-center text-[22px] font-normal leading-snug text-[var(--color-text-primary)] sm:text-[26px]">
-                  <span className="inline font-semibold text-[var(--color-primary)]">
-                    Connect your wallet.
-                  </span>
-                  <br />
-                  <span className="inline font-normal text-[var(--color-text-primary)]">
-                    Nuro is a web3 app
-                  </span>
-                </DialogTitle>
+              <motion.div
+                className="mx-auto w-fit max-w-xl"
+                variants={walletModalFlowLayerVariants}
+                initial="initial"
+                animate="animate"
+              >
+                <motion.div variants={walletModalItemCascadeVariants}>
+                  <DialogTitle className="text-center text-[22px] font-normal leading-snug text-[var(--color-text-primary)] sm:text-[26px]">
+                    <span className="inline font-semibold text-[var(--color-primary)]">
+                      Connect your wallet.
+                    </span>
+                    <br />
+                    <span className="inline font-normal text-[var(--color-text-primary)]">
+                      Nuro is a web3 app
+                    </span>
+                  </DialogTitle>
+                </motion.div>
 
-                <div className="mt-10">
+                <motion.div className="mt-10" variants={walletModalItemCascadeVariants}>
                   <Button
                     type="button"
                     className={cn(
@@ -485,21 +529,32 @@ export function AccountOnboardingModal({ open, onOpenChange }: AccountOnboarding
                     <Wallet className="size-6" strokeWidth={2} />
                     Connect Wallet
                   </Button>
-                </div>
-              </div>
+                </motion.div>
+              </motion.div>
             ) : null}
 
             {step === "theme" ? (
-              <div className="mx-auto w-full max-w-3xl">
-                <div className="flex flex-col items-center gap-2 text-center">
+              <motion.div
+                className="mx-auto w-full max-w-3xl"
+                variants={walletModalFlowLayerVariants}
+                initial="initial"
+                animate="animate"
+              >
+                <motion.div
+                  className="flex flex-col items-center gap-2 text-center"
+                  variants={walletModalItemCascadeVariants}
+                >
                   <DialogTitle className="text-[22px] font-normal leading-snug text-[var(--color-text-primary)] sm:text-[26px]">
                     <span className="font-semibold text-[var(--color-primary)]">Choose your theme</span>
                   </DialogTitle>
                   <p className={cn(ONBOARDING_COPY_CLASS, "text-sm text-[var(--color-text-muted)]")}>
                     You can change this later
                   </p>
-                </div>
-                <div className="mt-8 flex flex-wrap justify-center gap-8">
+                </motion.div>
+                <motion.div
+                  className="mt-8 flex flex-wrap justify-center gap-8"
+                  variants={walletModalItemCascadeVariants}
+                >
                   {THEME_OPTIONS.map(({ id, title }) => (
                     <ThemePreviewButton
                       key={id}
@@ -509,29 +564,37 @@ export function AccountOnboardingModal({ open, onOpenChange }: AccountOnboarding
                       onSelect={() => setThemeChoice(id)}
                     />
                   ))}
-                </div>
-              </div>
+                </motion.div>
+              </motion.div>
             ) : null}
 
             {step === "team" ? (
-              <div className="mx-auto flex w-full max-w-md flex-col items-center text-center">
-                <DialogTitle
-                  className={cn(
-                    ONBOARDING_COPY_CLASS,
-                    "text-[22px] font-normal leading-none text-[var(--color-text-primary)] sm:text-[26px]",
-                  )}
-                >
-                  What&apos;s your team or business called?
-                </DialogTitle>
-                <p
+              <motion.div
+                className="mx-auto flex w-full max-w-md flex-col items-center text-center"
+                variants={walletModalFlowLayerVariants}
+                initial="initial"
+                animate="animate"
+              >
+                <motion.div variants={walletModalItemCascadeVariants}>
+                  <DialogTitle
+                    className={cn(
+                      ONBOARDING_COPY_CLASS,
+                      "text-[22px] font-normal leading-none text-[var(--color-text-primary)] sm:text-[26px]",
+                    )}
+                  >
+                    What&apos;s your team or business called?
+                  </DialogTitle>
+                </motion.div>
+                <motion.p
                   className={cn(
                     ONBOARDING_COPY_CLASS,
                     "mt-3 text-sm leading-none text-[var(--color-text-muted)]",
                   )}
+                  variants={walletModalItemCascadeVariants}
                 >
                   Used for your workspace and ENS business identity later in setup.
-                </p>
-                <div className="mt-8 w-full">
+                </motion.p>
+                <motion.div className="mt-8 w-full" variants={walletModalItemCascadeVariants}>
                   <Input
                     label="Team name"
                     placeholder="Bob's Burgers"
@@ -539,10 +602,11 @@ export function AccountOnboardingModal({ open, onOpenChange }: AccountOnboarding
                     value={teamName}
                     onChange={(e) => setTeamName(e.target.value)}
                   />
-                </div>
-              </div>
+                </motion.div>
+              </motion.div>
             ) : null}
 
+            </div>
           </div>
 
           <footer className="flex shrink-0 items-center justify-between gap-3 px-6 py-4 sm:px-8">
@@ -564,13 +628,16 @@ export function AccountOnboardingModal({ open, onOpenChange }: AccountOnboarding
               </span>
             )}
             <div className="ml-auto flex items-center gap-3">
-              {showSkip ? (
+              {reserveSkipSlot ? (
                 <button
                   type="button"
                   className={cn(
                     ONBOARDING_FOOTER_ACTION_CLASS,
                     "text-[var(--color-text-muted)] transition-none hover:bg-white/[0.04] hover:text-[var(--color-text-primary)] focus-visible:outline-none active:bg-transparent",
+                    !showSkip && "pointer-events-none invisible",
                   )}
+                  aria-hidden={!showSkip}
+                  tabIndex={showSkip ? 0 : -1}
                   onMouseDown={(event) => event.preventDefault()}
                   onClick={goSkip}
                 >
@@ -579,7 +646,11 @@ export function AccountOnboardingModal({ open, onOpenChange }: AccountOnboarding
               ) : null}
               <Button
                 type="button"
-                className={cn(FORM_MODAL_SUBMIT_BUTTON_CLASS, ONBOARDING_FOOTER_ACTION_CLASS)}
+                className={cn(
+                  FORM_MODAL_SUBMIT_BUTTON_CLASS,
+                  ONBOARDING_FOOTER_ACTION_CLASS,
+                  "transition-none",
+                )}
                 disabled={!canContinue}
                 onClick={goNext}
               >

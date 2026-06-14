@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Check, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { ensParentDomain, normalizeEnsSlug, validateEnsSlug } from "@/lib/ens/slug";
+import { ensParentDomain, normalizeEnsSlug, sanitizeEnsSlugInput, validateEnsSlug } from "@/lib/ens/slug";
 import { useDebounce } from "@/features/ens/hooks/useDebounce";
 
 export type EnsAvailability = "idle" | "checking" | "available" | "taken";
@@ -97,7 +97,7 @@ export function EnsUsernameField({
             spellCheck={false}
             placeholder="yourname"
             value={slug}
-            onChange={(e) => onSlugChange(e.target.value)}
+            onChange={(e) => onSlugChange(sanitizeEnsSlugInput(e.target.value))}
             className="min-w-0 flex-1 bg-transparent text-sm text-[var(--color-text-primary)] outline-none placeholder:text-[var(--color-text-muted)]"
           />
           <span className="shrink-0 text-sm text-[var(--color-text-muted)]">.{parent}</span>
