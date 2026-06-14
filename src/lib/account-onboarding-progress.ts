@@ -11,6 +11,7 @@ export type OnboardingCompletedStepKey =
   | "welcome"
   | "ens"
   | "wallet"
+  | "ensBind"
   | "theme";
 
 export type StoredOnboardingProgress = {
@@ -27,6 +28,8 @@ export type StoredOnboardingProgress = {
     themeChoice: OnboardingTheme | null;
     walletAddress?: string;
     walletConnected?: boolean;
+    ensWalletBound?: boolean;
+    ensBindSkipped?: boolean;
   };
 };
 
@@ -110,6 +113,8 @@ export function createDefaultOnboardingProgress(
       themeChoice: null,
       walletAddress: "",
       walletConnected: false,
+      ensWalletBound: false,
+      ensBindSkipped: false,
     },
   };
 }

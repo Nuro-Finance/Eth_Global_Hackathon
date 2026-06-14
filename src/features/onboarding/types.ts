@@ -8,6 +8,7 @@ export type AccountOnboardingStep =
   | "team"
   | "ens"
   | "wallet"
+  | "ensBind"
   | "theme"
   | "complete";
 

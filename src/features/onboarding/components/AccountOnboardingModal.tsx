@@ -35,7 +35,7 @@ import {
   EnsUsernameField,
   useEnsNameAvailability,
 } from "./EnsNameOnboardingStep";
-import { normalizeEnsSlug } from "@/lib/ens/slug";
+import { normalizeEnsSlug, ensParentDomain } from "@/lib/ens/slug";
 import { usePrivyRuntime } from "@/providers/PrivyRuntimeContext";
 import { DESIGN_MODE } from "@/config/design-mode";
 import Dropdown from "@/components/dropdown";
@@ -60,8 +60,8 @@ const ONBOARDING_EXTERNAL_WALLET_LIST = [
   "wallet_connect",
 ] as const;
 
-/** Planned full flow length - progress bar only (ENS, wallet, theme later). */
-const PLANNED_STEP_COUNT = 7;
+/** Planned full flow length - progress bar only (ENS, wallet, bind, theme later). */
+const PLANNED_STEP_COUNT = 8;
 
 const ACCOUNT_TYPE_OPTIONS: {
   id: AccountType;
@@ -184,10 +184,16 @@ export function AccountOnboardingModal({
   const [ensSlug, setEnsSlug] = useState("");
   const [walletAddress, setWalletAddress] = useState("");
   const [walletConnected, setWalletConnected] = useState(false);
+  const [ensWalletBound, setEnsWalletBound] = useState(false);
+  const [ensBindSkipped, setEnsBindSkipped] = useState(false);
+  const [ensBinding, setEnsBinding] = useState(false);
+  const [ensBindError, setEnsBindError] = useState<string | null>(null);
+  const pendingEnsBindAdvanceRef = useRef(false);
   const markWalletConnected = useCallback((address: string) => {
     clearRequireWalletRelinkClient();
     setWalletAddress(address);
     setWalletConnected(true);
+    pendingEnsBindAdvanceRef.current = true;
   }, []);
   const markWalletDisconnected = useCallback(() => {
     setWalletAddress("");
@@ -216,6 +222,8 @@ export function AccountOnboardingModal({
       themeChoice,
       walletAddress,
       walletConnected,
+      ensWalletBound,
+      ensBindSkipped,
     }),
     [
       accountType,
@@ -226,6 +234,8 @@ export function AccountOnboardingModal({
       themeChoice,
       walletAddress,
       walletConnected,
+      ensWalletBound,
+      ensBindSkipped,
     ],
   );
 
@@ -355,8 +365,18 @@ export function AccountOnboardingModal({
         setEnsSlug(saved.draft.ensSlug);
         setWalletAddress(saved.draft.walletAddress ?? "");
         setWalletConnected(saved.draft.walletConnected ?? false);
+        setEnsWalletBound(saved.draft.ensWalletBound ?? false);
+        setEnsBindSkipped(saved.draft.ensBindSkipped ?? false);
         setThemeChoice(saved.draft.themeChoice);
         setCountry((saved.draft.country as Country | undefined) ?? "US");
+        if (
+          saved.currentStep === "wallet" &&
+          (saved.draft.walletConnected ?? false) &&
+          !(saved.draft.ensBindSkipped ?? false) &&
+          !(saved.draft.ensWalletBound ?? false)
+        ) {
+          setStep("ensBind");
+        }
       } else {
         setStep("accountType");
         setAccountType(null);
@@ -365,14 +385,26 @@ export function AccountOnboardingModal({
         setEnsSlug("");
         setWalletAddress("");
         setWalletConnected(false);
+        setEnsWalletBound(false);
+        setEnsBindSkipped(false);
         setThemeChoice(null);
         setCountry("US");
       }
       setEnsClaimError(null);
+      setEnsBindError(null);
       ensClaimStartedRef.current = false;
     }
     wasOpenRef.current = open;
   }, [open, userId]);
+
+  useEffect(() => {
+    if (!pendingEnsBindAdvanceRef.current || step !== "wallet" || !walletConnected || !walletAddress) {
+      return;
+    }
+    pendingEnsBindAdvanceRef.current = false;
+    persistProgress({ currentStep: "ensBind", draft: buildDraftSnapshot() });
+    setStep("ensBind");
+  }, [step, walletConnected, walletAddress, persistProgress, buildDraftSnapshot]);
 
   useEffect(() => {
     if (step !== "complete" || ensClaimStartedRef.current) return;
@@ -392,7 +424,7 @@ export function AccountOnboardingModal({
             kind: "business",
             slug,
             visibility: "public",
-            ...(walletAddress ? { address: walletAddress } : {}),
+            ...(ensWalletBound && walletAddress ? { address: walletAddress } : {}),
           }),
         });
         if (!res.ok) {
@@ -403,15 +435,22 @@ export function AccountOnboardingModal({
         setEnsClaimError("Claim failed");
       }
     })();
-  }, [step, ensSlug, walletAddress]);
+  }, [step, ensSlug, walletAddress, ensWalletBound]);
+
+  const fullEnsName = useMemo(() => {
+    const slug = normalizeEnsSlug(ensSlug);
+    if (slug.length < 2) return "";
+    return `${slug}.${ensParentDomain()}`;
+  }, [ensSlug]);
 
   const progressStep = useMemo(() => {
     if (step === "accountType") return 1;
     if (step === "welcome") return 2;
     if (step === "ens") return 4;
     if (step === "wallet") return 5;
-    if (step === "theme") return 6;
-    if (step === "complete") return 7;
+    if (step === "ensBind") return 6;
+    if (step === "theme") return 7;
+    if (step === "complete") return 8;
     return 1;
   }, [step]);
 
@@ -425,16 +464,54 @@ export function AccountOnboardingModal({
       return ensCheckAvailability === "available" && normalizeEnsSlug(ensSlug).length >= 2;
     }
     if (step === "wallet") return walletConnected;
+    if (step === "ensBind") return walletConnected && Boolean(walletAddress) && !ensBinding;
     if (step === "theme") return themeChoice !== null;
     return false;
-  }, [step, accountType, displayName, teamName, country, ensSlug, ensCheckAvailability, walletConnected, themeChoice]);
+  }, [step, accountType, displayName, teamName, country, ensSlug, ensCheckAvailability, walletConnected, walletAddress, ensBinding, themeChoice]);
 
-  const showSkip = step === "wallet";
-  const reserveSkipSlot = step === "wallet" || step === "theme";
+  const showSkip = step === "wallet" || step === "ensBind";
+  const reserveSkipSlot = step === "wallet" || step === "ensBind" || step === "theme";
+  const primaryActionLabel = step === "ensBind" ? "Link wallet" : "Next";
+
+  const bindEnsToWallet = useCallback(async (): Promise<boolean> => {
+    const slug = normalizeEnsSlug(ensSlug);
+    if (slug.length < 2 || !walletAddress) return false;
+
+    setEnsBinding(true);
+    setEnsBindError(null);
+    try {
+      const res = await fetch("/api/ens/claim", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          kind: "business",
+          slug,
+          visibility: "public",
+          address: walletAddress,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setEnsBindError(typeof data.error === "string" ? data.error : "Could not link wallet");
+        return false;
+      }
+      setEnsWalletBound(true);
+      setEnsBindSkipped(false);
+      return true;
+    } catch {
+      setEnsBindError("Could not link wallet");
+      return false;
+    } finally {
+      setEnsBinding(false);
+    }
+  }, [ensSlug, walletAddress]);
 
   const goBack = () => {
     let prevStep: AccountOnboardingStep = "accountType";
-    if (step === "theme") prevStep = "wallet";
+    if (step === "theme") {
+      prevStep = walletConnected && !ensBindSkipped ? "ensBind" : "wallet";
+    } else if (step === "ensBind") prevStep = "wallet";
     else if (step === "wallet") prevStep = "ens";
     else if (step === "ens") prevStep = "welcome";
     else if (step === "welcome") prevStep = "accountType";
@@ -471,8 +548,23 @@ export function AccountOnboardingModal({
     }
     if (step === "wallet") {
       markStepComplete("wallet");
-      persistProgress({ currentStep: "theme", draft: buildDraftSnapshot() });
-      setStep("theme");
+      if (walletConnected) {
+        persistProgress({ currentStep: "ensBind", draft: buildDraftSnapshot() });
+        setStep("ensBind");
+      }
+      return;
+    }
+    if (step === "ensBind") {
+      void (async () => {
+        const linked = await bindEnsToWallet();
+        if (!linked) return;
+        markStepComplete("ensBind");
+        persistProgress({
+          currentStep: "theme",
+          draft: { ...buildDraftSnapshot(), ensWalletBound: true, ensBindSkipped: false },
+        });
+        setStep("theme");
+      })();
       return;
     }
     if (step === "theme") {
@@ -493,15 +585,30 @@ export function AccountOnboardingModal({
   };
 
   const goSkip = () => {
-    if (step !== "wallet") return;
+    if (step === "wallet") {
+      if (document.activeElement instanceof HTMLElement) {
+        document.activeElement.blur();
+      }
+      persistProgress({
+        currentStep: "theme",
+        walletSkipped: true,
+        completedSteps: { wallet: true },
+        draft: buildDraftSnapshot(),
+      });
+      onProgressChange?.();
+      setStep("theme");
+      return;
+    }
+    if (step !== "ensBind") return;
     if (document.activeElement instanceof HTMLElement) {
       document.activeElement.blur();
     }
+    setEnsBindSkipped(true);
+    setEnsWalletBound(false);
+    markStepComplete("ensBind");
     persistProgress({
       currentStep: "theme",
-      walletSkipped: true,
-      completedSteps: { wallet: true },
-      draft: buildDraftSnapshot(),
+      draft: { ...buildDraftSnapshot(), ensBindSkipped: true, ensWalletBound: false },
     });
     onProgressChange?.();
     setStep("theme");
@@ -824,6 +931,70 @@ export function AccountOnboardingModal({
               </motion.div>
             ) : null}
 
+            {step === "ensBind" ? (
+              <motion.div
+                className="mx-auto w-full max-w-xl"
+                variants={walletModalFlowLayerVariants}
+                initial="initial"
+                animate="animate"
+              >
+                <motion.div variants={walletModalItemCascadeVariants}>
+                  <DialogTitle className="text-center text-[22px] font-normal leading-snug text-[var(--color-text-primary)] sm:text-[26px]">
+                    <span className="inline font-semibold text-[var(--color-text-primary)]">
+                      Link wallet to your ENS name
+                    </span>
+                  </DialogTitle>
+                  <p className="mt-2 text-center text-sm text-[var(--color-text-muted)]">
+                    You can change this later in settings
+                  </p>
+                </motion.div>
+
+                <motion.div
+                  className="mx-auto mt-10 flex max-w-md flex-col items-center gap-6"
+                  variants={walletModalItemCascadeVariants}
+                >
+                  <div className="flex w-full flex-col items-center gap-2 text-center">
+                    <p className="text-xs font-medium uppercase tracking-wide text-[var(--color-text-muted)]">
+                      Your ENS name
+                    </p>
+                    <p className="break-all text-[28px] font-semibold leading-tight text-[var(--color-primary)] sm:text-[32px]">
+                      {fullEnsName}
+                    </p>
+                  </div>
+
+                  <div className="flex flex-col items-center gap-3">
+                    <div className="relative inline-flex">
+                      <div
+                        className={cn(
+                          ONBOARDING_INPUT_CLASS,
+                          "inline-flex h-11 w-fit max-w-full items-center px-3 font-mono text-sm whitespace-nowrap text-[var(--color-text-primary)]",
+                        )}
+                      >
+                        {walletAddress}
+                      </div>
+                      <span
+                        className="absolute -right-2 -top-2 z-10 flex aspect-square size-5 items-center justify-center rounded-[6px] bg-[var(--color-success)]"
+                        aria-label="Connected"
+                      >
+                        <Check className="size-3 text-white" strokeWidth={2.5} />
+                      </span>
+                    </div>
+
+                    <p className="max-w-sm text-center text-sm leading-relaxed text-[var(--color-text-muted)]">
+                      Linking points your ENS name at the connected wallet
+                      <br />
+                      so anyone can send funds to{" "}
+                      <span className="text-[var(--color-text-secondary)]">{fullEnsName}</span>.
+                    </p>
+                  </div>
+
+                  {ensBindError ? (
+                    <p className="text-sm text-[var(--color-danger)]">{ensBindError}</p>
+                  ) : null}
+                </motion.div>
+              </motion.div>
+            ) : null}
+
             {step === "theme" ? (
               <motion.div
                 className="mx-auto w-full max-w-3xl"
@@ -998,7 +1169,7 @@ export function AccountOnboardingModal({
                 disabled={!canContinue}
                 onClick={goNext}
               >
-                Next
+                {primaryActionLabel}
               </Button>
             </div>
           </footer>
