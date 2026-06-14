@@ -4,12 +4,9 @@ export const metadata: Metadata = {
   title: "Nuro",
   description: "Nuro Dashboard",
   icons: {
-    icon: [
-      { url: "/favicon.ico?v=nuro", sizes: "any" },
-      { url: "/favicon-32.png?v=nuro", type: "image/png", sizes: "32x32" },
-    ],
-    shortcut: "/favicon.ico?v=nuro",
-    apple: [{ url: "/favicon-32.png", type: "image/png" }],
+    icon: [{ url: "/nuro-logo-black.svg", type: "image/svg+xml" }],
+    shortcut: "/nuro-logo-black.svg",
+    apple: [{ url: "/nuro-logo-black.svg", type: "image/svg+xml" }],
   },
 };
 

@@ -26,6 +26,7 @@ const SidebarLogo = memo<SidebarLogoProps>(function SidebarLogo({
           src="/assets/images/icons/logo.svg"
           alt="Logo"
           fill
+          priority
           className="object-contain dark:brightness-100 brightness-50"
         />
       </div>

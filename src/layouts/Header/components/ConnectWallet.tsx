@@ -143,26 +143,7 @@ function ConnectWalletPrivy({
   const { wallets } = useWallets();
   const pendingConnectRef = useRef(false);
   const userInitiatedConnectRef = useRef(false);
-  const [suppressStaleWallet, setSuppressStaleWallet] = useState(() =>
-    shouldSuppressWalletForSession(undefined, null),
-  );
 
-  useEffect(() => {
-    setSuppressStaleWallet(
-      shouldSuppressWalletForSession(session?.user?.email ?? undefined, user),
-    );
-  }, [session?.user?.email, user]);
-
- // Day-6: prefer external wallets (MetaMask/Rabby/Coinbase/etc.) over
- // the Privy-auto-created embedded wallet.
- //
- // Day-7 fix: previously, when there was NO external wallet, the
- // fallback `wallets[0]` would grab the embedded wallet anyway, so a
- // brand-new email-only signup saw a phantom 0xe798... address in the
- // header even though they never connected a wallet. Now we filter
- // out embedded from BOTH the wallets[] array and the linkedAccounts
- // fallback. If nothing external is connected, address stays empty
- // and the pill renders "Connect Wallet" CTA.
   const externalWallet = wallets.find(
     (w) => String((w as { connectorType?: string }).connectorType || "") !== "embedded",
   );
@@ -175,9 +156,19 @@ function ConnectWalletPrivy({
   )?.address as string | undefined) || "";
 
   const resolvedAddress = externalWallet?.address ?? externalLinkedWalletAddress ?? "";
+  const hasExternalWallet = Boolean(resolvedAddress);
+
+  const suppressStaleWallet = shouldSuppressWalletForSession(
+    session?.user?.email ?? undefined,
+    user,
+  );
+
+  useEffect(() => {
+    if (hasExternalWallet) clearRequireWalletRelinkClient();
+  }, [hasExternalWallet]);
 
   const address =
-    authenticated && !suppressStaleWallet ? (resolvedAddress || "") : "";
+    authenticated && !suppressStaleWallet ? resolvedAddress : "";
 
   const runConnect = useCallback(() => {
     if (!ready) {
@@ -214,7 +205,6 @@ function ConnectWalletPrivy({
     if (!userInitiatedConnectRef.current || !resolvedAddress) return;
     userInitiatedConnectRef.current = false;
     clearRequireWalletRelinkClient();
-    setSuppressStaleWallet(false);
   }, [resolvedAddress]);
 
   const handleConnect = () => {
@@ -253,7 +243,6 @@ function ConnectWalletPrivy({
       icon: <LogOut className="h-4 w-4" />,
       onClick: () => {
         clearRequireWalletRelinkClient();
-        setSuppressStaleWallet(false);
         void logout().catch(() => {});
       },
       variant: "danger",

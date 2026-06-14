@@ -226,8 +226,6 @@ export function useLogin() {
             });
             markPendingOnboardingClient();
             markRequireWalletRelinkClient();
-            setPendingVerification(null);
-            setIsLoading(false);
             router.push("/dashboard");
             return "SUCCESS";
         } catch (err) {

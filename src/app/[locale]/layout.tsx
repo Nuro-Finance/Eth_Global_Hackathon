@@ -33,12 +33,9 @@ export function generateStaticParams() {
 
 export const metadata: Metadata = {
   icons: {
-    icon: [
-      { url: "/favicon.ico?v=nuro", sizes: "any" },
-      { url: "/favicon-32.png?v=nuro", type: "image/png", sizes: "32x32" },
-    ],
-    shortcut: "/favicon.ico?v=nuro",
-    apple: [{ url: "/favicon-32.png", type: "image/png" }],
+    icon: [{ url: "/nuro-logo-black.svg", type: "image/svg+xml" }],
+    shortcut: "/nuro-logo-black.svg",
+    apple: [{ url: "/nuro-logo-black.svg", type: "image/svg+xml" }],
   },
   other: {
     "grammarly-disable-extension": "true",
@@ -66,6 +63,11 @@ export default async function LocaleLayout({
       dir={locale === "ar" ? "rtl" : "ltr"}
       suppressHydrationWarning
     >
+      <head>
+        <link rel="preload" href="/Nuro Horizontal Logo.svg" as="image" type="image/svg+xml" />
+        <link rel="preload" href="/nuro-logo-black.svg" as="image" type="image/svg+xml" />
+        <link rel="preload" href="/assets/images/icons/logo.svg" as="image" type="image/svg+xml" />
+      </head>
       <body
         className={`antialiased bg-transparent ${inter.variable} ${notoSansArabic.variable} font-sans overflow-x-hidden`}
         suppressHydrationWarning

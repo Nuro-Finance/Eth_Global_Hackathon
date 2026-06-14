@@ -40,13 +40,7 @@ import { DESIGN_MODE } from "@/config/design-mode";
 import Dropdown from "@/components/dropdown";
 import { useRouter } from "@/i18n/navigation";
 import { OnboardingConfettiBurst } from "./OnboardingConfettiBurst";
-import {
-  createDefaultOnboardingProgress,
-  readOnboardingProgress,
-  writeOnboardingProgress,
-  type OnboardingCompletedStepKey,
-  type StoredOnboardingProgress,
-} from "@/lib/account-onboarding-progress";
+import { clearRequireWalletRelinkClient } from "@/lib/welcome-onboarding";
 
 const ONBOARDING_EXTERNAL_WALLET_LIST = [
   "detected_ethereum_wallets",
@@ -178,6 +172,7 @@ export function AccountOnboardingModal({
   const [walletAddress, setWalletAddress] = useState("");
   const [walletConnected, setWalletConnected] = useState(false);
   const markWalletConnected = useCallback((address: string) => {
+    clearRequireWalletRelinkClient();
     setWalletAddress(address);
     setWalletConnected(true);
   }, []);
@@ -506,6 +501,10 @@ export function AccountOnboardingModal({
             <img
               src="/Nuro Horizontal Logo.svg"
               alt="Nuro Finance"
+              width={120}
+              height={24}
+              fetchPriority="high"
+              decoding="sync"
               className="h-6 w-auto"
             />
             <div className="flex items-center gap-3">
@@ -830,14 +829,22 @@ export function AccountOnboardingModal({
                 >
                   <div className="flex items-center justify-center gap-3">
                     <img
-                      src="/Nuro Fav Icon 1x1.png"
+                      src="/nuro-logo-black.svg"
                       alt=""
                       aria-hidden
-                      className="h-12 w-12 shrink-0 rounded-[12px]"
+                      width={48}
+                      height={48}
+                      fetchPriority="high"
+                      decoding="sync"
+                      className="h-12 w-12 shrink-0 rounded-[12px] bg-white p-2"
                     />
                     <img
                       src="/card-svg/nuro-word-mark.svg"
                       alt="nuro"
+                      width={80}
+                      height={24}
+                      fetchPriority="high"
+                      decoding="sync"
                       className="h-6 w-auto shrink-0 brightness-0 invert"
                     />
                   </div>

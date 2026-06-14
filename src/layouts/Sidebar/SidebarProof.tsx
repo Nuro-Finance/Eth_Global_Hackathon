@@ -206,6 +206,10 @@ export default function SidebarProof({
             <img
               src="/Nuro Horizontal Logo.svg"
               alt="Nuro Finance"
+              width={120}
+              height={18}
+              fetchPriority="high"
+              decoding="sync"
               className="h-[18px] w-auto"
             />
           </div>
