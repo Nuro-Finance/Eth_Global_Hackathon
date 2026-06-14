@@ -161,9 +161,18 @@ export function AccountOnboardingModal({ open, onOpenChange }: AccountOnboarding
   const [displayName, setDisplayName] = useState("");
   const [teamName, setTeamName] = useState("");
   const [ensSlug, setEnsSlug] = useState("");
+  const [walletAddress, setWalletAddress] = useState("");
   const [walletConnected, setWalletConnected] = useState(false);
-  const markWalletConnected = useCallback(() => setWalletConnected(true), []);
-  const markWalletDisconnected = useCallback(() => setWalletConnected(false), []);
+  const markWalletConnected = useCallback((address: string) => {
+    setWalletAddress(address);
+    setWalletConnected(true);
+  }, []);
+  const markWalletDisconnected = useCallback(() => {
+    setWalletAddress("");
+    setWalletConnected(false);
+  }, []);
+  const [ensClaimError, setEnsClaimError] = useState<string | null>(null);
+  const ensClaimStartedRef = useRef(false);
   const [themeChoice, setThemeChoice] = useState<OnboardingTheme | null>(null);
   const [country, setCountry] = useState<Country | undefined>("US");
 
@@ -226,12 +235,46 @@ export function AccountOnboardingModal({ open, onOpenChange }: AccountOnboarding
       setDisplayName("");
       setTeamName("");
       setEnsSlug("");
+      setWalletAddress("");
       setWalletConnected(false);
+      setEnsClaimError(null);
+      ensClaimStartedRef.current = false;
       setThemeChoice(null);
       setCountry("US");
     }
     wasOpenRef.current = open;
   }, [open]);
+
+  useEffect(() => {
+    if (step !== "complete" || ensClaimStartedRef.current) return;
+
+    const slug = normalizeEnsSlug(ensSlug);
+    if (slug.length < 2) return;
+
+    ensClaimStartedRef.current = true;
+
+    void (async () => {
+      try {
+        const res = await fetch("/api/ens/claim", {
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            kind: "business",
+            slug,
+            visibility: "public",
+            ...(walletAddress ? { address: walletAddress } : {}),
+          }),
+        });
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          setEnsClaimError(typeof data.error === "string" ? data.error : "Claim failed");
+        }
+      } catch {
+        setEnsClaimError("Claim failed");
+      }
+    })();
+  }, [step, ensSlug, walletAddress]);
 
   const progressStep = useMemo(() => {
     if (step === "accountType") return 1;
@@ -683,6 +726,9 @@ export function AccountOnboardingModal({ open, onOpenChange }: AccountOnboarding
                   <DialogTitle className="mt-8 text-[22px] font-semibold leading-snug text-[var(--color-text-primary)] sm:text-[26px]">
                     Welcome to Nuro Finance
                   </DialogTitle>
+                  {ensClaimError ? (
+                    <p className="mt-4 text-sm text-[var(--color-danger)]">{ensClaimError}</p>
+                  ) : null}
                   <Button
                     type="button"
                     className={cn(
@@ -902,7 +948,7 @@ function OnboardingWalletConnectButton({
   onConnected,
   onDisconnected,
 }: {
-  onConnected: () => void;
+  onConnected: (address: string) => void;
   onDisconnected: () => void;
 }) {
   const { privyEnabled } = usePrivyRuntime();
@@ -929,8 +975,9 @@ function OnboardingWalletConnectButton({
           "h-16 w-full gap-3 rounded-2xl text-lg font-semibold",
         )}
         onClick={() => {
+          const mockAddress = "0x3282a1b4c5d6e7f8901234567890abcdef123b80c";
           setDesignConnected(true);
-          onConnected();
+          onConnected(mockAddress);
         }}
       >
         <Wallet className="size-6" strokeWidth={2} />
@@ -967,7 +1014,7 @@ function OnboardingWalletConnectButtonPrivy({
   onConnected,
   onDisconnected,
 }: {
-  onConnected: () => void;
+  onConnected: (address: string) => void;
   onDisconnected: () => void;
 }) {
   const { ready, authenticated, login, logout, linkWallet, user } = usePrivy();
@@ -991,7 +1038,7 @@ function OnboardingWalletConnectButtonPrivy({
     : "";
 
   useEffect(() => {
-    if (address) onConnected();
+    if (address) onConnected(address);
   }, [address, onConnected]);
 
   const handleDisconnect = useCallback(async () => {

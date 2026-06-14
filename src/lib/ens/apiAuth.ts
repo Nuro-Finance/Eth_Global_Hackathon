@@ -1,10 +1,13 @@
-import { NextRequest } from "next/server";
+import { auth } from "@/auth";
 import { DESIGN_MODE } from "@/config/design-mode";
 import { DEMO_USER_ID } from "@/config/demo-user";
 
-export function ensUserIdFromRequest(request: NextRequest): string {
+/** Design mode: demo user. Production: NextAuth session user id. */
+export async function ensUserIdFromRequest(): Promise<string | null> {
   if (DESIGN_MODE) return DEMO_USER_ID;
-  const auth = request.headers.get("authorization") ?? "";
-  if (!auth) return "anonymous";
-  return Buffer.from(auth).toString("base64url").slice(0, 32);
+
+  const session = await auth();
+  const id = session?.user?.id;
+  if (typeof id === "string" && id.length > 0) return id;
+  return null;
 }

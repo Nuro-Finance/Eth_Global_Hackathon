@@ -31,9 +31,6 @@ export function isDevDesignLoginBypass(): boolean {
   return process.env.NODE_ENV === "development";
 }
 
-/** Dev onboarding: type 1234 to preview ENS "already taken" error state. Design mode only. */
-export const ENS_DESIGN_PREVIEW_TAKEN_SLUG = "1234";
-
 /** Design mode + Privy app id: mount real Privy wallet connect while keeping other design mocks. */
 export const DESIGN_MODE_PRIVY_WALLET =
   DESIGN_MODE && Boolean(process.env.NEXT_PUBLIC_PRIVY_APP_ID);

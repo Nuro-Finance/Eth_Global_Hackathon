@@ -38,7 +38,7 @@ export function useEnsNameAvailability(slug: string) {
       slug: normalized,
     });
 
-    fetch(`/api/ens/check?${params}`)
+    fetch(`/api/ens/check?${params}`, { credentials: "include" })
       .then((r) => r.json())
       .then((data) => {
         if (cancelled) return;

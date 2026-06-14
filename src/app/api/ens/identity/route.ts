@@ -1,13 +1,12 @@
-import { NextRequest, NextResponse } from "next/server";
-import { DESIGN_MODE } from "@/config/design-mode";
+import { NextResponse } from "next/server";
 import { ensUserIdFromRequest } from "@/lib/ens/apiAuth";
 import { getEnsIdentity } from "@/lib/ens/registry";
 
-export async function GET(request: NextRequest) {
-  if (!DESIGN_MODE) {
-    return NextResponse.json({ error: "ENS identity available in design mode only for now" }, { status: 501 });
+export async function GET() {
+  const userId = await ensUserIdFromRequest();
+  if (!userId) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const userId = ensUserIdFromRequest(request);
   return NextResponse.json(await getEnsIdentity(userId));
 }
