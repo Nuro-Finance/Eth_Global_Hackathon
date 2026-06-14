@@ -74,7 +74,7 @@ export function useLogin() {
                   return "SUCCESS";
                 }
                 dispatch(hydrateFromPrivyUser({ id: data.email || "", email: data.email || "", name: data.email?.split("@")[0] || "User", role: "admin" }));
-                router.push("/welcome");
+                router.push("/dashboard");
                 return "SUCCESS";
             }
 
@@ -97,7 +97,7 @@ export function useLogin() {
                     setIsLoading(false);
                     return "INVALID_CREDENTIALS";
                 }
-                router.push("/welcome");
+                router.push("/dashboard");
                 setIsLoading(false);
                 return "SUCCESS";
             }
@@ -148,7 +148,7 @@ export function useLogin() {
                 role: "user",
             }));
 
-            router.push("/welcome");
+            router.push("/dashboard");
             setIsLoading(false);
         } catch (err) {
             console.error("Auth failed:", err);
@@ -196,7 +196,7 @@ export function useLogin() {
                 name: pendingVerification.email.split("@")[0],
                 role: "user",
             }));
-            router.push("/welcome");
+            router.push("/dashboard");
             return "SUCCESS";
         } catch (err) {
             console.error("Verify failed:", err);
@@ -228,7 +228,7 @@ export function useLogin() {
     const handleGoogleLogin = useCallback(async () => {
         setIsLoading(true);
         try {
-            await signIn("google", { callbackUrl: "/en/welcome" });
+            await signIn("google", { callbackUrl: "/en/dashboard" });
         } catch {
             setError("Google login failed");
             setIsLoading(false);
