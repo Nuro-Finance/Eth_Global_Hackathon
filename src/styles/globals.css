@@ -51,6 +51,9 @@
 /* Animations */
 @import "./animations.css";
 
+/* Privy modal — Nuro charcoal palette */
+@import "./privy-nuro.css";
+
 /* Performance Optimizations */
 @import "./performance.css";
 

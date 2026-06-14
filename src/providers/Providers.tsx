@@ -6,12 +6,9 @@ import { SessionProvider } from "next-auth/react";
 import { ThemeProvider } from "./ThemeContext";
 import ReduxProvider from "./ReduxProvider";
 import ProgressProviderWrapper from "./progressBarProvider";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { WagmiProvider } from "wagmi";
-import { wagmiConfig } from "@/lib/wagmi.config";
-import { PrivyRuntimeProvider } from "./index";
+import { QueryClient } from "@tanstack/react-query";
 import { ErrorBoundary, installGlobalErrorHandlers } from "@/components/ErrorBoundary";
-import { DESIGN_MODE } from "@/config/design-mode";
+import { DESIGN_MODE_PRIVY_WALLET } from "@/config/design-mode";
 
 const WalletProviders = dynamic(
   () => import("./WalletProviders").then((m) => m.WalletProviders),
@@ -44,16 +41,10 @@ export function Providers({
   children: React.ReactNode;
 }) {
   const [queryClient] = useState(() => new QueryClient());
-  const walletTree = DESIGN_MODE ? (
-    <WagmiProvider config={wagmiConfig}>
-      <QueryClientProvider client={queryClient}>
-        <PrivyRuntimeProvider value={{ privyEnabled: false, ready: true }}>
-          {children}
-        </PrivyRuntimeProvider>
-      </QueryClientProvider>
-    </WagmiProvider>
-  ) : (
-    <WalletProviders queryClient={queryClient}>{children}</WalletProviders>
+  const walletTree = (
+    <WalletProviders queryClient={queryClient} designModePrivyOnly={DESIGN_MODE_PRIVY_WALLET}>
+      {children}
+    </WalletProviders>
   );
 
   return (

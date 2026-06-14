@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { Briefcase, Check, CircleHelp, User, Wallet, X } from "lucide-react";
+import { usePrivy, useWallets } from "@privy-io/react-auth";
+import { Briefcase, Check, CircleHelp, Copy, LogOut, User, Wallet, X } from "lucide-react";
 import type { Country } from "react-phone-number-input";
 import {
   Dialog,
@@ -34,10 +35,21 @@ import {
   useEnsNameAvailability,
 } from "./EnsNameOnboardingStep";
 import { normalizeEnsSlug } from "@/lib/ens/slug";
+import { usePrivyRuntime } from "@/providers/PrivyRuntimeContext";
 import { DESIGN_MODE } from "@/config/design-mode";
+import Dropdown from "@/components/dropdown";
+import { useRouter } from "@/i18n/navigation";
+import { OnboardingConfettiBurst } from "./OnboardingConfettiBurst";
+
+const ONBOARDING_EXTERNAL_WALLET_LIST = [
+  "detected_ethereum_wallets",
+  "metamask",
+  "coinbase_wallet",
+  "wallet_connect",
+] as const;
 
 /** Planned full flow length — progress bar only (ENS, wallet, theme later). */
-const PLANNED_STEP_COUNT = 6;
+const PLANNED_STEP_COUNT = 7;
 
 const ACCOUNT_TYPE_OPTIONS: {
   id: AccountType;
@@ -143,28 +155,82 @@ export interface AccountOnboardingModalProps {
 }
 
 export function AccountOnboardingModal({ open, onOpenChange }: AccountOnboardingModalProps) {
+  const router = useRouter();
   const [step, setStep] = useState<AccountOnboardingStep>("accountType");
   const [accountType, setAccountType] = useState<AccountType | null>(null);
   const [displayName, setDisplayName] = useState("");
   const [teamName, setTeamName] = useState("");
   const [ensSlug, setEnsSlug] = useState("");
   const [walletConnected, setWalletConnected] = useState(false);
+  const markWalletConnected = useCallback(() => setWalletConnected(true), []);
+  const markWalletDisconnected = useCallback(() => setWalletConnected(false), []);
   const [themeChoice, setThemeChoice] = useState<OnboardingTheme | null>(null);
   const [country, setCountry] = useState<Country | undefined>("US");
 
   const { availability: ensCheckAvailability, availabilityError: ensCheckError } =
     useEnsNameAvailability(ensSlug);
 
+  /** Block onboarding dismiss briefly after Privy closes (Radix races Privy unmount). */
+  const suppressOnboardingCloseRef = useRef(false);
+  const privyModalOpenRef = useRef(false);
+  const wasOpenRef = useRef(false);
+
+  const handleOpenChange = useCallback(
+    (nextOpen: boolean) => {
+      if (
+        !nextOpen &&
+        (privyModalOpenRef.current ||
+          document.getElementById("privy-dialog") ||
+          suppressOnboardingCloseRef.current)
+      ) {
+        return;
+      }
+      onOpenChange(nextOpen);
+    },
+    [onOpenChange],
+  );
+
+  const blockDismissWhilePrivyOpen = useCallback((event: Event) => {
+    const target = event.target;
+    if (target instanceof Node && document.getElementById("privy-dialog")?.contains(target)) {
+      return;
+    }
+    if (
+      privyModalOpenRef.current ||
+      document.getElementById("privy-dialog") ||
+      suppressOnboardingCloseRef.current
+    ) {
+      event.preventDefault();
+    }
+  }, []);
+
+  const allowFocusIntoPrivy = useCallback(
+    (event: Event & { detail?: { originalEvent?: Event } }) => {
+      const original = event.detail?.originalEvent;
+      if (
+        original instanceof FocusEvent &&
+        original.relatedTarget instanceof Node &&
+        document.getElementById("privy-dialog")?.contains(original.relatedTarget)
+      ) {
+        return;
+      }
+      blockDismissWhilePrivyOpen(event);
+    },
+    [blockDismissWhilePrivyOpen],
+  );
+
   useEffect(() => {
-    if (!open) return;
-    setStep("accountType");
-    setAccountType(null);
-    setDisplayName("");
-    setTeamName("");
-    setEnsSlug("");
-    setWalletConnected(false);
-    setThemeChoice(null);
-    setCountry("US");
+    if (open && !wasOpenRef.current) {
+      setStep("accountType");
+      setAccountType(null);
+      setDisplayName("");
+      setTeamName("");
+      setEnsSlug("");
+      setWalletConnected(false);
+      setThemeChoice(null);
+      setCountry("US");
+    }
+    wasOpenRef.current = open;
   }, [open]);
 
   const progressStep = useMemo(() => {
@@ -173,6 +239,7 @@ export function AccountOnboardingModal({ open, onOpenChange }: AccountOnboarding
     if (step === "ens") return 4;
     if (step === "wallet") return 5;
     if (step === "theme") return 6;
+    if (step === "complete") return 7;
     return 1;
   }, [step]);
 
@@ -223,7 +290,7 @@ export function AccountOnboardingModal({ open, onOpenChange }: AccountOnboarding
       return;
     }
     if (step === "theme") {
-      onOpenChange(false);
+      setStep("complete");
       return;
     }
     if (step === "team") {
@@ -241,15 +308,30 @@ export function AccountOnboardingModal({ open, onOpenChange }: AccountOnboarding
     setStep("theme");
   };
 
-  const isLastStep = step === "theme";
+  const { privyEnabled } = usePrivyRuntime();
+
+  const finishToDashboard = useCallback(() => {
+    onOpenChange(false);
+    router.push("/dashboard");
+  }, [onOpenChange, router]);
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange} modal={false}>
+      {privyEnabled && open && step === "wallet" ? (
+        <PrivyWalletLayer
+          modalOpenRef={privyModalOpenRef}
+          suppressCloseRef={suppressOnboardingCloseRef}
+        />
+      ) : null}
       <DialogContent
         hideClose
         overlayClassName={ONBOARDING_MODAL_OVERLAY_CLASS}
         className={ONBOARDING_MODAL_SHELL_CLASS}
         style={COMPACT_GLASS_SHELL_OUTER_STYLE}
+        onEscapeKeyDown={blockDismissWhilePrivyOpen}
+        onPointerDownOutside={blockDismissWhilePrivyOpen}
+        onInteractOutside={blockDismissWhilePrivyOpen}
+        onFocusOutside={allowFocusIntoPrivy}
       >
         <div
           className={ONBOARDING_MODAL_INNER_CLASS}
@@ -258,7 +340,8 @@ export function AccountOnboardingModal({ open, onOpenChange }: AccountOnboarding
             backgroundColor: "var(--color-bg-picker-panel)",
           }}
         >
-          <header className="flex shrink-0 items-center justify-between gap-4 px-6 py-4 sm:px-8">
+          {step === "complete" ? <OnboardingConfettiBurst /> : null}
+          <header className="relative z-[70] flex shrink-0 items-center justify-between gap-4 px-6 py-4 sm:px-8">
             <img
               src="/Nuro Horizontal Logo.svg"
               alt="Nuro Finance"
@@ -505,30 +588,35 @@ export function AccountOnboardingModal({ open, onOpenChange }: AccountOnboarding
               >
                 <motion.div variants={walletModalItemCascadeVariants}>
                   <DialogTitle className="text-center text-[22px] font-normal leading-snug text-[var(--color-text-primary)] sm:text-[26px]">
-                    <span className="inline font-semibold text-[var(--color-primary)]">
-                      Connect your wallet.
-                    </span>
-                    <br />
-                    <span className="inline font-normal text-[var(--color-text-primary)]">
-                      Nuro is a web3 app
-                    </span>
+                    {walletConnected ? (
+                      <>
+                        <span className="inline font-semibold text-[var(--color-primary)]">
+                          Wallet Connected
+                        </span>
+                        <br />
+                        <span className="inline font-normal text-[var(--color-text-primary)]">
+                          You&apos;re good to go
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="inline font-semibold text-[var(--color-primary)]">
+                          Connect your wallet.
+                        </span>
+                        <br />
+                        <span className="inline font-normal text-[var(--color-text-primary)]">
+                          Nuro is a web3 app
+                        </span>
+                      </>
+                    )}
                   </DialogTitle>
                 </motion.div>
 
                 <motion.div className="mt-10" variants={walletModalItemCascadeVariants}>
-                  <Button
-                    type="button"
-                    className={cn(
-                      FORM_MODAL_SUBMIT_BUTTON_CLASS,
-                      "h-16 w-full gap-3 rounded-2xl text-lg font-semibold",
-                    )}
-                    onClick={() => {
-                      if (DESIGN_MODE) setWalletConnected(true);
-                    }}
-                  >
-                    <Wallet className="size-6" strokeWidth={2} />
-                    Connect Wallet
-                  </Button>
+                  <OnboardingWalletConnectButton
+                    onConnected={markWalletConnected}
+                    onDisconnected={markWalletDisconnected}
+                  />
                 </motion.div>
               </motion.div>
             ) : null}
@@ -564,6 +652,47 @@ export function AccountOnboardingModal({ open, onOpenChange }: AccountOnboarding
                       onSelect={() => setThemeChoice(id)}
                     />
                   ))}
+                </motion.div>
+              </motion.div>
+            ) : null}
+
+            {step === "complete" ? (
+              <motion.div
+                className="mx-auto flex w-full max-w-md flex-col items-center text-center"
+                variants={walletModalFlowLayerVariants}
+                initial="initial"
+                animate="animate"
+              >
+                <motion.div
+                  className="relative z-[70] flex flex-col items-center"
+                  variants={walletModalItemCascadeVariants}
+                >
+                  <div className="flex items-center justify-center gap-3">
+                    <img
+                      src="/Nuro Fav Icon 1x1.png"
+                      alt=""
+                      aria-hidden
+                      className="h-12 w-12 shrink-0 rounded-[12px]"
+                    />
+                    <img
+                      src="/card-svg/nuro-word-mark.svg"
+                      alt="nuro"
+                      className="h-6 w-auto shrink-0 brightness-0 invert"
+                    />
+                  </div>
+                  <DialogTitle className="mt-8 text-[22px] font-semibold leading-snug text-[var(--color-text-primary)] sm:text-[26px]">
+                    Welcome to Nuro Finance
+                  </DialogTitle>
+                  <Button
+                    type="button"
+                    className={cn(
+                      FORM_MODAL_SUBMIT_BUTTON_CLASS,
+                      "mt-10 h-11 min-w-[10rem] px-8 text-sm font-semibold",
+                    )}
+                    onClick={finishToDashboard}
+                  >
+                    Continue
+                  </Button>
                 </motion.div>
               </motion.div>
             ) : null}
@@ -609,6 +738,7 @@ export function AccountOnboardingModal({ open, onOpenChange }: AccountOnboarding
             </div>
           </div>
 
+          {step !== "complete" ? (
           <footer className="flex shrink-0 items-center justify-between gap-3 px-6 py-4 sm:px-8">
             {canGoBack ? (
               <button
@@ -654,12 +784,288 @@ export function AccountOnboardingModal({ open, onOpenChange }: AccountOnboarding
                 disabled={!canContinue}
                 onClick={goNext}
               >
-                {isLastStep ? "Finish" : "Next"}
+                Next
               </Button>
             </div>
           </footer>
+          ) : null}
         </div>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function PrivyWalletLayer({
+  modalOpenRef,
+  suppressCloseRef,
+}: {
+  modalOpenRef: React.MutableRefObject<boolean>;
+  suppressCloseRef: React.MutableRefObject<boolean>;
+}) {
+  const { isModalOpen } = usePrivy();
+  const prevOpenRef = useRef(isModalOpen);
+  modalOpenRef.current = isModalOpen;
+
+  useLayoutEffect(() => {
+    if (prevOpenRef.current && !isModalOpen) {
+      suppressCloseRef.current = true;
+      const timer = window.setTimeout(() => {
+        suppressCloseRef.current = false;
+      }, 300);
+      prevOpenRef.current = isModalOpen;
+      return () => window.clearTimeout(timer);
+    }
+    prevOpenRef.current = isModalOpen;
+  }, [isModalOpen, suppressCloseRef]);
+
+  return null;
+}
+
+function OnboardingConnectedWalletField({
+  address,
+  onDisconnect,
+}: {
+  address: string;
+  onDisconnect: () => void;
+}) {
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const menuItems = [
+    {
+      id: "copy",
+      label: "Copy address",
+      icon: <Copy className="h-4 w-4" />,
+      onClick: () => {
+        try {
+          void navigator.clipboard.writeText(address);
+        } catch {
+          // Clipboard may be unavailable.
+        }
+        setMenuOpen(false);
+      },
+    },
+    {
+      id: "disconnect",
+      label: "Disconnect",
+      icon: <LogOut className="h-4 w-4" />,
+      onClick: () => {
+        setMenuOpen(false);
+        onDisconnect();
+      },
+      variant: "danger" as const,
+    },
+  ];
+
+  return (
+    <div className="flex flex-col items-center">
+      <Dropdown
+        modal={false}
+        open={menuOpen}
+        onOpenChange={setMenuOpen}
+        placement="bottom-right"
+        variant="userNav"
+        userNavPanelWidth="content"
+        trigger={
+          <button
+            type="button"
+            aria-label="Wallet address options"
+            aria-haspopup="menu"
+            aria-expanded={menuOpen}
+            className="inline-flex text-left outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]/25 rounded-[var(--radius-md)]"
+          >
+            <span
+              className={cn(
+                ONBOARDING_INPUT_CLASS,
+                "inline-flex h-11 !w-max items-center px-3 font-mono text-sm whitespace-nowrap",
+              )}
+            >
+              {address}
+            </span>
+          </button>
+        }
+        items={menuItems}
+      />
+      <div className="mt-3 flex items-center justify-center gap-2">
+        <span
+          className="flex h-4 w-4 shrink-0 items-center justify-center rounded-[4px] bg-[var(--color-success)]"
+          aria-hidden
+        >
+          <Check className="h-2.5 w-2.5 text-white" strokeWidth={3} />
+        </span>
+        <span className="text-sm text-[var(--color-text-primary)]">Connected</span>
+      </div>
+    </div>
+  );
+}
+
+function OnboardingWalletConnectButton({
+  onConnected,
+  onDisconnected,
+}: {
+  onConnected: () => void;
+  onDisconnected: () => void;
+}) {
+  const { privyEnabled } = usePrivyRuntime();
+  const [designConnected, setDesignConnected] = useState(false);
+
+  if (DESIGN_MODE && !privyEnabled) {
+    if (designConnected) {
+      return (
+        <OnboardingConnectedWalletField
+          address="0x3282a1b4c5d6e7f8901234567890abcdef123b80c"
+          onDisconnect={() => {
+            setDesignConnected(false);
+            onDisconnected();
+          }}
+        />
+      );
+    }
+
+    return (
+      <Button
+        type="button"
+        className={cn(
+          FORM_MODAL_SUBMIT_BUTTON_CLASS,
+          "h-16 w-full gap-3 rounded-2xl text-lg font-semibold",
+        )}
+        onClick={() => {
+          setDesignConnected(true);
+          onConnected();
+        }}
+      >
+        <Wallet className="size-6" strokeWidth={2} />
+        Connect Wallet
+      </Button>
+    );
+  }
+
+  if (!privyEnabled) {
+    return (
+      <Button
+        type="button"
+        disabled
+        className={cn(
+          FORM_MODAL_SUBMIT_BUTTON_CLASS,
+          "h-16 w-full gap-3 rounded-2xl text-lg font-semibold",
+        )}
+      >
+        <Wallet className="size-6" strokeWidth={2} />
+        Connect Wallet
+      </Button>
+    );
+  }
+
+  return (
+    <OnboardingWalletConnectButtonPrivy
+      onConnected={onConnected}
+      onDisconnected={onDisconnected}
+    />
+  );
+}
+
+function OnboardingWalletConnectButtonPrivy({
+  onConnected,
+  onDisconnected,
+}: {
+  onConnected: () => void;
+  onDisconnected: () => void;
+}) {
+  const { ready, authenticated, login, logout, linkWallet, user } = usePrivy();
+  const { wallets } = useWallets();
+  const pendingConnectRef = useRef(false);
+
+  const externalWallet = wallets.find(
+    (w) => String((w as { connectorType?: string }).connectorType || "") !== "embedded",
+  );
+  const externalLinkedWalletAddress =
+    (user?.linkedAccounts?.find(
+      (a) =>
+        (a.type === "wallet" || a.type === "smart_wallet") &&
+        "address" in a &&
+        "walletClientType" in a &&
+        a.walletClientType !== "privy",
+    )?.address as string | undefined) || "";
+
+  const address = authenticated
+    ? externalWallet?.address ?? externalLinkedWalletAddress ?? ""
+    : "";
+
+  useEffect(() => {
+    if (address) onConnected();
+  }, [address, onConnected]);
+
+  const handleDisconnect = useCallback(async () => {
+    try {
+      await Promise.allSettled(
+        wallets.map((wallet) => {
+          try {
+            return wallet.disconnect();
+          } catch {
+            return Promise.resolve();
+          }
+        }),
+      );
+    } catch {
+      // Session may already be cleared.
+    }
+
+    try {
+      if (authenticated) {
+        await logout();
+      }
+    } catch {
+      // Privy rejects with a non-enumerable error object when the session is already gone.
+    }
+
+    onDisconnected();
+  }, [authenticated, logout, onDisconnected, wallets]);
+
+  const runConnect = useCallback(() => {
+    if (!ready) {
+      pendingConnectRef.current = true;
+      return;
+    }
+    pendingConnectRef.current = false;
+
+    const walletList = [...ONBOARDING_EXTERNAL_WALLET_LIST];
+
+    if (!authenticated) {
+      void login({
+        loginMethods: ["wallet"],
+        walletList,
+      } as Parameters<typeof login>[0]).catch(() => {});
+      return;
+    }
+
+    linkWallet({
+      description: "Connect a wallet to use with your Nuro account.",
+      walletList,
+    });
+  }, [authenticated, linkWallet, login, ready]);
+
+  useEffect(() => {
+    if (!ready || !pendingConnectRef.current) return;
+    pendingConnectRef.current = false;
+    runConnect();
+  }, [ready, runConnect]);
+
+  if (address) {
+    return (
+      <OnboardingConnectedWalletField address={address} onDisconnect={handleDisconnect} />
+    );
+  }
+
+  return (
+    <Button
+      type="button"
+      className={cn(
+        FORM_MODAL_SUBMIT_BUTTON_CLASS,
+        "h-16 w-full gap-3 rounded-2xl text-lg font-semibold",
+      )}
+      onClick={runConnect}
+    >
+      <Wallet className="size-6" strokeWidth={2} />
+      Connect Wallet
+    </Button>
   );
 }

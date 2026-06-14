@@ -11,26 +11,31 @@ import {
   PrivyRuntimeProvider,
 } from "./index";
 import BackendUserSync from "./BackendUserSync";
+import { DESIGN_MODE } from "@/config/design-mode";
 
 const privyAppId = process.env.NEXT_PUBLIC_PRIVY_APP_ID;
 
 export function WalletProviders({
   children,
   queryClient,
+  designModePrivyOnly = false,
 }: {
   children: React.ReactNode;
   queryClient: QueryClient;
+  designModePrivyOnly?: boolean;
 }) {
+  const mountPrivy = Boolean(privyAppId) && (!DESIGN_MODE || designModePrivyOnly);
+
   return (
     <WagmiProvider config={wagmiConfig}>
       <QueryClientProvider client={queryClient}>
-        {privyAppId ? (
+        {mountPrivy ? (
           <PrivyProvider
-            appId={privyAppId}
+            appId={privyAppId!}
             config={{
               appearance: {
-                theme: "dark",
-                accentColor: "#05fb81",
+                theme: "#141414",
+                accentColor: "#0D90FF",
                 logo: "/Nuro Horizontal Logo.svg",
                 showWalletLoginFirst: true,
                 walletList: [
@@ -42,7 +47,7 @@ export function WalletProviders({
                   "rainbow",
                 ],
               },
-              loginMethods: ["wallet", "email", "google"],
+              loginMethods: designModePrivyOnly ? ["wallet"] : ["wallet", "email", "google"],
               embeddedWallets: {
                 ethereum: {
                   createOnLogin: "off",
@@ -55,8 +60,8 @@ export function WalletProviders({
             }}
           >
             <PrivyInnerProviders>
-              <PrivyAuthSync />
-              <BackendUserSync />
+              {!designModePrivyOnly ? <PrivyAuthSync /> : null}
+              {!designModePrivyOnly ? <BackendUserSync /> : null}
               {children}
             </PrivyInnerProviders>
           </PrivyProvider>

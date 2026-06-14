@@ -47,8 +47,8 @@ export function ConnectWallet() {
   const [isOpen, setIsOpen] = useState(false);
   const showGlow = isHovered || isOpen;
 
- // ===== DESIGN MODE BYPASS: INSTANT RENDER =====
-  if (DESIGN_MODE) {
+ // ===== DESIGN MODE BYPASS: mock only when Privy is not mounted =====
+  if (DESIGN_MODE && !privyEnabled) {
     const mockMenuItems = [
       { id: "copy", label: "Copy address", icon: <Copy className="h-4 w-4" />, onClick: () => {} },
       { id: "switch", label: "Switch wallet", icon: <RefreshCw className="h-4 w-4" />, onClick: () => {} },

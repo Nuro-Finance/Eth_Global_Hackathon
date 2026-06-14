@@ -1,0 +1,84 @@
+/**
+ * Privy modal — Nuro dark grays (matches onboarding shell / theme.dark.css).
+ * Overrides Privy default navy (#020713) surfaces.
+ */
+#privy-dialog {
+  --privy-color-background: #141414;
+  --privy-color-background-2: #111111;
+  --privy-color-background-3: rgba(255, 255, 255, 0.03);
+  --privy-color-foreground: #f2f2f2;
+  --privy-color-foreground-2: #989898;
+  --privy-color-foreground-3: #7b8491;
+  --privy-color-foreground-4: rgba(255, 255, 255, 0.06);
+  --privy-color-accent: #0d90ff;
+  --privy-color-accent-light: #3da6ff;
+  --privy-color-accent-hover: #0a73cc;
+  --privy-color-accent-dark: #0a73cc;
+  --privy-color-accent-darkest: #085999;
+  --privy-color-foreground-accent: #ffffff;
+  --privy-color-border-default: rgba(255, 255, 255, 0.06);
+  --privy-color-border-hover: rgba(255, 255, 255, 0.08);
+  --privy-color-border-interactive: rgba(255, 255, 255, 0.12);
+  --privy-color-border-interactive-hover: rgba(255, 255, 255, 0.2);
+  --privy-color-background-hover: rgba(255, 255, 255, 0.04);
+  --privy-color-background-clicked: rgba(255, 255, 255, 0.06);
+  --privy-color-background-interactive: rgba(255, 255, 255, 0.04);
+  --privy-color-background-interactive-hover: rgba(255, 255, 255, 0.06);
+  --privy-color-background-interactive-clicked: rgba(255, 255, 255, 0.08);
+  --privy-color-foreground-interactive: #0d90ff;
+  --privy-color-foreground-interactive-hover: #3da6ff;
+  --privy-color-icon-default: #f2f2f2;
+  --privy-color-icon-muted: #989898;
+  --privy-color-icon-subtle: #7b8491;
+  --privy-color-icon-interactive: #0d90ff;
+  --privy-color-icon-interactive-hover: #3da6ff;
+  --privy-color-link-navigation-color: #0d90ff;
+}
+
+/* Dark drop shadow only — no white ring stroke */
+#privy-modal-content {
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55) !important;
+}
+
+/* No backdrop blur on Privy overlay */
+#privy-dialog-backdrop {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  background: transparent !important;
+}
+
+#privy-dialog button[aria-label="close modal"] {
+  background-color: transparent !important;
+  padding: 0 !important;
+}
+
+#privy-dialog button[aria-label="close modal"]:hover {
+  opacity: 1 !important;
+}
+
+/* Header back — outline only, no filled circle */
+#privy-dialog
+  #privy-modal-content
+  > div
+  > div
+  > div
+  > div:first-child
+  > div:first-child
+  > div:first-child
+  button:not([aria-label="close modal"]) {
+  background-color: transparent !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  border: none !important;
+}
+
+/* Privy wallet list scroll container */
+#privy-dialog *:has(+ #privy-content-footer-container) {
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Privy scroll-fade gradient — shows as a stray line under the last login button when the list doesn't scroll */
+#privy-dialog div:has(.login-method-button) {
+  background-image: none !important;
+}

@@ -226,11 +226,32 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 }
 
+function isBenignWalletConnectError(reason: unknown): boolean {
+  const message =
+    reason instanceof Error
+      ? reason.message
+      : typeof reason === "string"
+        ? reason
+        : String(reason ?? "");
+  return (
+    message.includes("Proposal expired") ||
+    message.includes("Connection request reset") ||
+    message.includes("No matching key") ||
+    message.includes("User rejected") ||
+    message.includes("User closed modal")
+  );
+}
+
 /** Window-level handlers only — do not hook console.error (floods API in dev). */
 export function installGlobalErrorHandlers() {
   if (typeof window === "undefined") return;
 
   window.addEventListener("error", (event) => {
+    if (isBenignWalletConnectError(event.message)) {
+      event.preventDefault();
+      return;
+    }
+
     reportClientError({
       message: event.message || "Unhandled error",
       stack: event.error?.stack || `${event.filename}:${event.lineno}:${event.colno}`,
@@ -240,6 +261,11 @@ export function installGlobalErrorHandlers() {
   });
 
   window.addEventListener("unhandledrejection", (event) => {
+    if (isBenignWalletConnectError(event.reason)) {
+      event.preventDefault();
+      return;
+    }
+
     const reason = event.reason;
     reportClientError({
       message: reason?.message || String(reason) || "Unhandled promise rejection",

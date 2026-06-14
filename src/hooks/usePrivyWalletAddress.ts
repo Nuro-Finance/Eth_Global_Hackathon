@@ -27,8 +27,8 @@ export function usePrivyWalletAddress() {
   const { ready, authenticated, user } = usePrivy();
   const { wallets } = useWallets();
 
- // ===== DESIGN MODE BYPASS: INSTANT RETURN =====
-  if (isDesignMode) {
+ // Design-mode mock only when Privy is not mounted (wallet-connect UX testing uses real Privy).
+  if (isDesignMode && !privyEnabled) {
     return DEV_MOCK_WALLET_STATE;
   }
 
