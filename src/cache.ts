@@ -1,18 +1,18 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// TIER-1 READ CACHE — agent_budgets / reputation / notifications hot reads
+// TIER-1 READ CACHE - agent_budgets / reputation / notifications hot reads
 //
 // Two backends, identical API:
 //
-// 1. In-memory Map — default; dev, tests, single-process VPS.
-// 2. Upstash Redis REST — prod; set UPSTASH_REDIS_REST_URL + _TOKEN.
+// 1. In-memory Map - default; dev, tests, single-process VPS.
+// 2. Upstash Redis REST - prod; set UPSTASH_REDIS_REST_URL + _TOKEN.
 //
 // Switching: zero-config. If env vars are present at first import, we use
 // Upstash. Otherwise we use the in-memory store. No app code changes.
 //
 // Why Upstash REST over ioredis:
-// - Pure HTTPS POST per get/set — no persistent socket pool to manage.
+// - Pure HTTPS POST per get/set - no persistent socket pool to manage.
 // - Works on serverless / edge / VPS uniformly.
-// - Free tier (10K commands/day) covers ~2K dashboard views/day —
+// - Free tier (10K commands/day) covers ~2K dashboard views/day -
 // well above our pre-pitch DAU.
 // - No new npm dependency. Native fetch (Node ≥18).
 //
@@ -29,7 +29,7 @@
 // await db.query(...); // write to Postgres
 // await cache.del(key); // bust the cache so next read goes fresh
 //
-// All cache misses + Upstash errors fall back to "no cache" — never block
+// All cache misses + Upstash errors fall back to "no cache" - never block
 // the request. Cache-side failures are surfaced via console.warn but the
 // caller proceeds as if the cache didn't exist.
 // ─────────────────────────────────────────────────────────────────────────────
@@ -41,7 +41,7 @@ const USE_UPSTASH = !!(UPSTASH_URL && UPSTASH_TOKEN)
 // ── In-memory backend ───────────────────────────────────────────────────────
 // Shared across all imports of this module within a single Node process.
 // LRU-ish: caps at 5000 entries to prevent unbounded growth in long-running
-// processes. Eviction policy is "oldest insertion" — `Map` preserves order.
+// processes. Eviction policy is "oldest insertion" - `Map` preserves order.
 
 const MEM_MAX = 5000
 const mem = new Map<string, { v: unknown; expiresAt: number }>()
@@ -53,7 +53,7 @@ function memGet<T>(key: string): T | null {
     mem.delete(key)
     return null
   }
- // Touch — bump to most-recently-used position.
+ // Touch - bump to most-recently-used position.
   mem.delete(key)
   mem.set(key, entry)
   return entry.v as T
@@ -73,7 +73,7 @@ function memDel(key: string): void {
 }
 
 function memDelPrefix(prefix: string): void {
- // Snapshot keys first — mutating Map during for-of would skip entries.
+ // Snapshot keys first - mutating Map during for-of would skip entries.
   const keys = Array.from(mem.keys())
   for (const k of keys) {
     if (k.startsWith(prefix)) mem.delete(k)
@@ -91,7 +91,7 @@ async function upstash<T = unknown>(cmd: string[]): Promise<T | null> {
     const res = await fetch(`${UPSTASH_URL}/${cmd.map(encodeURIComponent).join('/')}`, {
       method: 'GET',
       headers: { Authorization: `Bearer ${UPSTASH_TOKEN}` },
- // 1.5s budget — cache is a "fast path or skip" thing. We'd rather
+ // 1.5s budget - cache is a "fast path or skip" thing. We'd rather
  // miss the cache than block the request on a slow Upstash region.
       signal: AbortSignal.timeout(1500),
     })
@@ -138,7 +138,7 @@ async function upstashDelPrefix(prefix: string): Promise<void> {
  // each set(key) also adds key to "idx:{prefix}" set
  // and delPrefix iterates that set + deletes both the keys and the index.
  //
- // For now, we punt on cross-key invalidation in the Upstash backend — most
+ // For now, we punt on cross-key invalidation in the Upstash backend - most
  // call sites pass exact keys. If we hit a real need for prefix-invalidate
  // in prod, switch on the index pattern above.
   console.warn('[cache] upstashDelPrefix not implemented; consider switching to exact-key invalidation. prefix=' + prefix)
@@ -149,7 +149,7 @@ async function upstashDelPrefix(prefix: string): Promise<void> {
 export const cache = {
  /**
  * Fetch a cached value. Returns null on miss, expiry, or cache error.
- * Never throws — callers can safely treat null as "go to source of truth".
+ * Never throws - callers can safely treat null as "go to source of truth".
  */
   async get<T>(key: string): Promise<T | null> {
     if (USE_UPSTASH) return upstashGet<T>(key)
@@ -174,7 +174,7 @@ export const cache = {
   },
 
  /**
- * Invalidate all keys with a prefix. In-memory backend only — Upstash
+ * Invalidate all keys with a prefix. In-memory backend only - Upstash
  * backend logs a warning and no-ops (callers should use exact keys).
  */
   async delPrefix(prefix: string): Promise<void> {
@@ -182,18 +182,18 @@ export const cache = {
     memDelPrefix(prefix)
   },
 
- /** Diagnostic — current backend, used by /health and admin views. */
+ /** Diagnostic - current backend, used by /health and admin views. */
   backend(): 'upstash' | 'memory' {
     return USE_UPSTASH ? 'upstash' : 'memory'
   },
 
- /** Diagnostic — current memory-cache size. */
+ /** Diagnostic - current memory-cache size. */
   memSize(): number {
     return USE_UPSTASH ? -1 : mem.size
   },
 }
 
-// ── Key helpers — keep namespace under control ──────────────────────────────
+// ── Key helpers - keep namespace under control ──────────────────────────────
 // Every cache key MUST come through one of these helpers. This makes it
 // trivial to grep for "what's in the cache" and to bulk-invalidate via
 // delPrefix during admin operations.
@@ -203,7 +203,7 @@ export const cacheKeys = {
     `nuro:budget:snap:${agentId}:l${ledgerLimit}`,
 
  /**
- * All snapshot keys for an agent — call delPrefix() with this on writes
+ * All snapshot keys for an agent - call delPrefix() with this on writes
  * that change budget state. The ledgerLimit suffix means a single agentId
  * can have multiple snapshot keys cached at varying limits.
  */

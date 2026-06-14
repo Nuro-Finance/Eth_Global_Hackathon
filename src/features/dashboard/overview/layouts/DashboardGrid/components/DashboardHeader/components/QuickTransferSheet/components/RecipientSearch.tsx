@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 /**
  * Autocomplete recipient picker for P2P transfers. Replaces the pair of
  * free-text inputs that required the sender to know the recipient's email
- * exactly — one typo = 404. Now types a few chars → dropdown of Nuro users.
+ * exactly - one typo = 404. Now types a few chars → dropdown of Nuro users.
  *
  * Backend: GET /api/users/search?q=<text> returns up to 10 matches.
  * Ranking: exact email > email prefix > name prefix.
@@ -57,7 +57,7 @@ export function RecipientSearch({
             setResults([]);
             return;
         }
- // If the current input exactly equals the selected email, user just picked — skip
+ // If the current input exactly equals the selected email, user just picked - skip
         if (selectedEmail && q === selectedEmail) {
             setResults([]);
             return;

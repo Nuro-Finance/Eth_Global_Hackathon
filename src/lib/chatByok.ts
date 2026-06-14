@@ -47,7 +47,7 @@ export type CardChatRequestPayload =
   | { message: string; apiKey: string; provider: ByokProvider; tier: ChatModelTier }
   | { error: string };
 
-/** Per-card agent chat — uses the same BYOK provider + tier as the sidebar. */
+/** Per-card agent chat - uses the same BYOK provider + tier as the sidebar. */
 export function buildCardChatRequestBody(message: string): CardChatRequestPayload {
   const provider = getActiveByokProvider();
   if (!provider) {

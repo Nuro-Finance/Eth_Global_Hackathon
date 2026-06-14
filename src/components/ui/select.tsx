@@ -71,7 +71,7 @@ const SelectContent = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof SelectPrimitive.Content> & {
     container?: HTMLElement | null;
- /** Merged into the scroll viewport (list) — use for max-height / overflow overrides. */
+ /** Merged into the scroll viewport (list) - use for max-height / overflow overrides. */
     viewportClassName?: string;
   }
 >(({ className, children, position = "popper", container, viewportClassName, ...props }, ref) => (

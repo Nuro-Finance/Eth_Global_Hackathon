@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-// S30 Phase 2 — unified quote proxy. Dispatches to BE /quote/best which runs
+// S30 Phase 2 - unified quote proxy. Dispatches to BE /quote/best which runs
 // every applicable source (0x EVM / Jupiter Solana / future Uniswap-direct)
 // in parallel and returns the best buyAmountUsd + runner-up alternatives.
 const BACKEND = process.env.BACKEND_URL || "http://localhost:3000";

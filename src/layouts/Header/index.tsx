@@ -15,8 +15,7 @@ import {
 import { HeaderMenuProvider } from "./HeaderMenuContext";
 import { restoreDemoSampleForSwitchOff } from "@/features/dashboard/overview/hooks/designSampleData";
 import { useDevPreviewMode } from "@/providers/DevPreviewModeProvider";
-import { AccountOnboardingModal } from "@/features/onboarding";
-import { consumePendingOnboardingClient } from "@/lib/welcome-onboarding";
+import { useAccountOnboardingOptional } from "@/features/onboarding/context/AccountOnboardingContext";
 import { useDemoDevSession } from "@/hooks/useDemoDevSession";
 
 interface HeaderProps {
@@ -40,7 +39,7 @@ export default function Header({
   const { isDevAvailable, populated, togglePopulated } = useDevPreviewMode();
   const showDevControls = useDemoDevSession();
   const didInitDevPreview = useRef(false);
-  const [onboardingOpen, setOnboardingOpen] = useState(false);
+  const onboarding = useAccountOnboardingOptional();
 
   useEffect(() => {
     if (!isDevAvailable) return;
@@ -54,13 +53,6 @@ export default function Header({
 
   const cleanPath = pathname.replace(/^\/[a-z]{2}/, "") || "/dashboard";
   const isDashboardHome = cleanPath === "/dashboard";
-
-  useEffect(() => {
-    if (!isDashboardHome) return;
-    if (consumePendingOnboardingClient()) {
-      setOnboardingOpen(true);
-    }
-  }, [isDashboardHome]);
 
   // Get dynamic page title based on current pathname
   const getPageTitle = () => {
@@ -101,7 +93,7 @@ export default function Header({
         </div>
       </div>
 
-      {/* Right: search + actions — shared menu state so only one dropdown is open */}
+      {/* Right: search + actions - shared menu state so only one dropdown is open */}
       <HeaderMenuProvider>
         <div className="flex shrink-0 justify-end items-center gap-1 sm:gap-2">
           {/* <div className="hidden sm:block">
@@ -116,8 +108,8 @@ export default function Header({
                 showDevControls ? togglePopulated : undefined
               }
               onOpenOnboarding={
-                showDevControls && isDashboardHome
-                  ? () => setOnboardingOpen(true)
+                showDevControls && isDashboardHome && onboarding
+                  ? onboarding.openOnboarding
                   : undefined
               }
             />
@@ -145,7 +137,6 @@ export default function Header({
           <ConnectWallet />
         </div>
       </HeaderMenuProvider>
-      <AccountOnboardingModal open={onboardingOpen} onOpenChange={setOnboardingOpen} />
     </div>
   );
 }

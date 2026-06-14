@@ -37,7 +37,7 @@ export function DataStatusPill({
       ? formatRelativeTimeFromNow(state.meta?.lastUpdatedAt)
       : null;
 
- /** Live • just now — label and time: white @ 80%; success separator dot: green @ 80%. */
+ /** Live • just now - label and time: white @ 80%; success separator dot: green @ 80%. */
   const timedSegmentTone = time ? "opacity-80" : "";
   const timedSeparatorTone =
     time && state.status === "success" ? "text-[var(--color-success)] opacity-80" : timedSegmentTone;

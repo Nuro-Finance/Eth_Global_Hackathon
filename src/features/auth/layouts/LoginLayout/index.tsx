@@ -7,6 +7,7 @@ import { SubmitButton } from "../../components/LoginForm/components";
 import { useLogin } from "./hooks";
 import { LoginBackground } from "./components";
 import { InputOTP } from "@/components/ui/input-otp";
+import { clearDesignMockSessionSuppress } from "@/lib/design-session-suppress";
 
 /**
  * LoginLayout - Main layout component for the login page
@@ -28,6 +29,10 @@ export function LoginLayout({ initialSignUp = false }: { initialSignUp?: boolean
   const [otpCode, setOtpCode] = useState("");
   const [resendCooldown, setResendCooldown] = useState(0);
   const cooldownRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    clearDesignMockSessionSuppress();
+  }, []);
 
   useEffect(() => {
     if (pendingVerification) {

@@ -28,7 +28,7 @@ export const SETTINGS_ROW_STACK_CLASS = "flex flex-col gap-4";
 export const SETTINGS_SELECT_TRIGGER_CLASS =
   "flex h-11 w-32 shrink-0 items-center justify-between rounded-[var(--radius-md)] border border-transparent !border-transparent bg-[var(--color-bg-input)] px-3 text-sm text-[var(--color-text-primary)] shadow-none outline-none transition-colors hover:bg-white/[0.05] focus:border-white/20 focus:outline-none focus:ring-0 dark:!border-transparent";
 
-/** Glass dropdown panel — matches transactions filter / wallet sort menus. */
+/** Glass dropdown panel - matches transactions filter / wallet sort menus. */
 export const SETTINGS_GLASS_MENU_CONTENT_CLASS = cn(
   WALLET_GLASS_MENU_CONTENT,
   "!min-w-0 !grid !gap-1 !p-1"
@@ -51,7 +51,7 @@ export const SETTINGS_GLASS_MENU_ITEM_IDLE = cn(
 /** @deprecated Use SettingsGlassPicker + SETTINGS_GLASS_MENU_* tokens */
 export const SETTINGS_SELECT_CONTENT_CLASS = SETTINGS_GLASS_MENU_CONTENT_CLASS;
 
-/** Selected row for userNav dropdowns (language picker — icon + label, not check grid). */
+/** Selected row for userNav dropdowns (language picker - icon + label, not check grid). */
 export const SETTINGS_USER_NAV_ITEM_SELECTED = cn(
   WALLET_GLASS_MENU_ITEM_ROW_BASE,
   "!flex w-full min-w-0 max-w-full items-center gap-2",

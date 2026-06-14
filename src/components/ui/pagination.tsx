@@ -305,7 +305,7 @@ export function Pagination({
         className
       )}
     >
-      {/* Items info — hidden in md1 only (768–959) */}
+      {/* Items info - hidden in md1 only (768–959) */}
       {showItemsInfo && (
         <div className="text-sm text-[var(--color-text-muted)] max-md:block min-[768px]:max-[959px]:hidden min-[960px]:block min-[960px]:text-left text-right">
           {showingLabel} {from} {toLabel} {to} {ofLabel} {totalItems}{" "}

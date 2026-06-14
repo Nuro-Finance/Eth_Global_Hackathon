@@ -7,7 +7,7 @@ const OverviewVariant3 = dynamic(
   { ssr: false },
 );
 
-/** xl (1280px+) — layout 3 with SVG card stack clipped inside deck widget. */
+/** xl (1280px+) - layout 3 with SVG card stack clipped inside deck widget. */
 export default function HomeResponsiveXl() {
   return <OverviewVariant3 homeResponsiveSvgDeck />;
 }

@@ -15,7 +15,7 @@ const pgUrl = rawPgUrl
 // from the connection string so the same code works against local Postgres
 // (no SSL) and Supabase (SSL required) without env-var gymnastics.
 // rejectUnauthorized: false because Supabase uses a self-signed cert chain
-// behind their pooler — verifying would fail. The TLS itself is real, just
+// behind their pooler - verifying would fail. The TLS itself is real, just
 // the cert chain isn't trusted by Node's default CA bundle.
 const needsSSL = /supabase\.(com|co)|sslmode=require/i.test(pgUrl);
 

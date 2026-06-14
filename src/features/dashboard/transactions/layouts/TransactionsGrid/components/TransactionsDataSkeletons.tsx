@@ -22,7 +22,7 @@ function PreviewRowSkeleton() {
   );
 }
 
-/** In-place refresh veil — same row count as live data (no extra skeleton rows). */
+/** In-place refresh veil - same row count as live data (no extra skeleton rows). */
 export function TransactionsPreviewColumnBusyVeil({
   title,
   rowCount,
@@ -50,7 +50,7 @@ export function TransactionsPreviewColumnBusyVeil({
   );
 }
 
-/** Flat veil over the table block — no extra borders (avoids faux outer stroke). */
+/** Flat veil over the table block - no extra borders (avoids faux outer stroke). */
 export function TransactionsTableBusyOverlay() {
   return (
     <div

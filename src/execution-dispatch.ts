@@ -4,15 +4,15 @@
  * The bridge between Intent Layer (DB) and Execution Layer (On-Chain).
  *
  * This module runs periodic sweeps to find pending intents and route them
- * to on-chain execution. It never creates fake data — it either executes
+ * to on-chain execution. It never creates fake data - it either executes
  * for real or leaves the intent in pending state with a clear reason.
  *
  * Architecture:
  * Intent recorded (DB) → Execution Dispatch picks up → On-chain tx → Status updated
  *
  * Sweep types (public build):
- * 1. Card transactions — pending deposits → verify issuer credit → complete
- * 2. Card settlements — vault → issuer
+ * 1. Card transactions - pending deposits → verify issuer credit → complete
+ * 2. Card settlements - vault → issuer
  * 3. Transfers + scheduled intents + issuer sync
  *
  * Errors are logged to execution_log.
@@ -140,7 +140,7 @@ async function resolveIssuerBaseAddress(db: Pool, userId: string, issuerUserId: 
 /**
  * Enqueue a card_settlements row if the user's payout_destination starts with 'card'.
  * Called from sweepMarketPayouts success branch. Uniqueness is enforced by
- * card_settlements.position_id UNIQUE — safe to call multiple times for the same position.
+ * card_settlements.position_id UNIQUE - safe to call multiple times for the same position.
  */
 async function enqueueCardSettlement(
   db: Pool,
@@ -159,7 +159,7 @@ async function enqueueCardSettlement(
 
   const issuerUserId = userRow.rows[0]?.issuer_user_id
   if (!issuerUserId) {
-    console.warn('[card-settlement] user', userId, 'has no Issuer ID — skipping enqueue')
+    console.warn('[card-settlement] user', userId, 'has no Issuer ID - skipping enqueue')
     return
   }
 
@@ -181,7 +181,7 @@ async function enqueueCardSettlement(
 // This sweep checks if Issuer has received the USDC by querying Issuer's balance/transactions,
 // and marks the transaction as 'completed' once confirmed.
 //
-// We NEVER write to cards.balance — Issuer is the source of truth.
+// We NEVER write to cards.balance - Issuer is the source of truth.
 
 async function sweepPendingCardTransactions(db: Pool): Promise<number> {
   let processed = 0
@@ -205,7 +205,7 @@ async function sweepPendingCardTransactions(db: Pool): Promise<number> {
           action: 'verify_deposit',
           status: 'skipped',
           tx_hash: null,
-          detail: `User ${tx.user_id} has no Issuer ID — cannot verify deposit`,
+          detail: `User ${tx.user_id} has no Issuer ID - cannot verify deposit`,
           error_message: null,
         })
         continue
@@ -226,7 +226,7 @@ async function sweepPendingCardTransactions(db: Pool): Promise<number> {
         })
 
         if (matchingIssuerTx) {
- // Issuer confirmed the deposit — mark as completed
+ // Issuer confirmed the deposit - mark as completed
           await db.query(
             `UPDATE card_transactions SET status = 'completed', updated_at = now() WHERE id = $1`,
             [tx.id]
@@ -242,7 +242,7 @@ async function sweepPendingCardTransactions(db: Pool): Promise<number> {
           })
           processed++
         } else {
- // Check age — if pending > 2 hours, flag as potentially failed
+ // Check age - if pending > 2 hours, flag as potentially failed
           const ageMs = Date.now() - txCreatedAt
           if (ageMs > 2 * 60 * 60 * 1000) {
             await logExecution(db, {
@@ -251,11 +251,11 @@ async function sweepPendingCardTransactions(db: Pool): Promise<number> {
               action: 'verify_deposit',
               status: 'failed',
               tx_hash: null,
-              detail: `Deposit of $${depositAmount.toFixed(2)} pending > 2 hours — may need manual review`,
+              detail: `Deposit of $${depositAmount.toFixed(2)} pending > 2 hours - may need manual review`,
               error_message: 'Timeout: Issuer has not confirmed deposit after 2 hours',
             })
           }
- // Don't mark as failed yet — Issuer may still be processing
+ // Don't mark as failed yet - Issuer may still be processing
         }
       } catch (err: any) {
         await logExecution(db, {
@@ -283,7 +283,7 @@ async function sweepPendingCardTransactions(db: Pool): Promise<number> {
   return processed
 }
 
-// ─── SWEEP 3.5: CARD SETTLEMENTS (Sprint B — vault → Issuer) ─────────────────
+// ─── SWEEP 3.5: CARD SETTLEMENTS (Sprint B - vault → Issuer) ─────────────────
 //
 // When a market payout lands in the user's vault and their payout_destination='card',
 // sweepMarketPayouts enqueues a card_settlements row. This sweep executes those:
@@ -328,7 +328,7 @@ async function sweepCardSettlements(db: Pool): Promise<number> {
           continue
         }
 
- // Max attempts exhausted — fail + surface to admin
+ // Max attempts exhausted - fail + surface to admin
         if (row.attempt_count >= MAX_SETTLEMENT_ATTEMPTS) {
           const finalStatus = row.fee_tx_hash ? 'failed_post_fee' : 'failed'
           await db.query(
@@ -418,7 +418,7 @@ async function sweepCardSettlements(db: Pool): Promise<number> {
           continue
         }
 
- // Execute two sequential txs inside a single chain lock — mirrors bridge.ts:447-469
+ // Execute two sequential txs inside a single chain lock - mirrors bridge.ts:447-469
         let feeTx: ethers.ContractTransaction | null = null
         let feeTxHash: string | null = row.fee_tx_hash  // may already exist from prior partial attempt
         let fwdTx: ethers.ContractTransaction | null = null
@@ -470,7 +470,7 @@ async function sweepCardSettlements(db: Pool): Promise<number> {
  // stashes when it enqueues. Use GREATEST(... , 0) so concurrent
  // races (e.g. multiple settle paths landing close together) can't
  // produce a negative total_profit. The decrement is an "after
- // money moved" event — same semantic as crediting card
+ // money moved" event - same semantic as crediting card
  // transactions for market winnings; never decrement before
  // forward_tx_hash is set.
           const settlementMetadata = (row.metadata && typeof row.metadata === 'object')
@@ -562,7 +562,7 @@ async function sweepCardSettlements(db: Pool): Promise<number> {
 // ─── SWEEP 4: ISSUER BALANCE SYNC ─────────────────────────────────────────────
 //
 // Periodically sync card balances FROM Issuer API INTO our DB.
-// This is a READ — Issuer is the source of truth. We store the cached value
+// This is a READ - Issuer is the source of truth. We store the cached value
 // so the frontend can display it without calling Issuer every render.
 
 async function sweepIssuerBalanceSync(db: Pool): Promise<number> {
@@ -589,7 +589,7 @@ async function sweepIssuerBalanceSync(db: Pool): Promise<number> {
         const outcome = await syncCardBalanceFromIssuer(db, user.card_id, issuerUserId, oldBalance, 'sweep')
         if (outcome.updated) synced++
       } catch (err: any) {
- // Don't log every sync failure as an error — Issuer may rate limit us
+ // Don't log every sync failure as an error - Issuer may rate limit us
         if (!err.message?.includes('404') && !err.message?.includes('rate')) {
           await logExecution(db, {
             entity_type: 'issuer_sync',
@@ -772,7 +772,7 @@ async function sweepPendingTransfers(db: Pool): Promise<number> {
             detail: `$${transferAmount.toFixed(2)} transferred vault→vault on Base`,
             error_message: null,
           })
- // Session 27 — Sprint 2.6 finisher. Scheduled transfers already
+ // Session 27 - Sprint 2.6 finisher. Scheduled transfers already
  // get a "processing" notification at the promote step in
  // sweepScheduledIntents. Fire a second "confirmed" notification
  // when the on-chain transfer actually lands so users know the
@@ -950,7 +950,7 @@ async function sweepScheduledIntents(db: Pool): Promise<number> {
 // ─── MAIN DISPATCH LOOP ──────────────────────────────────────────────────────
 
 let sweepInterval: NodeJS.Timeout | null = null
-const SWEEP_INTERVAL_MS = 60_000 // 60 seconds — configurable
+const SWEEP_INTERVAL_MS = 60_000 // 60 seconds - configurable
 
 export function startExecutionDispatch(db: Pool): void {
   console.log('[execution-dispatch] Starting execution dispatch engine (interval: 60s)')

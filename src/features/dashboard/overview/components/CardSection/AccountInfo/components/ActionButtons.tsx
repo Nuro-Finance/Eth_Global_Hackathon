@@ -15,7 +15,7 @@ interface ActionButtonsProps {
   layout?: CardSectionLayout;
  /** Parent supplies vertical gap (e.g. sm deck → actions at 16px) */
   noTopMargin?: boolean;
- /** sm: full-width Reload only — no Withdraw */
+ /** sm: full-width Reload only - no Withdraw */
   reloadOnly?: boolean;
 }
 

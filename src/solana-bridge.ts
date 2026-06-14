@@ -1,5 +1,5 @@
 /**
- * Solana Bridge — Circle Bridge Kit for Solana → Base USDC
+ * Solana Bridge - Circle Bridge Kit for Solana → Base USDC
  * ─────────────────────────────────────────────────────────
  *
  * Uses @circle-fin/bridge-kit (Circle's Bridge Kit) instead of
@@ -21,7 +21,7 @@ const USDC_SOLANA = new PublicKey(CONFIG.USDC_SOLANA)
 
 import { createHash } from "crypto"
 
-/** Master Solana wallet — used for bridge execution (fee vault, relay) */
+/** Master Solana wallet - used for bridge execution (fee vault, relay) */
 function getSolanaWallet(): Keypair {
     const privateKeyBytes = Uint8Array.from(Buffer.from(CONFIG.SOLANA_PRIVATE_KEY, "hex"))
     return Keypair.fromSecretKey(privateKeyBytes)
@@ -30,10 +30,10 @@ function getSolanaWallet(): Keypair {
 /**
  * Generate a PER-USER Solana deposit address.
  * Uses HMAC-SHA512 of (master_key + userId) to derive a unique keypair per user.
- * Same pattern as EVM HD derivation — deterministic and recoverable.
+ * Same pattern as EVM HD derivation - deterministic and recoverable.
  *
  * IMPORTANT: The master wallet is still used for bridge execution.
- * Per-user addresses are just for deposit DETECTION — funds are swept to master
+ * Per-user addresses are just for deposit DETECTION - funds are swept to master
  * before bridging.
  */
 export function generateSolanaDepositAddress(userId?: string): string {
@@ -133,18 +133,18 @@ export async function solanaBridgeAndForward(
  // ── Circle Bridge Kit: Solana → Base ─────────────────────────────────
     console.log(`[solana-bridge] Initiating Circle Bridge Kit Solana -> Base...`)
 
- // Dynamic imports — Bridge Kit + adapters are ESM
+ // Dynamic imports - Bridge Kit + adapters are ESM
     const { BridgeKit } = await import('@circle-fin/bridge-kit' as any)
     const { createSolanaAdapterFromPrivateKey } = await import('@circle-fin/adapter-solana' as any)
 
- // Solana adapter — signs the burn tx from our deposit wallet
+ // Solana adapter - signs the burn tx from our deposit wallet
     const depositKeyBase58 = toBase58(wallet.secretKey)
     const solanaAdapter = createSolanaAdapterFromPrivateKey({
         privateKey: depositKeyBase58,
         connection,
     })
 
- // Base adapter — use ethers v6 (aliased as ethers6) for EVM signing
+ // Base adapter - use ethers v6 (aliased as ethers6) for EVM signing
     const ethers6 = await import('ethers6' as any)
     const { createAdapterFromPrivateKey: createEvmAdapter } = await import('@circle-fin/adapter-ethers-v6' as any)
 
@@ -169,7 +169,7 @@ export async function solanaBridgeAndForward(
  // Log bridge events
     kit.on('*', (payload: any) => {
         if (payload?.action) {
-            console.log(`[solana-bridge] Event: ${payload.action} — ${payload.state || ''}${payload.txHash ? ' tx:' + payload.txHash.slice(0, 16) + '...' : ''}`)
+            console.log(`[solana-bridge] Event: ${payload.action} - ${payload.state || ''}${payload.txHash ? ' tx:' + payload.txHash.slice(0, 16) + '...' : ''}`)
         }
     })
 

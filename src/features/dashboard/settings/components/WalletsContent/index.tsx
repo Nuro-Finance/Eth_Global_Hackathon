@@ -88,7 +88,7 @@ function WalletDashedCtaButton({
   );
 }
 
-/** Created at account setup — not removable from settings. */
+/** Created at account setup - not removable from settings. */
 const ACCOUNT_RELOAD_ADDRESS = "0x71C7656EC7ab88b098defB751B7401B5f6d8976F";
 const ACCOUNT_WITHDRAW_ADDRESS = "0x742d35cc6634c0532925a3b844bc454e4438f44e";
 
@@ -106,10 +106,10 @@ interface WalletData {
   type: "ethereum" | "solana" | "bitcoin";
 }
 
-/** Dev preview ON — matches Nuro Front End 5.4.26 header / Privy design mock. */
+/** Dev preview ON - matches Nuro Front End 5.4.26 header / Privy design mock. */
 const PREVIEW_CONNECTED_ADDRESS = "0x742d35Cc6634C0532925a3b844Bc454e4438f44e";
 
-/** Dev preview ON — matches 5.4.26 My Wallet address book demo rows. */
+/** Dev preview ON - matches 5.4.26 My Wallet address book demo rows. */
 const PREVIEW_ADDRESS_BOOK_WALLETS: WalletData[] = [
   {
     id: "preview-chris-brignola",

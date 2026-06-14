@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// AGENT GAS BALANCE SYNC — hourly on-chain refresh (S32)
+// AGENT GAS BALANCE SYNC - hourly on-chain refresh (S32)
 //
 // Refreshes agent_gas_balances rows with on-chain provider.getBalance()
 // data + USD conversion via native-price.ts. Drives the Nuro POV "gas
@@ -44,7 +44,7 @@ export async function runGasBalanceSyncCycle(db: Pool): Promise<{
 
   try {
  // Pull rows whose last_synced_at is older than 1 hour. Cap at 200 per
- // cycle so a backlog doesn't stall the cron — next pass catches the
+ // cycle so a backlog doesn't stall the cron - next pass catches the
  // rest.
     const due = await db.query<SyncRow>(
       `SELECT agent_id, chain_id, wallet_address
@@ -62,7 +62,7 @@ export async function runGasBalanceSyncCycle(db: Pool): Promise<{
       try {
         const rpcUrl = RPC_URLS[row.chain_id]
         if (!rpcUrl) {
- // Unsupported chain — skip without failure-noise. Schema allows
+ // Unsupported chain - skip without failure-noise. Schema allows
  // any chain_id; we only sync ones we have an RPC for.
           continue
         }
@@ -85,7 +85,7 @@ export async function runGasBalanceSyncCycle(db: Pool): Promise<{
             balanceUsd = +(ethValue * priceUsd).toFixed(2)
           }
         } catch {
- /* swallow — leave balance_usd null */
+ /* swallow - leave balance_usd null */
         }
 
         const updRes = await db.query(
@@ -98,7 +98,7 @@ export async function runGasBalanceSyncCycle(db: Pool): Promise<{
         refreshed++
 
  // Track when we land below the configured threshold. Doesn't
- // alert directly — surfaced via the snapshot view. Future
+ // alert directly - surfaced via the snapshot view. Future
  // enhancement: fire to the bus on threshold-cross (matches the
  // budget-low pattern from S32).
         const lowThr = updRes.rows[0]?.low_threshold_usd

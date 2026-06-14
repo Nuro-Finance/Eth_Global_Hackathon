@@ -30,10 +30,10 @@ export interface ThemeColors {
     cardAccentMuted: string;
 }
 
-// 2026-05-25 — call: hide Nuro (purple), Golden, Silver (white) until
+// 2026-05-25 - call: hide Nuro (purple), Golden, Silver (white) until
 // minor styling hiccups on those 3 non-Obsidian themes are resolved in a future
 // sprint. Only Blue (Obsidian) ships visible for now. Theme definitions PRESERVED
-// below as `_hiddenThemes` for trivial re-enable when fixes land — spread back
+// below as `_hiddenThemes` for trivial re-enable when fixes land - spread back
 // into `themes` array in the desired order.
 //
 // Re-enable: replace `themes` body with the spread shown in `_hiddenThemes` plus
@@ -64,7 +64,7 @@ export const themes: ThemeColors[] = [
 ];
 
 /**
- * Hidden themes — spread these back into `themes` above (in the desired display
+ * Hidden themes - spread these back into `themes` above (in the desired display
  * order) when the styling hiccups noted on 2026-05-25 are fixed.
  */
 export const _hiddenThemes: ThemeColors[] = [

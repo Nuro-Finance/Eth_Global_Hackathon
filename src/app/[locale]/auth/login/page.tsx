@@ -2,7 +2,7 @@
 //
 // NextAuth v5 beta, some older ProtectedRoute code paths, and misbehaving
 // client-side pushes have historically tried to route users to
-// /<locale>/auth/login — a path that doesn't exist in our app. Result: 404
+// /<locale>/auth/login - a path that doesn't exist in our app. Result: 404
 // page, and users believe sign-in is broken.
 //
 // This shim catches the stray path and redirects server-side to the real

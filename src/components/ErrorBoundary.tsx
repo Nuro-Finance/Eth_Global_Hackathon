@@ -20,7 +20,7 @@ const GLASS_SHELL_INNER_STYLE = {
 } as const;
 
 /**
- * Global Error Boundary — catches React render crashes and reports to backend.
+ * Global Error Boundary - catches React render crashes and reports to backend.
  * All errors → POST /api/client-error → backend execution_log → ops tools
  */
 
@@ -76,7 +76,7 @@ export function reloadFromErrorBoundary() {
   window.location.replace(`/${locale}/login`);
 }
 
-/** Centered glass crash modal — used by ErrorBoundary and dev preview route. */
+/** Centered glass crash modal - used by ErrorBoundary and dev preview route. */
 export function ErrorFallbackModal({
   error,
   errorInfo,
@@ -242,7 +242,7 @@ function isBenignWalletConnectError(reason: unknown): boolean {
   );
 }
 
-/** Window-level handlers only — do not hook console.error (floods API in dev). */
+/** Window-level handlers only - do not hook console.error (floods API in dev). */
 export function installGlobalErrorHandlers() {
   if (typeof window === "undefined") return;
 

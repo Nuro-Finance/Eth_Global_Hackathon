@@ -2,13 +2,13 @@
  * Shared chain registry. Canonical source for per-chain facts that monitor,
  * bridge, ops tools, and any new deposit flow should agree on.
  *
- * Currently scoped to USDC decimals — the one mismatch that cost us 3 hours
+ * Currently scoped to USDC decimals - the one mismatch that cost us 3 hours
  * during Session 22's BSC incident (monitor hardcoded 6-dec, BSC uses 18-dec
  * Binance-Peg USDC → displayed real $0.04 as $40,000,000,000).
  *
  * Future expansion: chain metadata (name, usdcAddress, cctpDomain, lzEid, rpcUrl)
  * should consolidate here as the 23-chain matrix is tested. Do NOT copy-paste
- * chain facts into individual files — add them here and import.
+ * chain facts into individual files - add them here and import.
  */
 
 /**
@@ -17,7 +17,7 @@
  * USDC (18 decimals) at 0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d.
  */
 export const DECIMALS_BY_CHAIN: Record<number, number> = {
-    56: 18, // BSC — Binance-Peg USDC
+    56: 18, // BSC - Binance-Peg USDC
 };
 
 /**
@@ -39,7 +39,7 @@ export function getChainDecimals(chainId: number): number {
  *
  * Any chain NOT in this list will accept a deposit (monitor still
  * detects it) but bridging-to-Base will fail and the card will not
- * credit. For the FE we use this as a hard gate on the Reload picker —
+ * credit. For the FE we use this as a hard gate on the Reload picker -
  * we don't surface a chain we can't settle from.
  *
  * Source of truth: CCTP V1 native-USDC chains.
@@ -71,7 +71,7 @@ export const SETTLEMENT_SUPPORTED_CHAIN_NAMES = new Set<string>([
  * need to convert a human-readable chain name into the numeric ID required
  * by wagmi (`switchChain`, `useChainId`) or by the backend aggregator.
  *
- * EVM-only — Solana is intentionally NOT included here because (a) it's
+ * EVM-only - Solana is intentionally NOT included here because (a) it's
  * not an EVM chain (no real chainId) and (b) call sites that ALSO handle
  * Solana use a per-call sentinel convention (-1 for ReloadFlow's
  * aggregator dispatch; 0 for admin/transactions table rendering). Mixing
@@ -95,7 +95,7 @@ export const CHAIN_NAME_TO_ID: Record<string, number> = {
     Linea: 59144,
     Scroll: 534352,
     Base: 8453,
-    BASE: 8453, // alias — some upstream callers uppercase
+    BASE: 8453, // alias - some upstream callers uppercase
     Arbitrum: 42161,
     Celo: 42220,
     Avalanche: 43114,

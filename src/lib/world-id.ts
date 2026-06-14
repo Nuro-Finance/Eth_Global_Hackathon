@@ -1,4 +1,4 @@
-/** World Developer Portal action — must match the action created in the portal. */
+/** World Developer Portal action - must match the action created in the portal. */
 export const WORLD_RELOAD_ACTION =
   process.env.NEXT_PUBLIC_WORLD_ACTION?.trim() || "nuro-reload-verify";
 

@@ -3,7 +3,7 @@
 import { AsciiBackground } from "@/components/AsciiBackground";
 
 /**
- * LoginBackground — dark theme arena with interactive ASCII fog
+ * LoginBackground - dark theme arena with interactive ASCII fog
  */
 export function LoginBackground() {
   return (
@@ -16,7 +16,7 @@ export function LoginBackground() {
       {/* Interactive ASCII Fog (GPU Accelerated) */}
       <AsciiBackground />
 
-      {/* Texture Grain — mixed overlay noise */}
+      {/* Texture Grain - mixed overlay noise */}
       <div
         className="absolute inset-0 pointer-events-none opacity-[0.4] z-0"
         style={{

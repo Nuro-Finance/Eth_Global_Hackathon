@@ -163,7 +163,7 @@ function parsePct(s: string) {
 }
 
 /**
- * Full-screen assets list — shell + title row match {@link TransactionsModal}; subtitle + toolbar follow
+ * Full-screen assets list - shell + title row match {@link TransactionsModal}; subtitle + toolbar follow
  * {@link TransactionsTable} → {@link SearchAndFilters} layout (then table + pagination).
  */
 export function WalletAssetsModal({

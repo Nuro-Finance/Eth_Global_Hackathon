@@ -26,7 +26,7 @@ import {
 import { TransactionsTableBusyOverlay } from "@/features/dashboard/transactions/layouts/TransactionsGrid/components/TransactionsDataSkeletons";
 import { useDevPreviewMode } from "@/providers/DevPreviewModeProvider";
 
-/** sm (&lt;768px): raw primary deck on card face — never CardSection / My Card widget */
+/** sm (&lt;768px): raw primary deck on card face - never CardSection / My Card widget */
 function HomeResponsiveSmInner() {
   const tTx = useTranslations("Transactions");
   const { dateRange } = useDashboardDateRange();

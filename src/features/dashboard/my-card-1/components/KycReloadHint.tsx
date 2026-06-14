@@ -9,14 +9,14 @@ import { isKycVerified } from "@/lib/kyc-status";
  * approved/active. Without KYC, swapped USDC lands in their wallet
  * instead of auto-crediting the card (depositRoutingActive=false on the
  * firm-quote response). Previously this state was silent until AFTER
- * the swap confirmed — too late to action.
+ * the swap confirmed - too late to action.
  *
  * Fires the existing `nuro:verify-kyc` window event when the user clicks
- * "Verify identity" — KycBanner.tsx (mounted globally on the dashboard
+ * "Verify identity" - KycBanner.tsx (mounted globally on the dashboard
  * shell) listens for it and opens the legal-name prompt + KYC flow.
  *
  * Self-contained: fetches its own KYC status via /api/kyc/status. Hidden
- * while loading + when KYC is approved/active. Best-effort — auth or
+ * while loading + when KYC is approved/active. Best-effort - auth or
  * network failure renders nothing rather than a confusing error.
  */
 type KycPhase = "loading" | "needs-kyc" | "ok";
@@ -56,7 +56,7 @@ export function KycReloadHint() {
     try {
       window.dispatchEvent(new Event("nuro:verify-kyc"));
     } catch {
- /* noop — older browsers */
+ /* noop - older browsers */
     }
   };
 

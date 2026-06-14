@@ -2,7 +2,7 @@
  * Shared formatting helpers used across the app.
  *
  * USD formatting uses en-US locale with thousands separators and exactly 2
- * decimals — the finance/accounting standard. Replaces ad-hoc `$${x.toFixed(2)}`
+ * decimals - the finance/accounting standard. Replaces ad-hoc `$${x.toFixed(2)}`
  * which produces ugly "$2000000006.84" instead of "$2,000,000,006.84".
  */
 

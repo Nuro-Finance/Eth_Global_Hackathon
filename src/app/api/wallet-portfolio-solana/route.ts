@@ -5,7 +5,7 @@ const BACKEND = process.env.BACKEND_URL || "http://localhost:3000";
 /**
  * GET /api/wallet-portfolio-solana?address=<base58>
  *
- * Proxies to Express `/wallet-portfolio-solana`. Session 27 addition —
+ * Proxies to Express `/wallet-portfolio-solana`. Session 27 addition -
  * backend builds out native SOL + SPL balances via public Solana RPC +
  * CoinGecko prices. FE integration (Privy Solana provider) is Session 28
  * work; this endpoint is callable today with a manually-provided address.

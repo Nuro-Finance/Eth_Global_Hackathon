@@ -7,15 +7,15 @@
  * server-sent events shaped: `data: {"text": "..."}\n\n` then `data: [DONE]\n\n`.
  *
  * Why one route serves all 3:
- * - Same SSE shape on the wire — the FE consumer (scheduleAssistant) doesn't
+ * - Same SSE shape on the wire - the FE consumer (scheduleAssistant) doesn't
  * have to branch per provider
- * - Same auth model (req.user via NextAuth) — same rate-limit / audit posture
- * - Different upstream APIs handled internally — Anthropic via SDK, OpenAI
+ * - Same auth model (req.user via NextAuth) - same rate-limit / audit posture
+ * - Different upstream APIs handled internally - Anthropic via SDK, OpenAI
  * and Gemini via raw fetch (no extra deps)
  *
  * Security:
  * - apiKey is in the request body (over HTTPS); never logged
- * - Never persisted server-side — frontend stores in localStorage only
+ * - Never persisted server-side - frontend stores in localStorage only
  * - Auth-gated via NextAuth session; only signed-in users can proxy
  */
 
@@ -34,7 +34,7 @@ interface ChatRequestBody {
 }
 
 const SYSTEM_PROMPT =
-  `You are the Nuro.Finance AI assistant — a smart, concise financial copilot embedded in the Nuro dashboard. ` +
+  `You are the Nuro.Finance AI assistant - a smart, concise financial copilot embedded in the Nuro dashboard. ` +
   `You help users understand their spending, manage their virtual Visa cards, track transactions, and navigate the Nuro.Finance platform. ` +
   `Key facts: Nuro is the financial control plane for autonomous AI agents. Users hold virtual Visa cards that lock/unlock instantly. ` +
   `CCTP enables multi-chain crypto deposits. Powered by Nuro middleware. ` +
@@ -45,7 +45,7 @@ const ANTHROPIC_MODELS = {
   smart: "claude-opus-4-6",
 } as const;
 
-// OpenAI doesn't ship "GPT-5.5" — Chris's UX labels it that way for the demo.
+// OpenAI doesn't ship "GPT-5.5" - Chris's UX labels it that way for the demo.
 // Map fast/smart to the current top-of-line OpenAI models.
 const OPENAI_MODELS = {
   fast: "gpt-4o-mini",

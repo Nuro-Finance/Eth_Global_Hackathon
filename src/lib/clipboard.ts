@@ -1,5 +1,5 @@
 /**
- * Copy text to clipboard — works on both HTTPS (navigator.clipboard)
+ * Copy text to clipboard - works on both HTTPS (navigator.clipboard)
  * and HTTP (execCommand fallback, needed for dev/staging on plain IP).
  */
 export function copyToClipboard(text: string): void {

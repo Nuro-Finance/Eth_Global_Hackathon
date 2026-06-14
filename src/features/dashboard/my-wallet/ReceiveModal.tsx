@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * ReceiveModal — Session 25
+ * ReceiveModal - Session 25
  *
  * Simple "show me my address + QR" modal, opened from the Receive button on
  * ConnectedWalletDashboard. No network call, no state beyond copy-feedback.
@@ -35,7 +35,7 @@ export function ReceiveModal({
   open: boolean;
   onOpenChange: (next: boolean) => void;
   walletAddress: string;
- /** Reserved — dev preview uses demo address from parent. */
+ /** Reserved - dev preview uses demo address from parent. */
   previewMode?: boolean;
 }) {
   const [qrDataUrl, setQrDataUrl] = useState<string>("");
@@ -146,7 +146,7 @@ export function ReceiveModal({
                 aria-label="Copy wallet address"
               >
                 <span className="truncate font-mono text-sm text-[var(--color-text-primary)]">
-                  {walletAddress || "—"}
+                  {walletAddress || "-"}
                 </span>
                 <span className="flex shrink-0 items-center gap-1.5 text-xs font-semibold text-[var(--color-primary)]">
                   {copied ? (

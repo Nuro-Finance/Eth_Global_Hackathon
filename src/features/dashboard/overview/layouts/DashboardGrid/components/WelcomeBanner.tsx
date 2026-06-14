@@ -1,13 +1,13 @@
 "use client";
 
 /**
- * WelcomeBanner — first-load callout on /dashboard.
+ * WelcomeBanner - first-load callout on /dashboard.
  *
  * Bridges the public marketing pages ("Open your dashboard, watch the
  * autonomous action happen") and the actual dashboard surface. Without
  * this, users land in a sea of widgets without a clear next-step. With
  * it, they get one inviting card pointing at the highest-value
- * onboarding moves — connecting their first agent and their first bank.
+ * onboarding moves - connecting their first agent and their first bank.
  *
  * Dismissed state persists in localStorage so power-users don't see it
  * after the first session. Per-tab dismissal would feel jittery.

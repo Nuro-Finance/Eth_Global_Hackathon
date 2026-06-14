@@ -19,7 +19,7 @@ import { CHAIN_NAME_TO_ID, getChainDecimals } from "@/lib/chains";
  * - ERC-20 (USDC/USDT/DAI): useWriteContract with token.transfer(to, amount)
  *
  * The native-token path pairs perfectly with our new 0x swap pipeline
- * (Marathon 7 B MVP) — user sends native ETH, backend auto-swaps to USDC
+ * (Marathon 7 B MVP) - user sends native ETH, backend auto-swaps to USDC
  * and bridges to their card. Zero manual address-copying.
  *
  * Auto-switches chain if the user's wallet is on the wrong network.
@@ -46,9 +46,9 @@ interface WalletDepositButtonProps {
     amount: string;
  /** Which token to send: USDC, Tether, Dai, or native symbol (ETH/MATIC/BNB) */
     token: string;
- /** Which chain the deposit address is on — matches backend CHAINS names */
+ /** Which chain the deposit address is on - matches backend CHAINS names */
     chainName: string;
- /** Fired on successful tx hash — parent can advance UI to "processing" step */
+ /** Fired on successful tx hash - parent can advance UI to "processing" step */
     onSuccess?: (txHash: string) => void;
 }
 
@@ -89,20 +89,20 @@ export function WalletDepositButton({
  // 2. Build + send tx
             let hash: `0x${string}`;
             if (isNative) {
- // ETH/MATIC/BNB native — use sendTransaction with value
+ // ETH/MATIC/BNB native - use sendTransaction with value
                 hash = await sendTransactionAsync({
                     to: depositAddress as `0x${string}`,
                     value: parseEther(amount),
                 });
             } else {
- // USDC/USDT/DAI — ERC-20 transfer
+ // USDC/USDT/DAI - ERC-20 transfer
                 const tokenAddress = USDC_ADDRESSES[targetChainId || 1];
                 if (!tokenAddress) {
-                    setError(`${token} not yet supported on ${chainName} — use native ETH for now`);
+                    setError(`${token} not yet supported on ${chainName} - use native ETH for now`);
                     return;
                 }
  // Decimals resolved per-chain via the canonical chains.ts
- // override map — defaults to 6 for native USDC chains, 18
+ // override map - defaults to 6 for native USDC chains, 18
  // for BSC (Binance-Peg). Without this, sending 1000 USDC
  // on BSC would underflow by 12 orders of magnitude.
                 const decimals = getChainDecimals(targetChainId || 1);
@@ -116,7 +116,7 @@ export function WalletDepositButton({
             setTxHash(hash);
             onSuccess?.(hash);
         } catch (e: any) {
- // User-rejected, insufficient funds, etc. — show clean message
+ // User-rejected, insufficient funds, etc. - show clean message
             const raw = e?.shortMessage || e?.message || "Transaction failed";
             setError(raw.length > 120 ? raw.slice(0, 120) + "…" : raw);
         }
@@ -161,13 +161,13 @@ export function WalletDepositButton({
                     {txHash}
                 </span>
                 <span className="text-[11px] text-[var(--color-text-muted)]">
-                    Watching for arrival — card will credit automatically.
+                    Watching for arrival - card will credit automatically.
                 </span>
             </div>
         );
     }
 
- // Connected, no tx yet — show Send button (with chain-switch nudge if needed)
+ // Connected, no tx yet - show Send button (with chain-switch nudge if needed)
     return (
         <div className="flex flex-col gap-2 w-full">
             <button

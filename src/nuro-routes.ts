@@ -23,6 +23,7 @@ import { reportError } from './error-reporter'
 import { NATIVE_TOKENS, getErc20Allowlist, findErc20, previewSwapQuote, ensureAllowlistFresh, forceRefreshAllowlist } from './swap'
 import { verifyIdToken, OAuthVerifyError } from './oauth-verify'
 import { normalizeKycStatus } from './lib/kyc-status'
+import { wipeUserData } from './lib/wipe-user-data'
 import { placePolymarketTrade, getAgentBalance } from './polymarket'
 import Anthropic from '@anthropic-ai/sdk'
 import {
@@ -78,7 +79,7 @@ function resolveLocalDevOtp(): string | null {
 const LOCAL_DEV_OTP = resolveLocalDevOtp()
 if (LOCAL_DEV_OTP) {
   console.warn(
-    '[auth/otp] NURO_LOCAL_DEV_OTP enabled — fixed code 111111, extended TTL, verify bypass. ' +
+    '[auth/otp] NURO_LOCAL_DEV_OTP enabled - fixed code 111111, extended TTL, verify bypass. ' +
       'Never set NURO_LOCAL_DEV_OTP in production.',
   )
 }
@@ -124,10 +125,10 @@ async function issueEmailOtp(
 async function sendOtpEmail(toEmail: string, code: string, purpose: 'signup' | 'login' | 'recovery'): Promise<void> {
   const subject =
     purpose === 'signup'
-      ? `Verify your Nuro account — code ${code}`
+      ? `Verify your Nuro account - code ${code}`
       : purpose === 'login'
-        ? `Nuro sign-in code — ${code}`
-        : `Nuro account recovery — ${code}`
+        ? `Nuro sign-in code - ${code}`
+        : `Nuro account recovery - ${code}`
   const reasonLine =
     purpose === 'signup'
       ? 'Welcome to Nuro. Enter the code below to verify your email and finish creating your account.'
@@ -143,10 +144,10 @@ async function sendOtpEmail(toEmail: string, code: string, purpose: 'signup' | '
     ``,
     `This code expires in 10 minutes and can be used once.`,
     ``,
-    `If you did not start this request, you can safely ignore this email —`,
+    `If you did not start this request, you can safely ignore this email -`,
     `no account changes were made.`,
     ``,
-    `— Nuro Finance`,
+    `- Nuro Finance`,
   ].join('\n')
  // Fire-and-forget: caller already returns 200 to the client. If Resend is
  // down, the audit log shows the failure and the user can hit /resend-otp.
@@ -282,7 +283,7 @@ export function createNuroRouter(db: Pool): Router {
       )
       if (existing.rows.length > 0) {
  // If user exists but never verified, treat this like a resend instead
- // of a 409 — a real user retrying after closing the page should be
+ // of a 409 - a real user retrying after closing the page should be
  // able to recover. We update the password hash so a forgotten one is
  // overwritten without leaking that the account exists.
         if (existing.rows[0].email_verified === false) {
@@ -329,7 +330,7 @@ export function createNuroRouter(db: Pool): Router {
     }
   })
 
- // POST /auth/verify-otp — finalize signup OR login by exchanging a valid
+ // POST /auth/verify-otp - finalize signup OR login by exchanging a valid
  // OTP for a JWT. Single endpoint serves both flows; the OTP row's
  // `purpose` column distinguishes signup vs login.
   router.post('/auth/verify-otp', rateLimit, async (req, res) => {
@@ -375,7 +376,7 @@ export function createNuroRouter(db: Pool): Router {
           })
         }
 
- // Code is valid — consume it and mark user verified
+ // Code is valid - consume it and mark user verified
         await db.query(`UPDATE email_otps SET consumed_at = now() WHERE id = $1`, [otp.id])
       }
       const userResult = await db.query(
@@ -424,7 +425,7 @@ export function createNuroRouter(db: Pool): Router {
     }
   })
 
- // POST /auth/resend-otp — regenerate a fresh code for an email+purpose.
+ // POST /auth/resend-otp - regenerate a fresh code for an email+purpose.
  // Same rate-limit as the rest of /auth/*.
   router.post('/auth/resend-otp', rateLimit, async (req, res) => {
     const { email, purpose: rawPurpose } = req.body
@@ -440,7 +441,7 @@ export function createNuroRouter(db: Pool): Router {
         [normalizedEmail],
       )
       if (userResult.rows.length === 0) {
- // Pretend we sent — avoids account enumeration. The user will just
+ // Pretend we sent - avoids account enumeration. The user will just
  // never receive an email.
         return res.status(202).json({ ok: true })
       }
@@ -455,7 +456,7 @@ export function createNuroRouter(db: Pool): Router {
     }
   })
 
- // POST /auth/login (rate limited — 10 attempts per 15 min per IP + per-account lockout after 5 fails)
+ // POST /auth/login (rate limited - 10 attempts per 15 min per IP + per-account lockout after 5 fails)
   router.post('/auth/login', rateLimit, async (req, res) => {
     const { email, password } = req.body
     if (!email || !password)
@@ -495,7 +496,7 @@ export function createNuroRouter(db: Pool): Router {
         return res.status(401).json({ error: 'Invalid credentials' })
       }
 
- // Success — reset failed counter
+ // Success - reset failed counter
       if ((user.failed_login_attempts || 0) > 0 || user.locked_until) {
         await db.query(
           `UPDATE users SET failed_login_attempts = 0, locked_until = NULL WHERE id = $1`,
@@ -505,7 +506,7 @@ export function createNuroRouter(db: Pool): Router {
 
  // Day-7 demo-critical: if the account isn't yet email-verified (account
  // created via /auth/register before the OTP was entered), we issue a
- // fresh signup-purpose OTP and return needsVerification — same shape
+ // fresh signup-purpose OTP and return needsVerification - same shape
  // as the register endpoint. The FE pivots to the OTP screen.
  // Existing pre-migration accounts were grandfathered to verified=TRUE
  // so this never fires for them.
@@ -542,7 +543,7 @@ export function createNuroRouter(db: Pool): Router {
     }
   })
 
- // POST /auth/social-login — bridge OAuth identity → Nuro JWT.
+ // POST /auth/social-login - bridge OAuth identity → Nuro JWT.
  //
  // Context: NextAuth's Google provider on the FE creates a NextAuth session
  // cookie but does NOT give us a Nuro-issued JWT. Our backend requireAuth
@@ -553,7 +554,7 @@ export function createNuroRouter(db: Pool): Router {
  // Trust model: we require the provider's id_token (a JWT signed by the
  // provider's private key) and verify the signature + audience + issuer +
  // email_verified against the provider's JWKS before trusting any claim.
- // The previous version trusted {email, name} from the request body — that
+ // The previous version trusted {email, name} from the request body - that
  // was an impersonation vector if the endpoint was ever reached directly.
  // See src/oauth-verify.ts for the verification logic.
  //
@@ -563,7 +564,7 @@ export function createNuroRouter(db: Pool): Router {
     if (!provider || !id_token)
       return res.status(400).json({ error: 'provider and id_token required' })
 
- // Cryptographic verification — throws on any failure (bad signature,
+ // Cryptographic verification - throws on any failure (bad signature,
  // wrong audience, expired, unverified email, etc.).
     let verified
     try {
@@ -585,7 +586,7 @@ export function createNuroRouter(db: Pool): Router {
     const { email, name, externalId } = verified
 
     try {
- // Returning user — find by email and issue fresh Nuro JWT
+ // Returning user - find by email and issue fresh Nuro JWT
       const existing = await db.query(
         'SELECT id, email, name FROM users WHERE email = $1',
         [email]
@@ -604,7 +605,7 @@ export function createNuroRouter(db: Pool): Router {
         })
       }
 
- // New user — create with cryptographically-random placeholder password_hash
+ // New user - create with cryptographically-random placeholder password_hash
  // so column NOT NULL is satisfied but no feasible password can ever match.
  // This user can only sign in via OAuth from this point forward.
       const id = randomUUID()
@@ -722,7 +723,7 @@ export function createNuroRouter(db: Pool): Router {
  // FE's KYC modal prompts for first/last name and passes them in. We persist
  // them on the users row (migration 028 columns) and hand them to Issuer as the
  // legal identity. Second-time callers with stored names don't need to pass
- // anything — the stored values are used.
+ // anything - the stored values are used.
   router.post('/kyc/start', requireAuth, async (req, res) => {
     const userId = (req as any).user.id
     const firstNameIn = typeof req.body?.firstName === 'string' ? req.body.firstName.trim() : ''
@@ -735,7 +736,7 @@ export function createNuroRouter(db: Pool): Router {
       const user = userResult.rows[0]
       if (!user) return res.status(404).json({ error: 'User not found' })
 
- // Idempotent — already onboarded, return stored data
+ // Idempotent - already onboarded, return stored data
       if (user.issuer_user_id) {
         return res.json({
           kycUrl:    user.kyc_url,
@@ -745,9 +746,9 @@ export function createNuroRouter(db: Pool): Router {
       }
 
  // Name resolution precedence:
- // 1. Explicit body (KYC modal prompt) — highest trust
+ // 1. Explicit body (KYC modal prompt) - highest trust
  // 2. Stored first_name / last_name columns (migration 028)
- // 3. Split user.name on whitespace — legacy fallback
+ // 3. Split user.name on whitespace - legacy fallback
       let firstName = firstNameIn || user.first_name || ''
       let lastName  = lastNameIn  || user.last_name  || ''
       if (!firstName || !lastName) {
@@ -755,7 +756,7 @@ export function createNuroRouter(db: Pool): Router {
         if (!firstName) firstName = nameParts[0] || ''
         if (!lastName)  lastName  = nameParts.slice(1).join(' ') || ''
       }
- // Refuse to onboard with a nonsense name like "PlainPaper PlainPaper" —
+ // Refuse to onboard with a nonsense name like "PlainPaper PlainPaper" -
  // Issuer requires a real legal name and will later reject the KYC. Better
  // to prompt up front than strand the user mid-flow.
       if (!firstName || !lastName) {
@@ -770,7 +771,7 @@ export function createNuroRouter(db: Pool): Router {
       const issuerUserId = data.userId
  // Issuer returns { url, params: { userId } }. The browser lands on a bare
  // /kyc and crashes with "Required param userId is missing" if we drop
- // params — so merge them into the URL as query string before storing.
+ // params - so merge them into the URL as query string before storing.
       const kycBase   = data.kycCompletionLink?.url || null
       const kycParams = data.kycCompletionLink?.params || {}
       const kycUrl    = kycBase && Object.keys(kycParams).length > 0
@@ -792,7 +793,7 @@ export function createNuroRouter(db: Pool): Router {
 
  // Auto-create EVM deposit address so monitor watches this user immediately.
  // Migration 027 semantics: deposit_addresses.user_id holds local users.id.
- // HD derivation still seeds from issuerUserId — existing on-chain addresses
+ // HD derivation still seeds from issuerUserId - existing on-chain addresses
  // stay stable across the migration.
       const evmRec = await getDepositAddress(userId, 'evm')
       if (!evmRec) {
@@ -818,7 +819,7 @@ export function createNuroRouter(db: Pool): Router {
       )
       const issuerUserId = userResult.rows[0]?.issuer_user_id
       if (!issuerUserId) {
-        return res.status(400).json({ error: 'KYC not completed — verify identity first' })
+        return res.status(400).json({ error: 'KYC not completed - verify identity first' })
       }
  // Get/create EVM intermediary address (monitor watches this for non-Base chains)
  // Migration 027: deposit_addresses.user_id = local users.id now.
@@ -830,7 +831,7 @@ export function createNuroRouter(db: Pool): Router {
         await saveDepositAddress(userId, 'evm', address)
         evmRecord = { address }
       }
- // Issuer Base contract address — cached in deposit_addresses table after first fetch
+ // Issuer Base contract address - cached in deposit_addresses table after first fetch
       let issuerBaseAddress: string | null = null
       const baseRecord = await getDepositAddress(userId, 'base')
       if (baseRecord) {
@@ -843,7 +844,7 @@ export function createNuroRouter(db: Pool): Router {
           }
         } catch { /* not provisioned */ }
       }
- // Solana deposit address — per-user derivation (SHA-512 of master key + userId)
+ // Solana deposit address - per-user derivation (SHA-512 of master key + userId)
       let solanaRecord = await getDepositAddress(userId, 'solana')
       if (!solanaRecord) {
         try {
@@ -853,7 +854,7 @@ export function createNuroRouter(db: Pool): Router {
         } catch { /* Solana key not configured */ }
       }
       res.json({
-        evm:    evmRecord.address,           // Non-Base chains — monitor bridges to Issuer
+        evm:    evmRecord.address,           // Non-Base chains - monitor bridges to Issuer
         base:   issuerBaseAddress,             // Base direct deposit
         solana: solanaRecord?.address ?? null,
       })
@@ -872,7 +873,7 @@ export function createNuroRouter(db: Pool): Router {
         [userId]
       )
 
- // Sprint D: shared helper — reads Issuer, write-through if drift ≥$0.01,
+ // Sprint D: shared helper - reads Issuer, write-through if drift ≥$0.01,
  // alerts on drift ≥$10, logs every call. Never writes from local calc.
  // Day-4 hardening: SKIP cards without `issuer_card_id` (phantoms /
  // demo deck-stack rows). Without this guard the user-level Issuer
@@ -884,7 +885,7 @@ export function createNuroRouter(db: Pool): Router {
       if (issuerUserId && result.rows.length > 0) {
         for (const card of result.rows) {
           if (!card.is_active) continue
-          if (!card.issuer_card_id) continue  // phantom — never overwrite
+          if (!card.issuer_card_id) continue  // phantom - never overwrite
           const oldBalance = parseFloat(card.balance || '0')
           try {
             const outcome = await syncCardBalanceFromIssuer(db, card.id, issuerUserId, oldBalance, 'get_cards')
@@ -956,7 +957,7 @@ export function createNuroRouter(db: Pool): Router {
       )
 
  // Issuer card sync: list first, create only if none exist
- // CHANGED from fire-and-forget to AWAITED — user must know if card creation failed
+ // CHANGED from fire-and-forget to AWAITED - user must know if card creation failed
       let issuerSyncStatus = 'skipped'
       let issuerSyncError: string | null = null
 
@@ -967,7 +968,7 @@ export function createNuroRouter(db: Pool): Router {
           let issuerCardId: string | null = null
 
           if (issuerCards.length > 0) {
- // Issuer already has a card — reuse it (don't try to create)
+ // Issuer already has a card - reuse it (don't try to create)
             issuerCardId = issuerCards[0].cardId || (issuerCards[0] as any).id
             console.log(`[POST /cards] Found existing Issuer card ${issuerCardId} for user ${issuerUserId}`)
             issuerSyncStatus = 'linked'
@@ -977,7 +978,7 @@ export function createNuroRouter(db: Pool): Router {
               [id, `Found existing Issuer card: ${issuerCardId}`]
             ).catch(() => {})
           } else {
- // Step 2: No existing card — try to create one
+ // Step 2: No existing card - try to create one
             try {
               issuerCardId = await createCard(issuerUserId)
               console.log(`[POST /cards] Created Issuer card ${issuerCardId} for user ${issuerUserId}`)
@@ -1050,7 +1051,7 @@ export function createNuroRouter(db: Pool): Router {
   })
 
  // PATCH /cards/:id
- // ⚠️ S32 SECURITY FIX — `balance` is INTENTIONALLY NOT accepted from the
+ // ⚠️ S32 SECURITY FIX - `balance` is INTENTIONALLY NOT accepted from the
  // request body. Allowing client-supplied balance combined with the
  // withdrawal balance gate (line ~2774) created an exploit chain:
  // PATCH balance → spoof → withdraw real treasury USDC. The card balance
@@ -1075,7 +1076,7 @@ export function createNuroRouter(db: Pool): Router {
     let idx = 1
     if (lockValue !== undefined) { updates.push(`is_locked = $${idx++}`); values.push(lockValue) }
     if (isActive !== undefined)  { updates.push(`is_active = $${idx++}`); values.push(isActive) }
- // ⚠️ balance is NOT settable from this endpoint — see header comment.
+ // ⚠️ balance is NOT settable from this endpoint - see header comment.
     if (nameValue !== undefined) { updates.push(`card_name = $${idx++}`); values.push(nameValue) }
     if (gradient !== undefined) { updates.push(`gradient = $${idx++}`); values.push(gradient) }
     if (defaultValue !== undefined) { updates.push(`is_default = $${idx++}`); values.push(defaultValue) }
@@ -1127,7 +1128,7 @@ export function createNuroRouter(db: Pool): Router {
       const userId = (req as any).user.id
 
       if (issuerCardId) {
- // Real Issuer card exists — sync freeze state to Issuer's backend
+ // Real Issuer card exists - sync freeze state to Issuer's backend
         try {
           await freezeCard(issuerCardId, frozenState)
  // Log successful freeze/unfreeze to execution_log
@@ -1135,10 +1136,10 @@ export function createNuroRouter(db: Pool): Router {
             `INSERT INTO execution_log (id, entity_type, entity_id, action, status, tx_hash, detail, error_message, created_at)
              VALUES (gen_random_uuid(), 'card_freeze', $1, $2, 'success', NULL, $3, NULL, now())`,
             [cardId, frozenState ? 'freeze' : 'unfreeze',
-             `Card ${cardId} ${frozenState ? 'frozen' : 'unfrozen'} — Issuer card ${issuerCardId} synced`]
+             `Card ${cardId} ${frozenState ? 'frozen' : 'unfrozen'} - Issuer card ${issuerCardId} synced`]
           )
         } catch (err: any) {
- // Issuer sync failed — log the failure but DB state is already updated
+ // Issuer sync failed - log the failure but DB state is already updated
           const errMsg = err?.response?.data?.error || err?.message || 'Unknown error'
           await db.query(
             `INSERT INTO execution_log (id, entity_type, entity_id, action, status, tx_hash, detail, error_message, created_at)
@@ -1150,13 +1151,13 @@ export function createNuroRouter(db: Pool): Router {
           console.warn(`[PATCH /cards/:id] Issuer freeze sync failed for card ${cardId}:`, errMsg)
         }
       } else {
- // No Issuer card ID — log that freeze is DB-only (execution layer not connected)
+ // No Issuer card ID - log that freeze is DB-only (execution layer not connected)
         await db.query(
           `INSERT INTO execution_log (id, entity_type, entity_id, action, status, tx_hash, detail, error_message, created_at)
            VALUES (gen_random_uuid(), 'card_freeze', $1, $2, 'skipped', NULL, $3, $4, now())`,
           [cardId, frozenState ? 'freeze' : 'unfreeze',
-           `Card ${cardId} ${frozenState ? 'frozen' : 'unfrozen'} in DB only — no Issuer card ID linked`,
-           'Issuer card ID is null — card not yet provisioned at card issuer']
+           `Card ${cardId} ${frozenState ? 'frozen' : 'unfrozen'} in DB only - no Issuer card ID linked`,
+           'Issuer card ID is null - card not yet provisioned at card issuer']
         ).catch(() => {})
       }
     }
@@ -1170,16 +1171,16 @@ export function createNuroRouter(db: Pool): Router {
     res.status(204).send()
   })
 
- // GET /cards/:id/secrets — fetch real PAN/CVV/expiry from Issuer API
+ // GET /cards/:id/secrets - fetch real PAN/CVV/expiry from Issuer API
  // This is the ONLY way to get real card secrets. Never store CVV locally.
  // S33 Tier 0 #3: rate limit + audit on /cards/:id/secrets.
  // CVV reveal is the most sensitive endpoint we expose to users; without
  // a cap, a stolen JWT can scrape the PAN+CVV unbounded. 5 reveals/hour
  // per user is generous for legit use (filling forms on 3-4 sites) and
  // tight enough to slow exfiltration. Window is rolling-1h via a simple
- // in-memory map; restart resets it (acceptable — restart frequency is
- // measured in hours, not reveal-attack speed). Every attempt — allowed
- // or denied — appends to execution_log so we have a paper trail.
+ // in-memory map; restart resets it (acceptable - restart frequency is
+ // measured in hours, not reveal-attack speed). Every attempt - allowed
+ // or denied - appends to execution_log so we have a paper trail.
   const SECRETS_RATE_WINDOW_MS = 60 * 60 * 1000 // 1 hour
  // Day-5 fix: bumped from 5 → 50. The original cap was set when the Issuer
  // reveal flow was newly shipped and we were defensive about exfil bursts;
@@ -1203,7 +1204,7 @@ export function createNuroRouter(db: Pool): Router {
         const retryAfterSec = Math.ceil(
           (entry.windowStart + SECRETS_RATE_WINDOW_MS - now) / 1000,
         )
- // Audit the denied attempt — exfil patterns show up here as bursts.
+ // Audit the denied attempt - exfil patterns show up here as bursts.
         await db
           .query(
             `INSERT INTO execution_log
@@ -1277,7 +1278,7 @@ export function createNuroRouter(db: Pool): Router {
         if (real) {
           revealedPan = real.pan
           revealedCvv = real.cvv
- // Encrypted secrets endpoint doesn't return expiry — only PAN+CVV.
+ // Encrypted secrets endpoint doesn't return expiry - only PAN+CVV.
  // Build expiry from the metadata fields if the response shape
  // included them (plaintext fallback path), else leave for the
  // metadata-merge step below.
@@ -1289,12 +1290,12 @@ export function createNuroRouter(db: Pool): Router {
         console.warn('[GET /cards/:id/secrets] reveal failed, falling back to metadata:', revealErr?.response?.data || revealErr.message?.slice(0, 120))
       }
 
- // Always also fetch metadata — the encrypted /secrets endpoint omits
+ // Always also fetch metadata - the encrypted /secrets endpoint omits
  // expiry, so we need /cards/:id to fill it in. Cheap call, idempotent,
  // also gives us a graceful fallback if reveal failed entirely.
       const meta = await getIssuerCardNumber(issuerCardId)
       if (!revealedPan) {
- // Reveal failed or returned null — surface metadata so the FE still
+ // Reveal failed or returned null - surface metadata so the FE still
  // gets last4 + expiry rendered instead of a 404.
         if (!meta) {
           return res.status(404).json({ error: 'Could not retrieve card details from Issuer' })
@@ -1303,14 +1304,14 @@ export function createNuroRouter(db: Pool): Router {
         revealedExpiry = meta.expiryDate
  // revealedCvv stays null
       } else if (!revealedExpiry && meta?.expiryDate) {
- // Reveal succeeded but expiry was missing from its payload — patch
+ // Reveal succeeded but expiry was missing from its payload - patch
  // from metadata.
         revealedExpiry = meta.expiryDate
       }
 
- // Also update DB with latest PAN/expiry (NEVER CVV — PCI-DSS 3.2.2).
+ // Also update DB with latest PAN/expiry (NEVER CVV - PCI-DSS 3.2.2).
  // Only persist last 4 digits of the PAN. The full PAN is ephemeral
- // here — we don't write the full pan column even if we have it.
+ // here - we don't write the full pan column even if we have it.
       if (revealedPan || revealedExpiry) {
         const last4Source = revealedPan ? revealedPan.replace(/\D/g, '').slice(-4) : null
         await db.query(
@@ -1322,7 +1323,7 @@ export function createNuroRouter(db: Pool): Router {
         ).catch(() => {})
       }
 
- // Audit successful reveal — the canonical "PAN was viewed" record.
+ // Audit successful reveal - the canonical "PAN was viewed" record.
  // We do NOT log the PAN/CVV themselves (that defeats the audit's
  // purpose); only the fact that user X revealed card Y at time T,
  // plus whether full reveal succeeded vs metadata fallback.
@@ -1354,7 +1355,7 @@ export function createNuroRouter(db: Pool): Router {
       })
     } catch (err: any) {
       console.error('[GET /cards/:id/secrets]', err?.response?.data || err.message)
- // Audit the error too — operator wants to see Issuer outage spikes.
+ // Audit the error too - operator wants to see Issuer outage spikes.
       await db
         .query(
           `INSERT INTO execution_log (entity_type, entity_id, action, status, error_message, detail)
@@ -1373,12 +1374,12 @@ export function createNuroRouter(db: Pool): Router {
     }
   })
 
- // POST /cards/:id/report-lost — user reports card as lost or stolen.
+ // POST /cards/:id/report-lost - user reports card as lost or stolen.
  // S33 Tier 1 #7: the FE button (CardDetails.tsx ~line 415) was wired to
  // a callback prop that nobody passed in, so clicking did nothing. This
  // endpoint backs that button. Flow:
  // 1. Verify card ownership (requireAuth + WHERE user_id = $userId)
- // 2. Freeze with Issuer (calls freezeCard(issuer_card_id) — the same
+ // 2. Freeze with Issuer (calls freezeCard(issuer_card_id) - the same
  // Issuer call that powers the existing Toggle Freeze button, so we
  // reuse that mechanism for the actual block on transaction approval)
  // 3. Mark cards.is_locked = true locally so FE reflects immediately
@@ -1387,7 +1388,7 @@ export function createNuroRouter(db: Pool): Router {
  // 5. execution_log audit row + counsel-event event for cross-system trace
  //
  // Reason captured in body so support can distinguish lost vs stolen vs
- // other (matters for fraud-claim downstream — e.g. stolen → file police
+ // other (matters for fraud-claim downstream - e.g. stolen → file police
  // report; lost → just lock + reissue).
   router.post('/cards/:id/report-lost', requireAuth, async (req: any, res: Response) => {
     const userId = req.user.id
@@ -1399,7 +1400,7 @@ export function createNuroRouter(db: Pool): Router {
     }
 
  // S33 Tier 1 #13: scan user note. The note is stored in card_alerts
- // (operator inbox) — same poisoning concerns as other user-authored
+ // (operator inbox) - same poisoning concerns as other user-authored
  // text fields. Empty note (the common case) is no-op.
     if (note) {
       try {
@@ -1444,7 +1445,7 @@ export function createNuroRouter(db: Pool): Router {
         })
       }
 
- // 3. Freeze with Issuer — this is the Execution Layer block that
+ // 3. Freeze with Issuer - this is the Execution Layer block that
  // actually prevents transactions from being authorized. If the
  // Issuer call fails, we still lock locally so the user gets the
  // immediate "frozen" visual; operator gets surfaced via the
@@ -1462,7 +1463,7 @@ export function createNuroRouter(db: Pool): Router {
         }
       }
 
- // 4. Local lock (always — even if Issuer freeze failed, the user
+ // 4. Local lock (always - even if Issuer freeze failed, the user
  // must SEE the card as frozen, and admin can retry Issuer side).
       await db.query(
         'UPDATE cards SET is_locked = true, updated_at = now() WHERE id = $1',
@@ -1477,11 +1478,11 @@ export function createNuroRouter(db: Pool): Router {
         [
           cardId,
           userId,
-          `Card reported ${reason}${note ? ` — ${note}` : ''}. Issuer freeze: ${issuerFreezeStatus}.`,
+          `Card reported ${reason}${note ? ` - ${note}` : ''}. Issuer freeze: ${issuerFreezeStatus}.`,
         ],
       )
 
- // 6. Audit trail (execution_log) — operator dashboard reads this.
+ // 6. Audit trail (execution_log) - operator dashboard reads this.
       await db.query(
         `INSERT INTO execution_log (entity_type, entity_id, action, status, error_message, detail)
          VALUES ($1, $2, $3, $4, $5, $6)`,
@@ -1524,7 +1525,7 @@ export function createNuroRouter(db: Pool): Router {
 
  // ── Card Controls ────────────────────────────────────────────────────────────
 
- // GET /cards/:id/controls — fetch limits + live usage
+ // GET /cards/:id/controls - fetch limits + live usage
   router.get('/cards/:id/controls', requireAuth, async (req, res) => {
     const userId = (req as any).user.id;
     const { id: cardId } = req.params;
@@ -1573,7 +1574,7 @@ export function createNuroRouter(db: Pool): Router {
     }
   });
 
- // PATCH /cards/:id/controls — update limits
+ // PATCH /cards/:id/controls - update limits
   router.patch('/cards/:id/controls', requireAuth, async (req, res) => {
     const userId = (req as any).user.id;
     const { id: cardId } = req.params;
@@ -1642,7 +1643,7 @@ export function createNuroRouter(db: Pool): Router {
     }
   });
 
- // GET /cards/:id/controls/alerts — recent abnormality alerts
+ // GET /cards/:id/controls/alerts - recent abnormality alerts
   router.get('/cards/:id/controls/alerts', requireAuth, async (req, res) => {
     const userId = (req as any).user.id;
     const { id: cardId } = req.params;
@@ -1681,7 +1682,7 @@ export function createNuroRouter(db: Pool): Router {
 
  /**
  * Lazy-singleton Anthropic client.
- * @deprecated For per-card chat — use BYOK apiKey on POST /cards/:id/chat.
+ * @deprecated For per-card chat - use BYOK apiKey on POST /cards/:id/chat.
  * Still used by self-learn report generation (POST /users/me/reports).
  */
   let _anthropicClient: Anthropic | null = null;
@@ -1695,11 +1696,11 @@ export function createNuroRouter(db: Pool): Router {
 
  /** Pull live card context for the system prompt (balance, name, recent merchants). */
   async function buildCardContext(cardId: string, userId: string): Promise<CardContext | null> {
- // 2026-05-25 fix: removed JOIN to card_limits — that table doesn't exist
+ // 2026-05-25 fix: removed JOIN to card_limits - that table doesn't exist
  // in the current schema (caused "relation \"card_limits\" does not exist"
  // in production). Spending limits aren't in the DB yet; system prompt
  // gracefully handles spendingLimitMonthly=null already.
- // 2026-05-25 fix: column is c.card_last_4 (per migration 041 — S33
+ // 2026-05-25 fix: column is c.card_last_4 (per migration 041 - S33
  // Tier 0 PAN retirement). Earlier draft used c.last_4 which doesn't
  // exist. Migration log shows the column was added 7d before this
  // chat endpoint shipped, so we need the qualified name.
@@ -1766,7 +1767,7 @@ export function createNuroRouter(db: Pool): Router {
     const validProviders: ChatLlmProvider[] = ['openai', 'anthropic', 'gemini'];
     const tier = req.body?.tier === 'smart' ? 'smart' : 'fast';
 
- // BYOK-only — server ANTHROPIC_API_KEY path deprecated (no company/shared key).
+ // BYOK-only - server ANTHROPIC_API_KEY path deprecated (no company/shared key).
     if (!byokApiKey || byokApiKey.length < 10) {
       return res.status(401).json({
         error:
@@ -1808,18 +1809,18 @@ export function createNuroRouter(db: Pool): Router {
         { role: 'user' as const, content: userMessage },
       ];
 
- // .self_learn signal injection (2026-05-25 — migration 052):
+ // .self_learn signal injection (2026-05-25 - migration 052):
  // Load recent user-level signals (card creations, KYC milestones,
  // reloads, prior chat across all cards, persona swaps, etc.) and
  // attach them to the system prompt so the agent answers with
  // awareness of the user's broader behavior, not just THIS card.
- // The agent is still scoped to THIS card — the signals are context.
+ // The agent is still scoped to THIS card - the signals are context.
       const recentSignals = await loadRecentSignals(db as any, userId, 25);
       const selfLearnBlock = `\n\n--- USER .self_learn ACTIVITY (last 25 events, newest first) ---\n${formatSignalsForPrompt(recentSignals)}\n\nWhen answering, draw on this activity only when it's directly relevant. Don't recite the list. Don't reveal you have access to it unless asked.`;
 
       const system = buildSystemPrompt(persona, ctx) + selfLearnBlock;
 
- // M12 tool-use loop — OpenAI / Anthropic / Gemini BYOK.
+ // M12 tool-use loop - OpenAI / Anthropic / Gemini BYOK.
  // See lib/card-agent-chat-loop.ts.
       const toolCtx: CardChatContext = {
         db: db as any,
@@ -1878,16 +1879,16 @@ export function createNuroRouter(db: Pool): Router {
       }
 
  // M12 inline drift detector (2026-05-29 conservative MVP).
- // Bug reported: "I asked my card if it could freeze itself —
- // it lied and said yes — then it did nothing." Smith's full Claude-
+ // Bug reported: "I asked my card if it could freeze itself -
+ // it lied and said yes - then it did nothing." Smith's full Claude-
  // pass detector lands later in M12, but for the specific bug pattern
- // we ALREADY have enough info on every turn — assistant text +
+ // we ALREADY have enough info on every turn - assistant text +
  // toolsFired array. Fire the simplest possible regex sieve right
  // here: if the reply claims a freeze/unfreeze happened AND no
  // freeze tool actually fired, log a drift violation. Conservative
  // pattern set chosen so false-positives stay near zero. Real users
  // will hit this if and only if the model regresses to the original
- // bug — exactly what we want to alarm on.
+ // bug - exactly what we want to alarm on.
       try {
         const claimedFreeze = /\b(?:froze|frozen|freezing|i'?ll freeze|i have frozen|i'?ve frozen)\b/i.test(assistantText);
         const claimedUnfreeze = /\b(?:unfroze|unfrozen|unfreezing|i'?ll unfreeze|i have unfrozen|i'?ve unfrozen)\b/i.test(assistantText);
@@ -1911,7 +1912,7 @@ export function createNuroRouter(db: Pool): Router {
           });
         }
       } catch (driftErr: any) {
- // Drift detection is best-effort — never let it block the chat reply.
+ // Drift detection is best-effort - never let it block the chat reply.
         console.warn('[chat drift detector] failed:', driftErr?.message);
       }
 
@@ -1930,7 +1931,7 @@ export function createNuroRouter(db: Pool): Router {
         stateChanges: accumulatedStateChanges,
  // Trust-signal pill: list of tool names that fired in this turn.
  // The chat UI renders a small chip per name under the assistant
- // message — concrete proof of what the agent actually did.
+ // message - concrete proof of what the agent actually did.
         toolsFired,
       });
     } catch (err: any) {
@@ -1984,7 +1985,7 @@ export function createNuroRouter(db: Pool): Router {
  //
  // Pulls user_signals for the chosen window, asks Claude to synthesize a
  // personalized report in the requested kind, persists to self_learn_reports
- // (per migration 052 — spec ratified ticket #15).
+ // (per migration 052 - spec ratified ticket #15).
   router.post('/users/me/reports', requireAuth, async (req: any, res: Response) => {
     const userId = (req as any).user.id;
     const cadenceRaw = String(req.body?.cadence || 'weekly');
@@ -2015,7 +2016,7 @@ export function createNuroRouter(db: Pool): Router {
  // Build a compact bullet list of activity for the prompt. We cap at 80
  // bullets to keep token cost predictable; if the user has >80 signals
  // in the window we show the newest 80 (formatSignalsForPrompt itself
- // hard-caps at 15 internally for the chat injection — but the report
+ // hard-caps at 15 internally for the chat injection - but the report
  // generator wants more so we format here directly).
       const signalLines = signals.slice(0, 80).map((s) => {
         const ago = new Date(s.created_at).toISOString().slice(0, 10);
@@ -2048,10 +2049,10 @@ export function createNuroRouter(db: Pool): Router {
         '',
         `Cadence: ${cadenceLabel}`,
         cadence === 'custom'
-          ? 'The user gave a free-text window description. Interpret it against the activity below — if "last month" pick the last 30 days, if "since I joined" use the full window, etc.'
+          ? 'The user gave a free-text window description. Interpret it against the activity below - if "last month" pick the last 30 days, if "since I joined" use the full window, etc.'
           : 'Cover the entire cadence window.',
         '',
-        'Format: Markdown. Start with a SHORT title (one line, ## prefix, no quotes). Then 3–6 short sections, each with a ### heading and 2–4 lines of prose. Use bullet lists sparingly — only for genuine lists. Total length: 250–500 words. No fluff. No disclaimers. No "as your personal AI" preambles.',
+        'Format: Markdown. Start with a SHORT title (one line, ## prefix, no quotes). Then 3–6 short sections, each with a ### heading and 2–4 lines of prose. Use bullet lists sparingly - only for genuine lists. Total length: 250–500 words. No fluff. No disclaimers. No "as your personal AI" preambles.',
         '',
         'Voice: warm but not saccharine. Specific over generic. Cite specific signals when concrete ("On May 14 you froze your Amazon Orders card"). Never reveal the raw payload structure or that you\'re reading a JSON log. Speak as if you\'ve been watching their journey on Nuro.',
         '',
@@ -2081,7 +2082,7 @@ export function createNuroRouter(db: Pool): Router {
       const titleMatch = bodyMarkdown.match(/^#{1,3}\s+(.+?)$/m);
       const title = titleMatch
         ? titleMatch[1].trim().slice(0, 200)
-        : `${kind.charAt(0).toUpperCase() + kind.slice(1)} report — ${cadenceLabel}`;
+        : `${kind.charAt(0).toUpperCase() + kind.slice(1)} report - ${cadenceLabel}`;
 
  // Persist. signal_ids array captures which rows fed this generation so
  // we can debug / replay later (per migration 052 comment).
@@ -2108,7 +2109,7 @@ export function createNuroRouter(db: Pool): Router {
 
       const reportId = inserted.rows[0]?.id;
 
- // Emit a signal that we generated this report — so future reports
+ // Emit a signal that we generated this report - so future reports
  // can see "user requested 3 weekly reports in the last month" as
  // a meta-pattern.
       voidSafe(emitSignal({
@@ -2135,7 +2136,7 @@ export function createNuroRouter(db: Pool): Router {
     }
   });
 
- // GET /users/me/reports — list past reports (newest first, lightweight).
+ // GET /users/me/reports - list past reports (newest first, lightweight).
   router.get('/users/me/reports', requireAuth, async (req: any, res: Response) => {
     const userId = (req as any).user.id;
     const limit = Math.min(parseInt(String(req.query.limit || '20'), 10) || 20, 100);
@@ -2324,11 +2325,11 @@ export function createNuroRouter(db: Pool): Router {
  // These are the on-chain USDC deposits from various chains.
  //
  // Migration 027 (Session 27): transactions.user_id now holds local
- // users.id directly. The old issuer_user_id lookup is gone — query
+ // users.id directly. The old issuer_user_id lookup is gone - query
  // straight against the JWT userId.
     try {
       {
- // Session 25 Phase 6 — exclude failed + failed_restart + stranded
+ // Session 25 Phase 6 - exclude failed + failed_restart + stranded
  // from the Transactions feed. These are retry-loop artifacts that
  // would inflate Total Income if surfaced.
         const bridgeResult = await db.query(
@@ -2373,18 +2374,18 @@ export function createNuroRouter(db: Pool): Router {
  // Real card transactions arrive via the Issuer issuer webhook (debit
  // events from the card network), then `card_transactions` rows are
  // INSERTed by the webhook handler. This POST endpoint creates a row
- // WITHOUT any merchant interaction — it's pure fixture territory.
+ // WITHOUT any merchant interaction - it's pure fixture territory.
  //
  // In production, a malicious authenticated user could spam
  // `{name:"Whatever", type:"purchase", amount:10}` and corrupt their
  // own spending history (and any analytics derived from it). Balance
  // is never debited (line ~1236 confirms), so it's not a money exploit
- // — but it IS a data-integrity exploit.
+ // - but it IS a data-integrity exploit.
  //
  // Sandbox / test environments set SANDBOX_MODE=true to enable the
  // endpoint for fixture creation. Production deployments leave it
  // unset and get a 403 here. The request-scoped sandbox harness
- // (src/sandbox/scope.ts) still works without this flag — it routes
+ // (src/sandbox/scope.ts) still works without this flag - it routes
  // INSERTs to scratch schemas via AsyncLocalStorage.
     if (process.env.SANDBOX_MODE !== 'true') {
       return res.status(403).json({
@@ -2435,7 +2436,7 @@ export function createNuroRouter(db: Pool): Router {
             }
           }
         } catch {
-          console.warn(`[card-tx] Issuer sync failed for debit check — using cached balance $${card.balance}`)
+          console.warn(`[card-tx] Issuer sync failed for debit check - using cached balance $${card.balance}`)
         }
         if (realBalance < amount) {
           return res.status(402).json({ error: "Insufficient balance", balance: realBalance, requested: amount });
@@ -2472,32 +2473,32 @@ export function createNuroRouter(db: Pool): Router {
         }
         await db.query("UPDATE card_controls SET daily_used = daily_used + $1, monthly_used = monthly_used + $1, updated_at = NOW() WHERE card_id = $2", [amount, card.id]);
  // S33 Tier 1 #10: card_alerts schema has columns
- // (id, card_id, user_id, alert_type, amount, description, resolved, created_at) —
+ // (id, card_id, user_id, alert_type, amount, description, resolved, created_at) -
  // NOT (message, metadata). Previous INSERTs would throw at runtime
  // ("column message does not exist"). Realigned to use description
  // (the actual text column) and amount (the actual numeric column).
  // Structured context that used to live in metadata JSON is now
- // serialized into description with a — separator.
+ // serialized into description with a - separator.
         if (ctrl.alert_enabled && Number(ctrl.alert_threshold) > 0 && amount >= Number(ctrl.alert_threshold)) {
           await db.query(
             `INSERT INTO card_alerts (id, card_id, user_id, alert_type, amount, description) VALUES (gen_random_uuid(), $1, $2, 'high_value', $3, $4)`,
-            [card.id, userId, amount, `High-value transaction: $${amount.toFixed(2)} at ${name.trim()} — category=${category || 'other'}`]
+            [card.id, userId, amount, `High-value transaction: $${amount.toFixed(2)} at ${name.trim()} - category=${category || 'other'}`]
           );
         }
  // Alert on limit breaches (>80% used)
         if (Number(ctrl.daily_limit) > 0 && newDailyUsed > Number(ctrl.daily_limit) * 0.8) {
           await db.query(
             `INSERT INTO card_alerts (id, card_id, user_id, alert_type, amount, description) VALUES (gen_random_uuid(), $1, $2, 'limit_warning', $3, $4)`,
-            [card.id, userId, newDailyUsed, `Daily spend at ${Math.round(newDailyUsed / Number(ctrl.daily_limit) * 100)}% of limit — used=$${newDailyUsed.toFixed(2)} cap=$${Number(ctrl.daily_limit).toFixed(2)}`]
+            [card.id, userId, newDailyUsed, `Daily spend at ${Math.round(newDailyUsed / Number(ctrl.daily_limit) * 100)}% of limit - used=$${newDailyUsed.toFixed(2)} cap=$${Number(ctrl.daily_limit).toFixed(2)}`]
           );
         }
         if (Number(ctrl.monthly_limit) > 0 && newMonthlyUsed > Number(ctrl.monthly_limit) * 0.8) {
           await db.query(
             `INSERT INTO card_alerts (id, card_id, user_id, alert_type, amount, description) VALUES (gen_random_uuid(), $1, $2, 'limit_warning', $3, $4)`,
-            [card.id, userId, newMonthlyUsed, `Monthly spend at ${Math.round(newMonthlyUsed / Number(ctrl.monthly_limit) * 100)}% of limit — used=$${newMonthlyUsed.toFixed(2)} cap=$${Number(ctrl.monthly_limit).toFixed(2)}`]
+            [card.id, userId, newMonthlyUsed, `Monthly spend at ${Math.round(newMonthlyUsed / Number(ctrl.monthly_limit) * 100)}% of limit - used=$${newMonthlyUsed.toFixed(2)} cap=$${Number(ctrl.monthly_limit).toFixed(2)}`]
           );
         }
- // Card balance NOT modified here — Issuer is source of truth.
+ // Card balance NOT modified here - Issuer is source of truth.
  // For purchases: Issuer card network handles real deduction.
  // For deposits: bridge sends USDC to Issuer Base address, Issuer credits card.
       }
@@ -2594,7 +2595,7 @@ export function createNuroRouter(db: Pool): Router {
           total += parseFloat(token.balance) || 0
         }
       }
- // DO NOT write Issuer's balance to our cards table — read only
+ // DO NOT write Issuer's balance to our cards table - read only
  // Issuer's contract balance is the source of truth
       res.json({ balance: total, source: 'issuer_contracts' })
     } catch (err: any) {
@@ -2664,8 +2665,39 @@ export function createNuroRouter(db: Pool): Router {
     }
   });
 
+ // ── DELETE /users/me ───────────────────────────────────────────────────────
+ // Dev-only self-service account deletion (DB wipe). Production returns 501.
+  router.delete("/users/me", requireAuth, async (req: any, res: any) => {
+    if (process.env.NODE_ENV === "production") {
+      return res.status(501).json({ error: "Account deletion is not enabled in production" });
+    }
+
+    try {
+      const userId = req.user?.id as string | undefined;
+      const email = (req.user?.email as string | undefined)?.trim().toLowerCase() ?? "";
+      if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
+      if (email === "demo@nuro.finance") {
+        return res.status(403).json({
+          error: "Cannot delete the demo account. Re-seed with npm run seed:demo.",
+        });
+      }
+
+      const client = await db.connect();
+      try {
+        await wipeUserData(client, userId, email);
+        res.json({ ok: true });
+      } finally {
+        client.release();
+      }
+    } catch (err) {
+      console.error("DELETE /users/me error:", err);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
  // ── GET /users/me/vault ────────────────────────────────────────────────────
- // Session 26 Sprint 2.1 polish — exposes the user's Base vault address +
+ // Session 26 Sprint 2.1 polish - exposes the user's Base vault address +
  // live USDC balance. The vault is a deterministic HD-derived wallet on Base
  // that holds the user's prediction-market bet collateral + P2P-received
  // funds. Derivation: keccak256(PRIVATE_KEY + 'vault_' + userId).
@@ -2679,7 +2711,7 @@ export function createNuroRouter(db: Pool): Router {
       const vaultSeed = ethers.utils.id(process.env.PRIVATE_KEY! + 'vault_' + userId);
       const vaultAddress = ethers.utils.HDNode.fromSeed(vaultSeed).address;
 
- // Read live USDC balance on Base — don't trust DB, always on-chain
+ // Read live USDC balance on Base - don't trust DB, always on-chain
       let usdcBalance = 0;
       let ethBalance = 0;
       try {
@@ -2699,7 +2731,7 @@ export function createNuroRouter(db: Pool): Router {
         console.warn('[GET /users/me/vault] Base RPC read failed:', rpcErr.message?.slice(0, 100));
       }
 
- // Open market positions for this user — expose count + total at-risk
+ // Open market positions for this user - expose count + total at-risk
       let openPositions = 0;
       let totalAtRisk = 0;
       try {
@@ -2712,7 +2744,7 @@ export function createNuroRouter(db: Pool): Router {
         openPositions = posRes.rows[0]?.c || 0;
         totalAtRisk = parseFloat(posRes.rows[0]?.total || '0');
       } catch {
- // Non-fatal — vault info alone is still useful
+ // Non-fatal - vault info alone is still useful
       }
 
       res.json({
@@ -2733,7 +2765,7 @@ export function createNuroRouter(db: Pool): Router {
 
  // ── GET /users/search ──────────────────────────────────────────────────────
  // Autocomplete lookup for P2P transfer recipient picker.
- // Query: q (string, min 2 chars) — matches email-prefix OR name-prefix, case-insensitive.
+ // Query: q (string, min 2 chars) - matches email-prefix OR name-prefix, case-insensitive.
  // Returns: up to 10 users (never the caller), with `hasCard` flag so FE can grey-out
  // the 'card' destination option when the recipient hasn't completed KYC.
  //
@@ -2777,11 +2809,11 @@ export function createNuroRouter(db: Pool): Router {
   });
 
  // ── GET /supported-tokens ──────────────────────────────────────────────────
- // Session 23 Thread D — FE calls this to populate the 3-category Reload
+ // Session 23 Thread D - FE calls this to populate the 3-category Reload
  // Card token picker (Stablecoins / Native tokens / Memecoins). Returns
  // per-category arrays with enough metadata for the FE to render + swap.
  //
- // Query: ?chainId=X (optional) — filter to tokens available on a specific
+ // Query: ?chainId=X (optional) - filter to tokens available on a specific
  // chain. When omitted, returns the union across all supported chains.
  //
  // Stablecoins are hardcoded (USDC/USDT/DAI, direct deposit, no swap).
@@ -2793,14 +2825,14 @@ export function createNuroRouter(db: Pool): Router {
       const chainIdParam = req.query.chainId ? Number(req.query.chainId) : null
       const chainIds = chainIdParam ? [chainIdParam] : Object.keys(NATIVE_TOKENS).map(Number)
 
- // Stables — always USDC, USDT, DAI. Per-chain availability is FE concern.
+ // Stables - always USDC, USDT, DAI. Per-chain availability is FE concern.
       const stables = [
-        { symbol: 'USDC', name: 'USD Coin', category: 'stable', directDeposit: true,  iconId: 'usdc', description: 'Direct deposit — no swap, no slippage' },
-        { symbol: 'USDT', name: 'Tether',   category: 'stable', directDeposit: true,  iconId: 'usdt', description: 'Direct deposit — no swap, no slippage' },
-        { symbol: 'DAI',  name: 'Dai',      category: 'stable', directDeposit: true,  iconId: 'dai',  description: 'Direct deposit — no swap, no slippage' },
+        { symbol: 'USDC', name: 'USD Coin', category: 'stable', directDeposit: true,  iconId: 'usdc', description: 'Direct deposit - no swap, no slippage' },
+        { symbol: 'USDT', name: 'Tether',   category: 'stable', directDeposit: true,  iconId: 'usdt', description: 'Direct deposit - no swap, no slippage' },
+        { symbol: 'DAI',  name: 'Dai',      category: 'stable', directDeposit: true,  iconId: 'dai',  description: 'Direct deposit - no swap, no slippage' },
       ]
 
- // Natives — ETH/MATIC/BNB pulled from NATIVE_TOKENS registry
+ // Natives - ETH/MATIC/BNB pulled from NATIVE_TOKENS registry
       const natives = chainIds
         .map(cid => NATIVE_TOKENS[cid])
         .filter(Boolean)
@@ -2815,7 +2847,7 @@ export function createNuroRouter(db: Pool): Router {
           description: `Auto-swap to USDC on ${t.chainName} · ~0.5% slippage`,
         }))
 
- // ERC-20s — refresh snapshot from DB (admin toggles take effect in
+ // ERC-20s - refresh snapshot from DB (admin toggles take effect in
  // <60s) then flatten allowlist, split bluechip vs memecoin.
       await ensureAllowlistFresh()
       const allowlist = getErc20Allowlist()
@@ -2846,7 +2878,7 @@ export function createNuroRouter(db: Pool): Router {
         }
       }
 
- // Session 30 Phase 2.5 — DB-backed Solana allowlist (migration 030).
+ // Session 30 Phase 2.5 - DB-backed Solana allowlist (migration 030).
  // FE treats chainId=-1 as Solana (matches ReloadModal's CHAINS array).
  // Tokens go into their natural category so the existing tabs render
  // them without FE changes. Jupiter routes quotes; 0x is untouched.
@@ -2866,11 +2898,11 @@ export function createNuroRouter(db: Pool): Router {
           iconId: sol.symbol.toLowerCase(),
           description:
             sol.category === 'stablecoin'
-              ? 'Direct deposit on Solana — no swap'
+              ? 'Direct deposit on Solana - no swap'
               : `Auto-swap to USDC via Jupiter · up to ${CONFIG.ZEROX_SLIPPAGE_BPS / 100}% slippage`,
         }
         if (sol.category === 'stablecoin') {
- // Merge into stables but keyed by chain — FE already dedupes by symbol
+ // Merge into stables but keyed by chain - FE already dedupes by symbol
  // for stables across chains, so push a chain-tagged entry.
           stables.push({ ...entry })
         } else if (sol.category === 'native') {
@@ -2893,7 +2925,7 @@ export function createNuroRouter(db: Pool): Router {
           nativeSwapEnabled: CONFIG.NATIVE_SWAP_ENABLED,
           erc20SwapEnabled: CONFIG.ERC20_SWAP_ENABLED,
           memecoinEnabled,
-          solanaEnabled: true, // Phase 1 — preview quotes only; execution in Phase 3
+          solanaEnabled: true, // Phase 1 - preview quotes only; execution in Phase 3
         },
       })
     } catch (err: any) {
@@ -2905,17 +2937,17 @@ export function createNuroRouter(db: Pool): Router {
  // ── GET /public/skill-health ───────────────────────────────────────────────
  // Public version of /admin/api/skill-health for the sub-agents + neural
  // dashboards (both served as raw HTML from /public/ with no auth proxy).
- // Returns aggregate counts + health classification — no PII, no per-user data.
+ // Returns aggregate counts + health classification - no PII, no per-user data.
  // ── GET /quote/swap ────────────────────────────────────────────────────────
- // Session 23 Thread D — FE live-quote preview. Hits 0x Aggregator v2 with
+ // Session 23 Thread D - FE live-quote preview. Hits 0x Aggregator v2 with
  // sellToken + amount, returns expected USDC output + worst-case min.
  // Never exposes the API key to FE (proxied through this endpoint).
  //
  // Query params:
- // - chainId (number, required) — which chain the sell token lives on
- // - sellToken (string, required) — 'native' OR ERC-20 symbol (e.g. 'LINK')
+ // - chainId (number, required) - which chain the sell token lives on
+ // - sellToken (string, required) - 'native' OR ERC-20 symbol (e.g. 'LINK')
  // Must be an allowlisted token; unknown symbols return 400.
- // - amount (string, required) — human-readable amount (e.g. "0.5")
+ // - amount (string, required) - human-readable amount (e.g. "0.5")
  //
  // Returns: { buyAmountUsd, minBuyAmountUsd, meetsThreshold, description }
  // On rate-limit or 0x failure, returns { error, degraded: true } so the FE
@@ -3018,17 +3050,17 @@ export function createNuroRouter(db: Pool): Router {
   })
 
  // ── GET /quote/swap-solana ────────────────────────────────────────────────
- // Session 30 — Phase 1 of the Jupiter/multi-quote aggregator build.
+ // Session 30 - Phase 1 of the Jupiter/multi-quote aggregator build.
  // Parallel to /quote/swap but routes through Jupiter's public `/v6/quote`
  // endpoint for Solana SPL tokens. Preview-only (returns USD value for UI);
  // Phase 3 will add /quote/swap-solana/firm for tx construction.
  //
  // Query params:
- // sellToken (string, required) — SPL symbol on our Solana catalog (e.g.
+ // sellToken (string, required) - SPL symbol on our Solana catalog (e.g.
  // 'PENGU', 'BONK', 'SOL') OR a raw mint
  // address if not in the catalog.
- // amount (string, required) — human-readable input amount (e.g. '1.5')
- // buyToken (string, optional) — defaults to USDC on Solana; pass another
+ // amount (string, required) - human-readable input amount (e.g. '1.5')
+ // buyToken (string, optional) - defaults to USDC on Solana; pass another
  // SPL symbol or mint for non-USDC quotes.
  //
  // Returns on success:
@@ -3052,7 +3084,7 @@ export function createNuroRouter(db: Pool): Router {
         return res.status(400).json({ error: 'amount must be a positive number' })
       }
 
- // Phase 2.5 — refresh the allowlist snapshot before lookups so an
+ // Phase 2.5 - refresh the allowlist snapshot before lookups so an
  // admin enable/disable propagates within 60s without restart.
       await ensureSolanaAllowlistFresh()
 
@@ -3069,7 +3101,7 @@ export function createNuroRouter(db: Pool): Router {
         inputMint = sellByMint.mint
         inputDecimals = sellByMint.decimals
       } else if (/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(sellToken)) {
- // Raw mint not in our allowlist — refuse rather than guess decimals.
+ // Raw mint not in our allowlist - refuse rather than guess decimals.
  // Admin must INSERT into solana_allowlist (or use the admin UI) first.
         return res.status(400).json({
           error: `Mint ${sellToken.slice(0, 8)}… not in Nuro Solana allowlist; add via admin first.`,
@@ -3119,13 +3151,13 @@ export function createNuroRouter(db: Pool): Router {
   })
 
  // ── GET /quote/swap-solana/firm ────────────────────────────────────────────
- // Session 30 Phase 3a — firm (executable) Solana swap. Returns a base64-
+ // Session 30 Phase 3a - firm (executable) Solana swap. Returns a base64-
  // encoded versioned Solana transaction the user signs in their wallet.
  //
  // Differs from /quote/swap-solana (preview) in two ways:
  // 1. requires the user's Solana wallet pubkey (the signer)
  // 2. fetches a FRESH quote and constructs the swap tx via Jupiter
- // /v6/swap. Cached preview quotes are not used here — Solana
+ // /v6/swap. Cached preview quotes are not used here - Solana
  // blockhashes have a ~60s validity window so we want the freshest
  // route at the moment of signing.
  //
@@ -3139,11 +3171,11 @@ export function createNuroRouter(db: Pool): Router {
  // keyed on user_id even before we wire idempotency.
  //
  // Query params:
- // sellToken (string, required) — symbol or mint
- // amount (string, required) — human-readable input
- // userPublicKey (string, required) — base58 Solana pubkey
- // buyToken (string, optional) — defaults to USDC
- // destinationTokenAccount (string, optional) — base58 ATA pubkey
+ // sellToken (string, required) - symbol or mint
+ // amount (string, required) - human-readable input
+ // userPublicKey (string, required) - base58 Solana pubkey
+ // buyToken (string, optional) - defaults to USDC
+ // destinationTokenAccount (string, optional) - base58 ATA pubkey
  //
  // Returns:
  // { swapTransaction (base64), lastValidBlockHeight, inputMint,
@@ -3195,10 +3227,10 @@ export function createNuroRouter(db: Pool): Router {
       const frac = (parts[1] || '').padEnd(sellInfo.decimals, '0').slice(0, sellInfo.decimals)
       const amountRaw = (BigInt(whole) * BigInt(10) ** BigInt(sellInfo.decimals) + BigInt(frac || '0')).toString()
 
- // Phase 3c — auto-derive the user's Nuro Solana deposit USDC ATA so
+ // Phase 3c - auto-derive the user's Nuro Solana deposit USDC ATA so
  // the swap output flows DIRECTLY into our CCTP-monitored reserve.
  // Caller can override with destinationTokenAccount but that's only
- // for ops/testing — production FE flow always wants the deposit
+ // for ops/testing - production FE flow always wants the deposit
  // routing.
  //
  // The Solana monitor (monitor.ts:633) already polls
@@ -3226,7 +3258,7 @@ export function createNuroRouter(db: Pool): Router {
           }
         } catch (e: any) {
  // If derivation fails (no deposit address yet, malformed pubkey,
- // etc.) we fall back to no destination override — output lands
+ // etc.) we fall back to no destination override - output lands
  // in the user's own ATA. Logged for visibility but non-fatal.
           console.warn('[swap-solana/firm] could not derive deposit ATA:', e?.message)
         }
@@ -3244,7 +3276,7 @@ export function createNuroRouter(db: Pool): Router {
         return res.json({ degraded: true, error: 'Swap tx construction failed; refresh quote' })
       }
 
- // Audit log entry — best-effort, does not block response on failure.
+ // Audit log entry - best-effort, does not block response on failure.
  // Captures pre-sign state; the post-sign tx hash gets recorded by
  // the FE after broadcast.
       db.query(
@@ -3291,15 +3323,15 @@ export function createNuroRouter(db: Pool): Router {
   })
 
  // ── GET /quote/best ────────────────────────────────────────────────────────
- // Session 30 Phase 2 — unified quote endpoint. Dispatches the request to
+ // Session 30 Phase 2 - unified quote endpoint. Dispatches the request to
  // every applicable source (0x for EVM, Jupiter for Solana, more to come)
  // in parallel, returns the winner by buyAmountUsd + runner-up alternatives.
  //
  // Query params:
- // chainId (number, required) — EVM chainId OR -1 for Solana
- // sellToken (string, required) — symbol or raw address/mint
- // amount (string, required) — human-readable input
- // buyToken (string, optional) — defaults to USDC on the chosen chain
+ // chainId (number, required) - EVM chainId OR -1 for Solana
+ // sellToken (string, required) - symbol or raw address/mint
+ // amount (string, required) - human-readable input
+ // buyToken (string, optional) - defaults to USDC on the chosen chain
  //
  // Returns:
  // { source, chainId, chainName, buyAmountUsd, minBuyAmountUsd,
@@ -3343,7 +3375,7 @@ export function createNuroRouter(db: Pool): Router {
   })
 
  // ── GET /quote/swap/firm ───────────────────────────────────────────────────
- // Session 25 Phase 4 — user-signed swap execution. Returns the full 0x
+ // Session 25 Phase 4 - user-signed swap execution. Returns the full 0x
  // transaction payload ({to, data, value, gas}) so the FE can hand it to
  // wagmi for signing with the connected wallet. Unlike /quote/swap (which
  // is preview-only and uses a synthetic taker), this requires a real taker
@@ -3351,12 +3383,12 @@ export function createNuroRouter(db: Pool): Router {
  //
  // Query params:
  // chainId (number, required)
- // sellToken (string, required) — 'native' OR allowlisted ERC-20 symbol
- // amount (string, required) — human-readable (e.g. "0.01")
- // taker (string, required) — connected wallet address
+ // sellToken (string, required) - 'native' OR allowlisted ERC-20 symbol
+ // amount (string, required) - human-readable (e.g. "0.01")
+ // taker (string, required) - connected wallet address
  //
  // Returns: {
- // to, data, value, gas, // raw tx — pass directly to wagmi
+ // to, data, value, gas, // raw tx - pass directly to wagmi
  // allowanceTarget, // ERC-20 approval target (null for native)
  // buyAmount, minBuyAmount, // integer strings in USDC 6-dec
  // buyAmountUsd, slippageBps,
@@ -3448,7 +3480,7 @@ export function createNuroRouter(db: Pool): Router {
         data: quote.data,
         value: quote.value,
         gas: quote.gas,
- // AllowanceHolder is at the quote's `to` for ERC-20 sells — the FE
+ // AllowanceHolder is at the quote's `to` for ERC-20 sells - the FE
  // approves that same address. For native, no approval needed.
         allowanceTarget: isNative ? null : quote.to,
         buyAmount: quote.buyAmount.toString(),
@@ -3561,7 +3593,7 @@ export function createNuroRouter(db: Pool): Router {
       return res.status(400).json({ error: "destination too long (max 100 chars)" })
     }
 
- // Validate prefix + shape at app layer (no DB constraint on purpose — extensible)
+ // Validate prefix + shape at app layer (no DB constraint on purpose - extensible)
     const exactMatches = ['vault', 'card']
     const prefixes: { prefix: string; argPattern?: RegExp; functional: boolean }[] = [
       { prefix: 'agent:',      argPattern: /^[a-zA-Z0-9-]{1,80}$/,         functional: false },
@@ -3731,7 +3763,7 @@ export function createNuroRouter(db: Pool): Router {
     }
   });
 
- // ── GET /cards (payment methods — alias for cards list) ─────────────────
+ // ── GET /cards (payment methods - alias for cards list) ─────────────────
 
  // KYC status (polled by frontend)
   router.get("/kyc/status", requireAuth, async (req: any, res: any) => {
@@ -3739,7 +3771,7 @@ export function createNuroRouter(db: Pool): Router {
       const result = await db.query("SELECT kyc_status FROM users WHERE id = $1", [req.user.id]);
       if (result.rows.length === 0) return res.status(404).json({ error: "User not found" });
  // Same read-side normalization as the earlier /kyc/status route above.
- // Two routes for the same endpoint (legacy) — both normalize.
+ // Two routes for the same endpoint (legacy) - both normalize.
       const normalized = normalizeKycStatus(result.rows[0].kyc_status) || "pending";
       res.json({ status: normalized });
     } catch (err: any) {
@@ -3822,7 +3854,7 @@ export function createNuroRouter(db: Pool): Router {
  // schema drift on one source degrades to an empty list rather than
  // 500'ing the whole feed. Synthetic rows use the source event UUID
  // as the notification id; mark-read on those is a no-op (the row
- // doesn't exist in the notifications table) — they reappear on next
+ // doesn't exist in the notifications table) - they reappear on next
  // fetch until acknowledged at the source. That's an acceptable
  // MVP behavior; per-row read-state for synthetic items is queued
  // as a Marathon 9 follow-up.
@@ -3848,7 +3880,7 @@ export function createNuroRouter(db: Pool): Router {
  // Helm security events for this user OR any of their agents,
  // high/critical severity only, last 30 days. The dual-keyed agent_id
  // covers both system-attribution (user.id) and direct-attribution
- // (agent.id) cases — see Marathon 9 / A3.
+ // (agent.id) cases - see Marathon 9 / A3.
         safe(
           `SELECT he.id::text AS id,
                   'security' AS type,
@@ -3894,7 +3926,7 @@ export function createNuroRouter(db: Pool): Router {
            ORDER BY ca.created_at DESC LIMIT 15`,
           [userId],
         ),
- // Profit-to-card sweep completions — closes the gains-funnel-to-card
+ // Profit-to-card sweep completions - closes the gains-funnel-to-card
  // visibility gap from Marathon 9 Tier C.
         safe(
           `SELECT cs.id::text AS id,
@@ -3918,7 +3950,7 @@ export function createNuroRouter(db: Pool): Router {
            ORDER BY COALESCE(cs.completed_at, cs.created_at) DESC LIMIT 15`,
           [userId],
         ),
- // Huginn dissents — when Huginn pushed back on this user's agent's
+ // Huginn dissents - when Huginn pushed back on this user's agent's
  // proposed action. Endorse verdicts skipped (low signal value);
  // caution / dissent / block-recommend surface here.
         safe(
@@ -4003,7 +4035,7 @@ export function createNuroRouter(db: Pool): Router {
  // S34 9.3 quick win: handles BOTH manual notifications (UPDATE the
  // notifications row) AND synthetic event-source rows (upsert into
  // notification_reads tracker keyed by user_id + notification_key).
- // Either path returns 200; never 404 — the FE can't distinguish row
+ // Either path returns 200; never 404 - the FE can't distinguish row
  // origins client-side, and a stale-id read attempt is harmless.
  // Casting id to text on the manual UPDATE so a non-UUID synthetic
  // key doesn't trip the type check.
@@ -4019,12 +4051,12 @@ export function createNuroRouter(db: Pool): Router {
           [id, userId],
         );
       } catch {
- // id failed UUID parse — definitely not a manual row, fall through.
+ // id failed UUID parse - definitely not a manual row, fall through.
       }
       if ((manualUpdate.rowCount ?? 0) > 0) {
         return res.json({ ok: true, source: "manual", row: manualUpdate.rows[0] });
       }
- // Synthetic — record into the tracker. UPSERT keyed by (user, key).
+ // Synthetic - record into the tracker. UPSERT keyed by (user, key).
       await db.query(
         `INSERT INTO notification_reads (user_id, notification_key, read_at)
          VALUES ($1, $2, NOW())
@@ -4073,7 +4105,7 @@ export function createNuroRouter(db: Pool): Router {
  //
  // Same dual-target pattern as /read: manual UPDATE first, fall back
  // to notification_reads upsert for synthetic event-source ids.
- // Always 200 on success — no 404 since the FE can't distinguish.
+ // Always 200 on success - no 404 since the FE can't distinguish.
   router.patch("/notifications/:id/dismiss", requireAuth, async (req: any, res: Response) => {
     try {
       const id = String(req.params.id);
@@ -4085,12 +4117,12 @@ export function createNuroRouter(db: Pool): Router {
           [id, userId],
         );
       } catch {
- // not a UUID — synthetic, fall through.
+ // not a UUID - synthetic, fall through.
       }
       if ((manualUpdate.rowCount ?? 0) > 0) {
         return res.json({ ok: true, source: "manual", row: manualUpdate.rows[0] });
       }
- // Synthetic — record dismissal in tracker (also marks as read).
+ // Synthetic - record dismissal in tracker (also marks as read).
       await db.query(
         `INSERT INTO notification_reads (user_id, notification_key, read_at, dismissed_at)
          VALUES ($1, $2, NOW(), NOW())
@@ -4107,16 +4139,16 @@ export function createNuroRouter(db: Pool): Router {
   });
 
 
- // ─── Address Book (S30 batch — Chris SendModal wiring) ──────────────────
+ // ─── Address Book (S30 batch - Chris SendModal wiring) ──────────────────
  //
  // Two surfaces:
- // GET /address-book/recent — inferred from withdrawals (Last Used tab)
- // GET /address-book — user-curated saved contacts (migration 031)
- // POST /address-book — add a saved contact
- // PATCH /address-book/:id — rename / toggle favorite
- // DELETE /address-book/:id — remove
+ // GET /address-book/recent - inferred from withdrawals (Last Used tab)
+ // GET /address-book - user-curated saved contacts (migration 031)
+ // POST /address-book - add a saved contact
+ // PATCH /address-book/:id - rename / toggle favorite
+ // DELETE /address-book/:id - remove
 
- // GET /address-book — user's saved contacts, favorites-first
+ // GET /address-book - user's saved contacts, favorites-first
   router.get("/address-book", requireAuth, async (req: any, res: Response) => {
     try {
       const { rows } = await db.query(
@@ -4143,7 +4175,7 @@ export function createNuroRouter(db: Pool): Router {
     }
   });
 
- // POST /address-book — add a saved contact.
+ // POST /address-book - add a saved contact.
  // Body: { address, label, chain?, favorite?, notes? }
  // Chain inferred from address shape when omitted.
   router.post("/address-book", requireAuth, async (req: any, res: Response) => {
@@ -4188,7 +4220,7 @@ export function createNuroRouter(db: Pool): Router {
     }
   });
 
- // PATCH /address-book/:id — rename / favorite / notes.
+ // PATCH /address-book/:id - rename / favorite / notes.
   router.patch("/address-book/:id", requireAuth, async (req: any, res: Response) => {
     try {
       const { label, favorite, notes } = req.body || {};
@@ -4282,7 +4314,7 @@ export function createNuroRouter(db: Pool): Router {
       return res.status(400).json({ error: "Invalid ENS name" });
     }
     try {
- // Use mainnet provider — ENS only resolves on L1. We already have
+ // Use mainnet provider - ENS only resolves on L1. We already have
  // RPC_URL_ETHEREUM in config for bridge + swap ops.
       const rpcUrl = CONFIG.RPC_URL_ETHEREUM || process.env.RPC_URL_ETHEREUM || process.env.RPC_URL_MAINNET;
       if (!rpcUrl) {
@@ -4353,7 +4385,7 @@ export function createNuroRouter(db: Pool): Router {
 
       let resolvedCardId = cardId;
       if (!resolvedCardId) {
- // S33 Tier 1 #10: cards has no `status` column — schema only has
+ // S33 Tier 1 #10: cards has no `status` column - schema only has
  // is_active + is_locked. Original query "WHERE status != 'deleted'"
  // would throw at runtime. Same semantic intent: pick the most
  // recent ACTIVE card.
@@ -4366,7 +4398,7 @@ export function createNuroRouter(db: Pool): Router {
       }
 
  // ── ATOMIC BALANCE CHECK + WITHDRAWAL INSERT ──
- // ⚠️ S32 SECURITY FIX — balance is now sourced from the card issuer
+ // ⚠️ S32 SECURITY FIX - balance is now sourced from the card issuer
  // BEFORE the FOR UPDATE lock. Previously we trusted cards.balance which
  // could be spoofed via PATCH /cards/:id (now closed) but still: balance
  // belongs to the Execution Layer (Issuer), not the Intent Layer (DB).
@@ -4456,7 +4488,7 @@ export function createNuroRouter(db: Pool): Router {
         return res.status(201).json({
           id: withdrawalId, destinationAddress: w.destination_address, amount: parseFloat(w.amount),
           token: w.token, chain: 'Base', status: 'scheduled', scheduledAt,
-          message: 'Withdrawal scheduled — will execute automatically at the scheduled time.',
+          message: 'Withdrawal scheduled - will execute automatically at the scheduled time.',
         });
       }
 
@@ -4511,19 +4543,19 @@ export function createNuroRouter(db: Pool): Router {
         await db.query(
           `INSERT INTO execution_log (entity_type, entity_id, user_id, action, status, detail, created_at)
            VALUES ('withdrawal', $1, $2, 'transfer', 'success', $3, now())`,
-          [withdrawalId, userId, `Sent $${amount} ${tk} to ${destinationAddress} — tx: ${txHash}`]
+          [withdrawalId, userId, `Sent $${amount} ${tk} to ${destinationAddress} - tx: ${txHash}`]
         ).catch(() => {});
 
         console.log(`[withdrawal] Confirmed: ${txHash}`);
       } catch (execErr: any) {
- // Sanitize error — never leak RPC URLs, private keys, or internal contract details to user
+ // Sanitize error - never leak RPC URLs, private keys, or internal contract details to user
         const rawError = execErr?.message || 'Unknown error';
         console.error(`[withdrawal] Execution failed: ${rawError.slice(0, 200)}`);
         if (rawError.includes('insufficient funds')) executionError = 'Insufficient gas for transaction';
         else if (rawError.includes('reverted')) executionError = 'Transaction reverted by contract';
-        else if (rawError.includes('nonce')) executionError = 'Transaction nonce conflict — retry shortly';
-        else if (rawError.includes('timeout')) executionError = 'Transaction timed out — check status later';
-        else executionError = 'Transaction failed — contact support';
+        else if (rawError.includes('nonce')) executionError = 'Transaction nonce conflict - retry shortly';
+        else if (rawError.includes('timeout')) executionError = 'Transaction timed out - check status later';
+        else executionError = 'Transaction failed - contact support';
         await db.query(`UPDATE withdrawals SET status = 'failed' WHERE id = $1`, [withdrawalId]);
         await db.query(
           `INSERT INTO execution_log (entity_type, entity_id, user_id, action, status, detail, error_message, created_at)
@@ -4553,7 +4585,7 @@ export function createNuroRouter(db: Pool): Router {
       res.status(500).json({ error: "Failed to create withdrawal" });
     }
   });
- // DELETE /withdrawals/:id — Cancel a pending withdrawal before execution
+ // DELETE /withdrawals/:id - Cancel a pending withdrawal before execution
   router.delete("/withdrawals/:id", requireAuth, async (req: any, res: Response) => {
     try {
       const userId = req.user.id;
@@ -4571,7 +4603,7 @@ export function createNuroRouter(db: Pool): Router {
       const w = wRes.rows[0];
       if (w.status !== 'pending') {
         return res.status(400).json({
-          error: `Cannot cancel — withdrawal is already ${w.status}. ${w.status === 'confirmed' ? 'Funds have been sent on-chain.' : ''}`
+          error: `Cannot cancel - withdrawal is already ${w.status}. ${w.status === 'confirmed' ? 'Funds have been sent on-chain.' : ''}`
         });
       }
 
@@ -4608,13 +4640,13 @@ export function createNuroRouter(db: Pool): Router {
  // Debits user's Issuer card balance + transfers USDC from Nuro Fee Vault
  // (deployer wallet on Base) to the user's wallet on the destination chain.
  //
- // Flag-gated by CONFIG.BUY_1_ENABLED — returns 503 until card issuer confirms API
+ // Flag-gated by CONFIG.BUY_1_ENABLED - returns 503 until card issuer confirms API
  // card-debit API is live + Nuro seeds sufficient Fee Vault liquidity.
  //
  // Non-atomic sequence, order matters (see commit e530f51 design note):
  // 1. Validate input + user state + flag + Fee Vault reserve
  // 2. Acquire pg_advisory lock on user_id (prevents double-debit via retry)
- // 3. Issuer debit card (FIRST — failure here = user loses nothing)
+ // 3. Issuer debit card (FIRST - failure here = user loses nothing)
  // 4. On-chain USDC transfer from Fee Vault → user's wallet
  // • destChain=8453 (Base): direct usdc.transfer()
  // • else: cctpBurnAndMint(Base → destChain)
@@ -4626,7 +4658,7 @@ export function createNuroRouter(db: Pool): Router {
  // transfer OR calls issuers.creditCard() to refund the card.
  //
   router.post("/buy-from-card", requireAuth, async (req: any, res: Response) => {
- // 0. Flag gate — fail fast before any DB work
+ // 0. Flag gate - fail fast before any DB work
     if (!CONFIG.BUY_1_ENABLED) {
       return res.status(503).json({
         error: 'Buy 1 not yet enabled',
@@ -4669,7 +4701,7 @@ export function createNuroRouter(db: Pool): Router {
       if (!issuer_user_id || !issuer_card_id) {
         return res.status(400).json({ error: 'Card not fully provisioned on issuer side.' });
       }
- // ⚠️ S32 SECURITY FIX — read balance from card issuer, not local DB.
+ // ⚠️ S32 SECURITY FIX - read balance from card issuer, not local DB.
  // Same fix class as POST /withdrawals: local cards.balance is a cache,
  // not authoritative. Refuse the spend rather than fall back to a
  // possibly-stale cache if Issuer is unreachable.
@@ -4719,11 +4751,11 @@ export function createNuroRouter(db: Pool): Router {
         await reportError('execution', 'buy1_fee_vault_exhausted', userId,
           `Fee Vault insufficient: bal=$${vaultBalUsd.toFixed(2)} needed=$${amountNum.toFixed(2)}`, new Error('fee_vault_exhausted'));
         return res.status(503).json({
-          error: 'Temporarily unavailable — insufficient Fee Vault reserves. Try again shortly.',
+          error: 'Temporarily unavailable - insufficient Fee Vault reserves. Try again shortly.',
         });
       }
 
- // 4. Advisory lock on (user_id) — prevents concurrent Buy 1 calls
+ // 4. Advisory lock on (user_id) - prevents concurrent Buy 1 calls
  // double-debiting while the first call is mid-flight. Key:
  // hashtext('buy_from_card:' || userId).
       const lockClient = await db.connect();
@@ -4734,7 +4766,7 @@ export function createNuroRouter(db: Pool): Router {
           [`buy_from_card:${userId}`]
         );
         acquired = Boolean(lockRes.rows[0]?.pg_try_advisory_xact_lock);
-      } catch { /* fall through — acquired stays false */ }
+      } catch { /* fall through - acquired stays false */ }
       if (!acquired) {
         lockClient.release();
         return res.status(429).json({
@@ -4752,12 +4784,12 @@ export function createNuroRouter(db: Pool): Router {
         [txId, userId, destChain, amountNum, Date.now()]
       );
 
- // 5. Issuer debit — the reversible step. If this throws, user loses nothing.
+ // 5. Issuer debit - the reversible step. If this throws, user loses nothing.
       let debitTxId: string | undefined;
       try {
         const debit = await debitCard(issuer_card_id, amountCents, idempotencyKey);
         debitTxId = debit.transactionId;
-        console.log(`[buy-from-card] Issuer debit ok — user=${userId} card=${issuer_card_id} amount=$${amountNum.toFixed(2)} issuer_tx=${debitTxId}`);
+        console.log(`[buy-from-card] Issuer debit ok - user=${userId} card=${issuer_card_id} amount=$${amountNum.toFixed(2)} issuer_tx=${debitTxId}`);
       } catch (err: any) {
         lockClient.release();
         const status = err?.response?.status;
@@ -4765,7 +4797,7 @@ export function createNuroRouter(db: Pool): Router {
           `UPDATE transactions SET status = 'failed' WHERE id = $1`,
           [txId]
         ).catch(() => {});
-        console.error(`[buy-from-card] Issuer debit FAILED — user=${userId} status=${status} msg=${err.message?.slice(0,100)}`);
+        console.error(`[buy-from-card] Issuer debit FAILED - user=${userId} status=${status} msg=${err.message?.slice(0,100)}`);
         if (status === 404) {
           return res.status(503).json({
             error: 'Issuer card-debit endpoint not yet available. Partner confirmation pending.',
@@ -4777,7 +4809,7 @@ export function createNuroRouter(db: Pool): Router {
         return res.status(502).json({ error: 'Card debit failed', detail: err.message?.slice(0, 100) });
       }
 
- // 6. On-chain transfer — from Fee Vault (deployer) to user's wallet
+ // 6. On-chain transfer - from Fee Vault (deployer) to user's wallet
       let onChainTxHash: string | undefined;
       try {
         const amountWei = ethers.utils.parseUnits(amountNum.toFixed(6), 6);
@@ -4800,9 +4832,9 @@ export function createNuroRouter(db: Pool): Router {
             destChain
           );
         }
-        console.log(`[buy-from-card] On-chain transfer ok — tx=${onChainTxHash} chain=${destChain}`);
+        console.log(`[buy-from-card] On-chain transfer ok - tx=${onChainTxHash} chain=${destChain}`);
       } catch (err: any) {
- // 7a. Mid-flight failure — Issuer debited but on-chain failed.
+ // 7a. Mid-flight failure - Issuer debited but on-chain failed.
  // Mark the row distinctly for manual reconciliation.
         await lockClient.query(
           `UPDATE transactions SET status = 'debited_pending_transfer', tx_hash = $1 WHERE id = $2`,
@@ -4819,7 +4851,7 @@ export function createNuroRouter(db: Pool): Router {
         });
       }
 
- // 7b. Happy path — commit the transaction row
+ // 7b. Happy path - commit the transaction row
       await lockClient.query(
         `UPDATE transactions SET status = 'confirmed', tx_hash = $1, confirmed_at = now() WHERE id = $2`,
         [onChainTxHash, txId]
@@ -4848,11 +4880,11 @@ export function createNuroRouter(db: Pool): Router {
     }
   });
 
- // ─── Buy 2 — Bank direct → Crypto Wallet (Session 28 Phase 8 scaffold) ──
+ // ─── Buy 2 - Bank direct → Crypto Wallet (Session 28 Phase 8 scaffold) ──
  // Two-step flow, both flag-gated by BUY_2_ENABLED:
  //
- // POST /buy-from-bank/link-token — mints short-lived Plaid link_token
- // POST /buy-from-bank/link-complete — exchange public_token → processor_token →
+ // POST /buy-from-bank/link-token - mints short-lived Plaid link_token
+ // POST /buy-from-bank/link-complete - exchange public_token → processor_token →
  // Dwolla customer + funding source
  //
  // The actual transfer initiation (POST /buy-from-bank) ships separately
@@ -4902,12 +4934,12 @@ export function createNuroRouter(db: Pool): Router {
     }
   });
 
- // ─── POST /transfers — Universal P2P Transfer System ─────────────────────────
+ // ─── POST /transfers - Universal P2P Transfer System ─────────────────────────
  //
  // Three destination tiers:
- // 1. "wallet" (default) — sender vault → recipient vault on Base (instant P2P)
- // 2. "card" — sender vault → recipient's Issuer deposit address → Visa card credited
- // 3. "agent" — sender vault → recipient's agent wallet (fund their bot)
+ // 1. "wallet" (default) - sender vault → recipient vault on Base (instant P2P)
+ // 2. "card" - sender vault → recipient's Issuer deposit address → Visa card credited
+ // 3. "agent" - sender vault → recipient's agent wallet (fund their bot)
  //
  // Recipient resolved by: email (finds user in DB) or wallet address (external)
  // Intent always recorded. Execution attempted immediately, retried by dispatch if pending.
@@ -4958,7 +4990,7 @@ export function createNuroRouter(db: Pool): Router {
 
  // S33 Tier 1 #13: scan transfer description for prompt-injection.
  // description gets stored in the transfers row + may surface to
- // recipients in their notification UI — poisoning surface.
+ // recipients in their notification UI - poisoning surface.
       if (description && typeof description === 'string') {
         try {
           const { scanAndEmit } = await import('./helm')
@@ -5010,7 +5042,7 @@ export function createNuroRouter(db: Pool): Router {
               error: `${resolvedRecipientName} doesn't have a card set up yet. They need to complete KYC first.`
             })
           }
- // Get recipient's Issuer Base deposit address — USDC sent here credits their Visa
+ // Get recipient's Issuer Base deposit address - USDC sent here credits their Visa
           try {
             const { getUserBaseDepositAddress } = require('./issuers')
             targetAddress = await getUserBaseDepositAddress(recipientIssuerUserId)
@@ -5060,7 +5092,7 @@ export function createNuroRouter(db: Pool): Router {
       );
       const transfer = rows[0]
 
- // If scheduled, skip execution — sweepScheduledIntents will fire when due
+ // If scheduled, skip execution - sweepScheduledIntents will fire when due
       if (isScheduled) {
         await db.query(
           `INSERT INTO notifications (user_id, type, title, message)
@@ -5071,7 +5103,7 @@ export function createNuroRouter(db: Pool): Router {
           ...transfer,
           status: 'scheduled',
           scheduledAt,
-          message: 'Transfer scheduled — will execute automatically at the scheduled time.',
+          message: 'Transfer scheduled - will execute automatically at the scheduled time.',
         })
       }
 
@@ -5104,8 +5136,8 @@ export function createNuroRouter(db: Pool): Router {
               executionStatus = 'completed'
               executionTxHash = tx.hash
               executionDetail = destination === 'card'
-                ? `$${amount.toFixed(2)} sent to ${resolvedRecipientName}'s Visa card via Issuer — TX: ${tx.hash.slice(0,10)}...`
-                : `$${amount.toFixed(2)} sent to ${resolvedRecipientName}'s ${destination} — TX: ${tx.hash.slice(0,10)}...`
+                ? `$${amount.toFixed(2)} sent to ${resolvedRecipientName}'s Visa card via Issuer - TX: ${tx.hash.slice(0,10)}...`
+                : `$${amount.toFixed(2)} sent to ${resolvedRecipientName}'s ${destination} - TX: ${tx.hash.slice(0,10)}...`
               await db.query(
                 `UPDATE transfers SET status = 'completed', execution_tx_hash = $1, completed_at = now() WHERE id = $2`,
                 [tx.hash, transfer.id]
@@ -5150,7 +5182,7 @@ export function createNuroRouter(db: Pool): Router {
         `INSERT INTO notifications (user_id, type, title, message) VALUES ($1, $2, $3, $4)`,
         [userId, "transaction",
          destination === 'card' ? "Card Transfer Sent" : "Transfer Sent",
-         `$${amount.toFixed(2)} ${cur} to ${resolvedRecipientName}'s ${destLabel}${executionStatus === 'completed' ? ' ✓' : ' — Pending'}`]
+         `$${amount.toFixed(2)} ${cur} to ${resolvedRecipientName}'s ${destLabel}${executionStatus === 'completed' ? ' ✓' : ' - Pending'}`]
       ).catch(() => {})
 
       if (recipientUserId) {
@@ -5160,7 +5192,7 @@ export function createNuroRouter(db: Pool): Router {
           `INSERT INTO notifications (user_id, type, title, message) VALUES ($1, $2, $3, $4)`,
           [recipientUserId, "transaction",
            destination === 'card' ? "Card Payment Received" : "Transfer Received",
-           `$${amount.toFixed(2)} ${cur} from ${senderName} → your ${destLabel}${executionStatus === 'completed' ? ' ✓' : ' — Pending'}`]
+           `$${amount.toFixed(2)} ${cur} from ${senderName} → your ${destLabel}${executionStatus === 'completed' ? ' ✓' : ' - Pending'}`]
         ).catch(() => {})
       }
 
@@ -5186,7 +5218,7 @@ export function createNuroRouter(db: Pool): Router {
     }
   });
 
- // ── DELETE /transfers/:id — cancel a SCHEDULED transfer before execution ──
+ // ── DELETE /transfers/:id - cancel a SCHEDULED transfer before execution ──
  // Sprint 2.6 finisher. Only works for status='scheduled' rows owned by the caller;
  // executed/pending/completed transfers are immutable (money already moved).
   router.delete("/transfers/:id", requireAuth, async (req: any, res: Response) => {
@@ -5466,7 +5498,7 @@ export function createNuroRouter(db: Pool): Router {
     }
   });
 
- // GET /analytics/statistics — spending trend (last 7 data points)
+ // GET /analytics/statistics - spending trend (last 7 data points)
   router.get('/analytics/statistics', requireAuth, async (req, res) => {
     const userId = (req as any).user.id;
     try {
@@ -5486,7 +5518,7 @@ export function createNuroRouter(db: Pool): Router {
     }
   });
 
- // GET /analytics/categories — spending by category (current month)
+ // GET /analytics/categories - spending by category (current month)
   router.get('/analytics/categories', requireAuth, async (req, res) => {
     const userId = (req as any).user.id;
     try {
@@ -5510,7 +5542,7 @@ export function createNuroRouter(db: Pool): Router {
     }
   });
 
- // GET /analytics/weekly — weekly activity breakdown (last 7 days)
+ // GET /analytics/weekly - weekly activity breakdown (last 7 days)
   router.get('/analytics/weekly', requireAuth, async (req, res) => {
     const userId = (req as any).user.id;
     try {
@@ -5542,7 +5574,7 @@ export function createNuroRouter(db: Pool): Router {
     }
   });
 
- // GET /analytics/stats — summary stats (revenue, expenses, net, savings rate)
+ // GET /analytics/stats - summary stats (revenue, expenses, net, savings rate)
   router.get('/analytics/stats', requireAuth, async (req, res) => {
     const userId = (req as any).user.id;
     try {
@@ -5640,7 +5672,7 @@ export function createNuroRouter(db: Pool): Router {
     }
   })
 
- // GET /agents — list user's agents
+ // GET /agents - list user's agents
   router.get('/agents', requireAuth, async (req, res) => {
     const userId = (req as any).user.id
     try {
@@ -5658,7 +5690,7 @@ export function createNuroRouter(db: Pool): Router {
     }
   })
 
- // GET /agents/:id — agent detail with REAL wallet balance
+ // GET /agents/:id - agent detail with REAL wallet balance
   router.get('/agents/:id', requireAuth, async (req, res) => {
     const userId = (req as any).user.id
     const id = String(req.params.id)
@@ -5674,7 +5706,7 @@ export function createNuroRouter(db: Pool): Router {
     }
   })
 
- // PATCH /agents/:id — update agent
+ // PATCH /agents/:id - update agent
   router.patch('/agents/:id', requireAuth, async (req, res) => {
     const userId = (req as any).user.id
     const { id } = req.params
@@ -5699,7 +5731,7 @@ export function createNuroRouter(db: Pool): Router {
     }
   })
 
- // DELETE /agents/:id — remove an agent and its bets
+ // DELETE /agents/:id - remove an agent and its bets
   router.delete('/agents/:id', requireAuth, async (req, res) => {
     const userId = (req as any).user.id
     const { id } = req.params
@@ -5714,7 +5746,7 @@ export function createNuroRouter(db: Pool): Router {
     }
   })
 
- // POST /agents/:id/fund — enqueue a funding intent (Base vault → Polygon agent wallet).
+ // POST /agents/:id/fund - enqueue a funding intent (Base vault → Polygon agent wallet).
  // Sprint 2.3. Records intent only; sweepAgentFundings performs the CCTP bridge.
  // While CONFIG.AGENT_FUNDING_OBSERVE_ONLY is true, the sweep marks the row
  // 'skipped_observe_only' without moving USDC. Flip to false once Base→Polygon
@@ -5782,7 +5814,7 @@ export function createNuroRouter(db: Pool): Router {
     }
   })
 
- // GET /agents/:id/fundings — list funding history for an agent
+ // GET /agents/:id/fundings - list funding history for an agent
   router.get('/agents/:id/fundings', requireAuth, async (req, res) => {
     const userId = (req as any).user.id
     const agentId = String(req.params.id)
@@ -5803,7 +5835,7 @@ export function createNuroRouter(db: Pool): Router {
     }
   })
 
- // GET /agents/:id/sweeps — list profit-sweep history for an agent
+ // GET /agents/:id/sweeps - list profit-sweep history for an agent
   router.get('/agents/:id/sweeps', requireAuth, async (req, res) => {
     const userId = (req as any).user.id
     const agentId = String(req.params.id)
@@ -5823,7 +5855,7 @@ export function createNuroRouter(db: Pool): Router {
     }
   })
 
- // POST /agents/:id/bets — place a REAL bet on Polymarket
+ // POST /agents/:id/bets - place a REAL bet on Polymarket
  // Attempts real CLOB trade first, falls back with clear instructions if it fails
   router.post('/agents/:id/bets', requireAuth, async (req, res) => {
     const userId = (req as any).user.id
@@ -5839,11 +5871,11 @@ export function createNuroRouter(db: Pool): Router {
 
      // S34 Marathon 9 / A3: HELM-105 tx-cap on agent-initiated bet placement.
      // Closes two pre-S34 gaps in one move:
-     //   1. Per-agent attribution — heimdall_events get tagged with the
+     //   1. Per-agent attribution - heimdall_events get tagged with the
      //      agent's UUID (not the user's). The Detail panel's Security
      //      tab now shows these as "direct agent attribution" rather
      //      than the "account-level" fallback.
-     //   2. Missing platform-level cap on agent-driven bets — pre-S34
+     //   2. Missing platform-level cap on agent-driven bets - pre-S34
      //      only the per-agent `risk_limit` column above gated this
      //      path. Helm's HELM-105 alarm now fires symmetrically
      //      with the /markets/:id/bet user-initiated site.
@@ -5918,7 +5950,7 @@ export function createNuroRouter(db: Pool): Router {
     }
   })
 
- // GET /agents/:id/bets — bet history
+ // GET /agents/:id/bets - bet history
   router.get('/agents/:id/bets', requireAuth, async (req, res) => {
     const userId = (req as any).user.id
     const agentId = req.params.id
@@ -5935,15 +5967,15 @@ export function createNuroRouter(db: Pool): Router {
     }
   })
 
- // GET /agents/:id/details — bundled snapshot for the user-facing Agent
- // Detail panel (S34 Tier A — Agent Control Plane).
+ // GET /agents/:id/details - bundled snapshot for the user-facing Agent
+ // Detail panel (S34 Tier A - Agent Control Plane).
   //
  // Returns budget + reputation + recent counsel + heimdall events + ledger
  // entries + recent bets + recent fundings, all in one round-trip. Mirrors
  // the admin Mythos POV but with agent-ownership auth (user can only see
  // their own agents) instead of admin-key auth.
   //
- // Empty arrays are expected for newly-deployed user agents — the
+ // Empty arrays are expected for newly-deployed user agents - the
  // budget/reputation/counsel infrastructure was originally built for
  // system agents (Mythos, Huginn) and only populates for user agents
  // when those features wire through. The FE shows graceful empty
@@ -5958,7 +5990,7 @@ export function createNuroRouter(db: Pool): Router {
     const userId = (req as any).user.id
     const id = String(req.params.id)
     try {
-     // Ownership check — fetch full agent row in one go.
+     // Ownership check - fetch full agent row in one go.
       const agentResult = await db.query(
         'SELECT * FROM agents WHERE id = $1 AND user_id = $2',
         [id, userId],
@@ -6167,24 +6199,24 @@ export function createNuroRouter(db: Pool): Router {
     }
   })
 
- // POST /agents/:id/settle — queue agent-profit → card settlement (KYC REQUIRED)
+ // POST /agents/:id/settle - queue agent-profit → card settlement (KYC REQUIRED)
   //
  // S33 Tier 1 #5: previously this endpoint ZEROED total_profit and told
- // the user "Profits deposited to card" — but no money moved. The user
+ // the user "Profits deposited to card" - but no money moved. The user
  // believed they had collected $X when in fact the agent's profit just
  // disappeared. This was the canonical Intent-vs-Execution conflation
  // (System Rule #1: "Intent Layer records intent. Execution Layer moves
  // real money. Never conflate the two.")
   //
  // Fixed flow:
- //   1. Validate KYC + agent + profit (intent layer — same as before)
+ //   1. Validate KYC + agent + profit (intent layer - same as before)
  //   2. INSERT a card_settlements row in 'pending' state with the agent's
  //      profit amount + metadata pointing back to the agent. position_id
  //      stays NULL (this isn't a market position).
- //   3. DO NOT decrement total_profit yet — it stays accumulated until
+ //   3. DO NOT decrement total_profit yet - it stays accumulated until
  //      the sweep actually moves money. This is the rollback safety net:
  //      if the bridge fails, the user's profit is still visible.
- //   4. Notification + response are EXPLICIT about pending state — no more
+ //   4. Notification + response are EXPLICIT about pending state - no more
  //      "deposited to card" lie.
  //   5. (FOLLOW-UP) execution-dispatch sweepCardSettlements needs to
  //      learn the agent code path: when metadata.agent_id is set, the
@@ -6197,7 +6229,7 @@ export function createNuroRouter(db: Pool): Router {
     const userId = (req as any).user.id
     const agentId = req.params.id
     try {
-     // KYC gate — cannot convert crypto profits to fiat card without KYC
+     // KYC gate - cannot convert crypto profits to fiat card without KYC
       const userCheck = await db.query('SELECT kyc_status FROM users WHERE id = $1', [userId])
       if (!userCheck.rows.length) return res.status(404).json({ error: 'User not found' })
       if (userCheck.rows[0].kyc_status !== 'approved') {
@@ -6252,7 +6284,7 @@ export function createNuroRouter(db: Pool): Router {
            // Surfacing for the sweep: the source vault on Polygon needs
            // CCTP-bridging to Base before forward can happen. Until that
            // sweep branch lands, this row will be skipped (status stays
-           // 'pending' — no money lost, just delayed). Operator runs the
+           // 'pending' - no money lost, just delayed). Operator runs the
            // bridge manually meanwhile.
             polygon_bridge_required: true,
           }),
@@ -6260,7 +6292,7 @@ export function createNuroRouter(db: Pool): Router {
       )
       const settlementId = settlementRes.rows[0].id
 
-     // Audit trail — explicit settlement_intent record before any
+     // Audit trail - explicit settlement_intent record before any
      // money attempts to move.
       await db.query(
         `INSERT INTO execution_log
@@ -6282,7 +6314,7 @@ export function createNuroRouter(db: Pool): Router {
         ],
       ).catch(() => {})
 
-     // Notification — TRUTHFUL about pending state.
+     // Notification - TRUTHFUL about pending state.
       await db.query(
         `INSERT INTO notifications (id, user_id, type, title, message, is_read, created_at)
          VALUES (gen_random_uuid(), $1, 'transaction', $2, $3, false, now())`,
@@ -6319,9 +6351,9 @@ export function createNuroRouter(db: Pool): Router {
   mountFacilitatorRoutes(router, db)
 
  // ── Agent budget routes (S31 H2) ───────────────────────────────────────────
- // GET /api/agents/:id/budget — full snapshot (auth: self or admin)
- // POST /api/agents/:id/budget/refill — admin only — top up
- // POST /api/agents/:id/budget/authority — admin only — set cap
+ // GET /api/agents/:id/budget - full snapshot (auth: self or admin)
+ // POST /api/agents/:id/budget/refill - admin only - top up
+ // POST /api/agents/:id/budget/authority - admin only - set cap
   router.get('/api/agents/:id/budget', requireAuthOrAdminKey, async (req: any, res: Response) => {
     try {
       const targetId = String(req.params.id)
@@ -6355,7 +6387,7 @@ export function createNuroRouter(db: Pool): Router {
     }
   })
 
- // POST /api/agents/:id/budget/topup — USER-FACING budget top-up
+ // POST /api/agents/:id/budget/topup - USER-FACING budget top-up
  // (Marathon 9 sprint 9.1 / A1).
  //
  // The admin /budget/refill above is admin-key-gated and used for
@@ -6366,14 +6398,14 @@ export function createNuroRouter(db: Pool): Router {
  // (agent funding via /agents/:id/fund).
  //
  // Topup amount is gated by enforceTxCap so platform-level caps apply
- // — a runaway script can't blow through unlimited topup increments.
+ // - a runaway script can't blow through unlimited topup increments.
  // agent_id passed correctly (Marathon 9 / A3 lesson) so the
  // resulting heimdall_event tags the agent's UUID.
   router.post('/api/agents/:id/budget/topup', requireAuth, async (req: any, res: Response) => {
     const userId = (req as any).user.id
     const targetId = String(req.params.id)
     try {
- // Ownership check — user can only top up their own agents.
+ // Ownership check - user can only top up their own agents.
       const ownership = await db.query(
         'SELECT id, name FROM agents WHERE id = $1 AND user_id = $2',
         [targetId, userId],
@@ -6390,7 +6422,7 @@ export function createNuroRouter(db: Pool): Router {
       const period = (req.body?.period === 'daily' || req.body?.period === 'monthly') ? req.body.period : 'weekly'
       const description = String(req.body?.description || `User top-up by ${userId.slice(0, 8)}`).slice(0, 480)
 
- // tx-cap cap on the topup itself — direct agent attribution.
+ // tx-cap cap on the topup itself - direct agent attribution.
       await enforceTxCap({
         source: 'agent-budget-topup',
         txKind: 'transfer',
@@ -6415,7 +6447,7 @@ export function createNuroRouter(db: Pool): Router {
     }
   })
 
- // Manual spend recording. Mirrors /refill — admin-only counterpart for
+ // Manual spend recording. Mirrors /refill - admin-only counterpart for
  // ops adjustments + smoke-testing the agent-budget-low → Huginn →
  // Telegram loop. Real on-chain spends flow through enforceTxCap, NOT
  // this endpoint.
@@ -6437,20 +6469,20 @@ export function createNuroRouter(db: Pool): Router {
     }
   })
 
- // ── x402 — agentic-payment rails (S33 Phase 1, idea #1 in roadmap) ────────
+ // ── x402 - agentic-payment rails (S33 Phase 1, idea #1 in roadmap) ────────
  // Programmatic Agent Treasury: any agent on AFI calls any x402-protected URL
  // through our middleware. Pre-flight chain (tx-cap → huginn.counsel →
  // recordSpend) gates every payment under existing budget + reputation
  // policy. Settlement on Base (USDC).
  //
- // Admin-only — callers are server-side processes or operator probes.
+ // Admin-only - callers are server-side processes or operator probes.
  // For the eventual user-mode usage (agents acting on a user's behalf),
  // a separate authenticated endpoint will land in Phase 2.
 
  // GET /api/x402/agent-address?agentId=Nuro
  // Returns the deterministic Base address an agent signs from. Operator
  // funds this address with USDC + ETH (gas-free if facilitator is used
- // with EIP-3009 — only USDC needed).
+ // with EIP-3009 - only USDC needed).
   router.get('/api/x402/agent-address', requireAuthOrAdminKey, async (req: any, res: Response) => {
     try {
       const isAdminCaller = (req.user as any)?.role === 'admin'
@@ -6536,13 +6568,13 @@ export function createNuroRouter(db: Pool): Router {
     }
   })
 
- // ── x402 — Phase 2: server-side endpoints (S33 idea X3) ────────────────
- // PUBLIC endpoints — no admin/JWT required. The auth IS the payment
+ // ── x402 - Phase 2: server-side endpoints (S33 idea X3) ────────────────
+ // PUBLIC endpoints - no admin/JWT required. The auth IS the payment
  // (USDC on Base, settled via Coinbase facilitator before the response
  // body flushes). Revenue accumulates in the deterministic Nuro vault
  // visible at GET /api/x402/revenue-address.
 
- // GET /api/x402/revenue-address — public, no payment.
+ // GET /api/x402/revenue-address - public, no payment.
  // Returns where payments to this deployment land. Useful for monitoring
  // (basescan watchlist) and transparency (clients can verify payTo before
  // signing).
@@ -6562,22 +6594,22 @@ export function createNuroRouter(db: Pool): Router {
     }
   })
 
- // ── x402-PAID PRODUCT ENDPOINTS — agent-to-agent revenue (S33 X3) ────────
+ // ── x402-PAID PRODUCT ENDPOINTS - agent-to-agent revenue (S33 X3) ────────
  //
- // PUBLIC — no admin/JWT. Authentication IS the x402 USDC payment.
+ // PUBLIC - no admin/JWT. Authentication IS the x402 USDC payment.
  // Wrappers built once at registration time so the closure is shared
  // across requests.
   {
  // eslint-disable-next-line @typescript-eslint/no-var-requires
     const { x402Route } = require('./x402/server') as typeof import('./x402/server')
 
- // GET /api/x402/demo/echo — $0.001 — Phase 2 demo / loopback target.
+ // GET /api/x402/demo/echo - $0.001 - Phase 2 demo / loopback target.
     router.get(
       '/api/x402/demo/echo',
       x402Route(
         {
           priceUsd: 0.001,
-          description: 'Nuro x402 echo — Phase 2 demo endpoint',
+          description: 'Nuro x402 echo - Phase 2 demo endpoint',
           mimeType: 'application/json',
           db,
         },
@@ -6601,23 +6633,23 @@ export function createNuroRouter(db: Pool): Router {
       ),
     )
 
- // GET /api/x402/helm/threat-intel — $0.10 — daily threat-intel
+ // GET /api/x402/helm/threat-intel - $0.10 - daily threat-intel
  // digest. Returns active rules in last 24h with category/severity
  // rollup. External agents pay to see what attacks our infra is
- // catching — a public-good signal for the agent ecosystem.
+ // catching - a public-good signal for the agent ecosystem.
     router.get(
       '/api/x402/helm/threat-intel',
       x402Route(
         {
           priceUsd: 0.10,
-          description: 'Nuro Helm — 24h threat-intel digest, FP-labeled, per-rule active list',
+          description: 'Nuro Helm - 24h threat-intel digest, FP-labeled, per-rule active list',
           mimeType: 'application/json',
           db,
         },
         async () => {
           const { runHelmSelfTest } = await import('./helm')
           const selfTest = await runHelmSelfTest(db)
- // Only ship rules that fired in last 24h — that's the signal.
+ // Only ship rules that fired in last 24h - that's the signal.
  // Counts by category and severity for a quick rollup.
           const active = selfTest.rules.filter((r) => r.count24h > 0)
           const byCategory: Record<string, number> = {}
@@ -6633,7 +6665,7 @@ export function createNuroRouter(db: Pool): Router {
             totalEvents24h: active.reduce((s, r) => s + r.count24h, 0),
             byCategory,
             bySeverity,
- // Per-rule list (no PII / no payload — just metadata + counts)
+ // Per-rule list (no PII / no payload - just metadata + counts)
             rules: active.map((r) => ({
               id: r.id,
               category: r.category,
@@ -6651,14 +6683,14 @@ export function createNuroRouter(db: Pool): Router {
       ),
     )
 
- // GET /api/x402/markets/resolved — $0.001 — resolved market history.
+ // GET /api/x402/markets/resolved - $0.001 - resolved market history.
  // Cheap, high-call-volume target for agents building probability models.
     router.get(
       '/api/x402/markets/resolved',
       x402Route(
         {
           priceUsd: 0.001,
-          description: 'Resolved prediction markets — last N (max 100) with outcomes + volumes',
+          description: 'Resolved prediction markets - last N (max 100) with outcomes + volumes',
           mimeType: 'application/json',
           db,
         },
@@ -6692,7 +6724,7 @@ export function createNuroRouter(db: Pool): Router {
       ),
     )
 
- // POST /api/x402/huginn/counsel — $0.005 — synchronous Huginn counsel
+ // POST /api/x402/huginn/counsel - $0.005 - synchronous Huginn counsel
  // for any agent's proposal. Caller posts {actionType, valueUsd?,
  // reasoning?, metadata?} and gets back the same {verdict, signals,
  // reasoning} structure our internal agents see. Lets external agents
@@ -6703,7 +6735,7 @@ export function createNuroRouter(db: Pool): Router {
       x402Route(
         {
           priceUsd: 0.005,
-          description: 'Huginn counsel — pre-action advisory for external agents (verdict + signals)',
+          description: 'Huginn counsel - pre-action advisory for external agents (verdict + signals)',
           mimeType: 'application/json',
           db,
         },
@@ -6711,10 +6743,10 @@ export function createNuroRouter(db: Pool): Router {
           const b = (req.body || {}) as Record<string, any>
           const actionType = String(b.actionType || '').slice(0, 64).trim()
           if (!actionType) {
- // x402Route returns whatever we put in body — caller still
+ // x402Route returns whatever we put in body - caller still
  // got charged but the deterministic shape lets them retry
  // with a valid body. Pricing this as the cost of a malformed
- // request is acceptable — sandboxes check shape locally first.
+ // request is acceptable - sandboxes check shape locally first.
             return { error: 'actionType required (e.g. "on-chain-tx", "agent-action")' }
           }
           const valueUsd = typeof b.valueUsd === 'number' ? b.valueUsd : null
@@ -6736,20 +6768,20 @@ export function createNuroRouter(db: Pool): Router {
           await scanAndEmit({
             text: scanText,
             source: 'x402-huginn-counsel',
-            agentId: null, // external caller — no internal agent attribution
+            agentId: null, // external caller - no internal agent attribution
           }).catch((err) => {
  // In enforce mode, a blocking finding throws here. Surface to
  // the response body so caller knows their input was rejected.
  // This bypasses the standard return path; we re-raise so x402
  // server's outer catch returns 500 (caller paid; we kept the
- // money — but we also blocked the action. Future polish: 422
+ // money - but we also blocked the action. Future polish: 422
  // with a payment-refund hint.)
             throw err
           })
 
           const { counsel } = await import('./huginn')
           const result = await counsel(db, {
- // External callers don't have an internal proposerAgentId — tag
+ // External callers don't have an internal proposerAgentId - tag
  // them as 'external-x402' so reputation feedback stays scoped.
             proposerAgentId: 'external-x402',
             actionType,
@@ -6844,7 +6876,7 @@ function rowToCard(r: any) {
  // MASKED form ('•••• 1234'). Full PAN is only ever delivered via
  // /cards/:id/secrets which proxies Issuer directly under rate-limit + audit
  // (Tier 0 #3). The FE's existing `c.cardNumber || c.card_number` fallback
- // chains continue to work — they just receive masked values now.
+ // chains continue to work - they just receive masked values now.
   const last4 = r.card_last_4 || (r.card_number ? String(r.card_number).slice(-4) : null)
   return {
     id:         r.id,
@@ -6860,11 +6892,11 @@ function rowToCard(r: any) {
     alertEnabled: r.alert_enabled ?? true,
     spendThreshold: r.spend_threshold ? parseFloat(r.spend_threshold) : 500,
  // Day-4 fix: expose whether this card is linked to an Issuer issuer card.
- // FE uses this to compute the total wallet balance from REAL cards only —
+ // FE uses this to compute the total wallet balance from REAL cards only -
  // phantom deck-stack cards have a balance for visual purposes but should
  // NOT be summed into the displayed account total.
     isIssuerLinked: !!r.issuer_card_id,
- // Session 27 — balance freshness metadata so FE can render a
+ // Session 27 - balance freshness metadata so FE can render a
  // "last synced X ago" indicator. `balance_synced_at` reflects the
  // last SUCCESSFUL Issuer balance fetch; if rate-limited (429/503), the
  // timestamp stays stale and balance_source stays 'issuer_sync:*'.
@@ -6904,7 +6936,7 @@ function rowToTransaction(r: any) {
     sourceChain: r.source_chain ?? null,
     destChain:   r.dest_chain ?? null,
     token:       r.token ?? null,
- // Sprint 2.4 — Issuer Visa-spend metadata
+ // Sprint 2.4 - Issuer Visa-spend metadata
     merchantName:        r.merchant_name ?? null,
     merchantCategoryRaw: r.merchant_category_raw ?? null,
     transactionType:     r.transaction_type ?? null,
@@ -6913,7 +6945,7 @@ function rowToTransaction(r: any) {
   }
 }
 
-// No fake card numbers — Issuer provides real card details after creation.
+// No fake card numbers - Issuer provides real card details after creation.
 // Placeholders are used until Issuer responds with actual PAN/expiry.
 function placeholderCardNumber(): string {
   return '**** **** **** ****'

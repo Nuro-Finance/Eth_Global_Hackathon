@@ -1,10 +1,10 @@
 "use client";
 
 /**
- * useCardUsage — computes the Card Usage panel's data from real card_transactions.
+ * useCardUsage - computes the Card Usage panel's data from real card_transactions.
  *
  * Replaces the EMPTY_CARD_USAGE production fallback (which left the panel
- * showing $0 used / $0 limit / no categories — visually empty in the
+ * showing $0 used / $0 limit / no categories - visually empty in the
  * demo). Now derives:
  *
  * - dailyUsed: today's outgoing transactions, summed

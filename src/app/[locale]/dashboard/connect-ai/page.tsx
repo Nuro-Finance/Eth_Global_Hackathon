@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * /dashboard/connect-ai — BYOK (Bring Your Own AI) setup page.
+ * /dashboard/connect-ai - BYOK (Bring Your Own AI) setup page.
  *
  * Generates Nuro MCP API keys + shows copy-paste configs for plugging
  * Nuro into the user's AI client of choice (Claude Desktop, Claude Code,
@@ -144,11 +144,11 @@ export default function ConnectAiPage() {
             <h1 className="text-3xl font-bold">Connect your AI</h1>
           </div>
           <p className="text-[var(--color-text-muted)] text-sm max-w-2xl">
-            Generate an API key and paste it into your AI client of choice. Your AI will be able to read your balance, transactions, and (with confirmation) adjust card limits or freeze cards. Bring your own agent — Claude, GPT, Cursor, anything that speaks MCP.
+            Generate an API key and paste it into your AI client of choice. Your AI will be able to read your balance, transactions, and (with confirmation) adjust card limits or freeze cards. Bring your own agent - Claude, GPT, Cursor, anything that speaks MCP.
           </p>
         </header>
 
-        {/* New key reveal — modal-like card that appears after generation */}
+        {/* New key reveal - modal-like card that appears after generation */}
         <AnimatePresence>
           {newKey && (
             <motion.div
@@ -161,7 +161,7 @@ export default function ConnectAiPage() {
                 <ShieldCheck className="w-5 h-5 text-[var(--color-primary)] shrink-0 mt-0.5" />
                 <div className="flex-1 min-w-0">
                   <h2 className="font-semibold text-[var(--color-text-primary)] mb-1">
-                    Your new key — save it now
+                    Your new key - save it now
                   </h2>
                   <p className="text-xs text-[var(--color-text-muted)]">
                     This is the only time you can see the full key. Copy it, paste it into your AI client's config, then keep this tab open until you've verified it works.

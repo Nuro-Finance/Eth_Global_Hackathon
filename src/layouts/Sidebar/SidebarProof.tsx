@@ -112,7 +112,7 @@ export default function SidebarProof({
 }: {
   expanded: boolean;
   setExpanded: (expanded: boolean) => void;
- /** sm: rail only — hide toggle, parent blocks expand */
+ /** sm: rail only - hide toggle, parent blocks expand */
   expandLocked?: boolean;
 }) {
   const [openSections, setOpenSections] = useState<string[]>(['MAIN', 'CARDS', 'WALLET']);
@@ -156,7 +156,7 @@ export default function SidebarProof({
       items: [
         { id: 'my-wallet', label: 'My Wallet', icon: <Wallet />, href: '/dashboard/my-wallet' },
  // 2026-05-25 staging-only carve-out: Agent Wallet + Bank Vault don't
- // meet our FE standards yet — design team is going to redo them.
+ // meet our FE standards yet - design team is going to redo them.
  // Visible on staging (NEXT_PUBLIC_DESIGN_PENDING_VISIBLE=true) so the
  // design team can see + iterate, hidden on prod by default. Routes
  // (/dashboard/agent-wallet + /dashboard/vault) still resolve so direct
@@ -210,7 +210,7 @@ export default function SidebarProof({
             />
           </div>
           
-          {/* Toggle — sm (expandLocked): visible, non-interactive */}
+          {/* Toggle - sm (expandLocked): visible, non-interactive */}
           <button
             type="button"
             onClick={expandLocked ? undefined : toggle}

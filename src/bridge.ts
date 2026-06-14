@@ -121,7 +121,7 @@ function buildLzOptions(gasLimit: number): string {
     const valueHex = ethers.utils.hexZeroPad("0x00", 16)
  // Options V3: version(2) + workerID(1) + optionLength(2) + type(1) + gas(16) + value(16)
  // optionLength = 1 + 16 + 16 = 33 = 0x0021
- // BUG FIX: was 0x0011 (17) — parser overran, read 0x00 as workerID → InvalidWorkerId(0)
+ // BUG FIX: was 0x0011 (17) - parser overran, read 0x00 as workerID → InvalidWorkerId(0)
     return "0x0003" + "01" + "0021" + "01" + gasHex.slice(2) + valueHex.slice(2)
 }
 
@@ -132,14 +132,14 @@ async function lzBridgeToArbitrum(
     forwardAmount: ethers.BigNumber,
     decimals: number
 ): Promise<string> {
- // Session 28 Kelp-hardening — kill-switch. Refuses to send if
+ // Session 28 Kelp-hardening - kill-switch. Refuses to send if
  // LZ_BRIDGE_ENABLED is not explicitly true. Defaults off until the
  // hardened contract + multi-DVN config + reserve monitor are all live.
  // Upstream caller should catch this and fall back gracefully OR surface
  // a clear "bridge temporarily disabled" message to the user.
     if (!CONFIG.LZ_BRIDGE_ENABLED) {
         throw new Error(
-            'LZ_BRIDGE_ENABLED=false — LayerZero path disabled post-Kelp hardening. ' +
+            'LZ_BRIDGE_ENABLED=false - LayerZero path disabled post-Kelp hardening. ' +
             'Awaiting: (1) MyOFTAdapter v2 deploy, (2) multi-DVN config verify, (3) reserve monitor live.'
         )
     }
@@ -158,11 +158,11 @@ async function lzBridgeToArbitrum(
     const usdc = new ethers.Contract(usdcAddress, USDC_ABI, wallet)
     const adapter = new ethers.Contract(adapterAddress, OFT_ADAPTER_ABI, wallet)
 
- // Helm tx-cap — outbound value cap. USDC is 1:1 USD so amount in
+ // Helm tx-cap - outbound value cap. USDC is 1:1 USD so amount in
  // human units == valueUsd. Observe-only unless HELM_TXCAP_ENFORCE=on.
  // Throws synchronously in enforce mode so the bridge never broadcasts
  // an over-cap move. Counterpart to the OFTAdapter on-chain per-message
- // cap — this is the off-chain twin so the alarm fires before signing.
+ // cap - this is the off-chain twin so the alarm fires before signing.
     const forwardAmountUsd = Number(ethers.utils.formatUnits(forwardAmount, decimals))
     await enforceTxCap({
         source: 'bridge-lz',
@@ -314,7 +314,7 @@ const TOKEN_MESSENGER_ABI = [
  * Core CCTP V2 burn+mint. Default destination is Base (chainId 8453) for
  * backward compatibility with all existing callers (inbound deposit flow).
  *
- * Pass `destChainId` to target any other CCTP-supported chain — e.g. 137 for
+ * Pass `destChainId` to target any other CCTP-supported chain - e.g. 137 for
  * Polygon to implement Base→Polygon agent funding (Sprint 2.3 reverse flow).
  *
  * Domain and RPC lookup delegated to the pure helpers resolveCCTPDomains +
@@ -345,7 +345,7 @@ export async function cctpBurnAndMint(
 
     const mintRecipient = ethers.utils.hexZeroPad(recipientAddress, 32)
 
- // Acquire chain lock — only one CCTP operation per chain at a time
+ // Acquire chain lock - only one CCTP operation per chain at a time
     await acquireChainLock(sourceChainId, wallet.address)
     console.log(`[cctp] Chain ${sourceChainId} lock acquired`)
 
@@ -373,7 +373,7 @@ export async function cctpBurnAndMint(
             console.log(`[cctp] Allowance sufficient (${ethers.utils.formatUnits(allowance, decimals)}), skipping approve`)
         }
 
- // Burn — use incremented nonce (no re-fetch needed, we track it)
+ // Burn - use incremented nonce (no re-fetch needed, we track it)
         console.log(`[cctp] Burning ${ethers.utils.formatUnits(amount, decimals)} USDC on chain ${sourceChainId} → domain ${destDomain} (chain ${destChainId})...`)
         const burnTx = await messenger.depositForBurn(
             amount,
@@ -418,7 +418,7 @@ export async function cctpBurnAndMint(
     if (!attestation) throw new Error("Timed out waiting for CCTP attestation")
 
  // Call receiveMessage on destination chain's MessageTransmitter to complete the mint
-    console.log(`[cctp] Attestation received — submitting receiveMessage on chain ${destChainId} (domain ${destDomain})...`)
+    console.log(`[cctp] Attestation received - submitting receiveMessage on chain ${destChainId} (domain ${destDomain})...`)
     const sourceProvider = new ethers.providers.JsonRpcProvider(publicRpc)
     const burnReceipt = await sourceProvider.getTransactionReceipt(burnTxHash)
     const MSG_SENT_TOPIC = "0x8c5261668696ce22758910d05bab8f186d6eb247ceac2af2e82c7dc17669b036"
@@ -442,7 +442,7 @@ export async function cctpBurnAndMint(
         console.log(`[cctp] Mint confirmed on chain ${destChainId}: ${mintTx.hash}`)
     } catch (mintErr: any) {
         if (mintErr?.reason === 'Nonce already used' || mintErr?.message?.includes('Nonce already used')) {
-            console.log(`[cctp] Circle already relayed — USDC delivered to recipient on chain ${destChainId}`)
+            console.log(`[cctp] Circle already relayed - USDC delivered to recipient on chain ${destChainId}`)
         } else {
             console.log(`[cctp] receiveMessage failed: ${mintErr?.reason || mintErr?.message?.slice(0,80)}`)
             console.log(`[cctp] Circle auto-relay will complete delivery`)
@@ -552,7 +552,7 @@ export async function bridgeAndForward(
 
     const forwardAmount = amountToUse.sub(feeAmount)
 
- // Base direct — fee + forward atomically (both on same chain, no bridge risk)
+ // Base direct - fee + forward atomically (both on same chain, no bridge risk)
     if (sourceChainId === 8453) {
         await acquireChainLock(8453)
         try {
@@ -596,7 +596,7 @@ export async function bridgeAndForward(
                 releaseChainLock(sourceChainId)
             }
         } catch (feeErr: any) {
- // Fee sweep failed but bridge succeeded — log for manual collection
+ // Fee sweep failed but bridge succeeded - log for manual collection
             console.warn(`[bridge] Fee sweep failed on chain ${sourceChainId} (bridge succeeded, fee pending): ${feeErr.message?.slice(0, 60)}`)
         }
     }
@@ -608,7 +608,7 @@ export async function bridgeAndForward(
  // chain like BSC, so the amount that lands on Arbitrum is the source
  // amount / 10^(sourceDecimals - 6). Found 2026-04-17: $0.04 BSC deposit
  // got stuck because waitForArbUsdc compared 3.8e16 target against a
- // real 38000 arrival — would never match.
+ // real 38000 arrival - would never match.
         const ARB_DECIMALS = 6
         const forwardAmountArb = decimals > ARB_DECIMALS
             ? forwardAmount.div(ethers.BigNumber.from(10).pow(decimals - ARB_DECIMALS))

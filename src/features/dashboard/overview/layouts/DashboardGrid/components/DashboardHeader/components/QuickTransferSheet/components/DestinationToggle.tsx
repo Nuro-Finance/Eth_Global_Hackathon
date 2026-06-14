@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
  *
  * `canSendToCard=false` disables the Card option (grey + tooltip) when the
  * recipient hasn't completed KYC. Without KYC, Issuer has no deposit address
- * to credit — backend returns 400, so we pre-empt in the UI.
+ * to credit - backend returns 400, so we pre-empt in the UI.
  */
 
 export type TransferDestination = "wallet" | "card" | "agent";

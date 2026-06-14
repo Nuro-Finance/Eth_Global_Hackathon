@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-// Proxy to Express BE /agents/:id/details — bundled snapshot for the
+// Proxy to Express BE /agents/:id/details - bundled snapshot for the
 // per-agent Detail panel (S34 Marathon 9 / Tier A). Returns budgets +
 // reputation + counsel + ledger + security events + bets + fundings +
 // settlements in one round-trip.

@@ -143,7 +143,7 @@ export function useLogin() {
                 return "INVALID_CREDENTIALS";
             }
 
- // Verified — go through NextAuth to mint the session cookie
+ // Verified - go through NextAuth to mint the session cookie
             const result = await signIn("credentials", {
                 redirect: false,
                 email: data.email,
@@ -199,7 +199,7 @@ export function useLogin() {
                 setIsLoading(false);
                 return res.status === 400 && /expired/i.test(data.error || "") ? "EXPIRED" : "INVALID";
             }
- // OTP good — mint session from verify-otp JWT (skip redundant /auth/login round-trip)
+ // OTP good - mint session from verify-otp JWT (skip redundant /auth/login round-trip)
             const result = await signIn("credentials", {
                 redirect: false,
                 email: pendingVerification.email,
@@ -278,7 +278,7 @@ export function useLogin() {
         onSubmit,
         handleGoogleLogin,
         handleAppleLogin,
- // Day-7 OTP state — LoginLayout pivots its render when truthy
+ // Day-7 OTP state - LoginLayout pivots its render when truthy
         pendingVerification,
         verifyOtp,
         resendOtp,

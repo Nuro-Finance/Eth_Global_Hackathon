@@ -5,7 +5,7 @@ const BACKEND = process.env.BACKEND_URL || "http://localhost:3000";
 /**
  * GET /api/wallet-portfolio?address=0x...&chains=1,8453,42161,137
  *
- * Proxies to Express backend GET /wallet-portfolio. No auth — public
+ * Proxies to Express backend GET /wallet-portfolio. No auth - public
  * on-chain data. Rate-limiting + caching live in the backend.
  */
 export async function GET(req: NextRequest) {

@@ -30,12 +30,12 @@ import { useAppSession } from "@/hooks/useAppSession";
 
 /** Bump when `public/Nuro Black Card - Home Page.png` changes to bust browser cache. */
 export const PRIMARY_DECK_C1_FACE_CACHE_VERSION = "20260522-front-r14";
-/** Front tier (stack position 1) — card art with stroke baked in. */
+/** Front tier (stack position 1) - card art with stroke baked in. */
 export const PRIMARY_DECK_C1_FACE_SRC = `/Nuro%20Black%20Card%20-%20Home%20Page.png?v=${PRIMARY_DECK_C1_FACE_CACHE_VERSION}`;
 
 /** Bump when `public/Nuro Black Card - Home Page - No Stroke.png` changes. */
 export const PRIMARY_DECK_STACK_BEHIND_FACE_CACHE_VERSION = "20260522-nostroke-3";
-/** Stack tiers 2–3 — `Nuro Black Card - Home Page - No Stroke.png` */
+/** Stack tiers 2–3 - `Nuro Black Card - Home Page - No Stroke.png` */
 export const PRIMARY_DECK_STACK_BEHIND_FACE_SRC = `/Nuro%20Black%20Card%20-%20Home%20Page%20-%20No%20Stroke.png?v=${PRIMARY_DECK_STACK_BEHIND_FACE_CACHE_VERSION}`;
 
 export function resolvePrimaryDeckTierFaceSrc(stackIndex: number): string {
@@ -171,7 +171,7 @@ type DeckStackOrderDialogProps = {
 /** Cap height when pickers open long lists; shell height follows content (unlike fixed-step reload/withdraw). */
 const DECK_STACK_MODAL_MAX_HEIGHT = "max-h-[min(540px,85vh)]";
 
-/** ReloadFlow picker panel: border, fill, token radii (no heavy outer shadow — avoids square halo compositing). */
+/** ReloadFlow picker panel: border, fill, token radii (no heavy outer shadow - avoids square halo compositing). */
 const DECK_STACK_RELOAD_PICKER_PANEL = cn(
   "pointer-events-auto flex min-h-0 flex-col overflow-hidden rounded-t-[var(--radius-md)] rounded-b-[var(--radius-xl)]",
   "border border-[var(--color-border-primary)] bg-[var(--color-bg-picker-panel)] shadow-none",

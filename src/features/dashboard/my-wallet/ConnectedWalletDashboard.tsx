@@ -62,7 +62,7 @@ import {
   type WalletRecentActivityModalRow,
 } from "@/features/dashboard/cards/components/WalletRecentActivityModal";
 
-// Session 25 Phase 2 + Phase 3 — real data wiring
+// Session 25 Phase 2 + Phase 3 - real data wiring
 import { useWalletPortfolio, type WalletPortfolio, type WalletToken } from "./useWalletPortfolio";
 import { useWalletActivity, type WalletActivityEntry } from "./useWalletActivity";
 import {
@@ -93,7 +93,7 @@ const ASSET_ROW_OVERFLOW_MENU: { label: string; Icon: LucideIcon }[] = [
   { label: "Scanner", Icon: Globe },
 ];
 
-// Polish pass — block explorer URLs for the supported chains. Native tokens
+// Polish pass - block explorer URLs for the supported chains. Native tokens
 // drop to the chain homepage; ERC-20s link to the token page.
 function explorerUrlForAsset(chainId: number, contract: string | null): string | null {
   const base = ((): string | null => {
@@ -119,7 +119,7 @@ function explorerUrlForAsset(chainId: number, contract: string | null): string |
 
 const SEGMENTS = 40;
 
-/** Overview / dashboard cards use `gap-4` between widgets — keep that as the only vertical rhythm between blocks here. */
+/** Overview / dashboard cards use `gap-4` between widgets - keep that as the only vertical rhythm between blocks here. */
 const BLOCK_GAP = "gap-4";
 
 function SegmentedBarSparkline({
@@ -172,7 +172,7 @@ function formatSignedPctOneDecimal(value: number): string {
   return `${sign}${abs}%`;
 }
 
-/** Jagged sparkline (viewBox 0 0 100 40) — separate shapes for 24h vs 7d. */
+/** Jagged sparkline (viewBox 0 0 100 40) - separate shapes for 24h vs 7d. */
 function buildWalletBalanceSparklinePaths(window: WalletBalancePerfWindow): { lineD: string; areaD: string } {
   const w = 100;
   const h = 40;
@@ -253,12 +253,12 @@ function formatUsd(value: number) {
 }
 
 /** `public/Gas Icon.svg` (URL-encoded for the space in the filename).
- * Ported from Chris 4.23 drop — reusable on any panel toolbar where we
+ * Ported from Chris 4.23 drop - reusable on any panel toolbar where we
  * want to surface an estimated network fee alongside an action CTA. */
 const WALLET_GAS_ICON_SRC = "/Gas%20Icon.svg";
 
 /**
- * Muted "gas + USD" chip for swap / send toolbars. Presentational only —
+ * Muted "gas + USD" chip for swap / send toolbars. Presentational only -
  * caller is responsible for computing the USD value from a live quote or
  * placeholder. Port from Chris 4.23; consumers added when gas-quote hook
  * lands.
@@ -430,7 +430,7 @@ function WalletBannerNameEditor({ fullAddress }: { fullAddress: string }) {
 
   return (
     <div className={cn("relative h-8 min-h-8 w-full min-w-0 overflow-hidden", BANNER_NAME_ROW)}>
-      {/* Display name + pencil — fades out while editing */}
+      {/* Display name + pencil - fades out while editing */}
       <div
         className={cn(
           "absolute inset-y-0 left-0 flex w-full min-w-0 max-w-full flex-nowrap items-center gap-1 transition-opacity ease-in-out motion-reduce:transition-none",
@@ -456,7 +456,7 @@ function WalletBannerNameEditor({ fullAddress }: { fullAddress: string }) {
         </button>
       </div>
 
-      {/* Input + save — fades in while editing */}
+      {/* Input + save - fades in while editing */}
       <div
         className={cn(
           "absolute inset-y-0 left-0 flex h-8 min-w-0 max-w-[16rem] flex-nowrap items-center gap-1 transition-opacity ease-in-out motion-reduce:transition-none",
@@ -562,7 +562,7 @@ const DEMO_WALLET_HOLDINGS: WalletHolding[] = [
   },
 ];
 
-/** Dev preview — sendable portfolio rows when `/api/wallet-portfolio` is empty (5.4.26 demo balances). */
+/** Dev preview - sendable portfolio rows when `/api/wallet-portfolio` is empty (5.4.26 demo balances). */
 const DEMO_SENDABLE_TOKENS: WalletToken[] = [
   {
     chainId: 1,
@@ -617,7 +617,7 @@ function pickTopAssetCards(holdings: WalletHolding[], maxCards = 3): TopAssetCar
   });
 }
 
-/** Dev-preview / design parity only — not used when live portfolio tokens exist. */
+/** Dev-preview / design parity only - not used when live portfolio tokens exist. */
 const WALLET_ASSET_TABLE_MOCK_ROWS = [
   {
     key: "eth-mainnet",
@@ -662,7 +662,7 @@ const WALLET_ASSET_TABLE_MOCK_ROWS = [
     balance: formatUsd(1372.04),
     price: "$3,479.10",
     d24: "+1.1%",
-    cap: "—",
+    cap: "-",
     isScam: true,
   },
 ] as const;
@@ -745,7 +745,7 @@ const WALLET_RECENT_ACTIVITY_ROWS: WalletRecentActivityModalRow[] = [
     title: "Approved USDC",
     meta: "Apr 10 · 11:02 AM",
     txid: "0xcccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
-    amount: "—",
+    amount: "-",
     kind: "other",
     status: "pending",
     eventDate: "2026-04-10",
@@ -775,7 +775,7 @@ const WALLET_RECENT_ACTIVITY_ROWS: WalletRecentActivityModalRow[] = [
     title: "Swap failed (reverted)",
     meta: "Apr 7 · 6:18 PM",
     txid: "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
-    amount: "—",
+    amount: "-",
     kind: "swap",
     status: "cancelled",
     eventDate: "2026-04-07",
@@ -809,7 +809,7 @@ const WALLET_BANNER_RIM_STROKE_ALPHA = 0.2;
 const WALLET_BANNER_SOLANA_SPARKLINE_PURPLE = `rgba(167, 139, 250, ${WALLET_BANNER_RIM_STROKE_ALPHA})`;
 const WALLET_BANNER_INFO_BLUE_STROKE = `rgba(59, 130, 246, ${WALLET_BANNER_RIM_STROKE_ALPHA})`;
 
-/** Left stem + BL hook + left margin glow: `"blue"` | `"purple"` — flip one line to restore purple. */
+/** Left stem + BL hook + left margin glow: `"blue"` | `"purple"` - flip one line to restore purple. */
 const WALLET_BANNER_EDGE_ACCENT: "blue" | "purple" = "blue";
 
 const WALLET_BANNER_EDGE_RGB =
@@ -836,7 +836,7 @@ const WALLET_BANNER_TR_COLUMN_SHIFT_PX = -1;
 /**
  * Rim outside the overflow-hidden shell.
  * Corner hooks: border + horizontal mask (keeps vertical leg solid).
- * Vertical stems: SVG `<rect>` + `<linearGradient>` — avoids CSS mask + 2px div + box-shadow “step” artifacts.
+ * Vertical stems: SVG `<rect>` + `<linearGradient>` - avoids CSS mask + 2px div + box-shadow “step” artifacts.
  * TR hook + blue stem share one column wrapper; `WALLET_BANNER_TR_COLUMN_SHIFT_PX` is applied on that wrapper only.
  */
 function WalletBalanceBannerRimDecor() {
@@ -970,11 +970,11 @@ function WalletBalanceBannerRimDecor() {
 type WalletBalanceBannerProps = {
   address: string;
   portfolio?: WalletPortfolio;
- /** User reload or first fetch — skeleton on balance amount only. */
+ /** User reload or first fetch - skeleton on balance amount only. */
   showSkeleton?: boolean;
   onSend?: () => void;
   onReceive?: () => void;
- /** 5.4.26 — opens send/receive inside the swap panel shell. */
+ /** 5.4.26 - opens send/receive inside the swap panel shell. */
   onTransferAction?: (tab: "send" | "receive") => void;
   onRefresh?: () => void;
 };
@@ -1026,7 +1026,7 @@ function WalletBalanceBanner(props: WalletBalanceBannerProps) {
 
   return (
     <div className="relative isolate w-full">
-      {/* Left margin glow — geometry mirrors right; color follows WALLET_BANNER_EDGE_ACCENT */}
+      {/* Left margin glow - geometry mirrors right; color follows WALLET_BANNER_EDGE_ACCENT */}
       <div
         aria-hidden
         className="pointer-events-none absolute z-0 block opacity-0 dark:opacity-90"
@@ -1044,7 +1044,7 @@ function WalletBalanceBanner(props: WalletBalanceBannerProps) {
             "linear-gradient(180deg, transparent 0%, black 7%, black 82%, rgba(0,0,0,0.5) 89%, rgba(0,0,0,0.14) 95%, transparent 100%)",
         }}
       />
-      {/* Right margin: blue — vertical mirror of left mask (heavy toward top-right corner); 20px higher than left */}
+      {/* Right margin: blue - vertical mirror of left mask (heavy toward top-right corner); 20px higher than left */}
       <div
         aria-hidden
         className="pointer-events-none absolute z-0 block opacity-0 dark:opacity-90"
@@ -1086,7 +1086,7 @@ function WalletBalanceBanner(props: WalletBalanceBannerProps) {
         <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-[var(--color-primary)]/10 blur-3xl" />
       </div>
 
-      {/* Faint cyan sparkline + fill — right-weighted, fades into the balance column (no dots). */}
+      {/* Faint cyan sparkline + fill - right-weighted, fades into the balance column (no dots). */}
       <div
         aria-hidden
         className={cn("pointer-events-none absolute inset-0 z-[5] overflow-hidden", CARD_RADIUS)}
@@ -1398,7 +1398,7 @@ function SortableTopAssetCard({
   const shellClass = "min-w-0 w-full self-stretch";
 
   if (isDragging) {
- // Invisible footprint identical to the real card — avoids stretched dashed slots blowing row height.
+ // Invisible footprint identical to the real card - avoids stretched dashed slots blowing row height.
     return (
       <div ref={setNodeRef} style={style} {...attributes} className={shellClass} aria-hidden>
         <div className="pointer-events-none select-none opacity-0">
@@ -1440,7 +1440,7 @@ function TopAssetCardsStrip(props: {
   const { cards, orderStorageKey, portfolio } = props;
   const stripShowSkeleton = props.showSkeleton === true;
  // When the portfolio fetch has resolved (success), we trust the live data
- // unconditionally — even if it's empty. Falling back to the demo cards on
+ // unconditionally - even if it's empty. Falling back to the demo cards on
  // an empty live wallet was producing the cardinal sin of this dashboard:
  // showing $128K of fake "ETH/SOL/BTC" holdings under a "$0.00" banner for
  // every freshly-connected user, who would (correctly) call it bullshit.
@@ -1584,7 +1584,7 @@ function TopAssetCardsStrip(props: {
 
 type AssetsSortKey = "value_desc" | "value_asc" | "change_desc" | "change_asc";
 
-/** All assets toolbar — glass sort menu pilot (see `docs/glass-ui-playbook.md`). */
+/** All assets toolbar - glass sort menu pilot (see `docs/glass-ui-playbook.md`). */
 const ASSETS_SORT_MENU: { key: AssetsSortKey; label: string; dir: "down" | "up" }[] = [
   { key: "value_desc", label: "Filter", dir: "down" },
   { key: "value_asc", label: "Filter", dir: "up" },
@@ -1615,7 +1615,7 @@ const ASSETS_GLASS_MENU_CONTENT = cn(
   "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2"
 );
 
-// Phishing / spam heuristics for Phase 3.5 — catches the classic airdrop
+// Phishing / spam heuristics for Phase 3.5 - catches the classic airdrop
 // attacks where malicious tokens stuff telegram links, unicode stars, or
 // instructions into the name/symbol fields.
 const SPAM_REGEXES: RegExp[] = [
@@ -1630,7 +1630,7 @@ const SPAM_REGEXES: RegExp[] = [
 
 function looksLikeScam(token: WalletToken, whitelist?: TokenWhitelist): boolean {
   if (token.isNative) return false;
- // Session 26 — positive whitelist override. A token on our erc20_allowlist
+ // Session 26 - positive whitelist override. A token on our erc20_allowlist
  // is DEFINITIVELY legit (we audited it for the swap pipeline) and MUST
  // never be flagged as scam, even if CoinGecko hasn't priced it yet.
   if (
@@ -1647,7 +1647,7 @@ function looksLikeScam(token: WalletToken, whitelist?: TokenWhitelist): boolean 
   if (SPAM_REGEXES.some((r) => r.test(haystack))) return true;
  // Obvious zero-price + long unicode garble case
   if (token.usdPrice === 0 && haystack.length > 40) return true;
- // Zero price alone is suggestive but not conclusive — keep the existing
+ // Zero price alone is suggestive but not conclusive - keep the existing
  // soft flag so "Hide Scams" hides the noise by default
   if (token.usdPrice === 0) return true;
   return false;
@@ -1659,7 +1659,7 @@ function AssetsTable(props: {
 }) {
   const { tokens } = props;
   const tableShowSkeleton = props.showSkeleton === true;
- // Session 26 — positive allowlist override for the scam filter
+ // Session 26 - positive allowlist override for the scam filter
   const whitelist = useTokenWhitelist();
   const [query, setQuery] = useState("");
   const [hideDust, setHideDust] = useState(false);
@@ -1671,7 +1671,7 @@ function AssetsTable(props: {
 
   const DUST_THRESHOLD_USD = 10;
 
- // Session 25 Phase 3 + polish — convert real portfolio tokens into the
+ // Session 25 Phase 3 + polish - convert real portfolio tokens into the
  // row shape the existing filter/sort/table logic already understands.
  // Extended to carry logo + explorer URL so the polish pass can render
  // them without re-walking the tokens array.
@@ -1684,9 +1684,9 @@ function AssetsTable(props: {
         asset: t.isNative ? `${t.name} Native` : t.name,
         sym: t.symbol,
         balance: formatUsd(t.usdValue),
-        price: t.usdPrice > 0 ? `$${t.usdPrice.toFixed(t.usdPrice < 1 ? 6 : 2)}` : "—",
-        d24: t.delta24h != null ? `${t.delta24h >= 0 ? "+" : ""}${t.delta24h.toFixed(1)}%` : "—",
-        cap: "—",
+        price: t.usdPrice > 0 ? `$${t.usdPrice.toFixed(t.usdPrice < 1 ? 6 : 2)}` : "-",
+        d24: t.delta24h != null ? `${t.delta24h >= 0 ? "+" : ""}${t.delta24h.toFixed(1)}%` : "-",
+        cap: "-",
         isScam: looksLikeScam(t, whitelist),
         logo: t.logo,
         chainId: t.chainId,
@@ -2091,7 +2091,7 @@ function AssetsTable(props: {
                                 : isLast
                                   ? "mt-0.5 mb-1"
                                   : "my-0.5";
- // Polish pass — wire the menu actions. Scanner
+ // Polish pass - wire the menu actions. Scanner
  // always opens a new tab to the block explorer;
  // Send/Receive/Swap scroll to the relevant panel
  // (full wiring into those panels is Phase 6).
@@ -2164,7 +2164,7 @@ function parsePositiveDecimalInput(raw: string): number {
   return Number.isFinite(n) && n > 0 ? n : 0;
 }
 
-/** 5.4.26 swap discs — under /public/assets/images/icons (no spaced filenames). */
+/** 5.4.26 swap discs - under /public/assets/images/icons (no spaced filenames). */
 const SWAP_TOKEN_ICON_SRC: Record<string, string> = {
   eth: "/assets/images/icons/eth.svg",
   weth: "/assets/images/icons/eth.svg",
@@ -2222,7 +2222,7 @@ function SwapWidgetPanel({
   onConnectWallet?: () => void;
   activeTab?: TradeTab;
   onTabChange?: (tab: TradeTab) => void;
- /** Phase 5 — real portfolio tokens for the sell-side dropdown. */
+ /** Phase 5 - real portfolio tokens for the sell-side dropdown. */
   portfolioTokens?: WalletToken[];
   shell?: WalletRightShell;
   onShellChange?: (next: WalletRightShell) => void;
@@ -2252,7 +2252,7 @@ function SwapWidgetPanel({
   const [swapToAsset, setSwapToAsset] = useState<SwapBuyAssetSel | null>(null);
  // Real assets that exist in /public. Missing symbols fall through to the
  // colored-bg fallback below. Previous version referenced /assets/images/
- // icons/ether.svg and similar paths that don't exist — browsers then show
+ // icons/ether.svg and similar paths that don't exist - browsers then show
  // the broken-image placeholder inside the token picker rows.
   const iconSrcForSymbol = useCallback(
     (sym: string, logo?: string | null) => resolveSwapTokenIconSrc(sym, logo),
@@ -2262,7 +2262,7 @@ function SwapWidgetPanel({
  // --- Session 25 Phase 2 + 5: live swap-quote preview ---
  // Fetches a real 0x quote via the backend /quote/swap endpoint as the user
  // types. Phase 5 extended this to support any sellable token from the
- // portfolio — native uses 'native' sentinel, ERC-20 passes the symbol.
+ // portfolio - native uses 'native' sentinel, ERC-20 passes the symbol.
   const { chain: connectedChain } = useAccount();
   const [quoteBuyUsd, setQuoteBuyUsd] = useState<number | null>(null);
   const [quoteMinUsd, setQuoteMinUsd] = useState<number | null>(null);
@@ -2271,7 +2271,7 @@ function SwapWidgetPanel({
  // Phase 5 sell-token selection (declared early so the quote effect can
  // read the selected token for the API call).
  //
- // Session 26 — multi-chain sell: dropped the "connected chain only"
+ // Session 26 - multi-chain sell: dropped the "connected chain only"
  // filter. Users can now pick any non-scam, non-zero balance token from
  // their portfolio regardless of current chain. If the picked token is
  // on a different chain than the wallet, the execution flow calls
@@ -2322,7 +2322,7 @@ function SwapWidgetPanel({
       setQuoteMinUsd(null);
       return;
     }
- // Session 26 — multi-chain sell: quote uses the SELECTED TOKEN's
+ // Session 26 - multi-chain sell: quote uses the SELECTED TOKEN's
  // chain, not the connected wallet's chain. Lets the user preview a
  // swap before committing to the chain switch at execution time.
  //
@@ -2330,7 +2330,7 @@ function SwapWidgetPanel({
  // can quote arbitrary destination tokens, not just the card-credit
  // USDC pipeline. When the user picks a memecoin / bluechip / native
  // destination, buyAmountUsd may be NaN; we fall back to displaying
- // "—" until the FE price-feed integration lands.
+ // "-" until the FE price-feed integration lands.
     const chainId = selectedSellToken.chainId;
     const sellTokenParam = isNativeSell ? "native" : selectedSellToken.symbol;
     const buyTokenParam = swapToAsset?.symbol || "USDC";
@@ -2417,14 +2417,14 @@ function SwapWidgetPanel({
     }
   }, [sellSymbol]);
 
- // --- Session 25 Phase 4 + 5 — Firm swap execution with ERC-20 approval ---
+ // --- Session 25 Phase 4 + 5 - Firm swap execution with ERC-20 approval ---
  // Handles two paths from the sell-token dropdown:
  // - Native token (ETH/MATIC): single tx via useSendTransaction
  // - Allowlisted ERC-20: check allowance → ERC20.approve if short →
  // wait → fetch firm quote → swap tx
   const { address: takerAddress } = useAccount();
   const { data: nativeBalance } = useBalance({ address: takerAddress });
- // Session 26 — multi-chain sell support: wallet-initiated switch before
+ // Session 26 - multi-chain sell support: wallet-initiated switch before
  // firm quote + tx signing when picked token lives on a different chain.
   const { switchChainAsync } = useSwitchChain();
 
@@ -2450,7 +2450,7 @@ function SwapWidgetPanel({
   const [swapError, setSwapError] = useState<string | null>(null);
   const [isFetchingFirm, setIsFetchingFirm] = useState(false);
 
- // Phase 5 polish — dispatch activity-bump when a swap confirms so the
+ // Phase 5 polish - dispatch activity-bump when a swap confirms so the
  // dashboard re-fetches portfolio + activity after ~5s.
   useEffect(() => {
     if (isSwapConfirmed) {
@@ -2458,7 +2458,7 @@ function SwapWidgetPanel({
     }
   }, [isSwapConfirmed]);
 
- // Phase 5 — ERC-20 approval state
+ // Phase 5 - ERC-20 approval state
   const { writeContractAsync: writeApproval } = useWriteContract();
   const [approvalHash, setApprovalHash] = useState<`0x${string}` | undefined>(undefined);
   const [isApproving, setIsApproving] = useState(false);
@@ -2512,7 +2512,7 @@ function SwapWidgetPanel({
       amount,
       taker,
     });
- // S31 H1 — multi-token execution. When buyToken is omitted backend
+ // S31 H1 - multi-token execution. When buyToken is omitted backend
  // defaults to USDC (card-credit pipeline unchanged).
     if (buyToken && buyToken.toUpperCase() !== "USDC") params.set("buyToken", buyToken);
     const url = `/api/quote/swap-firm?${params.toString()}`;
@@ -2529,7 +2529,7 @@ function SwapWidgetPanel({
     setSwapError(null);
     setIsFetchingFirm(true);
     try {
- // Session 26 — multi-chain sell: if the selected token's chain
+ // Session 26 - multi-chain sell: if the selected token's chain
  // differs from the wallet's connected chain, request the wallet
  // to switch first. Must happen BEFORE fetching the firm quote so
  // taker + chainId match up, and BEFORE submitting the tx so the
@@ -2549,7 +2549,7 @@ function SwapWidgetPanel({
         }
       }
       const sellTokenParam = isNativeSell ? "native" : selectedSellToken.symbol;
- // S31 H1 — pass through the user's selected buy-side asset so the
+ // S31 H1 - pass through the user's selected buy-side asset so the
  // backend produces an executable quote for any allowlisted target,
  // not just USDC. Defaults to USDC when no asset is selected.
       const buyTokenParam = swapToAsset?.symbol || "USDC";
@@ -2573,7 +2573,7 @@ function SwapWidgetPanel({
             chainId,
           });
           setApprovalHash(hash as `0x${string}`);
- // Wait for approval to confirm (via useWaitForTransactionReceipt) —
+ // Wait for approval to confirm (via useWaitForTransactionReceipt) -
  // we then re-fetch the firm quote since gas prices + 0x routes
  // may have moved, and submit the swap in a follow-up effect.
  // See: "approval confirmation effect" below.
@@ -2585,7 +2585,7 @@ function SwapWidgetPanel({
         return;
       }
 
- // Native path — single tx, no approval needed
+ // Native path - single tx, no approval needed
       sendSwapTx({
         to: firm.to,
         data: firm.data,
@@ -2706,7 +2706,7 @@ function SwapWidgetPanel({
         <div className="flex flex-wrap items-center gap-1.5 text-[11px] font-semibold sm:text-xs">
           {/* Day-7 Chris-zip integration: collapse to 2 visible tabs (Swap + Buy). */}
           {/* Limit/Sell still type-supported and rendered below if `activeTab` is */}
-          {/* set programmatically — we just don't expose the buttons until those */}
+          {/* set programmatically - we just don't expose the buttons until those */}
           {/* flows are fully wired. */}
           {(["Swap", "Buy"] as const).map((t) => {
             const isActive = activeTab === t;
@@ -3135,33 +3135,33 @@ function SwapWidgetPanel({
 }
 
 // ──────────────────────────────────────────────────────────────────────────
-// Session 25 Phase 6 — Limit / Buy / Sell tab panels
+// Session 25 Phase 6 - Limit / Buy / Sell tab panels
 // ──────────────────────────────────────────────────────────────────────────
 
 /**
- * BuyPanel — in-house Buy tab with dual CTA (Session 26 Phase 8 scaffold).
+ * BuyPanel - in-house Buy tab with dual CTA (Session 26 Phase 8 scaffold).
  *
  * Per "In-House Buy Sell Ramp Design.md" Phase 8 directive: ship Buy 1
  * (card-balance → crypto wallet) and Buy 2 (bank-direct → crypto wallet)
  * SIDE BY SIDE, not sequentially. This component renders both CTAs
  * behind feature flags:
  *
- * BUY_1_ENABLED — gates the card-balance path (blocked on Issuer card-debit API)
- * BUY_2_ENABLED — gates the bank-direct path (blocked on Plaid + Dwolla)
+ * BUY_1_ENABLED - gates the card-balance path (blocked on Issuer card-debit API)
+ * BUY_2_ENABLED - gates the bank-direct path (blocked on Plaid + Dwolla)
  *
  * When both flags are false (today), we show the dual layout with
- * disabled CTAs + "Coming soon — <reason>" hints so the UX intent is
+ * disabled CTAs + "Coming soon - <reason>" hints so the UX intent is
  * already baked in. Flipping a flag ships the backing flow without a
  * new UI commit.
  *
  * Moonpay fallback stays as the tertiary for users who need it
- * today — gets removed in full once both in-house paths are live.
+ * today - gets removed in full once both in-house paths are live.
  */
 
 const WALLET_DISPLAY_CURRENCIES = ["USD", "EUR", "JPY", "AUD", "CAD"] as const;
 type WalletDisplayCurrency = (typeof WALLET_DISPLAY_CURRENCIES)[number];
 
-/** 5.4.26 BUY_ONRAMP_PROVIDERS — icon sizes unchanged from reference. */
+/** 5.4.26 BUY_ONRAMP_PROVIDERS - icon sizes unchanged from reference. */
 const BUY_ONRAMP_PROVIDERS = [
   {
     id: "moonpay",
@@ -3204,7 +3204,7 @@ function BuyPanel({
  // Feature flags retained for the post-pitch ramp launch, but the
  // "Coming soon · Phase 8a/8b" cards are hidden until the underlying
  // Issuer card-debit + Plaid/Dwolla flows ship. Showing them on the demo
- // confused investors — they looked like dead CTAs. The third-party
+ // confused investors - they looked like dead CTAs. The third-party
  // onramp list below (Moonpay live, Robinhood + Coinbase queued) is
  // the only Buy surface investors see today.
   const buy1Enabled = process.env.NEXT_PUBLIC_BUY_1_ENABLED === "true";
@@ -3219,7 +3219,7 @@ function BuyPanel({
       {/* In-house Buy 1 (card balance) + Buy 2 (bank direct) cards
           hidden for the demo. They re-appear automatically once either
           NEXT_PUBLIC_BUY_1_ENABLED or NEXT_PUBLIC_BUY_2_ENABLED is set
-          to "true" — Phase 8a/8b ship gate. */}
+          to "true" - Phase 8a/8b ship gate. */}
       {(buy1Enabled || buy2Enabled) && (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           {buy1Enabled && (
@@ -3257,11 +3257,11 @@ function BuyPanel({
         </div>
       )}
 
-      {/* Third-party onramps — Moonpay live, Robinhood + Coinbase queued.
+      {/* Third-party onramps - Moonpay live, Robinhood + Coinbase queued.
           MoonPay is live (opens hosted URL). Robinhood + Coinbase are visual-only
           placeholders until we wire their respective onramp flows in the
           batch wiring phase. The target UX shows all three
-          as equal-weight options — we follow that, but label coming-soon ones
+          as equal-weight options - we follow that, but label coming-soon ones
           distinctly to avoid false promises. */}
       <div className="rounded-[var(--radius-lg)] bg-black/20 p-4">
         <p className="mb-3 text-[11px] font-medium uppercase tracking-wide text-[var(--color-text-muted)]">
@@ -3369,10 +3369,10 @@ function BuyPanel({
 }
 
 /**
- * SellPanel — the in-house Sell flow.
+ * SellPanel - the in-house Sell flow.
  *
  * Session 25 Phase 7a (per "In-House Buy Sell Ramp Design.md"):
- * Our existing crypto→card flow (Reload Card) IS a sell — user gives us
+ * Our existing crypto→card flow (Reload Card) IS a sell - user gives us
  * crypto, gets spendable USD balance. Exposing it on the /my-wallet
  * Sell tab as the PRIMARY action lets us drop the Moonpay Sell
  * dependency entirely for this path. Moonpay stays as a fallback for
@@ -3406,7 +3406,7 @@ function SellPanel({ walletAddress, chainId }: { walletAddress?: string; chainId
           Sell to your Nuro card
         </h3>
         <p className="mt-2 text-xs text-[var(--color-text-muted)]">
-          Convert any token from any supported chain into spendable USD on your Nuro Visa card. Runs through our own swap + bridge infrastructure — no third-party widget, no 3-5% on-ramp fee, no KYC hand-off.
+          Convert any token from any supported chain into spendable USD on your Nuro Visa card. Runs through our own swap + bridge infrastructure - no third-party widget, no 3-5% on-ramp fee, no KYC hand-off.
         </p>
         <ul className="mt-3 space-y-1 text-[11px] text-[var(--color-text-muted)]">
           <li>• 23 source chains supported</li>
@@ -3448,7 +3448,7 @@ function SellPanel({ walletAddress, chainId }: { walletAddress?: string; chainId
 }
 
 /**
- * BuySellPanel — on-ramp / off-ramp via Moonpay's hosted widget.
+ * BuySellPanel - on-ramp / off-ramp via Moonpay's hosted widget.
  * We don't proxy the transaction ourselves; we link out with the user's
  * address pre-filled. Moonpay's buy.moonpay.com / sell.moonpay.com pages
  * accept public query params and don't require an API key for the demo
@@ -3526,7 +3526,7 @@ function BuySellPanel({
       </Button>
 
       <p className="text-[10px] text-[var(--color-text-muted)]">
-        Nuro doesn't process the fiat transaction — you're redirected to Moonpay's hosted flow. Rates + fees set by Moonpay.
+        Nuro doesn't process the fiat transaction - you're redirected to Moonpay's hosted flow. Rates + fees set by Moonpay.
       </p>
     </div>
   );
@@ -3545,7 +3545,7 @@ type LimitOrderRecord = {
 };
 
 /**
- * LimitOrderPanel — captures a target-price limit order and persists it
+ * LimitOrderPanel - captures a target-price limit order and persists it
  * to localStorage. Proper execution requires a keeper bot watching prices
  * (Session 26 concern); this MVP records the intent so the UI is usable
  * today.
@@ -3566,7 +3566,7 @@ function LimitOrderPanel({
   const [submitted, setSubmitted] = useState(false);
   const [pendingOrders, setPendingOrders] = useState<LimitOrderRecord[]>([]);
 
- // Custom token dropdown — replaces the ugly native <select>. Shows the
+ // Custom token dropdown - replaces the ugly native <select>. Shows the
  // selected symbol + chevron, opens a styled popover on click, closes on
  // outside-click or Escape.
   const [sellPickerOpen, setSellPickerOpen] = useState(false);
@@ -3596,12 +3596,12 @@ function LimitOrderPanel({
     }
   }, [sellableTokens, sellSymbol]);
 
- // Current market price (USDC per 1 sellSymbol) — fetched from the
+ // Current market price (USDC per 1 sellSymbol) - fetched from the
  // /quote/best aggregator with amount=1. Powers the "Current:
  // $2,318.44" hint under the target input + a "Use market" button
  // that pre-fills the target. Before this fix (S30 overtime), users
  // had to know the current market price themselves before setting a
- // limit order — the target input was a raw field with no context.
+ // limit order - the target input was a raw field with no context.
   const [marketPrice, setMarketPrice] = useState<number | null>(null);
   const [marketPriceLoading, setMarketPriceLoading] = useState(false);
   useEffect(() => {
@@ -3795,7 +3795,7 @@ function LimitOrderPanel({
         </div>
         {exceedsBalance && (
           <p className="mt-2 text-[11px] font-medium text-red-400">
-            Insufficient {sellSymbol} balance —
+            Insufficient {sellSymbol} balance -
             have {Number(activeToken!.balance).toLocaleString("en-US", { maximumFractionDigits: 6 })},
             trying to sell {sellAmountNum.toLocaleString("en-US", { maximumFractionDigits: 6 })}.
           </p>
@@ -3837,7 +3837,7 @@ function LimitOrderPanel({
             className="flex-1 min-w-0 border-0 bg-transparent p-0 text-2xl font-semibold tabular-nums text-[var(--color-text-primary)] outline-none placeholder:text-[var(--color-text-muted)]/40"
           />
         </div>
-        {/* Surface how far target is from current — helps users sanity-check
+        {/* Surface how far target is from current - helps users sanity-check
             their limit order (e.g. target way below market means sell immediately). */}
         {marketPrice != null && targetPrice && Number(targetPrice) > 0 && (() => {
           const tgt = Number(targetPrice);
@@ -3851,12 +3851,12 @@ function LimitOrderPanel({
                 : "text-amber-400",
             )}>
               {deltaPct.toFixed(2)}% {direction} market
-              {deltaPct < -1 && " — would execute at current price"}
+              {deltaPct < -1 && " - would execute at current price"}
             </p>
           );
         })()}
         <p className="mt-2 text-[11px] text-[var(--color-text-muted)]">
-          Your order will execute a swap when the market hits {targetPrice ? `$${targetPrice}` : "your target"}. Keeper-bot execution launches Session 26 — for now we persist the intent locally and list it below.
+          Your order will execute a swap when the market hits {targetPrice ? `$${targetPrice}` : "your target"}. Keeper-bot execution launches Session 26 - for now we persist the intent locally and list it below.
         </p>
       </div>
 
@@ -3929,7 +3929,7 @@ function formatActivityMeta(timestamp: number): string {
   return `${month} ${d.getDate()} · ${time}`;
 }
 
-// Human-readable amount formatter — never scientific notation, even for
+// Human-readable amount formatter - never scientific notation, even for
 // tiny values. Uses increasing decimal precision as the number shrinks,
 // and collapses anything below 6 decimals to a "<0.000001" label so the
 // column stays visually uniform and honest.
@@ -3940,7 +3940,7 @@ function formatActivityAmount(amount: number): string {
   if (abs >= 0.01) return amount.toFixed(4);
   if (abs >= 0.0001) return amount.toFixed(6);
   if (abs >= 0.00000001) return amount.toFixed(8);
- // Genuinely tiny — avoid useless precision noise
+ // Genuinely tiny - avoid useless precision noise
   return amount > 0 ? "<0.00000001" : ">-0.00000001";
 }
 
@@ -3959,7 +3959,7 @@ function activityToRows(
         : `${sign}${t.asset}`;
     return {
       key: `act-${t.txHash}-${i}`,
- // Phase 6 polish — drop the "· chainName" suffix; chain now rendered
+ // Phase 6 polish - drop the "· chainName" suffix; chain now rendered
  // as a branded icon leading the row (matches Transactions page UX).
       title: `${dirLabel} ${t.asset}`,
       meta: formatActivityMeta(t.timestamp),
@@ -3973,7 +3973,7 @@ function activityToRows(
   });
 }
 
-// Phase 5 polish — same phishing heuristic as the All Assets table, but
+// Phase 5 polish - same phishing heuristic as the All Assets table, but
 // applied to transfer entries. Airdropped scam tokens are visible on-chain
 // which means their receive-transfers surface in Recent Activity. Most
 // users want them hidden by default.
@@ -3992,7 +3992,7 @@ function transferLooksLikeSpam(
   whitelist?: TokenWhitelist
 ): boolean {
   const asset = t.asset ?? "";
- // Session 26 — whitelist override wins over every other heuristic.
+ // Session 26 - whitelist override wins over every other heuristic.
  // If the asset matches an allowlist symbol, it's legit. Period.
   if (whitelist && asset && isWhitelistedToken(whitelist, { symbol: asset })) {
     return false;
@@ -4017,10 +4017,10 @@ function RecentActivityPanel(props: {
   const activityShowSkeleton = props.showSkeleton === true;
   const MAX_VISIBLE = 5;
   const [showSpam, setShowSpam] = useState(false);
- // Session 26 — positive allowlist override
+ // Session 26 - positive allowlist override
   const whitelist = useTokenWhitelist();
 
- // Build a set of "known scam" asset symbols from the portfolio —
+ // Build a set of "known scam" asset symbols from the portfolio -
  // tokens that are zero-priced or hit our looksLikeScam heuristic.
  // This catches clean short-name scams (OCT / ASTEROID / MOGU pattern)
  // that the regex heuristic alone would miss.
@@ -4207,13 +4207,13 @@ function RecentActivityPanel(props: {
 }
 
 /**
- * Connected wallet layout (see `.cursor/rules/connected-wallet-dashboard-layout.mdc` — do not regress).
+ * Connected wallet layout (see `.cursor/rules/connected-wallet-dashboard-layout.mdc` - do not regress).
  *
  * Below `xl`: one column, `order-*` → balance → cards → assets → swap → recent.
  * At `xl`: 2×2 grid `2fr / 1fr`, rows `auto` + `minmax(0,1fr)`, `gap-4` only between blocks.
  * Row 2 aligns All assets | Recent activity.
  * Row-1 at `xl`: left stack uses `xl:self-start` (content-sized). Swap column stretches (`xl:h-full`) so the swap
- * card grows to the row-1 track height — only `gap-4` (16px) between swap and Recent activity, no dead band.
+ * card grows to the row-1 track height - only `gap-4` (16px) between swap and Recent activity, no dead band.
  */
 export type ConnectedWalletDashboardProps = {
  /** Optional `0x…` for the pill; falls back to demo when omitted. */
@@ -4244,7 +4244,7 @@ export function ConnectedWalletDashboard({
   const topAssetCards = useMemo(() => pickTopAssetCards(holdingsSource, 3), [holdingsSource]);
 
  // --- Session 25 Phase 2 + 3 wiring ---
- // Portfolio (balances + prices) + activity (recent transfers) — both via
+ // Portfolio (balances + prices) + activity (recent transfers) - both via
  // the backend /wallet-portfolio + /wallet-activity Alchemy proxies.
  // Falls back to mock values when status is idle/error so the UI never
  // shows a blank page.
@@ -4313,7 +4313,7 @@ export function ConnectedWalletDashboard({
       return;
     }
 
- // Hooks never reached loading (idle address / instant cache) — still show skeleton briefly.
+ // Hooks never reached loading (idle address / instant cache) - still show skeleton briefly.
     const t = window.setTimeout(() => {
       if (!userRefreshGuard.current.active) return;
       userRefreshGuard.current = { active: false, sawLoading: false };
@@ -4348,7 +4348,7 @@ export function ConnectedWalletDashboard({
 
   const handleRefreshPortfolio = requestUserRefresh;
 
- // Phase 5 polish — re-fire the refresh key as soon as a local swap/send
+ // Phase 5 polish - re-fire the refresh key as soon as a local swap/send
  // tx confirms, so the user sees their own action land in Recent Activity
  // without waiting for the 60s poll. We piggyback on the events
  // bubbled via a custom DOM event (wallet-activity-bump) that the modals +
@@ -4362,7 +4362,7 @@ export function ConnectedWalletDashboard({
     return () => window.removeEventListener("wallet-activity-bump", onBump);
   }, [bumpFetchOnly]);
 
- // Phase 5 polish — live-refresh every 60s while the page is visible.
+ // Phase 5 polish - live-refresh every 60s while the page is visible.
  // Pauses when the tab is hidden (document.hidden) to conserve Alchemy CU
  // and CoinGecko rate budget. Also re-fires immediately on becoming
  // visible again so data is fresh when the user returns.

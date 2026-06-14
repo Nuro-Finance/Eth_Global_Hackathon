@@ -40,7 +40,7 @@ const countryPickerInnerStyle = {
 
 const COUNTRY_PICKER_LIST_HEIGHT_PX = 220;
 
-/** Strip Radix popover chrome — glass shell is the only visible panel (same as notifications dropdown). */
+/** Strip Radix popover chrome - glass shell is the only visible panel (same as notifications dropdown). */
 const COUNTRY_PICKER_POPOVER_RESET = cn(
   "z-[120] w-[var(--radix-popover-trigger-width)] !max-w-[var(--radix-popover-trigger-width)]",
   "!rounded-none !border-0 !bg-transparent !p-0 !shadow-none !backdrop-blur-none",

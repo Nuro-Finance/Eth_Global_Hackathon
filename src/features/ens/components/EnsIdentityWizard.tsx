@@ -178,7 +178,7 @@ export function EnsIdentityWizard({ open, onOpenChange, onComplete }: EnsIdentit
             {step === "business"
               ? "Choose your business name on the Nuro registry."
               : step === "agent"
-                ? "Add an agent identity — fund by name, not hex."
+                ? "Add an agent identity - fund by name, not hex."
                 : "Share this name to fund your agent."}
           </p>
         </div>
@@ -253,7 +253,7 @@ export function EnsIdentityWizard({ open, onOpenChange, onComplete }: EnsIdentit
                     </p>
                     <p className="text-xs text-[var(--color-text-muted)]">
                       {visibility === "private"
-                        ? "Not shown in fleet browse — share the name directly."
+                        ? "Not shown in fleet browse - share the name directly."
                         : "Visible in your agent fleet."}
                     </p>
                   </div>
@@ -276,8 +276,8 @@ export function EnsIdentityWizard({ open, onOpenChange, onComplete }: EnsIdentit
               </p>
               <p className="mt-2 max-w-sm text-sm text-[var(--color-text-muted)]">
                 {successResult.visibility === "private"
-                  ? "Unlisted agent identity — copy and share with funders."
-                  : "Public agent identity — resolves in any CCIP-capable wallet."}
+                  ? "Unlisted agent identity - copy and share with funders."
+                  : "Public agent identity - resolves in any CCIP-capable wallet."}
               </p>
               <p className="mt-3 font-mono text-xs text-[var(--color-text-muted)]">
                 {successResult.address.slice(0, 10)}…{successResult.address.slice(-8)}

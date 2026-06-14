@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 const BACKEND = process.env.BACKEND_URL || "http://localhost:3000";
 
-// GET /api/users/search?q=<text> — proxies to backend /users/search
+// GET /api/users/search?q=<text> - proxies to backend /users/search
 // Used by QuickTransferSheet's RecipientSearch autocomplete.
 export async function GET(req: NextRequest) {
     const auth = req.headers.get("authorization") || "";

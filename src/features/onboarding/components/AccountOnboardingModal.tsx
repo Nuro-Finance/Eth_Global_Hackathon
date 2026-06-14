@@ -40,6 +40,13 @@ import { DESIGN_MODE } from "@/config/design-mode";
 import Dropdown from "@/components/dropdown";
 import { useRouter } from "@/i18n/navigation";
 import { OnboardingConfettiBurst } from "./OnboardingConfettiBurst";
+import {
+  createDefaultOnboardingProgress,
+  readOnboardingProgress,
+  writeOnboardingProgress,
+  type OnboardingCompletedStepKey,
+  type StoredOnboardingProgress,
+} from "@/lib/account-onboarding-progress";
 
 const ONBOARDING_EXTERNAL_WALLET_LIST = [
   "detected_ethereum_wallets",
@@ -48,7 +55,7 @@ const ONBOARDING_EXTERNAL_WALLET_LIST = [
   "wallet_connect",
 ] as const;
 
-/** Planned full flow length — progress bar only (ENS, wallet, theme later). */
+/** Planned full flow length - progress bar only (ENS, wallet, theme later). */
 const PLANNED_STEP_COUNT = 7;
 
 const ACCOUNT_TYPE_OPTIONS: {
@@ -152,9 +159,16 @@ function ThemePreviewButton({
 export interface AccountOnboardingModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  userId?: string;
+  onProgressChange?: () => void;
 }
 
-export function AccountOnboardingModal({ open, onOpenChange }: AccountOnboardingModalProps) {
+export function AccountOnboardingModal({
+  open,
+  onOpenChange,
+  userId,
+  onProgressChange,
+}: AccountOnboardingModalProps) {
   const router = useRouter();
   const [step, setStep] = useState<AccountOnboardingStep>("accountType");
   const [accountType, setAccountType] = useState<AccountType | null>(null);
@@ -184,6 +198,29 @@ export function AccountOnboardingModal({ open, onOpenChange }: AccountOnboarding
   const privyModalOpenRef = useRef(false);
   const wasOpenRef = useRef(false);
 
+  const buildDraftSnapshot = useCallback(
+    () => ({
+      accountType,
+      displayName,
+      teamName,
+      ensSlug,
+      country,
+      themeChoice,
+      walletAddress,
+      walletConnected,
+    }),
+    [
+      accountType,
+      displayName,
+      teamName,
+      ensSlug,
+      country,
+      themeChoice,
+      walletAddress,
+      walletConnected,
+    ],
+  );
+
   const handleOpenChange = useCallback(
     (nextOpen: boolean) => {
       if (
@@ -194,9 +231,20 @@ export function AccountOnboardingModal({ open, onOpenChange }: AccountOnboarding
       ) {
         return;
       }
+      if (!nextOpen && userId && step !== "complete") {
+        const saved = readOnboardingProgress(userId);
+        if (!saved?.completedAt) {
+          writeOnboardingProgress(userId, {
+            ...(saved ?? createDefaultOnboardingProgress(step)),
+            currentStep: step,
+            draft: buildDraftSnapshot(),
+          });
+          onProgressChange?.();
+        }
+      }
       onOpenChange(nextOpen);
     },
-    [onOpenChange],
+    [onOpenChange, userId, step, buildDraftSnapshot, onProgressChange],
   );
 
   const blockDismissWhilePrivyOpen = useCallback((event: Event) => {
@@ -228,22 +276,66 @@ export function AccountOnboardingModal({ open, onOpenChange }: AccountOnboarding
     [blockDismissWhilePrivyOpen],
   );
 
+  const persistProgress = useCallback(
+    (patch: Partial<StoredOnboardingProgress>) => {
+      if (!userId) return;
+      const existing = readOnboardingProgress(userId) ?? createDefaultOnboardingProgress(step);
+      writeOnboardingProgress(userId, {
+        ...existing,
+        ...patch,
+        completedSteps: {
+          ...existing.completedSteps,
+          ...patch.completedSteps,
+        },
+        draft: {
+          ...existing.draft,
+          ...patch.draft,
+        },
+      });
+      onProgressChange?.();
+    },
+    [userId, step, onProgressChange],
+  );
+
+  const markStepComplete = useCallback(
+    (completedStep: OnboardingCompletedStepKey) => {
+      persistProgress({
+        completedSteps: { [completedStep]: true },
+        draft: buildDraftSnapshot(),
+      });
+    },
+    [persistProgress, buildDraftSnapshot],
+  );
+
   useEffect(() => {
     if (open && !wasOpenRef.current) {
-      setStep("accountType");
-      setAccountType(null);
-      setDisplayName("");
-      setTeamName("");
-      setEnsSlug("");
-      setWalletAddress("");
-      setWalletConnected(false);
+      const saved = userId ? readOnboardingProgress(userId) : null;
+      if (saved && !saved.completedAt) {
+        setStep(saved.currentStep);
+        setAccountType(saved.draft.accountType);
+        setDisplayName(saved.draft.displayName);
+        setTeamName(saved.draft.teamName);
+        setEnsSlug(saved.draft.ensSlug);
+        setWalletAddress(saved.draft.walletAddress ?? "");
+        setWalletConnected(saved.draft.walletConnected ?? false);
+        setThemeChoice(saved.draft.themeChoice);
+        setCountry((saved.draft.country as Country | undefined) ?? "US");
+      } else {
+        setStep("accountType");
+        setAccountType(null);
+        setDisplayName("");
+        setTeamName("");
+        setEnsSlug("");
+        setWalletAddress("");
+        setWalletConnected(false);
+        setThemeChoice(null);
+        setCountry("US");
+      }
       setEnsClaimError(null);
       ensClaimStartedRef.current = false;
-      setThemeChoice(null);
-      setCountry("US");
     }
     wasOpenRef.current = open;
-  }, [open]);
+  }, [open, userId]);
 
   useEffect(() => {
     if (step !== "complete" || ensClaimStartedRef.current) return;
@@ -304,16 +396,23 @@ export function AccountOnboardingModal({ open, onOpenChange }: AccountOnboarding
   const reserveSkipSlot = step === "wallet" || step === "theme";
 
   const goBack = () => {
-    if (step === "theme") setStep("wallet");
-    else if (step === "wallet") setStep("ens");
-    else if (step === "ens") setStep("welcome");
-    else if (step === "welcome") setStep("accountType");
+    let prevStep: AccountOnboardingStep = "accountType";
+    if (step === "theme") prevStep = "wallet";
+    else if (step === "wallet") prevStep = "ens";
+    else if (step === "ens") prevStep = "welcome";
+    else if (step === "welcome") prevStep = "accountType";
+    else return;
+
+    persistProgress({ currentStep: prevStep, draft: buildDraftSnapshot() });
+    setStep(prevStep);
   };
 
   const canGoBack = step !== "accountType";
 
   const goNext = () => {
     if (step === "accountType") {
+      markStepComplete("accountType");
+      persistProgress({ currentStep: "welcome", draft: buildDraftSnapshot() });
       setStep("welcome");
       return;
     }
@@ -321,18 +420,30 @@ export function AccountOnboardingModal({ open, onOpenChange }: AccountOnboarding
       if (!ensSlug.trim()) {
         setEnsSlug(normalizeEnsSlug(displayName));
       }
+      markStepComplete("welcome");
+      persistProgress({ currentStep: "ens", draft: buildDraftSnapshot() });
       setStep("ens");
       return;
     }
     if (step === "ens") {
+      markStepComplete("ens");
+      persistProgress({ currentStep: "wallet", draft: buildDraftSnapshot() });
       setStep("wallet");
       return;
     }
     if (step === "wallet") {
+      markStepComplete("wallet");
+      persistProgress({ currentStep: "theme", draft: buildDraftSnapshot() });
       setStep("theme");
       return;
     }
     if (step === "theme") {
+      markStepComplete("theme");
+      persistProgress({
+        currentStep: "complete",
+        draft: buildDraftSnapshot(),
+        completedAt: new Date().toISOString(),
+      });
       setStep("complete");
       return;
     }
@@ -348,6 +459,13 @@ export function AccountOnboardingModal({ open, onOpenChange }: AccountOnboarding
     if (document.activeElement instanceof HTMLElement) {
       document.activeElement.blur();
     }
+    persistProgress({
+      currentStep: "theme",
+      walletSkipped: true,
+      completedSteps: { wallet: true },
+      draft: buildDraftSnapshot(),
+    });
+    onProgressChange?.();
     setStep("theme");
   };
 

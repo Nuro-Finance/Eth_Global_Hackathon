@@ -3,7 +3,7 @@
  *
  * Per-card agent chat proxy. Forwards message, session auth, and optional BYOK
  * fields (`apiKey`, `provider`, `tier`) to the Express handler in
- * nuro-routes.ts. BYOK required — user keys are never stored server-side
+ * nuro-routes.ts. BYOK required - user keys are never stored server-side
  * (same posture as POST /api/chat). Server ANTHROPIC_API_KEY is not used
  * for card chat (deprecated path removed).
  *

@@ -10,7 +10,7 @@
  */
 
 const MCC_MAP: Record<string, string> = {
- // Retail — everyday
+ // Retail - everyday
   "5411": "Grocery",
   "5412": "Grocery",
   "5422": "Butcher",
@@ -25,7 +25,7 @@ const MCC_MAP: Record<string, string> = {
   "5812": "Restaurants",
   "5811": "Caterer",
 
- // Retail — goods
+ // Retail - goods
   "5200": "Home supply",
   "5211": "Lumber",
   "5231": "Glass/paint",
@@ -87,7 +87,7 @@ const MCC_MAP: Record<string, string> = {
   "5815": "Digital media",
   "5816": "Digital games",
   "5817": "Digital apps",
-  "5818": "Digital apps — other",
+  "5818": "Digital apps - other",
 
  // Entertainment
   "7829": "Film production",
@@ -113,7 +113,7 @@ const MCC_MAP: Record<string, string> = {
   "5968": "Subscription",
   "5969": "Direct marketing",
   "5964": "Catalog merchant",
-  "5967": "Direct marketing — inbound",
+  "5967": "Direct marketing - inbound",
   "5965": "Catalog & retail merchant",
 
  // Health
@@ -139,7 +139,7 @@ const MCC_MAP: Record<string, string> = {
   "6513": "Rent",
   "6540": "POI funding",
 
- // Transport — auto
+ // Transport - auto
   "5511": "Car dealer",
   "5521": "Used cars",
   "5531": "Auto supply",

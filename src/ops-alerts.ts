@@ -1,5 +1,5 @@
 /**
- * ─── OPS ALERTS — Sprint 6.5 Observability ───────────────────────────────────
+ * ─── OPS ALERTS - Sprint 6.5 Observability ───────────────────────────────────
  *
  * Cron that pings admin Telegram when transactions get stuck.
  *
@@ -12,7 +12,7 @@
  *
  * Reuses the bot token + ADMIN_CHAT_ID already wired into the growth
  * agent (TELEGRAM_BOT_TOKEN + TELEGRAM_ADMIN_CHAT_ID). Silent no-op if
- * either env var is missing — ops alerts are best-effort, they must
+ * either env var is missing - ops alerts are best-effort, they must
  * never take down the poller.
  *
  * CHAIN_ID_TO_NAME is inlined (not imported from FE) so this module
@@ -25,7 +25,7 @@ import { CONFIG } from './config'
 
 const ADMIN_CHAT_ID = process.env.TELEGRAM_ADMIN_CHAT_ID || ''
 
-// Session 26 polish — when monitor is paused (POLL_INTERVAL_MS > 1h),
+// Session 26 polish - when monitor is paused (POLL_INTERVAL_MS > 1h),
 // "pending > 30min" is expected behavior, not an incident. Ops alerts
 // should hush until we flip back to active polling.
 const MONITOR_PAUSED = CONFIG.POLL_INTERVAL_MS > 60 * 60 * 1000
@@ -57,7 +57,7 @@ export async function checkStuckPendingTxs(db: Pool): Promise<{
   skipped: number
 }> {
   if (!ADMIN_CHAT_ID) {
- // Env not configured — skip silently. First boot after a key rotation
+ // Env not configured - skip silently. First boot after a key rotation
  // shouldn't spam the log.
     return { scanned: 0, alerted: 0, skipped: 0 }
   }
@@ -120,7 +120,7 @@ export async function checkStuckPendingTxs(db: Pool): Promise<{
 
       const sent = await sendTelegramMessage(ADMIN_CHAT_ID, text)
 
- // Always record the dedup row — even if Telegram send failed,
+ // Always record the dedup row - even if Telegram send failed,
  // we don't want to retry-spam. Operator can re-check via admin
  // console; rate-limiting wins over completeness here.
       await db.query(
@@ -153,19 +153,19 @@ export async function checkStuckPendingTxs(db: Pool): Promise<{
 }
 
 /**
- * Boot the ops-alerts cron. Safe to call at startup — will no-op if
+ * Boot the ops-alerts cron. Safe to call at startup - will no-op if
  * TELEGRAM_ADMIN_CHAT_ID is unset. Interval: every 10 minutes.
  */
 export function startOpsAlerts(db: Pool): void {
   if (!ADMIN_CHAT_ID) {
-    console.log('[ops-alerts] Disabled — TELEGRAM_ADMIN_CHAT_ID not set')
+    console.log('[ops-alerts] Disabled - TELEGRAM_ADMIN_CHAT_ID not set')
     return
   }
 
   if (MONITOR_PAUSED) {
-    console.log(`[ops-alerts] Enabled but hushed — monitor is paused (POLL_INTERVAL_MS=${CONFIG.POLL_INTERVAL_MS}ms). Scans will no-op until poll resumes under 1h.`)
+    console.log(`[ops-alerts] Enabled but hushed - monitor is paused (POLL_INTERVAL_MS=${CONFIG.POLL_INTERVAL_MS}ms). Scans will no-op until poll resumes under 1h.`)
  // Still start the interval so we auto-resume when env changes on
- // restart — the scan self-checks MONITOR_PAUSED each cycle (caller
+ // restart - the scan self-checks MONITOR_PAUSED each cycle (caller
  // would need to re-import CONFIG to pick it up, but at boot time
  // this is correct).
   }
@@ -183,5 +183,5 @@ export function startOpsAlerts(db: Pool): void {
     )
   }, 10 * 60 * 1000)
 
-  console.log('[ops-alerts] Enabled — scanning stuck pending txs every 10 min')
+  console.log('[ops-alerts] Enabled - scanning stuck pending txs every 10 min')
 }

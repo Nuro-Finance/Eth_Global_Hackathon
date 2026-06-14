@@ -31,7 +31,7 @@ const stripe = new (Stripe as any)(process.env.STRIPE_SECRET_KEY || '', {
   apiVersion: '2025-03-31.basil' as any,
 });
 
-// Stripe webhook — MUST be before express.json() for raw body access
+// Stripe webhook - MUST be before express.json() for raw body access
 app.post('/stripe/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
   const sig = req.headers['stripe-signature'] as string;
   let event: any;
@@ -150,7 +150,7 @@ app.post('/stripe/webhook', express.raw({ type: 'application/json' }), async (re
   }
 });
 
-// ─── ISSUER WEBHOOK — MUST be before express.json() for HMAC raw-body ──
+// ─── ISSUER WEBHOOK - MUST be before express.json() for HMAC raw-body ──
 // Handles: transaction.completed (spend/fee/payment/collateral), application.updated, card.created
 // Verifier middleware handles HMAC-SHA256 against X-Issuer-Signature header, logs
 // every attempt to webhook_verifications, and re-attaches parsed JSON to req.body.
@@ -211,7 +211,7 @@ app.post(
       return res.status(500).json({ error: 'storage_failed' })
     }
 
- // Fast ack to Issuer — processing continues below
+ // Fast ack to Issuer - processing continues below
     res.status(200).json({ received: true, duplicate: isDuplicate })
 
     if (isDuplicate) {
@@ -277,7 +277,7 @@ app.post(
           const row = mapIssuerSpendToCardTx(data, dbCardId, dbUserId)
           if (!row.issuerTransactionId) {
             await reportWarning('issuer', 'webhook_missing_tx_id', dedupKey || '',
-              'Event missing transaction id — cannot dedup')
+              'Event missing transaction id - cannot dedup')
             await markEventProcessed(dedupKey, 'skipped_no_tx_id')
             return
           }
@@ -305,7 +305,7 @@ app.post(
  // Issuer emits `application.updated` events carrying BOTH `applicationStatus`
  // (lifecycle: pending|approved|rejected|submitted) AND `kycStatus`
  // (verification: incomplete|verified|kyc_complete|passed|complete|pending).
- // The two can disagree — applicationStatus may stay 'pending' (waiting on
+ // The two can disagree - applicationStatus may stay 'pending' (waiting on
  // card issuance, etc) even after kycStatus flips to 'verified'.
  //
  // The frontend KycBanner hides only on 'approved' or 'active'. Without
@@ -319,7 +319,7 @@ app.post(
  // 2. Normalize all "passed-equivalent" labels to canonical 'approved'.
  // 3. Log raw Issuer values in the dedup result for ops tools visibility.
  //
- // Reference incident: Chris's Amazon Orders account — Issuer verified,
+ // Reference incident: Chris's Amazon Orders account - Issuer verified,
  // banner still showed. Manually patched + this fix prevents recurrence.
 
         const rawAppStatus = data?.applicationStatus ?? data?.status ?? null
@@ -363,7 +363,7 @@ app.post(
         }
         await markEventProcessed(dedupKey, `card_id → ${cardId}`)
       } else if (resource === 'card' && action === 'updated') {
- // Session 26 — keep local is_locked in sync with Issuer freeze state.
+ // Session 26 - keep local is_locked in sync with Issuer freeze state.
  // Admin can also trigger this via `freezeCard()` in issuers.ts, but
  // webhooks catch out-of-band freeze (e.g. Issuer fraud detection).
         const cardId = data?.cardId || data?.id
@@ -385,7 +385,7 @@ app.post(
         }
         await markEventProcessed(dedupKey, `card_updated locked=${isLocked} active=${isActive}`)
       } else if (resource === 'card' && action === 'deleted') {
- // Rare but happens — card cancellation on Issuer side. Mark inactive
+ // Rare but happens - card cancellation on Issuer side. Mark inactive
  // locally; don't hard-delete the row (preserve audit trail).
         const cardId = data?.cardId || data?.id
         if (cardId && !observeOnly) {
@@ -429,7 +429,7 @@ app.use(express.json())
 
 // Structured HTTP request logging (Session 22 scouting tier-1 pick).
 // pino-http auto-logs every req/res with method, url, status, latency. Output
-// goes to stdout — PM2 picks it up into /home/nuro/.pm2/logs/nuro-api-*
+// goes to stdout - PM2 picks it up into /home/nuro/.pm2/logs/nuro-api-*
 // for free. Silences health-check noise to avoid log flooding.
 app.use(pinoHttp({
     autoLogging: {
@@ -441,7 +441,7 @@ app.use(pinoHttp({
     },
 }))
 
-// CORS — restrict to app origin(s); no admin-key header in public build.
+// CORS - restrict to app origin(s); no admin-key header in public build.
 const CORS_ORIGINS = (process.env.CORS_ORIGINS ?? 'http://localhost:2800')
   .split(',')
   .map((o) => o.trim())
@@ -463,11 +463,11 @@ const dbUrl = process.env.DATABASE_URL || 'postgresql://nuro:nuro@localhost:5432
 // connection string so the same code works against local pg (no SSL) and
 // Supabase (SSL required) without env-var gymnastics. rejectUnauthorized:false
 // because Supabase pooler uses a self-signed cert chain Node's default CA
-// bundle doesn't trust — TLS is real, only the chain validation is relaxed.
+// bundle doesn't trust - TLS is real, only the chain validation is relaxed.
 const dbNeedsSSL = /supabase\.(com|co)|sslmode=require/i.test(dbUrl);
 const db = new Pool({
     connectionString: dbUrl.includes('statement_timeout') ? dbUrl : dbUrl + (dbUrl.includes('?') ? '&' : '?') + 'statement_timeout=30000',
-    max: 20,                    // Max 20 connections (was default 10 — caused pool exhaustion)
+    max: 20,                    // Max 20 connections (was default 10 - caused pool exhaustion)
     idleTimeoutMillis: 30000,   // Close idle connections after 30s
     connectionTimeoutMillis: 10000, // Fail fast if can't connect in 10s
     ssl: dbNeedsSSL ? { rejectUnauthorized: false } : undefined,
@@ -537,11 +537,11 @@ async function saveTransaction(record: TransactionRecord) {
 
 app.use(createNuroRouter(db))
 
-// Session 25 Phase 3 — /wallet-portfolio + /wallet-activity proxy Alchemy
+// Session 25 Phase 3 - /wallet-portfolio + /wallet-activity proxy Alchemy
 // (see src/wallet-portfolio-routes.ts for the contract).
 app.use(createWalletPortfolioRouter())
 
-// Venture Portal — removed from hackathon submission
+// Venture Portal - removed from hackathon submission
 
 app.get('/deposit-address/:userId/:chainId', async (req, res) => {
     const { userId, chainId } = req.params
@@ -578,7 +578,7 @@ app.get('/solana-deposit-address/:userId', async (req, res) => {
  // S30 fix: MUST pass userId so the derivation returns a per-user
  // keypair (SHA-512(PRIVATE_KEY + userId) → 32-byte seed). Calling
  // without userId falls back to the master wallet, causing every
- // user to share the same deposit address — double-credit risk
+ // user to share the same deposit address - double-credit risk
  // when the monitor attributes incoming USDC to every matching row.
         const depositAddress = generateSolanaDepositAddress(userId)
         await saveDepositAddress(userId, 'solana', depositAddress)
@@ -600,7 +600,7 @@ app.post('/solana-webhook', async (req, res) => {
         id: randomUUID(),
         userId,
  // Pass userId so the derived address matches the one the user
- // actually holds — avoids "userWallet" showing the master wallet
+ // actually holds - avoids "userWallet" showing the master wallet
  // in transaction records (which would obscure per-user audit).
         userWallet: generateSolanaDepositAddress(userId),
         baseDepositAddress: '',
@@ -618,7 +618,7 @@ app.post('/solana-webhook', async (req, res) => {
 
     try {
         const recipientBaseAddress = await getUserBaseDepositAddress(userId)
-        if (!recipientBaseAddress) throw new Error(`No Issuer Base address for user ${userId} (Issuer 403/404 — user stranded)`)
+        if (!recipientBaseAddress) throw new Error(`No Issuer Base address for user ${userId} (Issuer 403/404 - user stranded)`)
         record.baseDepositAddress = recipientBaseAddress
         const txHash = await solanaBridgeAndForward(recipientBaseAddress, amount)
         record.txHash = txHash || ''
@@ -697,7 +697,7 @@ app.post('/webhook', async (req, res) => {
 
     try {
         const recipientBaseAddress = await getUserBaseDepositAddress(userId)
-        if (!recipientBaseAddress) throw new Error(`No Issuer Base address for user ${userId} (Issuer 403/404 — user stranded)`)
+        if (!recipientBaseAddress) throw new Error(`No Issuer Base address for user ${userId} (Issuer 403/404 - user stranded)`)
         record.baseDepositAddress = recipientBaseAddress
 
         const dbRecord = await getDepositAddress(userId, 'evm')
@@ -748,7 +748,7 @@ app.post('/hype-webhook', async (req, res) => {
 
     try {
         const recipientBaseAddress = await getUserBaseDepositAddress(userId)
-        if (!recipientBaseAddress) throw new Error(`No Issuer Base address for user ${userId} (Issuer 403/404 — user stranded)`)
+        if (!recipientBaseAddress) throw new Error(`No Issuer Base address for user ${userId} (Issuer 403/404 - user stranded)`)
         record.baseDepositAddress = recipientBaseAddress
 
         const txHash = await hypeBridgeAndForward(recipientBaseAddress, amount)
@@ -782,7 +782,7 @@ app.post('/create-user', async (req, res) => {
 
         let solRecord = await getDepositAddress(userId, 'solana')
         if (!solRecord) {
- // Pass userId — see /solana-deposit-address/:userId comment.
+ // Pass userId - see /solana-deposit-address/:userId comment.
             const depositAddress = generateSolanaDepositAddress(userId)
             await saveDepositAddress(userId, 'solana', depositAddress)
             solRecord = { address: depositAddress }
@@ -819,7 +819,7 @@ app.get('/health/cache', async (_, res) => {
         return res.json({
             backend: cache.backend(),
             memSize: cache.memSize(),
- // Roundtrip test on the configured backend — write + read + del.
+ // Roundtrip test on the configured backend - write + read + del.
  // 1.5s cumulative budget; if upstash is slow we'd rather report
  // it than hide it.
             ok: await (async () => {
@@ -855,11 +855,11 @@ app.post('/client-error', express.json(), async (req, res) => {
         )
         res.json({ received: true })
     } catch {
-        res.json({ received: true })  // Always 200 — don't fail the error report
+        res.json({ received: true })  // Always 200 - don't fail the error report
     }
 })
 
-// Centralized Express error handler — catches all unhandled route errors → execution_log
+// Centralized Express error handler - catches all unhandled route errors → execution_log
 app.use(expressErrorHandler)
 
 const server = app.listen(CONFIG.PORT, () => {
@@ -871,8 +871,8 @@ startDepositMonitor().catch(err => {
     reportError('monitor', 'startup', 'deposit_monitor', 'Monitor failed to start', err as Error)
 })
 
-// Start execution dispatch engine — routes pending intents to on-chain execution
-// Sweep interval: 60s. Disabled by default in dev — enable with ENABLE_EXECUTION_DISPATCH=true
+// Start execution dispatch engine - routes pending intents to on-chain execution
+// Sweep interval: 60s. Disabled by default in dev - enable with ENABLE_EXECUTION_DISPATCH=true
 if (process.env.ENABLE_EXECUTION_DISPATCH === 'true') {
     startExecutionDispatch(db)
 } else {
@@ -902,7 +902,7 @@ if (process.env.BUDGET_ROLLOVER_OFF !== 'true') {
     console.log('[budget-rollover] disabled (BUDGET_ROLLOVER_OFF=true)')
 }
 
-// ─── AGENT GAS BALANCE SYNC CRON — S32 ──────────────────────────────────────
+// ─── AGENT GAS BALANCE SYNC CRON - S32 ──────────────────────────────────────
 // Hourly per-chain provider.getBalance() refresh for agent_gas_balances.
 // Read-only on-chain. Powers the Nuro POV "gas across chains" view +
 // the future low-threshold alert. Disable with AGENT_GAS_SYNC_OFF=true.
@@ -919,7 +919,7 @@ if (process.env.AGENT_GAS_SYNC_OFF !== 'true') {
             console.error('[gas-sync] cycle error:', err?.message?.slice(0, 120))
         }
     }
- // Boot delay 8 min — staggered after hl-sync to avoid all crons hitting
+ // Boot delay 8 min - staggered after hl-sync to avoid all crons hitting
  // RPCs simultaneously on a fresh boot.
     setTimeout(() => { void runGasSync() }, 8 * 60 * 1000)
     setInterval(() => { void runGasSync() }, GAS_SYNC_INTERVAL_MS)
@@ -933,7 +933,7 @@ server.on('error', (err) => {
     reportError('admin', 'server_error', 'express', 'Express server error', err)
 })
 
-// Sprint 6.4 — graceful-shutdown handler. When pm2 restart 4 sends SIGTERM,
+// Sprint 6.4 - graceful-shutdown handler. When pm2 restart 4 sends SIGTERM,
 // mark any in-flight 'pending' transactions as 'failed_restart' so boot-time
 // recovery knows what died mid-bridge. Without this, a mid-restart bridge
 // leaves a phantom pending row that dedup blocks new deposits against,
@@ -942,7 +942,7 @@ let shuttingDown = false
 async function gracefulShutdown(signal: string) {
     if (shuttingDown) return
     shuttingDown = true
-    console.log(`[shutdown] Received ${signal} — marking in-flight bridges as failed_restart…`)
+    console.log(`[shutdown] Received ${signal} - marking in-flight bridges as failed_restart…`)
     try {
  // Only rows older than 30s (avoid killing bridges that just started)
         const result = await db.query(

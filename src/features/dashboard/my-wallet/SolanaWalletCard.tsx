@@ -1,6 +1,6 @@
 "use client";
 
-// ─── SolanaWalletCard — Session 28 Phase 8 ──────────────────────────────────
+// ─── SolanaWalletCard - Session 28 Phase 8 ──────────────────────────────────
 // Dedicated UI for the user's Privy-embedded Solana wallet. Consumes the
 // existing `useSolanaWalletPortfolio` hook and renders SOL balance, SPL token
 // holdings, total USD value, and Solscan links.
@@ -13,7 +13,7 @@
 // <SolanaWalletCard /> // auto-resolves connected address
 // <SolanaWalletCard address="ABC123..." /> // admin/debug view
 //
-// Defensive by design — renders empty state when:
+// Defensive by design - renders empty state when:
 // • Privy isn't configured (no NEXT_PUBLIC_PRIVY_APP_ID)
 // • User hasn't completed Solana wallet creation
 // • Address yields zero holdings
@@ -82,7 +82,7 @@ function CopyButton({ value, label }: { value: string; label?: string }) {
 
 function SolanaTokenRow({ token, addressForExplorer }: { token: SolanaToken; addressForExplorer?: string }) {
   const symbol = token.symbol || truncateAddress(token.mint);
-  const isNative = token.mint === "So11111111111111111111111111111111111111112"; // wrapped SOL sentinel — rare in SPL list
+  const isNative = token.mint === "So11111111111111111111111111111111111111112"; // wrapped SOL sentinel - rare in SPL list
   const explorerTarget = isNative ? addressForExplorer : token.mint;
   const explorerType = isNative ? "address" : "token";
 
@@ -123,7 +123,7 @@ function SolanaTokenRow({ token, addressForExplorer }: { token: SolanaToken; add
 // ─── MAIN COMPONENT ──────────────────────────────────────────────────────────
 
 export interface SolanaWalletCardProps {
- /** Optional explicit address override — omit to use the user's Privy wallet. */
+ /** Optional explicit address override - omit to use the user's Privy wallet. */
   address?: string | null;
  /** Custom title (defaults to "Solana Wallet"). */
   title?: string;
@@ -133,7 +133,7 @@ export interface SolanaWalletCardProps {
 export function SolanaWalletCard({ address: explicitAddress, title = "Solana Wallet", className }: SolanaWalletCardProps) {
   const { portfolio, isLoading, error, refresh } = useSolanaWalletPortfolio(explicitAddress);
 
- // Sort tokens by USD value descending — highest-value assets float to top.
+ // Sort tokens by USD value descending - highest-value assets float to top.
   const sortedTokens = useMemo(() => {
     if (!portfolio?.tokens) return [];
     return [...portfolio.tokens].sort((a, b) => b.usdValue - a.usdValue);

@@ -39,7 +39,7 @@ const CHART = {
   blue: "#3B82F6",
 } as const;
 
-/** Balanced 2×2 / 1×4 grid — equal row heights, generous inner padding */
+/** Balanced 2×2 / 1×4 grid - equal row heights, generous inner padding */
 const LAYOUT = {
   pad: 28,
   sidebarW: 56,

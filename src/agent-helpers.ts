@@ -1,6 +1,6 @@
 /**
  * Pure helpers for Sprint 2.3 agent/bot logic.
- * No side effects — tested via src/__tests__/agent-helpers.test.ts.
+ * No side effects - tested via src/__tests__/agent-helpers.test.ts.
  *
  * These are the formulas that Sprint 2.3 sweeps MUST use correctly.
  * A wrong coefficient here = silent real-money loss across every settlement.
@@ -83,7 +83,7 @@ export function shouldEnqueueCardSettlement(payoutDestination: string | null | u
  *
  * expected = total_funded - total_invested + won_payouts_sum - total_swept
  *
- * A drift between this and the on-chain balance > $0.50 surfaces an alert —
+ * A drift between this and the on-chain balance > $0.50 surfaces an alert -
  * same pattern as Sprint D card balance drift telemetry.
  */
 export function computeExpectedAgentBalance(params: {
@@ -102,7 +102,7 @@ export function computeExpectedAgentBalance(params: {
   return +(funded - invested + payouts - swept).toFixed(6)
 }
 
-/** Drift alert predicate. Absolute delta threshold — same semantics as Sprint D. */
+/** Drift alert predicate. Absolute delta threshold - same semantics as Sprint D. */
 export function shouldAlertDrift(expected: number, actual: number, thresholdUsd: number): boolean {
   if (!Number.isFinite(expected) || !Number.isFinite(actual) || !Number.isFinite(thresholdUsd)) {
     return false

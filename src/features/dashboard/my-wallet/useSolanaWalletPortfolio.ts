@@ -4,9 +4,9 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSolanaAddress } from "./useSolanaAddress";
 
 /**
- * useSolanaWalletPortfolio — fetch Solana portfolio for a base58 address.
+ * useSolanaWalletPortfolio - fetch Solana portfolio for a base58 address.
  *
- * Session 27 — now wired to Privy Solana via `useSolanaAddress()`. Pass
+ * Session 27 - now wired to Privy Solana via `useSolanaAddress()`. Pass
  * an explicit `address` to override (useful for admin views or inspecting
  * external addresses); otherwise the hook auto-resolves the connected
  * user's embedded Solana wallet.

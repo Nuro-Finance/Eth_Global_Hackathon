@@ -43,7 +43,7 @@ export function SubmitButton({
     }
   }, [isSent, countdownDuration]);
 
- // Countdown timer — only runs when isSent is true
+ // Countdown timer - only runs when isSent is true
   React.useEffect(() => {
     if (!isSent) return;
     if (countdown <= 0) {

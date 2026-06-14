@@ -117,7 +117,7 @@ const variant2TopCardAnimateLayoutChanges = (
   return defaultAnimateLayoutChanges(args);
 };
 
-/** In-place hero amount skeleton — same glyph box as live USD (no layout shift). */
+/** In-place hero amount skeleton - same glyph box as live USD (no layout shift). */
 function HeroBalanceAmount({
   busy,
   children,
@@ -151,7 +151,7 @@ const HERO_SLIM_WIDGET_HEADER_TITLE_PROPS = {
 } as const;
 
 /**
- * Squeeze only when primary card is square (no tilt, below 1024 — matches CardStack) or narrow desktop 1280–1399.
+ * Squeeze only when primary card is square (no tilt, below 1024 - matches CardStack) or narrow desktop 1280–1399.
  * 1024–1279: full titles + original amount sizes while card stays tilted.
  */
 function HeroSlimWidgetTitle({
@@ -251,14 +251,14 @@ function Variant2TopSortableShell({
 }: {
   id: TopVariant2CardId;
   children: ReactElement<WidgetCardProps>;
- /** Deck column only: **`xl:col-span-4`** — unchanged vs flat three-col hero. Slim tiles live inside `xl:col-span-8` / `grid-cols-3`. */
+ /** Deck column only: **`xl:col-span-4`** - unchanged vs flat three-col hero. Slim tiles live inside `xl:col-span-8` / `grid-cols-3`. */
   heroSlot: "slim" | "deck";
  /** Layout 2: each slim tile is its own **`xl:col-span-4`** column (flat 12-col row). */
   slimFlat?: boolean;
   slimAutoHeight?: boolean;
  /** Layout 3: measure deck column shell height without changing grid markup. */
   shellCallbackRef?: RefCallback<HTMLDivElement | null>;
- /** Layout 3: painted stack height from deck shell — slim shells + deck shell (see layout effect memos). */
+ /** Layout 3: painted stack height from deck shell - slim shells + deck shell (see layout effect memos). */
   shellStyle?: CSSProperties;
   shellClassName?: string;
  /** Home-responsive xl: deck shell shrink-wraps to painted stack (no h-full stretch). */
@@ -341,7 +341,7 @@ const PRIMARY_DECK_LIFT = 72;
 const PRIMARY_DECK_REST_Y: [number, number, number, number] = [0, 7, 14, 21];
 
 /**
- * Back tiers translate below the front card’s aspect box (`overflow: visible` only paints — it does not grow layout).
+ * Back tiers translate below the front card’s aspect box (`overflow: visible` only paints - it does not grow layout).
  * Reserve this much space below the 158:100 frame so the hero row matches the full painted stack (purple tier bottom).
  */
 const PRIMARY_DECK_STACK_LAYOUT_EXTRA_BELOW_PX = Math.max(
@@ -635,7 +635,7 @@ function VariantPrimaryDeckStack({
   }, [frontId]);
 
   const swipePv = useMotionValue(0);
- /** 0 = next · 1 = prev — numeric so `useTransform`[] types align in Framer */
+ /** 0 = next · 1 = prev - numeric so `useTransform`[] types align in Framer */
   const intentCodeMv = useMotionValue(0);
 
  /** Stop in-flight tween so motion values cannot desync vs deck order */
@@ -946,7 +946,7 @@ function VariantPrimaryDeckStack({
             <NuroCodeCard
               balance={tierBalance}
               panMasked={tierPan}
-              expiry={tierSensitive?.expiry ?? "—/—"}
+              expiry={tierSensitive?.expiry ?? "-/-"}
               cvv={tierSensitive?.cvv ?? "•••"}
               sensitiveRevealed={isFront ? sensitiveRevealed : false}
               onToggleSensitive={
@@ -1229,7 +1229,7 @@ function VariantPrimaryDeckStack({
                                 : undefined
                             }
                           >
-                            —
+                            -
                           </span>
                         ) : (
                           <span
@@ -1284,7 +1284,7 @@ function VariantPrimaryDeckStack({
                                   <span className={sensitiveRevealed ? "text-white/72" : "text-white/50"}>
                                     CVV
                                   </span>{" "}
-                                  {sensitiveRevealed ? (overlaySensitive.cvv ?? "—") : "•••"}
+                                  {sensitiveRevealed ? (overlaySensitive.cvv ?? "-") : "•••"}
                                 </span>
                               </div>
                               <div className="flex min-w-0 items-center gap-2 pb-3">
@@ -1402,7 +1402,7 @@ function VariantPrimaryDeckStack({
                       >
                         {nextBalanceLoading ? (
                           <span className="inline-block font-semibold tabular-nums tracking-tight text-white/55">
-                            —
+                            -
                           </span>
                         ) : (
                           <span
@@ -1483,7 +1483,7 @@ function VariantPrimaryDeckStack({
                         <NuroCodeCard
                           balance={tierBalance}
                           panMasked={tierPan}
-                          expiry={tierSensitive?.expiry ?? "—/—"}
+                          expiry={tierSensitive?.expiry ?? "-/-"}
                           cvv={tierSensitive?.cvv ?? "•••"}
                           sensitiveRevealed={isFront ? sensitiveRevealed : false}
                           onToggleSensitive={
@@ -1676,7 +1676,7 @@ function VariantPrimaryDeckStack({
   );
 }
 
-/** Pass B sm (&lt;768): balance/PAN on card face; Reload + Withdraw below — no My Card widget. */
+/** Pass B sm (&lt;768): balance/PAN on card face; Reload + Withdraw below - no My Card widget. */
 export function HomeSmPrimaryCardTop({
   newUserPrimaryCardCta = false,
 }: {
@@ -1786,8 +1786,8 @@ export function HomeSmPrimaryCardTop({
 }
 
 /**
- * Four share bands separated by gaps (largest left). Each band is dense vertical tally pillars —
- * tall narrow capsules with slim gaps inside the band — one solid tone per band.
+ * Four share bands separated by gaps (largest left). Each band is dense vertical tally pillars -
+ * tall narrow capsules with slim gaps inside the band - one solid tone per band.
  */
 const SMART_SPEND_SEGMENT_FILLS = [
   "var(--color-primary)",
@@ -1798,7 +1798,7 @@ const SMART_SPEND_SEGMENT_FILLS = [
 
 const SMART_SPEND_SECTION_GAP_UV = 10;
 /**
- * Tally marks per share band — chunkier pillars + slightly wider gutters so they read at a glance on this card.
+ * Tally marks per share band - chunkier pillars + slightly wider gutters so they read at a glance on this card.
  */
 const SMART_SPEND_TALLY_INNER_GAP_UV = 0.82;
 const SMART_SPEND_PILLAR_TARGET_UV = 3.5;
@@ -2068,9 +2068,9 @@ function resolveCardUsageLimitsCardId(deck: PrimaryDeckItem[]): string {
 }
 
 /**
- * Layout 2 hero: flat **`xl:grid-cols-12`** row — balance · spending · primary (**`xl:col-span-4`** each), drag-reorder, own persisted order.
- * Layout 3 hero: slim bucket **`xl:col-span-8`** + deck **`xl:col-span-4`**, includes Cash flow tile — unchanged grid + chromeless deck path.
- * **`layout3LeftColumns={2}`**: same row geometry with two slim tiles + deck (order isolated, not persisted — layout experiments).
+ * Layout 2 hero: flat **`xl:grid-cols-12`** row - balance · spending · primary (**`xl:col-span-4`** each), drag-reorder, own persisted order.
+ * Layout 3 hero: slim bucket **`xl:col-span-8`** + deck **`xl:col-span-4`**, includes Cash flow tile - unchanged grid + chromeless deck path.
+ * **`layout3LeftColumns={2}`**: same row geometry with two slim tiles + deck (order isolated, not persisted - layout experiments).
  */
 export function OverviewTopThreeHeroRow({
   overviewLayout,
@@ -2085,9 +2085,9 @@ export function OverviewTopThreeHeroRow({
   layout3LeftColumns?: 2 | 3;
  /** New-user preview: front deck card shows activate CTA instead of balance/PAN. */
   newUserPrimaryCardCta?: boolean;
- /** Pass B md: compact CardSection replaces hero deck — keep KPI / cash flow / upgrade row. */
+ /** Pass B md: compact CardSection replaces hero deck - keep KPI / cash flow / upgrade row. */
   hidePrimaryDeck?: boolean;
- /** sm lab: Card + Wallet KPIs only, side by side — no total / upgrade / cash flow */
+ /** sm lab: Card + Wallet KPIs only, side by side - no total / upgrade / cash flow */
   smHeroKpisOnly?: boolean;
  /** Home-responsive xl: SVG stack clipped inside deck widget; right rail unchanged. */
   homeResponsiveSvgDeck?: boolean;

@@ -7,7 +7,7 @@
  * Security model:
  * - The key is sent in the request body (over HTTPS)
  * - We never log the key value, only the verification outcome
- * - We never persist the key server-side — frontend stores it in localStorage
+ * - We never persist the key server-side - frontend stores it in localStorage
  * - The validation request itself is read-only (lists models / counts tokens)
  * and uses no tokens / dollars on the user's account
  *
@@ -32,7 +32,7 @@ interface VerifyResult {
 }
 
 /**
- * OpenAI: GET /v1/models with the api key — returns 200 + model list if valid,
+ * OpenAI: GET /v1/models with the api key - returns 200 + model list if valid,
  * 401 if invalid, 429 if rate-limited (counts as valid). Free check, no tokens.
  */
 async function verifyOpenAi(apiKey: string): Promise<VerifyResult> {
@@ -51,7 +51,7 @@ async function verifyOpenAi(apiKey: string): Promise<VerifyResult> {
 }
 
 /**
- * Anthropic: GET /v1/models with the api key. Same shape as OpenAI — Anthropic
+ * Anthropic: GET /v1/models with the api key. Same shape as OpenAI - Anthropic
  * accepts x-api-key header (not Bearer) plus an anthropic-version header.
  * Returns the public model list on 200; 401 / 403 if invalid.
  */
@@ -75,7 +75,7 @@ async function verifyAnthropic(apiKey: string): Promise<VerifyResult> {
 }
 
 /**
- * Gemini: GET /v1beta/models?key={apiKey}. Different auth model — Google uses
+ * Gemini: GET /v1beta/models?key={apiKey}. Different auth model - Google uses
  * a query-string key for these public ListModels calls. Returns 200 with the
  * model catalog when valid, 400/403 with "API key not valid" when invalid.
  */
@@ -114,7 +114,7 @@ export async function POST(req: NextRequest) {
 
   const trimmed = apiKey.trim();
 
- // Dev bypass — matches FE convention for recording demos without burning
+ // Dev bypass - matches FE convention for recording demos without burning
  // credits. MUST come before any minimum-length / format check so the
  // 4-char "1234" sentinel actually works.
   if (trimmed === "1234") return Response.json({ ok: true });
@@ -130,7 +130,7 @@ export async function POST(req: NextRequest) {
   else if (provider === "anthropic") result = await verifyAnthropic(trimmed);
   else result = await verifyGemini(trimmed);
 
- // Always 200 with body — the FE distinguishes via `ok` field. Reserves
+ // Always 200 with body - the FE distinguishes via `ok` field. Reserves
  // non-200 status codes for malformed-request cases (above).
   return Response.json(result, { status: 200 });
 }

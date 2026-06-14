@@ -1,12 +1,12 @@
 // ─── JUPITER CLIENT ─────────────────────────────────────────────────────────
 //
-// Session 30 — Phase 1 of the multi-quote aggregator build. Jupiter is the
+// Session 30 - Phase 1 of the multi-quote aggregator build. Jupiter is the
 // canonical Solana DEX aggregator; it routes across Raydium, Orca, Meteora,
 // Phoenix, Pump, Lifinity, and every meaningful Solana DEX. For Nuro's
 // "pay with any token on any chain" goal, Jupiter is to Solana what 0x is
 // to EVM.
 //
-// This client is preview-only for Phase 1 — it powers the quote UX so users
+// This client is preview-only for Phase 1 - it powers the quote UX so users
 // see real numbers for Solana memecoins (PENGU-sol, BONK, WIF, etc.)
 // instead of "Quote unavailable". Phase 3 will layer on /v6/swap for tx
 // construction + Privy Solana signer + CCTP bridge for the full
@@ -19,14 +19,14 @@
 //
 // Cache: 20s TTL in-process. Jupiter price-impact math updates faster than
 // 0x quotes because Solana blocks are 400ms, but 20s is plenty for UI
-// preview — users won't perceive a 20s-old quote as wrong.
+// preview - users won't perceive a 20s-old quote as wrong.
 
 import axios, { AxiosInstance } from 'axios'
 import { pool as dbPool } from './db'
 
 // Jupiter's public/free tier. The old `quote-api.jup.ag/v6/quote` host was
 // deprecated; `lite-api.jup.ag/swap/v1/quote` is the current free endpoint.
-// A paid tier lives at `api.jup.ag` with higher rate limits — swap via env
+// A paid tier lives at `api.jup.ag` with higher rate limits - swap via env
 // if we ever need it. Response shape is identical across endpoints.
 const JUPITER_API_BASE = 'https://lite-api.jup.ag'
 const JUPITER_QUOTE_PATH = '/swap/v1/quote'
@@ -39,7 +39,7 @@ function client(): AxiosInstance {
     headers: { 'Content-Type': 'application/json' },
     timeout: 10000,
   })
- // Helm egress-observe — track outbound requests. Observe-only unless
+ // Helm egress-observe - track outbound requests. Observe-only unless
  // HELM_EGRESS_ENFORCE=on.
   try {
  // Lazy require so modules that import jupiter-client at test-time
@@ -47,26 +47,26 @@ function client(): AxiosInstance {
  // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { instrumentAxios } = require('./helm')
     instrumentAxios(_client, 'jupiter-client')
-  } catch { /* heimdall not initialized yet — skip */ }
+  } catch { /* heimdall not initialized yet - skip */ }
   return _client
 }
 
 // ─── CONSTANTS ──────────────────────────────────────────────────────────────
 
-/** Wrapped-SOL mint — Jupiter uses this when the user wants to sell raw SOL. */
+/** Wrapped-SOL mint - Jupiter uses this when the user wants to sell raw SOL. */
 export const WRAPPED_SOL_MINT = 'So11111111111111111111111111111111111111112'
 
-/** USDC on Solana — default output mint for our quote-preview flow. */
+/** USDC on Solana - default output mint for our quote-preview flow. */
 export const USDC_SOLANA_MINT = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'
 
 /**
- * Solana SPL token catalog — DB-backed via the `solana_allowlist` table
+ * Solana SPL token catalog - DB-backed via the `solana_allowlist` table
  * (migration 030). Mirrors the erc20_allowlist pattern in swap.ts: a 60s
  * in-memory snapshot keeps lookups synchronous + cheap, refresh happens
  * lazily via ensureSolanaAllowlistFresh().
  *
  * Pre-Phase-2.5 this was a hardcoded array. Moving to DB lets admin
- * toggle `enabled` per-token without redeploy — critical for memecoin
+ * toggle `enabled` per-token without redeploy - critical for memecoin
  * volatility / rug response.
  *
  * Symbols collide across chains (e.g. PENGU on Ethereum OFT AND PENGU
@@ -107,7 +107,7 @@ async function refreshSolanaAllowlistSnapshot(): Promise<void> {
     solanaAllowlistByMint = new Map(next.map((t) => [t.mint, t]))
     solanaAllowlistLastRefresh = Date.now()
   } catch (err: any) {
- // Keep previous snapshot on error — safer than wiping the allowlist
+ // Keep previous snapshot on error - safer than wiping the allowlist
  // (which would disable every Solana quote silently). Log so audit
  // trails pick it up.
     console.warn(`[jupiter] Solana allowlist refresh failed: ${err.message?.slice(0, 80)}`)
@@ -176,7 +176,7 @@ export interface JupiterQuoteResult {
   minBuyAmountUsd: number   // otherAmountThreshold / 10^outputDecimals
   priceImpactBps: number    // rounded to bps for UX
   slippageBps: number
-  routeCount: number        // how many hops — surfaces as a UX badge
+  routeCount: number        // how many hops - surfaces as a UX badge
   routeLabels: string[]     // DEX names the route traversed ("Raydium", "Orca", ...)
   source: 'jupiter'
 }
@@ -237,7 +237,7 @@ export async function getJupiterQuote(
     }
   } catch (err: any) {
  // 422 = no route found for pair; 400 = bad mint; all network errors here
- // are non-fatal — caller falls back to next source.
+ // are non-fatal - caller falls back to next source.
     const status = err?.response?.status
     if (status && status >= 400 && status < 500) {
       console.warn(`[jupiter] no route ${inputMint}→${outputMint} (HTTP ${status})`)
@@ -258,7 +258,7 @@ async function cached<T>(key: string, ttlMs: number, fn: () => Promise<T>): Prom
   const hit = _cache.get(key) as CachedEntry<T> | undefined
   if (hit && hit.expiresAt > now) return hit.value
   const value = await fn()
- // Don't cache null — we want retries on the next call if Jupiter blipped.
+ // Don't cache null - we want retries on the next call if Jupiter blipped.
   if (value !== null && value !== undefined) {
     _cache.set(key, { value, expiresAt: now + ttlMs })
   }
@@ -267,7 +267,7 @@ async function cached<T>(key: string, ttlMs: number, fn: () => Promise<T>): Prom
 
 /**
  * 20s-cached wrapper around getJupiterQuote. Safe to call per-keystroke in
- * the UI — cache absorbs the burst.
+ * the UI - cache absorbs the burst.
  */
 export async function getJupiterQuoteCached(
   inputMint: string,
@@ -344,7 +344,7 @@ export async function getJupiterSwapTx(opts: {
   userPublicKey: string
   destinationTokenAccount?: string
 }): Promise<JupiterSwapTxResult | null> {
- // Fetch a fresh quote (uncached — 60s blockhash window means we don't want
+ // Fetch a fresh quote (uncached - 60s blockhash window means we don't want
  // to reuse a 30s-old quote for tx construction).
   let quote: JupiterQuoteRaw
   try {
@@ -372,11 +372,11 @@ export async function getJupiterSwapTx(opts: {
       userPublicKey: opts.userPublicKey,
  // Wraps SOL automatically and unwraps any leftover. Sane default.
       wrapAndUnwrapSol: true,
- // Provider-suggested compute unit pricing — Jupiter picks a sane
+ // Provider-suggested compute unit pricing - Jupiter picks a sane
  // value based on current network congestion.
       dynamicComputeUnitLimit: true,
       prioritizationFeeLamports: 'auto',
-      asLegacyTransaction: false, // versioned tx — required for routes >2 hops
+      asLegacyTransaction: false, // versioned tx - required for routes >2 hops
     }
     if (opts.destinationTokenAccount) {
       swapBody.destinationTokenAccount = opts.destinationTokenAccount

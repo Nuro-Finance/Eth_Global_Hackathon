@@ -13,9 +13,9 @@ import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import {
   DEV_NEW_USER_PREVIEW_EVENT,
-  readDevNewUserPreviewEnabled,
   useDemoSurfaceState,
 } from "../hooks/designSampleData";
+import { useDevPreviewMode } from "@/providers/DevPreviewModeProvider";
 
 type DemoSurfaceContextValue = {
   groupHovered: boolean;
@@ -90,12 +90,13 @@ export function DemoSurfaceRegion({
   showActions = false,
 }: DemoSurfaceRegionProps) {
   const t = useTranslations("Dashboard");
+  const { newUserEmpty } = useDevPreviewMode();
   const { registerRegionEnter, registerRegionLeave, demoActive, exploring, exploreDemo, clearDemoData } =
     useDemoSurfaceContext();
   const [localHovered, setLocalHovered] = useState(false);
 
- /** Switch ON: blur + Explore/Clear only while this region is hovered. Switch OFF: no overlay. */
-  const blocked = readDevNewUserPreviewEnabled() && demoActive && !exploring;
+ /** New accounts in dev: blur + Explore/Clear while hovered until user clears sample data. */
+  const blocked = newUserEmpty && demoActive && !exploring;
   const showDemoOverlay = blocked && localHovered;
 
   useEffect(() => {

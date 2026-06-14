@@ -19,7 +19,7 @@ interface UseCardDataResult {
 }
 
 /**
- * useCardData — fetches the current user's primary card from GET /cards.
+ * useCardData - fetches the current user's primary card from GET /cards.
  *
  * The Express backend returns cards from the local Postgres DB (cards table).
  * The JWT from next-auth session is included automatically by the browser

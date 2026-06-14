@@ -25,7 +25,7 @@ interface CardPositions {
 /** @param flatCard When true, front card has no desktop tilt (squish layout or &lt;768 viewport). */
 export function useCardPositions(isRtl: boolean, totalCards: number = 2, flatCard: boolean = false): CardPositions {
     const getCardPosition = useCallback((stackIndex: number) => {
- // Front card (stackIndex = 0) — slight desktop tilt (5.4.26 parity)
+ // Front card (stackIndex = 0) - slight desktop tilt (5.4.26 parity)
         if (stackIndex === 0) {
             return {
                 x: flatCard ? 0 : (isRtl ? -10 : 10),

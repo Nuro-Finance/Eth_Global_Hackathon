@@ -39,7 +39,7 @@ export default function KycBanner() {
   const [token, setToken] = useState<string | null>(null);
   const [starting, setStarting] = useState(false);
   const [dismissed, setDismissed] = useState(false);
- // Name-prompt modal — opens when the user clicks Verify without having
+ // Name-prompt modal - opens when the user clicks Verify without having
  // completed onboarding yet. Issuer requires a real legal first + last name
  // and the OAuth profile we get from Google is often a single-word
  // handle ("PlainPaper"), so we prompt explicitly.
@@ -76,7 +76,7 @@ export default function KycBanner() {
  // Pre-fill the modal with whatever we know when it opens.
   const openNamePrompt = async () => {
     setNameError(null);
- // Always reset before opening — prevents stale values from a previous
+ // Always reset before opening - prevents stale values from a previous
  // attempt from carrying over (e.g. user closed mid-flow).
     setFirstName("");
     setLastName("");
@@ -89,7 +89,7 @@ export default function KycBanner() {
  // email-prefix (e.g. "chris+demo" from "chris+demo@gmail.com"). Pre-filling the First
  // Name field with that looks like an email leak to investors.
  // Heuristic: only pre-fill if the stored name is plausibly a
- // real "Firstname Lastname" — has a space and no obvious
+ // real "Firstname Lastname" - has a space and no obvious
  // email-handle markers (@, +, dots-without-spaces). Otherwise
  // leave both fields blank so the user types their legal name.
         const name = prof.name.trim();
@@ -107,9 +107,9 @@ export default function KycBanner() {
 
   const handleVerify = async () => {
     if (!token) return;
- // Already onboarded — re-open the stored KYC URL
+ // Already onboarded - re-open the stored KYC URL
     if (kycUrl) { window.open(kycUrl, "_blank"); return; }
- // Not yet onboarded — prompt for legal name before calling /kyc/start
+ // Not yet onboarded - prompt for legal name before calling /kyc/start
     await openNamePrompt();
   };
 
@@ -158,12 +158,12 @@ export default function KycBanner() {
         if (placeholderWindow && !placeholderWindow.closed) {
           placeholderWindow.location.href = data.kycUrl;
         } else {
- // Placeholder was blocked even synchronously — fall back to
+ // Placeholder was blocked even synchronously - fall back to
  // same-tab navigation so the user reaches the KYC page.
           window.location.href = data.kycUrl;
         }
       } else {
- // No URL to send the user to — close the placeholder we opened.
+ // No URL to send the user to - close the placeholder we opened.
         placeholderWindow?.close();
         setNameError(data?.error || "Could not start verification. Please try again.");
       }
@@ -230,7 +230,7 @@ export default function KycBanner() {
         )}
       </AnimatePresence>
 
-      {/* Name-prompt modal — Issuer KYC needs real legal first + last name */}
+      {/* Name-prompt modal - Issuer KYC needs real legal first + last name */}
       <AnimatePresence>
         {namePromptOpen && (
           <motion.div

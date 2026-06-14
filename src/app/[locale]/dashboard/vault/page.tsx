@@ -138,7 +138,7 @@ export default function VaultPage() {
                   </button>
                 </div>
                 <p className="text-[10px] text-[var(--color-text-muted)] mt-2">
-                  Send USDC (SPL) on Solana — bridges via CCTP to Base
+                  Send USDC (SPL) on Solana - bridges via CCTP to Base
                 </p>
               </div>
             )}
@@ -214,7 +214,7 @@ export default function VaultPage() {
               <p className="mt-0.5">Double-check the destination address. Crypto transactions cannot be reversed. Withdrawal fee: 1%</p>
             </div>
             <Button className="w-full bg-blue-500 hover:bg-blue-400 text-white" disabled={!withdrawAddress || !withdrawAmount}
-              onClick={() => alert(`Withdrawal of $${withdrawAmount} USDC to ${withdrawAddress.slice(0,10)}... — feature completing in next sprint`)}>
+              onClick={() => alert(`Withdrawal of $${withdrawAmount} USDC to ${withdrawAddress.slice(0,10)}... - feature completing in next sprint`)}>
               Withdraw USDC
             </Button>
           </CardContent>

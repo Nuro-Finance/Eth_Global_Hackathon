@@ -7,8 +7,9 @@ import {
   DEMO_USER_FULL_NAME,
   DEMO_USER_ID,
 } from "@/config/demo-user";
+import { isDesignMockSessionSuppressed } from "@/lib/design-session-suppress";
 
-/** Stable identity required: hooks like `useAccountBalance` depend on `[session]` — a fresh object each render re-triggers effects infinitely. */
+/** Stable identity required: hooks like `useAccountBalance` depend on `[session]` - a fresh object each render re-triggers effects infinitely. */
 const MOCK_DESIGN_SESSION = {
   data: {
     user: {
@@ -32,10 +33,18 @@ export function useAppSession() {
 
   if (!DESIGN_MODE) return nextAuthSession;
 
+  if (nextAuthSession.status === "loading") {
+    return nextAuthSession;
+  }
+
   if (
     nextAuthSession.status === "authenticated" &&
     nextAuthSession.data?.user?.email
   ) {
+    return nextAuthSession;
+  }
+
+  if (isDesignMockSessionSuppressed()) {
     return nextAuthSession;
   }
 

@@ -75,7 +75,7 @@ export function mapIssuerMerchantCategory(raw: string | null | undefined): strin
     return MCC_TO_CATEGORY[s] || 'other'
   }
 
- // Case 2: Issuer sent a human-readable string — normalize and match
+ // Case 2: Issuer sent a human-readable string - normalize and match
   const lower = s.toLowerCase().replace(/[_-]/g, '')
   if (VALID_CATEGORIES.has(lower)) return lower
 
@@ -105,7 +105,7 @@ export interface IssuerSpendPayload {
   merchantName?: string
   merchantCategory?: string
   status?: string
-  cardId?: string            // Issuer card id — maps to cards.issuer_card_id
+  cardId?: string            // Issuer card id - maps to cards.issuer_card_id
   userId?: string            // Issuer user id
   authorizedAt?: string
   postedAt?: string
@@ -137,7 +137,7 @@ export interface CardTxInsert {
   occurredAt: Date
   sourceVerified: boolean
  /**
- * For observability — if amount interpretation is uncertain, includes the
+ * For observability - if amount interpretation is uncertain, includes the
  * alternative interpretation so reconciliation can flag drift.
  */
   amountInterpretations?: { asCents: number; asMicro: number }
@@ -182,12 +182,12 @@ export function mapIssuerSpendToCardTx(
     return s.length > max ? s.slice(0, max) : s
   }
 
- // Day-4 fix: payment-type events are USDC-bridge top-ups (income — money
+ // Day-4 fix: payment-type events are USDC-bridge top-ups (income - money
  // INTO the card). Without isIncoming = true, the FE cash flow chart sums
  // them under "expenses" (or worse, drops them via type-not-purchase
  // fallback) and the income column reads $0 even when the user has been
  // funding their card. Source of truth: Issuer type === 'payment' OR amount
- // direction. We trust issuerTxType — the issuer is authoritative.
+ // direction. We trust issuerTxType - the issuer is authoritative.
   const isIncoming = issuerTxType === 'payment'
 
   return {

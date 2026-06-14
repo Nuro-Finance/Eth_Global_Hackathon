@@ -8,7 +8,7 @@
  *
  * Tool schemas follow the MCP spec (https://modelcontextprotocol.io/docs/concepts/tools).
  *
- * All tool dispatches scope strictly to the authenticated user_id — passed
+ * All tool dispatches scope strictly to the authenticated user_id - passed
  * in from the route handler after `resolveMcpKey()` succeeded.
  */
 
@@ -88,7 +88,7 @@ export const MCP_TOOLS = [
   {
     name: "set_card_limit",
     description:
-      "Set a daily or monthly spend limit on a card. This is a destructive action — first call returns a confirmation_code; user must say 'confirm with code XXXXXX' and AI calls again with that code to actually apply.",
+      "Set a daily or monthly spend limit on a card. This is a destructive action - first call returns a confirmation_code; user must say 'confirm with code XXXXXX' and AI calls again with that code to actually apply.",
     inputSchema: {
       type: "object",
       properties: {

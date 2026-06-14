@@ -62,7 +62,7 @@ export function loadLayout2HeroOrder(): TopLayout2HeroId[] {
   }
 }
 
-/** Layout 3 hero: four tiles — slim bucket `xl:col-span-8` / `grid-cols-3` + deck **`xl:col-span-4`**. */
+/** Layout 3 hero: four tiles - slim bucket `xl:col-span-8` / `grid-cols-3` + deck **`xl:col-span-4`**. */
 export function normalizeTopVariant2Order(candidate: unknown): TopVariant2CardId[] {
   const full: TopVariant2CardId[] = ["balance", "insight", "spending", "card"];
   if (!Array.isArray(candidate)) return pinDeckLast(full);

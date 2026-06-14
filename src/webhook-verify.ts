@@ -87,7 +87,7 @@ export function createIssuerWebhookVerifier(
       }
     }
 
- // Dev mode — no secret configured
+ // Dev mode - no secret configured
     if (!config.secret) {
       await reportWarning(
         'issuer',
@@ -106,7 +106,7 @@ export function createIssuerWebhookVerifier(
       return next()
     }
 
- // Production path — verify signature
+ // Production path - verify signature
     if (!signature) {
       await logVerification(false)
       await reportError(
@@ -131,7 +131,7 @@ export function createIssuerWebhookVerifier(
       return res.status(401).json({ error: 'Invalid signature' })
     }
 
- // Verified — re-attach parsed JSON
+ // Verified - re-attach parsed JSON
     try {
       req.body = JSON.parse(rawBody.toString('utf8'))
     } catch (err: any) {

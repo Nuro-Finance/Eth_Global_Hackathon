@@ -5,7 +5,7 @@ const BACKEND_URL =
 
 /**
  * GET /api/cards
- * Proxies to Express backend GET /cards — returns the current user's cards.
+ * Proxies to Express backend GET /cards - returns the current user's cards.
  * JWT is forwarded from the next-auth session via Authorization header.
  */
 export async function GET(request: NextRequest) {

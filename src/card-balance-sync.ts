@@ -3,7 +3,7 @@
  *
  * Centralizes the "read from Issuer, write-through to cards.balance" pattern
  * used in 3 places before Sprint D. Invariant: we ONLY write to cards.balance
- * after a successful Issuer API call — never from user input, never from local
+ * after a successful Issuer API call - never from user input, never from local
  * calculation. If the Issuer call returns null, we do nothing.
  *
  * Drift ≥$10 triggers an admin warning (execution_log + reportWarning). Every
@@ -16,7 +16,7 @@ import { reportWarning } from './error-reporter'
 
 const DRIFT_ALERT_THRESHOLD_USD = 10
 
-// Session 27 — rate-limit backoff. Issuer API throttles at ~3-5 req/s per key.
+// Session 27 - rate-limit backoff. Issuer API throttles at ~3-5 req/s per key.
 // Our 3 write-through paths (GET /cards, debit, sweep) were hammering the
 // API, and prod logs show 429/503 was the dominant response for 3+ days,
 // leaving users with stale balances forever. We now track consecutive
@@ -51,7 +51,7 @@ export async function syncCardBalanceFromIssuer(
     source,
   }
 
- // Rate-limit backoff — if Issuer is currently throttling us, don't even
+ // Rate-limit backoff - if Issuer is currently throttling us, don't even
  // try. Spares us from dogpiling their API during their rate-limit
  // window AND spares our execution_log from noise. Serves cached balance.
   if (Date.now() < backoffUntil) {
@@ -71,7 +71,7 @@ export async function syncCardBalanceFromIssuer(
       consecutiveFailures++
       if (consecutiveFailures >= BACKOFF_THRESHOLD_FAILURES) {
         backoffUntil = Date.now() + BACKOFF_DURATION_MS
-        console.warn(`[card-balance-sync] Issuer API 429/503 ×${consecutiveFailures} — entering backoff for ${BACKOFF_DURATION_MS / 1000 / 60}min`)
+        console.warn(`[card-balance-sync] Issuer API 429/503 ×${consecutiveFailures} - entering backoff for ${BACKOFF_DURATION_MS / 1000 / 60}min`)
       }
     }
     await logSync(db, cardId, source, outcome, 'failed', err.message?.slice(0, 200) || 'issuer_fetch_failed')
@@ -88,7 +88,7 @@ export async function syncCardBalanceFromIssuer(
   outcome.drift = Math.abs(issuerBalanceUsd - oldBalance)
 
   if (outcome.drift < 0.01) {
- // No meaningful change — skip write, skip log noise
+ // No meaningful change - skip write, skip log noise
     return outcome
   }
 

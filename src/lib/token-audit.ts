@@ -1,7 +1,7 @@
 /**
- * ─── TOKEN AUDIT HELPERS — GoPlus + TokenSniffer ────────────────────────────
+ * ─── TOKEN AUDIT HELPERS - GoPlus + TokenSniffer ────────────────────────────
  *
- * Session 26 — pair with the erc20_allowlist admin UI so that before
+ * Session 26 - pair with the erc20_allowlist admin UI so that before
  * flips a memecoin to enabled=true, he sees a one-shot security
  * summary: honeypot detection, buy/sell tax, proxy status, trading
  * cooldown, holder concentration.
@@ -11,10 +11,10 @@
  *
  * TokenSniffer (free tier, 10 req/min without key):
  * https://tokensniffer.com/api/v2/tokens/{chainId}/{address}?apikey=...
- * We skip TokenSniffer for now — requires account signup. GoPlus alone
+ * We skip TokenSniffer for now - requires account signup. GoPlus alone
  * covers the honeypot+tax+proxy risk signals we care about.
  *
- * Output schema is flattened to just the fields admin actually reads —
+ * Output schema is flattened to just the fields admin actually reads -
  * raw GoPlus response has 40+ fields, we surface ~12 that actually flag
  * risk. Raw JSON still passed through for deep-dive.
  */
@@ -35,7 +35,7 @@ export interface TokenAuditResult {
   transfer_pausable: boolean | null
   trading_cooldown: boolean | null
   external_call: boolean | null
- // ─── Fee signals (string "0.01" style — GoPlus quirk) ────
+ // ─── Fee signals (string "0.01" style - GoPlus quirk) ────
   buy_tax: string | null
   sell_tax: string | null
  // ─── Informational ───────────────────────────────────────
@@ -118,7 +118,7 @@ export async function fetchTokenAudit(
         token_symbol: null,
         token_name: null,
         verdict: 'unknown',
-        verdict_reasons: ['GoPlus returned no data for this token — may be unknown to their scanner'],
+        verdict_reasons: ['GoPlus returned no data for this token - may be unknown to their scanner'],
         raw: res.data,
       }
     }
@@ -148,17 +148,17 @@ export async function fetchTokenAudit(
     const sellTaxNum = num(data.sell_tax)
 
     const reasons: string[] = []
-    if (is_honeypot) reasons.push('HONEYPOT detected — cannot sell')
-    if (hidden_owner) reasons.push('Hidden owner — hard-coded admin wallet')
-    if (can_take_back_ownership) reasons.push('Ownership revocable — rug vector')
-    if (is_mintable) reasons.push('Mintable — unlimited supply inflation risk')
-    if (transfer_pausable) reasons.push('Transfers pausable — can freeze trading')
-    if (trading_cooldown) reasons.push('Trading cooldown — anti-bot may delay sells')
-    if (external_call) reasons.push('External calls — dependency risk')
+    if (is_honeypot) reasons.push('HONEYPOT detected - cannot sell')
+    if (hidden_owner) reasons.push('Hidden owner - hard-coded admin wallet')
+    if (can_take_back_ownership) reasons.push('Ownership revocable - rug vector')
+    if (is_mintable) reasons.push('Mintable - unlimited supply inflation risk')
+    if (transfer_pausable) reasons.push('Transfers pausable - can freeze trading')
+    if (trading_cooldown) reasons.push('Trading cooldown - anti-bot may delay sells')
+    if (external_call) reasons.push('External calls - dependency risk')
     if (buyTaxNum != null && buyTaxNum > 0.05) reasons.push(`Buy tax ${(buyTaxNum * 100).toFixed(1)}% (>5%)`)
     if (sellTaxNum != null && sellTaxNum > 0.05) reasons.push(`Sell tax ${(sellTaxNum * 100).toFixed(1)}% (>5%)`)
-    if (is_open_source === false) reasons.push('Not open source — code unverifiable')
-    if (is_in_dex === false) reasons.push('Not in any DEX — zero liquidity signal')
+    if (is_open_source === false) reasons.push('Not open source - code unverifiable')
+    if (is_in_dex === false) reasons.push('Not in any DEX - zero liquidity signal')
 
     let verdict: TokenAuditResult['verdict']
     if (is_honeypot || can_take_back_ownership || hidden_owner) verdict = 'high_risk'

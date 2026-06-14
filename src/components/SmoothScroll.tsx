@@ -1,13 +1,13 @@
 "use client";
 
 /**
- * SmoothScroll — Buttery scroll via Lenis on routes that scroll on the body.
+ * SmoothScroll - Buttery scroll via Lenis on routes that scroll on the body.
  *
  * v15.5 (2026-05-29): route-aware. Mounted unconditionally in the root layout
  * but only INITIALIZES on routes where the body is the scroll container.
  *
  * The dashboard layout uses `<main className="fixed inset-0 overflow-y-auto">`
- * with `<body>` set to overflow-hidden — its own scroll container. If we
+ * with `<body>` set to overflow-hidden - its own scroll container. If we
  * initialize Lenis at document level it intercepts all wheel events and they
  * never reach the dashboard's <main>, so dashboard scroll dies completely.
  *
@@ -41,7 +41,7 @@ export default function SmoothScroll() {
       smoothWheel: true,
       wheelMultiplier: 1,
       touchMultiplier: 2,
- // Leave touch alone — native iOS/Android momentum is already excellent
+ // Leave touch alone - native iOS/Android momentum is already excellent
  // and intercepting can break pinch-zoom + pull-to-refresh.
     });
 

@@ -18,6 +18,8 @@ import {
 } from "@/lib/walletGlassMenu";
 import { usePrimaryDeckStackOptional } from "../../../context/PrimaryDeckStackContext";
 import { useDemoSurfaceState } from "@/features/dashboard/overview/hooks/designSampleData";
+import { OnboardingSetupGuideButton } from "@/features/onboarding/components/OnboardingSetupGuideButton";
+import { useAccountOnboardingOptional } from "@/features/onboarding/context/AccountOnboardingContext";
 
 const MORE_BUTTON_CLASSNAME =
   "inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] bg-[var(--color-bg-chrome-on-canvas)] border-none text-white/70 transition-all hover:bg-white/[0.04] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]/30 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent";
@@ -27,10 +29,17 @@ export default function QuickActions() {
   const deckStack = usePrimaryDeckStackOptional();
   const { demoActive, exploring, clearDemoData } = useDemoSurfaceState();
   const { isRefreshing: refreshing, refresh: handleRefresh } = useDashboardRefresh();
+  const onboarding = useAccountOnboardingOptional();
 
   return (
     <div className="flex shrink-0 items-center gap-2 sm:gap-3">
       <DashboardInFlightBanner />
+      {onboarding?.showSetupGuide ? (
+        <OnboardingSetupGuideButton
+          fraction={onboarding.progressFraction}
+          onClick={onboarding.openOnboarding}
+        />
+      ) : null}
       {demoActive && exploring ? (
         <button
           type="button"

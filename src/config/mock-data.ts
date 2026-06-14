@@ -280,7 +280,7 @@ export const MOCK_TRANSACTIONS = [
     },
 ];
 
-/** Upcoming widget — developer subscriptions (debits only). */
+/** Upcoming widget - developer subscriptions (debits only). */
 export const MOCK_UPCOMING_TRANSACTIONS = [
     {
         id: "up1",

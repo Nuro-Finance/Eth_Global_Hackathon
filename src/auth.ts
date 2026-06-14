@@ -89,14 +89,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
  // First sign-in: `user` and `account` are populated. Subsequent requests
  // arrive with only `token` so we persist everything we need on the token.
       if (user && account?.provider === "google") {
- // Google OAuth — we forward Google's id_token (signed JWT) to the
+ // Google OAuth - we forward Google's id_token (signed JWT) to the
  // backend, which verifies signature + audience + email_verified
  // against Google's JWKS before trusting any claim. This replaces an
  // earlier version that trusted {email, name} from the request body.
  // If id_token is ever missing (shouldn't be for OIDC), we fail shut.
         const idToken = (account as any).id_token
         if (!idToken) {
-          console.error("[auth.jwt] Google account missing id_token — refusing to mint Nuro JWT")
+          console.error("[auth.jwt] Google account missing id_token - refusing to mint Nuro JWT")
           return token
         }
         try {
@@ -122,7 +122,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           console.error("[auth.jwt] social-login fetch error", err)
         }
       } else if (user) {
-        // Credentials path — authorize() already returned accessToken
+        // Credentials path - authorize() already returned accessToken
         token.accessToken = (user as any).accessToken
         token.name = user.name
         token.id = (user as any).id
@@ -142,7 +142,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     signIn: "/en/login",
   },
   trustHost: true,
- // Session 29 — NextAuth v5 renamed NEXTAUTH_SECRET → AUTH_SECRET. The .env
+ // Session 29 - NextAuth v5 renamed NEXTAUTH_SECRET → AUTH_SECRET. The .env
  // file still has the v4 name; accept BOTH so operators don't silently fall
  // through to the insecure hardcoded fallback. Fallback kept ONLY so local
  // dev doesn't crash when no env is set; NEVER rely on it in prod.

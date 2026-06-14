@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
   Trash2,
   ExternalLink,
@@ -24,11 +24,12 @@ import {
 import SettingsSection, { SettingsSectionHeader } from "@/components/settings-section";
 import SettingRow from "../SettingRow";
 import { ReloadFlowTokenHero, reloadFlowHeroStyles } from "@/features/dashboard/my-card-1/components/ReloadFlow";
-import { useAccountBalance } from "@/features/dashboard/overview/components/CardSection/AccountInfo/hooks/useAccountBalance";
 import {
-  DEFAULT_WITHDRAW_ADDRESS,
-  useWithdrawSettings,
+  getPersistedWithdrawAddress,
 } from "@/features/dashboard/settings/components/WithdrawContent/hooks/useWithdrawSettings";
+import { useAppSession } from "@/hooks/useAppSession";
+import { useAppLogout } from "@/hooks/useAppLogout";
+import { clearAccountClientState } from "@/lib/clear-account-client-state";
 import { cn } from "@/lib/utils";
 const DELETE_MODAL_ICON_CLASS =
   "mx-auto mb-5 flex h-14 w-14 shrink-0 items-center justify-center rounded-[var(--radius-sm)] border border-[var(--color-error)]/15 bg-[var(--color-error)]/10 text-[var(--color-error)]";
@@ -50,74 +51,148 @@ const DELETE_ACCOUNT_MODAL_INNER_STYLE = {
   borderStyle: "solid",
 } as const;
 
+function isValidEthAddress(addr: string): boolean {
+  return (
+    addr.startsWith("0x") &&
+    addr.length === 42 &&
+    /^0x[a-fA-F0-9]{40}$/.test(addr)
+  );
+}
+
+async function fetchRealAccountBalance(token: string): Promise<number> {
+  const res = await fetch("/api/cards", {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) return 0;
+  const data = await res.json();
+  const rawCards = (Array.isArray(data) ? data : data.cards || []) as Record<string, unknown>[];
+  const isReal = (c: Record<string, unknown>) => {
+    if ("isIssuerLinked" in c) return Boolean(c.isIssuerLinked);
+    if ("issuer_card_id" in c) return c.issuer_card_id != null;
+    return true;
+  };
+  return rawCards
+    .filter(isReal)
+    .reduce(
+      (sum, c) => sum + (parseFloat(String(c.balance ?? 0)) || 0),
+      0,
+    );
+}
+
 const ConfirmDeleteModal = ({
   open,
   onOpenChange,
-  onConfirm,
   balance,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onConfirm: () => void;
   balance: number;
 }) => {
-  const { settings: withdrawSettings } = useWithdrawSettings();
-  const [address, setAddress] = useState(DEFAULT_WITHDRAW_ADDRESS);
+  const { data: session } = useAppSession();
+  const logout = useAppLogout();
+
+  const hasWithdrawableBalance = balance > 0;
+  const [address, setAddress] = useState("");
   const [isEditing, setIsEditing] = useState(false);
   const [step, setStep] = useState<0 | 1 | 2>(0);
   const [isProcessing, setIsProcessing] = useState(true);
+  const [deleteError, setDeleteError] = useState("");
   const [error, setError] = useState("");
   const [countdown, setCountdown] = useState(30);
+  const deleteStartedRef = useRef(false);
 
   const formattedBalance = new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
   }).format(balance);
 
+  const finishDelete = useCallback(async () => {
+    clearAccountClientState(session?.user?.id);
+    await logout();
+  }, [logout, session?.user?.id]);
+
  // Countdown logic for the final completion state
   useEffect(() => {
     let timer: NodeJS.Timeout;
-    if (open && step === 2 && !isProcessing && countdown > 0) {
+    if (open && step === 2 && !isProcessing && !deleteError && countdown > 0) {
       timer = setInterval(() => {
         setCountdown((prev) => prev - 1);
       }, 1000);
-    } else if (countdown === 0 && open && step === 2 && !isProcessing) {
-      onConfirm();
+    } else if (countdown === 0 && open && step === 2 && !isProcessing && !deleteError) {
+      void finishDelete();
     }
     return () => clearInterval(timer);
-  }, [open, step, isProcessing, countdown, onConfirm]);
+  }, [open, step, isProcessing, countdown, deleteError, finishDelete]);
 
   useEffect(() => {
     if (!open) {
+      deleteStartedRef.current = false;
       const timer = setTimeout(() => {
         setStep(0);
         setIsEditing(false);
         setError("");
+        setDeleteError("");
         setIsProcessing(true);
         setCountdown(30);
+        setAddress("");
       }, 300);
       return () => clearTimeout(timer);
     }
 
-    const saved = withdrawSettings.address.trim();
-    const isValidEth =
-      saved.startsWith("0x") &&
-      saved.length === 42 &&
-      /^0x[a-fA-F0-9]{40}$/.test(saved);
-    setAddress(isValidEth ? saved : DEFAULT_WITHDRAW_ADDRESS);
-  }, [open, withdrawSettings.address]);
+    setAddress(getPersistedWithdrawAddress());
+  }, [open]);
 
-  const handleWithdrawAndDelete = () => {
-    const isEth = address.startsWith("0x") && address.length === 42 && /^0x[a-fA-F0-9]{40}$/.test(address);
-    if (!isEth) {
-      setError("Please supply a valid ETH format string (0x...)");
-      return;
+  const runAccountDeletion = useCallback(async (): Promise<boolean> => {
+    const token = session?.accessToken;
+    if (!token) {
+      setDeleteError("Session expired. Please sign in again and retry.");
+      return false;
     }
-    setError("");
+
+    try {
+      const res = await fetch("/api/users/me", {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = (await res.json().catch(() => ({}))) as { error?: string };
+      if (!res.ok) {
+        setDeleteError(data.error ?? "Account deletion failed. Please try again.");
+        return false;
+      }
+      return true;
+    } catch {
+      setDeleteError("Could not reach the server. Please try again.");
+      return false;
+    }
+  }, [session?.accessToken]);
+
+  const startDeletionStep = useCallback(() => {
+    if (deleteStartedRef.current) return;
+    deleteStartedRef.current = true;
     setStep(2);
     setIsProcessing(true);
- // Simulate blockchain confirmation delay
-    setTimeout(() => setIsProcessing(false), 15000);
+    setDeleteError("");
+
+    const minDelayMs = hasWithdrawableBalance ? 15000 : 2500;
+    void (async () => {
+      const [ok] = await Promise.all([
+        runAccountDeletion(),
+        new Promise<boolean>((resolve) => setTimeout(() => resolve(true), minDelayMs)),
+      ]);
+      setIsProcessing(false);
+      if (!ok) deleteStartedRef.current = false;
+    })();
+  }, [hasWithdrawableBalance, runAccountDeletion]);
+
+  const handleWithdrawAndDelete = () => {
+    if (hasWithdrawableBalance) {
+      if (!isValidEthAddress(address)) {
+        setError("Please supply a valid ETH format string (0x...)");
+        return;
+      }
+    }
+    setError("");
+    startDeletionStep();
   };
 
   const renderStep0 = () => (
@@ -134,7 +209,10 @@ const ConfirmDeleteModal = ({
           <div className="flex gap-3">
             <Trash2 className="w-5 h-5 text-[var(--color-error)] shrink-0 mt-0.5" strokeWidth={1.5} />
             <p className="text-[13px] text-[var(--color-text-muted)] leading-relaxed">
-              Your account and data will be <span className="text-[var(--color-text-primary)] font-medium">permanently deleted</span>. Card balances will be sent to your withdrawal wallet.
+              Your account and data will be <span className="text-[var(--color-text-primary)] font-medium">permanently deleted</span>.
+              {hasWithdrawableBalance
+                ? " Card balances will be sent to your withdrawal wallet."
+                : " There is nothing to withdraw from your account."}
             </p>
           </div>
           <div className="flex gap-3">
@@ -172,7 +250,15 @@ const ConfirmDeleteModal = ({
         Final Confirmation
       </DialogTitle>
       <DialogDescription className="text-[14px] text-[var(--color-text-muted)] mb-8 leading-relaxed text-center px-2">
-        Your total balance of <span className="text-[var(--color-text-primary)] font-medium">{formattedBalance}</span> will be automatically withdrawn to your address. This action cannot be undone.
+        {hasWithdrawableBalance ? (
+          <>
+            Your total balance of <span className="text-[var(--color-text-primary)] font-medium">{formattedBalance}</span> will be automatically withdrawn to your address. This action cannot be undone.
+          </>
+        ) : (
+          <>
+            Your account balance is <span className="text-[var(--color-text-primary)] font-medium">{formattedBalance}</span>. There is nothing to withdraw. Your account and all associated data will be permanently deleted. This action cannot be undone.
+          </>
+        )}
       </DialogDescription>
 
       <div className="mb-8 w-full">
@@ -182,7 +268,7 @@ const ConfirmDeleteModal = ({
             onClick={() => setIsEditing(!isEditing)}
             className="text-[12px] text-white/50 hover:text-[var(--color-text-primary)] font-medium transition-colors outline-none"
           >
-            {isEditing ? "Save" : "Change"}
+            {isEditing ? "Save" : address ? "Change" : "Add"}
           </button>
         </div>
         <div
@@ -202,8 +288,9 @@ const ConfirmDeleteModal = ({
               if (error) setError("");
             }}
             readOnly={!isEditing}
-            className={`bg-transparent w-full outline-none text-[13px] font-mono transition-colors ${
-              isEditing ? "text-[var(--color-text-primary)]" : "text-white/60"
+            placeholder="0x..."
+            className={`bg-transparent w-full outline-none text-[13px] font-mono transition-colors placeholder:text-white/30 ${
+              isEditing ? "text-[var(--color-text-primary)]" : address ? "text-white/60" : "text-white/30"
             }`}
           />
         </div>
@@ -221,7 +308,7 @@ const ConfirmDeleteModal = ({
           onClick={handleWithdrawAndDelete}
           className="flex-1 px-4 py-2.5 rounded-[12px] bg-[var(--color-error)]/10 border border-[var(--color-error)]/20 text-[var(--color-error)] hover:bg-[var(--color-error)]/20 transition-all font-semibold text-[14px] whitespace-nowrap"
         >
-          Withdraw & Delete
+          {hasWithdrawableBalance ? "Withdraw & Delete" : "Delete Account"}
         </button>
       </div>
     </div>
@@ -229,7 +316,31 @@ const ConfirmDeleteModal = ({
 
   const renderStep2 = () => (
     <div className="flex flex-col items-center justify-center text-center py-2 animate-in slide-in-from-right-4 fade-in duration-300 w-full h-full">
-      {isProcessing ? (
+      {deleteError ? (
+        <div className="flex flex-col items-center w-full h-full animate-in fade-in zoom-in-95 duration-300">
+          <div className={DELETE_MODAL_ICON_CLASS}>
+            <AlertCircle className="h-7 w-7" strokeWidth={1.5} />
+          </div>
+          <DialogTitle className="text-[20px] font-semibold text-[var(--color-text-primary)] mb-2 tracking-tight shrink-0 text-center">
+            Deletion failed
+          </DialogTitle>
+          <DialogDescription className="text-[14px] text-[var(--color-text-muted)] leading-relaxed px-2 shrink-0 max-w-[320px] text-center">
+            {deleteError}
+          </DialogDescription>
+          <div className="w-full shrink-0 mt-auto">
+            <button
+              onClick={() => {
+                deleteStartedRef.current = false;
+                setDeleteError("");
+                setStep(1);
+              }}
+              className="w-full px-4 py-3 rounded-[12px] bg-white/5 border border-white/10 text-[var(--color-text-primary)] hover:bg-white/10 transition-all font-semibold text-[14px]"
+            >
+              Back
+            </button>
+          </div>
+        </div>
+      ) : isProcessing ? (
         <div className="flex flex-col items-center w-full h-full animate-in fade-in zoom-in-95 duration-300">
           <style>{reloadFlowHeroStyles}</style>
           <style>{`
@@ -251,15 +362,23 @@ const ConfirmDeleteModal = ({
 
           <div className="flex-1 flex flex-col items-center justify-center w-full">
             <DialogTitle className="text-[20px] font-semibold text-[var(--color-text-primary)] mb-2 tracking-tight shrink-0 text-center">
-              Withdraw in progress
+              {hasWithdrawableBalance ? "Withdraw in progress" : "Deleting your account"}
             </DialogTitle>
             <DialogDescription className="text-[14px] text-[var(--color-text-muted)] leading-relaxed px-2 shrink-0 max-w-[320px] text-center">
-              Your balance of <span className="text-[var(--color-text-primary)] font-medium">{formattedBalance} USDC</span> is being withdrawn via smart contract. Your account will be permanently deleted once complete.
+              {hasWithdrawableBalance ? (
+                <>
+                  Your balance of <span className="text-[var(--color-text-primary)] font-medium">{formattedBalance} USDC</span> is being withdrawn via smart contract. Your account will be permanently deleted once complete.
+                </>
+              ) : (
+                <>We&apos;re removing your account and all associated data. This only takes a moment.</>
+              )}
             </DialogDescription>
 
-            <a href="#" className="flex items-center gap-1.5 mt-5 text-[13px] font-semibold text-[var(--color-primary)] hover:text-[var(--color-primary)]/80 transition-colors shrink-0">
-              View on Block Explorer <ExternalLink className="w-3.5 h-3.5" />
-            </a>
+            {hasWithdrawableBalance && (
+              <a href="#" className="flex items-center gap-1.5 mt-5 text-[13px] font-semibold text-[var(--color-primary)] hover:text-[var(--color-primary)]/80 transition-colors shrink-0">
+                View on Block Explorer <ExternalLink className="w-3.5 h-3.5" />
+              </a>
+            )}
           </div>
 
           <div className="w-full shrink-0">
@@ -282,20 +401,28 @@ const ConfirmDeleteModal = ({
 
           <div className="flex-1 flex flex-col items-center justify-center w-full">
             <DialogTitle className="text-[20px] font-semibold text-[var(--color-text-primary)] mb-2 tracking-tight shrink-0 text-center">
-              Withdrawal Complete
+              {hasWithdrawableBalance ? "Withdrawal Complete" : "Account deleted"}
             </DialogTitle>
             <DialogDescription className="text-[14px] text-[var(--color-text-muted)] leading-relaxed px-2 shrink-0 max-w-[320px] text-center">
-              <span className="text-[var(--color-text-primary)] font-medium">{formattedBalance}</span> successfully withdrawn. Your account has been permanently deleted.
+              {hasWithdrawableBalance ? (
+                <>
+                  <span className="text-[var(--color-text-primary)] font-medium">{formattedBalance}</span> successfully withdrawn. Your account has been permanently deleted.
+                </>
+              ) : (
+                <>Your Nuro account has been permanently deleted.</>
+              )}
             </DialogDescription>
 
-            <a href="#" className="flex items-center gap-1.5 mt-5 text-[13px] font-semibold text-[var(--color-primary)] hover:text-[var(--color-primary)]/80 transition-colors shrink-0">
-              View on Block Explorer <ExternalLink className="w-3.5 h-3.5" />
-            </a>
+            {hasWithdrawableBalance && (
+              <a href="#" className="flex items-center gap-1.5 mt-5 text-[13px] font-semibold text-[var(--color-primary)] hover:text-[var(--color-primary)]/80 transition-colors shrink-0">
+                View on Block Explorer <ExternalLink className="w-3.5 h-3.5" />
+              </a>
+            )}
           </div>
 
           <div className="w-full shrink-0">
             <button
-              onClick={() => onConfirm()}
+              onClick={() => void finishDelete()}
               className="w-full px-4 py-3 rounded-[12px] bg-white/5 border border-white/10 text-[var(--color-text-primary)] hover:bg-[var(--color-error)]/10 hover:text-[var(--color-error)] hover:border-[var(--color-error)]/20 transition-all font-semibold text-[14px]"
             >
               Log Out In {countdown} seconds
@@ -364,7 +491,29 @@ const ConfirmDeleteModal = ({
 
 export default function PrivacyDataContent() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const { balance } = useAccountBalance();
+  const { data: session } = useAppSession();
+  const [deleteBalance, setDeleteBalance] = useState(0);
+
+  useEffect(() => {
+    if (!showDeleteModal) {
+      setDeleteBalance(0);
+      return;
+    }
+
+    const token = (session as { accessToken?: string } | null)?.accessToken;
+    if (!token) {
+      setDeleteBalance(0);
+      return;
+    }
+
+    let cancelled = false;
+    void fetchRealAccountBalance(token).then((balance) => {
+      if (!cancelled) setDeleteBalance(balance);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [showDeleteModal, session]);
 
   return (
     <div className="space-y-12 p-1">
@@ -445,10 +594,7 @@ export default function PrivacyDataContent() {
       <ConfirmDeleteModal
         open={showDeleteModal}
         onOpenChange={setShowDeleteModal}
-        onConfirm={() => {
-          setShowDeleteModal(false);
-        }}
-        balance={balance}
+        balance={deleteBalance}
       />
     </div>
   );

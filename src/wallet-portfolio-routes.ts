@@ -1,7 +1,7 @@
 /**
  * ─── WALLET PORTFOLIO ROUTES ─────────────────────────────────────────────────
  *
- * Session 25 Phase 3 — replaces the mock "Demo data" in /my-wallet with real
+ * Session 25 Phase 3 - replaces the mock "Demo data" in /my-wallet with real
  * on-chain truth for the connected wallet address.
  *
  * Endpoints:
@@ -13,7 +13,7 @@
  * → Normalized asset transfer history via Alchemy getAssetTransfers.
  * Merges outgoing + incoming per chain, sorts by block desc.
  *
- * Auth: none. All data is public on-chain — we only proxy Alchemy so the
+ * Auth: none. All data is public on-chain - we only proxy Alchemy so the
  * API key (extracted from RPC_URL_POLYGON on boot) stays server-side.
  *
  * Caching: 30-second in-memory cache per (address, chain) key. Cuts
@@ -184,11 +184,11 @@ type CoinGeckoPrice = { usd?: number; usd_24h_change?: number }
 // Stable global cache keys so different wallet queries share the same
 // CoinGecko response (native prices aren't caller-specific).
 // Day-5: extended to cover every native token that appears in CHAIN_META
-// — was hardcoded to ['ethereum', 'matic-network'] only, so AVAX + BNB
+// - was hardcoded to ['ethereum', 'matic-network'] only, so AVAX + BNB
 // balances stayed at price=0 regardless of what was returned by Alchemy.
 const GLOBAL_NATIVE_IDS = ['ethereum', 'matic-network', 'avalanche-2', 'binancecoin']
 const CG_NATIVE_CACHE_KEY = `cg:native:${GLOBAL_NATIVE_IDS.join(',')}`
-const CG_NATIVE_TTL_MS = 5 * 60_000 // 5 min — prices don't move that fast
+const CG_NATIVE_TTL_MS = 5 * 60_000 // 5 min - prices don't move that fast
 const CG_NATIVE_STALE_TTL_MS = 60 * 60_000 // 1 hr stale-ok window on rate limit
 
 async function fetchCoinGeckoNativePrices(_ids: string[]): Promise<Record<string, CoinGeckoPrice>> {
@@ -202,7 +202,7 @@ async function fetchCoinGeckoNativePrices(_ids: string[]): Promise<Record<string
     cacheSet(CG_NATIVE_CACHE_KEY + ':stale', res.data, CG_NATIVE_STALE_TTL_MS)
     return res.data
   } catch (err: any) {
-    console.warn('[wallet-portfolio] CoinGecko native price fail:', err.message, '— using stale cache if available')
+    console.warn('[wallet-portfolio] CoinGecko native price fail:', err.message, '- using stale cache if available')
     const stale = cacheGet<Record<string, CoinGeckoPrice>>(CG_NATIVE_CACHE_KEY + ':stale')
     return stale ?? {}
   }
@@ -230,7 +230,7 @@ async function fetchCoinGeckoTokenPrices(
       const res = await axios.get<Record<string, CoinGeckoPrice>>(url, { timeout: 6_000 })
       Object.assign(merged, res.data)
     } catch (err: any) {
- // Swallow individual-chunk failures — partial pricing is better than
+ // Swallow individual-chunk failures - partial pricing is better than
  // none. Log once per chunk for observability.
       console.warn(`[wallet-portfolio] CoinGecko ${platform} chunk ${i}-${i + slice.length} fail:`, err.message)
     }
@@ -316,7 +316,7 @@ async function buildPortfolio(address: string, chainIds: number[]): Promise<Wall
           })
         }
 
- // ERC-20 slots — cap at 25 per chain to keep Alchemy CU in check
+ // ERC-20 slots - cap at 25 per chain to keep Alchemy CU in check
         const capped = erc20s.slice(0, 25)
         const metas = await Promise.all(capped.map((t) => fetchTokenMetadata(chainId, t.contractAddress)))
         for (let i = 0; i < capped.length; i++) {
@@ -536,12 +536,12 @@ async function buildActivity(address: string, limit: number): Promise<{ transfer
 // Solana portfolio builder
 // ──────────────────────────────────────────────────────────────────────────
 //
-// Session 27 — Solana wallet-portfolio support. Uses public Solana RPC
+// Session 27 - Solana wallet-portfolio support. Uses public Solana RPC
 // or SOLANA_RPC_URL env override. Enumerates SPL tokens via
 // getTokenAccountsByOwner + decodes parsed account data. USD prices via
 // CoinGecko platform='solana' lookup.
 //
-// Does NOT integrate with FE Privy yet — that's Session 28 polish. This
+// Does NOT integrate with FE Privy yet - that's Session 28 polish. This
 // endpoint is reachable via curl + testable standalone.
 
 interface SolanaTokenBalance {
@@ -599,7 +599,7 @@ async function fetchSolanaPrices(mints: string[]): Promise<Map<string, number>> 
           if (typeof usd === 'number') prices.set(mint.toLowerCase(), usd)
         }
       } catch {
- // Per-chunk tolerance — one 429 shouldn't kill the whole response
+ // Per-chunk tolerance - one 429 shouldn't kill the whole response
       }
     }
   } catch (err: any) {
@@ -621,12 +621,12 @@ async function fetchNativeSolPrice(): Promise<number> {
 }
 
 async function buildSolanaPortfolio(address: string): Promise<SolanaPortfolioResponse> {
- // 1. Native SOL balance — lamports
+ // 1. Native SOL balance - lamports
   const balanceResult = await solanaRpc<{ value: number }>('getBalance', [address])
   const lamports = balanceResult?.value ?? 0
   const sol = lamports / 1e9
 
- // 2. SPL token accounts — parsed
+ // 2. SPL token accounts - parsed
   const splResult = await solanaRpc<{
     value: Array<{ account: { data: { parsed: { info: { mint: string; tokenAmount: { uiAmount: number; decimals: number } } } } } }>
   }>('getTokenAccountsByOwner', [
@@ -660,7 +660,7 @@ async function buildSolanaPortfolio(address: string): Promise<SolanaPortfolioRes
     'mspltokenmintuaseas5wucvdxymeyhomhaqgpcfrk': 'MSOL',
   }
 
- // Stablecoins anchor to $1 regardless of CoinGecko hit — they occasionally
+ // Stablecoins anchor to $1 regardless of CoinGecko hit - they occasionally
  // 404 or return null for specific mints and we shouldn't zero out a user's
  // real balance because of a feed glitch.
   const STABLECOIN_MINTS: Record<string, number> = {
@@ -705,12 +705,12 @@ export function createWalletPortfolioRouter(): Router {
   const router = Router()
 
   if (!ALCHEMY_KEY) {
-    console.warn('[wallet-portfolio] ALCHEMY key not found in RPC_URL_* env vars — /wallet-portfolio + /wallet-activity will return 503.')
+    console.warn('[wallet-portfolio] ALCHEMY key not found in RPC_URL_* env vars - /wallet-portfolio + /wallet-activity will return 503.')
   }
 
   router.get('/wallet-portfolio', async (req: Request, res: Response) => {
     const ip = (req.headers['x-forwarded-for'] as string | undefined)?.split(',')[0]?.trim() || req.ip || 'unknown'
-    if (isRateLimited(ip)) return res.status(429).json({ error: 'rate limit — wait a few seconds' })
+    if (isRateLimited(ip)) return res.status(429).json({ error: 'rate limit - wait a few seconds' })
     if (!ALCHEMY_KEY) return res.status(503).json({ error: 'Alchemy not configured on backend' })
 
     const address = String(req.query.address || '').trim()
@@ -731,16 +731,16 @@ export function createWalletPortfolioRouter(): Router {
     }
   })
 
- // Session 27 — Solana wallet portfolio. Standalone endpoint (not merged into
+ // Session 27 - Solana wallet portfolio. Standalone endpoint (not merged into
  // /wallet-portfolio because Solana addresses are base58 not 0x + different
  // RPC). Uses public Solana RPC or SOLANA_RPC_URL env. SPL token enumeration
  // via getParsedTokenAccountsByOwner; prices via CoinGecko platform='solana'.
   router.get('/wallet-portfolio-solana', async (req: Request, res: Response) => {
     const ip = (req.headers['x-forwarded-for'] as string | undefined)?.split(',')[0]?.trim() || req.ip || 'unknown'
-    if (isRateLimited(ip)) return res.status(429).json({ error: 'rate limit — wait a few seconds' })
+    if (isRateLimited(ip)) return res.status(429).json({ error: 'rate limit - wait a few seconds' })
 
     const address = String(req.query.address || '').trim()
- // Base58 validation — Solana addresses are 32-44 chars, no 0, O, I, l
+ // Base58 validation - Solana addresses are 32-44 chars, no 0, O, I, l
     if (!/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(address)) {
       return res.status(400).json({ error: 'address must be a base58 Solana public key (32-44 chars)' })
     }
@@ -761,7 +761,7 @@ export function createWalletPortfolioRouter(): Router {
 
   router.get('/wallet-activity', async (req: Request, res: Response) => {
     const ip = (req.headers['x-forwarded-for'] as string | undefined)?.split(',')[0]?.trim() || req.ip || 'unknown'
-    if (isRateLimited(ip)) return res.status(429).json({ error: 'rate limit — wait a few seconds' })
+    if (isRateLimited(ip)) return res.status(429).json({ error: 'rate limit - wait a few seconds' })
     if (!ALCHEMY_KEY) return res.status(503).json({ error: 'Alchemy not configured on backend' })
 
     const address = String(req.query.address || '').trim()

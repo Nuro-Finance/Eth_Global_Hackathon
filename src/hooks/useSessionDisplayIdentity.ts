@@ -15,6 +15,10 @@ export function useSessionDisplayIdentity() {
     | { name?: string; email?: string | null; id?: string }
     | undefined;
 
+  if (status === "loading") {
+    return { name: undefined, email: undefined };
+  }
+
   if (
     status === "authenticated" &&
     sessionUser?.email &&

@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * CardAgentChat — the Nuro Finance Financial text box.
+ * CardAgentChat - the Nuro Finance Financial text box.
  *
  * Per-card conversational agent. The card IS the agent; this component is
  * its voice. Spec: AFI/Neural Net/Claude Memory/Per-Card Agent System Spec.md

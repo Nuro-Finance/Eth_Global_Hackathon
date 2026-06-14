@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-// S30 Phase 1 — proxy for Jupiter-backed Solana quote previews. Parallel
+// S30 Phase 1 - proxy for Jupiter-backed Solana quote previews. Parallel
 // to /api/quote/swap but routes to our BE /quote/swap-solana endpoint.
 const BACKEND = process.env.BACKEND_URL || "http://localhost:3000";
 

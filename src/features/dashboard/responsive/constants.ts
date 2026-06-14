@@ -1,5 +1,5 @@
 /**
- * Pass B — five layout tiers. Switch only in `DashboardResponsivePage`.
+ * Pass B - five layout tiers. Switch only in `DashboardResponsivePage`.
  * See /responsiveness-plan.md
  */
 
@@ -32,7 +32,7 @@ export const DASHBOARD_MOBILE_MAX_PX = DASHBOARD_SM_MAX_PX;
 /** @deprecated Use DASHBOARD_MD1_MIN_PX */
 export const DASHBOARD_MD_MIN_PX = DASHBOARD_MD1_MIN_PX;
 
-/** @deprecated Use DASHBOARD_MD3_MAX_PX — old “md” spanned md1–md3 */
+/** @deprecated Use DASHBOARD_MD3_MAX_PX - old “md” spanned md1–md3 */
 export const DASHBOARD_MD_SQUISH_MAX_PX = DASHBOARD_MD2_MAX_PX;
 
 /** @deprecated Use DASHBOARD_MD3_MIN_PX */
@@ -47,7 +47,7 @@ export const DASHBOARD_PASS_B_GUTTER_CLASS = "gap-[16px]";
 
 export const DASHBOARD_HOME_RESPONSIVE_LAB_PATH = "/dashboard/home-responsive";
 
-/** Single active tier from viewport width — used only in `DashboardResponsivePage`. */
+/** Single active tier from viewport width - used only in `DashboardResponsivePage`. */
 export function resolveDashboardLayoutTier(width: number): DashboardLayoutTier {
   if (width >= DASHBOARD_XL_MIN_PX) return "xl";
   if (width >= DASHBOARD_MD3_MIN_PX) return "md3";

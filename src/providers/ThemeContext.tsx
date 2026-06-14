@@ -33,7 +33,7 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
     try {
       localStorage.setItem("theme", "dark");
     } catch {
- /* private mode / quota — silent */
+ /* private mode / quota - silent */
     }
   }, []);
 

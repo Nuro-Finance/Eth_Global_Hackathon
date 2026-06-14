@@ -13,7 +13,7 @@ import {
   welcomeSeenForUserClient,
 } from "@/lib/welcome-onboarding";
 
-/** Interim onboarding — shown once per user until real onboarding ships. */
+/** Interim onboarding - shown once per user until real onboarding ships. */
 export default function WelcomePage() {
   const t = useTranslations();
   const router = useRouter();

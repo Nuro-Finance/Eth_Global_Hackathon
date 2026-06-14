@@ -54,7 +54,7 @@ function generateDepositAddress(userId: string): string {
 // the ops tools can surface WHY. Before this existed, had to grep
 // pm2 logs to answer "why didn't the ops tools show the skipped deposit?"
 // (Session 21 finding). DB writes are only for skips that correlate to a user
-// attempting a deposit — not the hot poll loop where nothing changed.
+// attempting a deposit - not the hot poll loop where nothing changed.
 async function logMonitorSkip(params: {
     reason: string;       // machine-readable code, e.g. 'dedup:existing-tx'
     chainId: number;
@@ -62,7 +62,7 @@ async function logMonitorSkip(params: {
     userId?: string | null;
     detail?: string;      // human-readable context (amount, tx id, ago, etc.)
 }): Promise<void> {
-    const msg = `[monitor:skip] ${params.reason} — chain=${params.chainId} addr=${params.address.slice(0, 8)}${params.detail ? ' ' + params.detail : ''}`
+    const msg = `[monitor:skip] ${params.reason} - chain=${params.chainId} addr=${params.address.slice(0, 8)}${params.detail ? ' ' + params.detail : ''}`
     console.log(msg)
     try {
  // Schema note: execution_log on prod has columns {id, entity_type, entity_id,
@@ -80,12 +80,12 @@ async function logMonitorSkip(params: {
             [params.address, params.reason, detailWithContext]
         )
     } catch (e: any) {
- // Never crash the monitor for telemetry issues — just log and continue.
+ // Never crash the monitor for telemetry issues - just log and continue.
         console.warn(`[monitor:skip] execution_log insert failed: ${e.message?.slice(0, 80)}`)
     }
 }
 
-// Card balance is READ ONLY from Issuer — never written directly.
+// Card balance is READ ONLY from Issuer - never written directly.
 // When deposits are bridged to Issuer's Base address, Issuer credits the card automatically.
 // This function only logs the event for monitoring visibility.
 async function logDepositDetected(db: any, issuerUserId: string, amount: number): Promise<void> {
@@ -98,14 +98,14 @@ async function logDepositDetected(db: any, issuerUserId: string, amount: number)
       console.warn(`[monitor] logDepositDetected: no user for Issuer ID ${issuerUserId}`);
       return;
     }
-    console.log(`[monitor] Deposit detected: $${amount} for Issuer user ${issuerUserId} — Issuer will credit card balance`);
+    console.log(`[monitor] Deposit detected: $${amount} for Issuer user ${issuerUserId} - Issuer will credit card balance`);
   } catch (e: any) {
     console.error("[monitor] logDepositDetected error:", e.message || e);
   }
 }
 
 // ─── BOOT: Seed lastSeen from DB so we never re-process old deposits ─────────
-// Only seed pending transactions (still in-flight) — confirmed/failed means
+// Only seed pending transactions (still in-flight) - confirmed/failed means
 // funds were already swept, so the on-chain balance is 0. Setting lastSeen=0
 // ensures new deposits to the same address are always detected.
 async function seedLastSeenFromDb(): Promise<void> {
@@ -145,7 +145,7 @@ async function processDeposit(
             chainId,
             address: depositAddress,
             userId,
-            detail: `in-memory lock held — another poll cycle is already bridging this deposit`,
+            detail: `in-memory lock held - another poll cycle is already bridging this deposit`,
         })
         return
     }
@@ -159,7 +159,7 @@ async function processDeposit(
  // One helper, one DB query, three possible outcomes. Previously this logic
  // lived in both pollChain AND processDeposit with subtle divergence; when
  // the 60-min time bound was added, it required two separate commits
- // (2c3f213 + 8289573) — a classic fragility. Now single source of truth.
+ // (2c3f213 + 8289573) - a classic fragility. Now single source of truth.
     const dedup = await checkDepositDedup({ userId, chainId, amountNum, depositAddress })
     if (dedup.action === 'skip') {
         await logMonitorSkip({ reason: dedup.reason, chainId, address: depositAddress, userId, detail: dedup.detail })
@@ -167,9 +167,9 @@ async function processDeposit(
         return;
     }
 
- // Session 25 Phase 6 — deposit-row reuse strategy:
+ // Session 25 Phase 6 - deposit-row reuse strategy:
  // - failed_restart: RESUME in place (reuse the same row id). This is
- // the SIGTERM-during-bridge case — no duplicate tx on-chain, just
+ // the SIGTERM-during-bridge case - no duplicate tx on-chain, just
  // our side didn't finish the book-keeping. Flipping back to
  // pending + updating timestamp is correct.
  // - stale pending (>30min): the bridge tx may have actually fired
@@ -180,14 +180,14 @@ async function processDeposit(
     let txId: string;
     if (dedup.action === 'stale-retry' && dedup.staleStatus === 'failed_restart') {
         txId = dedup.staleTxId;
-        console.log(`[monitor] Resuming failed_restart deposit in-place (tx ${txId}) — no duplicate row`)
+        console.log(`[monitor] Resuming failed_restart deposit in-place (tx ${txId}) - no duplicate row`)
         await pool.query(
             "UPDATE transactions SET status = 'pending', timestamp = $1 WHERE id = $2",
             [Date.now(), txId]
         );
     } else {
         if (dedup.action === 'stale-retry' && dedup.staleStatus === 'pending') {
-            console.log(`[monitor] Stale pending deposit (tx ${dedup.staleTxId}) — marking failed and retrying`)
+            console.log(`[monitor] Stale pending deposit (tx ${dedup.staleTxId}) - marking failed and retrying`)
             await pool.query("UPDATE transactions SET status = 'failed' WHERE id = $1", [dedup.staleTxId])
         } else if (dedup.action === 'stale-retry' && dedup.staleStatus === 'failed') {
             console.log(`[monitor] Auto-retrying failed deposit (tx ${dedup.staleTxId}, failed >1h ago)`)
@@ -208,7 +208,7 @@ async function processDeposit(
         )
     }
     try {
- // Session 26 stuck-dust fix — if getUserBaseDepositAddress returns
+ // Session 26 stuck-dust fix - if getUserBaseDepositAddress returns
  // nothing, the user has no Issuer Base address (no issuer_user_id
  // means they were never fully onboarded). Marking the tx 'failed'
  // means dedup's 1h auto-retry will pick it up again, creating an
@@ -226,7 +226,7 @@ async function processDeposit(
                  VALUES (gen_random_uuid(), 'monitor', $1, 'no_issuer_address', 'skipped', $2, now())`,
                 [
                     depositAddress,
-                    `user=${userId} | chain=${chainId} | amount=$${amountStr} | tx=${txId} — user has no Issuer Base address (likely missing issuer_user_id). Funds sit at source. Complete onboarding OR recover manually.`,
+                    `user=${userId} | chain=${chainId} | amount=$${amountStr} | tx=${txId} - user has no Issuer Base address (likely missing issuer_user_id). Funds sit at source. Complete onboarding OR recover manually.`,
                 ]
             ).catch(() => {})
             markDepositDone(chainId, depositAddress)
@@ -244,7 +244,7 @@ async function processDeposit(
         const msg = err?.response?.data?.message || err?.message || "Unknown error";
         const status = err?.response?.status || "N/A";
         markDepositDone(chainId, depositAddress)
-        console.error(`[monitor] Bridge failed for user ${userId}: ${status} — ${msg}`);
+        console.error(`[monitor] Bridge failed for user ${userId}: ${status} - ${msg}`);
         await pool.query("UPDATE transactions SET status = $1 WHERE id = $2", ["failed", txId])
  // Log error details so ops tools can display WHY it failed
         await pool.query(
@@ -260,7 +260,7 @@ async function pollChain(chain: { chainId: number; name: string; rpc: string; us
         const usdc = new ethers.Contract(chain.usdc, USDC_ABI, provider)
         const decimals = getChainDecimals(chain.chainId)
  // Derive EVM vault address for every user with an Issuer Issuer ID. This
- // replaces the old approach of polling only cached deposit_addresses —
+ // replaces the old approach of polling only cached deposit_addresses -
  // which silently skipped any user who hadn't yet triggered an address
  // cache write (see fix 2026-04-17: a real user's $0.10 Base deposit
  // went undetected because the endpoint only caches 'base', never 'evm').
@@ -302,7 +302,7 @@ async function pollChain(chain: { chainId: number; name: string; rpc: string; us
                                 detail: dedup.detail,
                             })
                         } else {
- // proceed OR stale-retry — processDeposit handles both
+ // proceed OR stale-retry - processDeposit handles both
                             await processDeposit(userId, address, chain.chainId, balance, decimals)
                         }
                     }
@@ -325,18 +325,18 @@ async function pollChain(chain: { chainId: number; name: string; rpc: string; us
 // user's deposit address for native-token balance. When balance exceeds the
 // gas buffer needed, call swap.ts to convert to USDC. Output USDC lands at
 // the same deposit address; next pollChain cycle picks it up and bridges to
-// Base via the existing CCTP/LZ pipeline. Elegant — no new branch in bridge
+// Base via the existing CCTP/LZ pipeline. Elegant - no new branch in bridge
 // code, swap is just a preprocessing step that tops up USDC.
 //
 // Off by default. Flip CONFIG.NATIVE_SWAP_ENABLED=true in VPS .env after the
 // 0x API key is in place and a demo test passes.
 const swapInflight = new Map<string, number>()  // chain:address → epoch_ms of swap start
-const SWAP_INFLIGHT_TTL_MS = 5 * 60 * 1000      // 5 min — plenty for 0x tx + 1 block confirm
+const SWAP_INFLIGHT_TTL_MS = 5 * 60 * 1000      // 5 min - plenty for 0x tx + 1 block confirm
 
 async function pollNativeBalance(chainId: number) {
     if (!CONFIG.NATIVE_SWAP_ENABLED) return
     if (!CONFIG.ZEROX_API_KEY) {
- // Feature flag enabled but key missing — log once and bail to prevent
+ // Feature flag enabled but key missing - log once and bail to prevent
  // every poll cycle from spamming the warning.
         return
     }
@@ -344,7 +344,7 @@ async function pollNativeBalance(chainId: number) {
     if (!token) return  // Unsupported chain
 
  // Resolve this chain's RPC URL. We reuse CHAINS[] where possible (same
- // RPCs as USDC polling) — every chain in NATIVE_TOKENS must also have a
+ // RPCs as USDC polling) - every chain in NATIVE_TOKENS must also have a
  // CHAINS entry (invariant enforced by design).
     const chainEntry = CHAINS.find(c => c.chainId === chainId)
     if (!chainEntry) return
@@ -367,7 +367,7 @@ async function pollNativeBalance(chainId: number) {
 
             try {
                 const nativeBal = await provider.getBalance(address)
- // Dust floor: need at least 0.0003 native to even consider — covers gas
+ // Dust floor: need at least 0.0003 native to even consider - covers gas
  // for the smallest chains (Base/Arb/Opt) where a full swap costs ~0.0001 native.
  // Ethereum mainnet needs more (~0.002 for a busy block); 0x quote will reject if gas > output.
                 const DUST_FLOOR = ethers.utils.parseEther("0.0003")
@@ -375,15 +375,15 @@ async function pollNativeBalance(chainId: number) {
 
  // Leave a gas buffer per-chain. Values tuned from Session 23 live
  // production data (Marathon 7 activation on 2026-04-18):
- // - Ethereum mainnet: swaps cost ~0.001-0.003 ETH — keep 0.001 baseline.
+ // - Ethereum mainnet: swaps cost ~0.001-0.003 ETH - keep 0.001 baseline.
  // - Polygon: MATIC is ~100x cheaper than ETH, but gas chunks are
- // 0.01-0.05 MATIC — buffer 0.5 covers ~10 swap-worth of volatility.
+ // 0.01-0.05 MATIC - buffer 0.5 covers ~10 swap-worth of volatility.
  // - BSC: BNB gas is ~0.001-0.002 per swap.
  // - Base/Optimism: cheapest L2s, ~0.0001 ETH per swap.
- // - Arbitrum: L2 but spikier auction — observed 0.00219 ETH in live
+ // - Arbitrum: L2 but spikier auction - observed 0.00219 ETH in live
  // data, insufficient-for-gas errors when buffer was 0.0002. 0.003
  // gives ~30% headroom.
- // If a chain is missing from this map (shouldn't happen — every
+ // If a chain is missing from this map (shouldn't happen - every
  // NATIVE_TOKENS key must have an entry), fall back to conservative 0.001.
                 const GAS_BUFFER_BY_CHAIN: Record<number, string> = {
                     1: "0.001",       // Ethereum
@@ -392,13 +392,13 @@ async function pollNativeBalance(chainId: number) {
                     8453: "0.0002",   // Base
                     10: "0.0002",     // Optimism
                     42161: "0.003",   // Arbitrum
-                    43114: "0.05",    // Avalanche (AVAX) — higher gas vs L2s
+                    43114: "0.05",    // Avalanche (AVAX) - higher gas vs L2s
                     59144: "0.0002",  // Linea (ETH L2)
                     534352: "0.0002", // Scroll (ETH L2)
                     130: "0.0002",    // Unichain (ETH L2)
                     480: "0.0002",    // World Chain (ETH L2)
-                    146: "0.5",       // Sonic (S) — cheap token, needs volume for gas
-                    999: "0.002",     // HyperEVM (HYPE) — moderately priced native
+                    146: "0.5",       // Sonic (S) - cheap token, needs volume for gas
+                    999: "0.002",     // HyperEVM (HYPE) - moderately priced native
                 }
                 const gasBufferStr = GAS_BUFFER_BY_CHAIN[chainId] ?? "0.001"
                 const gasBuffer = ethers.utils.parseEther(gasBufferStr)
@@ -409,7 +409,7 @@ async function pollNativeBalance(chainId: number) {
                 swapInflight.set(inflightKey, Date.now())
                 console.log(`[monitor:native] Swap candidate on ${token.chainName}: ${ethers.utils.formatEther(sellAmount)} ${token.nativeSymbol} → USDC (user ${userId.slice(0,8)})`)
 
- // Fire swap — the deposit address signs its own tx via HD-derived privkey
+ // Fire swap - the deposit address signs its own tx via HD-derived privkey
                 const privKey = new ethers.Wallet(
                     ethers.utils.HDNode.fromSeed(ethers.utils.id(CONFIG.PRIVATE_KEY + userId)).privateKey
                 ).privateKey
@@ -422,7 +422,7 @@ async function pollNativeBalance(chainId: number) {
                     result,
                 })
                 if (result.success) {
-                    console.log(`[monitor:native] ✓ swap complete — USDC arrival will be detected next pollChain cycle`)
+                    console.log(`[monitor:native] ✓ swap complete - USDC arrival will be detected next pollChain cycle`)
                 } else {
                     console.log(`[monitor:native] ✗ swap failed: ${result.reason}`)
  // Leave native untouched. User can try again by depositing more, or admin
@@ -443,13 +443,13 @@ async function pollNativeBalance(chainId: number) {
 // ─── ERC-20 → USDC Auto-Swap (Session 23 Thread D) ───────────────────────────
 // Same plumbing as pollNativeBalance but iterates the curated ERC20_ALLOWLIST
 // for each chain. Only tokens explicitly vetted via the Memecoin Allowlist
-// Policy get swapped. Each token check is one RPC call per user per cycle —
+// Policy get swapped. Each token check is one RPC call per user per cycle -
 // so we only enable this when users actually need it (CONFIG.ERC20_SWAP_ENABLED
 // defaults to false).
 async function pollErc20Balance(chainId: number, token: Erc20TokenInfo) {
     if (!CONFIG.ERC20_SWAP_ENABLED) return
     if (!CONFIG.ZEROX_API_KEY) return
- // Memecoin-category tokens require an additional gate — so even with
+ // Memecoin-category tokens require an additional gate - so even with
  // ERC20_SWAP_ENABLED=true, memecoins don't fire unless operator
  // explicitly enables ERC20_MEMECOIN_ENABLED=true. Blue-chips are always
  // allowed under ERC20_SWAP_ENABLED.
@@ -484,7 +484,7 @@ async function pollErc20Balance(chainId: number, token: Erc20TokenInfo) {
                 const bal: ethers.BigNumber = await erc20.balanceOf(address)
                 if (bal.isZero()) continue
 
- // Dust floor in human units — below 0.0001 of any token we skip.
+ // Dust floor in human units - below 0.0001 of any token we skip.
  // For an 18-decimal token that's 1e14 wei; for 8-dec WBTC that's 1e4 sat.
                 const dustFloor = ethers.utils.parseUnits('0.0001', token.decimals)
                 if (bal.lt(dustFloor)) continue
@@ -506,7 +506,7 @@ async function pollErc20Balance(chainId: number, token: Erc20TokenInfo) {
                     result,
                 })
                 if (result.success) {
-                    console.log(`[monitor:erc20] ✓ ${token.symbol}→USDC complete — USDC detected next cycle`)
+                    console.log(`[monitor:erc20] ✓ ${token.symbol}→USDC complete - USDC detected next cycle`)
                 } else {
                     console.log(`[monitor:erc20] ✗ ${token.symbol} swap failed: ${result.reason}`)
                 }
@@ -548,13 +548,13 @@ async function sweepAgentWallets() {
                 if (balance.gt(MIN_SWEEP)) {
                     const amount = parseFloat(ethers.utils.formatUnits(balance, 6))
                     const amountStr = ethers.utils.formatUnits(balance, 6)
-                    console.log(`[agent-sweep] Agent "${agent.name}" has $${amount.toFixed(2)} USDC on Polygon — bridging to Issuer`)
+                    console.log(`[agent-sweep] Agent "${agent.name}" has $${amount.toFixed(2)} USDC on Polygon - bridging to Issuer`)
 
  // Get Issuer's Base deposit address for this user
                     const userRow = await pool.query('SELECT issuer_user_id FROM users WHERE id = $1', [agent.user_id])
                     const issuerUserId = userRow.rows[0]?.issuer_user_id
                     if (!issuerUserId) {
-                        console.warn(`[agent-sweep] No Issuer user for agent "${agent.name}" — skipping`)
+                        console.warn(`[agent-sweep] No Issuer user for agent "${agent.name}" - skipping`)
                         continue
                     }
 
@@ -562,7 +562,7 @@ async function sweepAgentWallets() {
                     try {
                         const addr = await getUserBaseDepositAddress(issuerUserId)
                         if (!addr) {
-                            console.warn(`[agent-sweep] Issuer returned no Base address for ${issuerUserId} (403/404 — likely invalid issuer_user_id) — skipping`)
+                            console.warn(`[agent-sweep] Issuer returned no Base address for ${issuerUserId} (403/404 - likely invalid issuer_user_id) - skipping`)
                             continue
                         }
                         recipientBaseAddress = addr
@@ -571,15 +571,15 @@ async function sweepAgentWallets() {
                         continue
                     }
 
- // Check bridge lock — prevent concurrent sweeps for same agent wallet
+ // Check bridge lock - prevent concurrent sweeps for same agent wallet
                     if (isDepositProcessing(137, agent.wallet_address)) {
-                        console.log(`[agent-sweep] Skipping agent "${agent.name}" — sweep already in progress`)
+                        console.log(`[agent-sweep] Skipping agent "${agent.name}" - sweep already in progress`)
                         continue
                     }
                     markDepositProcessing(137, agent.wallet_address)
 
  // REAL BRIDGE: Polygon → CCTP → Base → Issuer contract
- // This is the same path as user deposits — Issuer detects it and credits the real Visa card
+ // This is the same path as user deposits - Issuer detects it and credits the real Visa card
                     console.log(`[agent-sweep] Bridging $${amount.toFixed(2)} from Polygon to Issuer Base contract ${recipientBaseAddress.slice(0,10)}...`)
                     let txHash: string
                     try {
@@ -601,22 +601,22 @@ async function sweepAgentWallets() {
                         [amount, agent.id]
                     )
 
- // Record INTENT — status 'pending' until Issuer confirms deposit on card.
+ // Record INTENT - status 'pending' until Issuer confirms deposit on card.
  // date populated explicitly so analytics windows (24h/7d/12mo) include
  // agent-sweep deposits. See migration 043 for the consolidation.
                     await pool.query(
                         `INSERT INTO card_transactions (id, card_id, user_id, name, type, amount, category, status, created_at, date)
                          VALUES (gen_random_uuid(), $1, $2, $3, 'deposit', $4, 'agent', 'pending', now(), now())`,
-                        [agent.card_id, agent.user_id, `${agent.name} — profit sweep`, amount]
+                        [agent.card_id, agent.user_id, `${agent.name} - profit sweep`, amount]
                     )
 
                     await pool.query(
                         `INSERT INTO notifications (id, user_id, type, title, message, is_read, created_at)
                          VALUES (gen_random_uuid(), $1, 'transaction', $2, $3, false, now())`,
-                        [agent.user_id, `Agent "${agent.name}" earned $${amount.toFixed(2)}`, `Profits bridged to Issuer — card will update shortly. TX: ${txHash?.slice(0,10)}...`]
+                        [agent.user_id, `Agent "${agent.name}" earned $${amount.toFixed(2)}`, `Profits bridged to Issuer - card will update shortly. TX: ${txHash?.slice(0,10)}...`]
                     )
 
-                    console.log(`[agent-sweep] Agent "${agent.name}" — $${amount.toFixed(2)} bridged to Issuer via Polygon→Base CCTP`)
+                    console.log(`[agent-sweep] Agent "${agent.name}" - $${amount.toFixed(2)} bridged to Issuer via Polygon→Base CCTP`)
                 }
             } catch (err: any) {
  // Silent per-agent errors
@@ -672,7 +672,7 @@ async function pollSolana() {
                     try {
                         const addr = await getUserBaseDepositAddress(row.user_id)
                         if (!addr) {
-                            console.warn(`[monitor] Issuer returned no Base address for Solana user ${row.user_id} (403/404) — skipping`)
+                            console.warn(`[monitor] Issuer returned no Base address for Solana user ${row.user_id} (403/404) - skipping`)
                             continue
                         }
                         recipientBase = addr
@@ -717,15 +717,15 @@ const POLL_INTERVAL_MS = CONFIG.POLL_INTERVAL_MS
 export async function startDepositMonitor() {
     const intervalSec = POLL_INTERVAL_MS / 1000
     if (intervalSec >= 3600) {
-        console.log(`[monitor] ⏸️  PAUSED — POLL_INTERVAL_MS=${POLL_INTERVAL_MS}ms (${(intervalSec/3600).toFixed(0)}h). Set POLL_INTERVAL_MS=60000 in .env to actively poll.`)
+        console.log(`[monitor] ⏸️  PAUSED - POLL_INTERVAL_MS=${POLL_INTERVAL_MS}ms (${(intervalSec/3600).toFixed(0)}h). Set POLL_INTERVAL_MS=60000 in .env to actively poll.`)
     } else {
-        console.log(`[monitor] ▶️  ACTIVE — polling ${CHAINS.length} chains every ${intervalSec}s`)
+        console.log(`[monitor] ▶️  ACTIVE - polling ${CHAINS.length} chains every ${intervalSec}s`)
     }
- // Restore processing locks from DB — prevents double-spend after PM2 restart
+ // Restore processing locks from DB - prevents double-spend after PM2 restart
     await restoreProcessingLocksFromDb(pool)
- // Seed lastSeen from DB BEFORE first poll — prevents re-detection of old deposits
+ // Seed lastSeen from DB BEFORE first poll - prevents re-detection of old deposits
     await seedLastSeenFromDb();
- // Sprint 6.4 — boot-time reconciler: surface any rows marked failed_restart
+ // Sprint 6.4 - boot-time reconciler: surface any rows marked failed_restart
  // by the SIGTERM handler in the previous session. These are bridges that
  // died mid-flight; admin should check if the user's funds actually landed
  // on Base before considering them lost.
@@ -744,9 +744,9 @@ export async function startDepositMonitor() {
         )
         const n = restartRows.rows[0].c
         if (n > 0) {
-            console.warn(`[monitor] ⚠️  ${n} incomplete bridge(s) from previous restart (last 24h) — inspect via admin console "Monitor Skips" panel filter on status='failed_restart'`)
+            console.warn(`[monitor] ⚠️  ${n} incomplete bridge(s) from previous restart (last 24h) - inspect via admin console "Monitor Skips" panel filter on status='failed_restart'`)
 
- // Telegram alert — best-effort, silent if bot env unset.
+ // Telegram alert - best-effort, silent if bot env unset.
             try {
                 const { sendTelegramMessage } = await import('./lib/telegram')
                 const adminChat = process.env.TELEGRAM_ADMIN_CHAT_ID || ''
@@ -754,7 +754,7 @@ export async function startDepositMonitor() {
                     const latest = restartRows.rows[0].latest
                     const ids: string[] = (restartRows.rows[0].ids || []).slice(0, 5)
                     const text =
-                        `⚠️ <b>Boot alert — ${n} incomplete bridge(s)</b>\n\n` +
+                        `⚠️ <b>Boot alert - ${n} incomplete bridge(s)</b>\n\n` +
                         `Process restart found ${n} tx row(s) marked failed_restart in last 24h. ` +
                         `These are bridges that died mid-flight during the previous shutdown.\n\n` +
                         `<b>Latest:</b> ${latest ? new Date(latest).toISOString() : 'unknown'}\n` +
@@ -771,11 +771,11 @@ export async function startDepositMonitor() {
         console.error('[monitor] failed_restart reconciler error:', e.message?.slice(0, 80))
     }
     await Promise.allSettled(CHAINS.map(pollChain))
- // Session 23 Marathon 7 — native-token swap polling. Runs alongside USDC
+ // Session 23 Marathon 7 - native-token swap polling. Runs alongside USDC
  // polling. If CONFIG.NATIVE_SWAP_ENABLED is false (default), pollNativeBalance
- // returns immediately — zero cost when disabled.
+ // returns immediately - zero cost when disabled.
     await Promise.allSettled(Object.keys(NATIVE_TOKENS).map(id => pollNativeBalance(Number(id))))
- // Session 23 Thread D — ERC-20 allowlist swap polling. Refresh snapshot
+ // Session 23 Thread D - ERC-20 allowlist swap polling. Refresh snapshot
  // from DB before iterating so admin toggles (enable/disable a token)
  // take effect within ~60s. Gated by CONFIG.ERC20_SWAP_ENABLED; memecoin-
  // category entries additionally gated by ERC20_MEMECOIN_ENABLED.

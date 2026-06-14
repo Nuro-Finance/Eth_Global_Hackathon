@@ -1,6 +1,6 @@
 // ─── 1INCH CLIENT ───────────────────────────────────────────────────────────
 //
-// Session 30 Phase 2 extension — 1inch probe for the multi-quote aggregator.
+// Session 30 Phase 2 extension - 1inch probe for the multi-quote aggregator.
 // Companion to src/jupiter-client.ts (Solana) and the existing previewSwapQuote
 // in src/swap.ts (0x for EVM). Parallel fan-out lets users see the BEST quote
 // across 0x + 1inch + Jupiter, not just one aggregator's answer.
@@ -13,7 +13,7 @@
 // Design:
 // - Env-gated: when ONEINCH_API_KEY is missing, every call returns null so
 // the aggregator silently skips this source. Mirrors the Google OAuth
-// pattern — no "accidentally-active-on-missing-key" footgun.
+// pattern - no "accidentally-active-on-missing-key" footgun.
 // - 20s in-process cache keyed on (chainId, src, dst, amount). Safe to
 // call per-keystroke.
 // - Returns null on any error so the aggregator's failedSources surface
@@ -106,7 +106,7 @@ export async function getOneInchQuote(
 
  // USDC is 6 decimals on every supported chain.
     const buyAmountUsd = Number(data.dstAmount) / 1e6
- // 1inch doesn't return a worst-case out of the box — we apply our
+ // 1inch doesn't return a worst-case out of the box - we apply our
  // own slippage envelope so the aggregator's comparison is fair.
     const minBuyAmountUsd = buyAmountUsd * (1 - slippageBps / 10_000)
 
@@ -131,13 +131,13 @@ export async function getOneInchQuote(
   } catch (err: any) {
     const status = err?.response?.status
     if (status === 400 || status === 404) {
- // "No route" or unsupported pair — fall through silently.
+ // "No route" or unsupported pair - fall through silently.
       return null
     }
     if (status === 401 || status === 403) {
  // Bad / exhausted API key. Log once prominently, then fail silent
  // for subsequent calls so we don't flood the log.
-      console.warn('[1inch] auth failure — API key missing or exhausted?')
+      console.warn('[1inch] auth failure - API key missing or exhausted?')
       return null
     }
     console.warn(`[1inch] quote error chain=${chainId}:`, err?.message || err)

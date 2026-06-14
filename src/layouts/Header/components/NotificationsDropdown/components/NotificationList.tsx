@@ -10,7 +10,7 @@ interface NotificationListProps {
   emptyMessage: string;
   markAsReadLabel: string;
   removeLabel: string;
- /** @deprecated Prefer scrollAfter for dropdown — caps list length. */
+ /** @deprecated Prefer scrollAfter for dropdown - caps list length. */
   maxVisible?: number;
  /** Dropdown: fit this many rows, then scroll (shows all notifications). */
   scrollAfter?: number;

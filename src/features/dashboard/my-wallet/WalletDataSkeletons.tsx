@@ -25,7 +25,7 @@ function Skel({ className }: { className?: string }) {
 }
 
 /**
- * Pulse overlay that keeps the exact glyph box of the underlying text — zero layout shift.
+ * Pulse overlay that keeps the exact glyph box of the underlying text - zero layout shift.
  */
 export function WalletSkeletonText({
   children,
@@ -60,7 +60,7 @@ function WalletSparklineSkeleton() {
   );
 }
 
-/** Balance headline placeholder — same slot height as formatted USD. */
+/** Balance headline placeholder - same slot height as formatted USD. */
 export function WalletBalanceAmountSkeleton({ className }: { className?: string }) {
   return (
     <span
@@ -73,7 +73,7 @@ export function WalletBalanceAmountSkeleton({ className }: { className?: string 
   );
 }
 
-/** Top asset card — mirrors `TopAssetCard` spacing (`gap-3`, `space-y-0.5`, sparkline). */
+/** Top asset card - mirrors `TopAssetCard` spacing (`gap-3`, `space-y-0.5`, sparkline). */
 export function WalletTopAssetCardSkeleton({ className }: { className?: string }) {
   return (
     <div className={cn(walletWidgetSurface, "flex flex-col gap-3 px-4 py-3 sm:px-5 sm:py-4", className)}>

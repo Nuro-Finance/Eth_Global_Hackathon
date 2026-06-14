@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * SelfLearnFeed — card activity memory surface (Brain tab in CardsGrid).
+ * SelfLearnFeed - card activity memory surface (Brain tab in CardsGrid).
  *
  * Mounted as the "Brain" tab in CardsGrid. Reads /api/users/me/signals and
  * renders a chronological activity feed. Each row is a signal that the
@@ -205,7 +205,7 @@ export default function SelfLearnFeed() {
       ) : filtered.length === 0 ? (
         <div className="text-center py-8 text-zinc-500 text-sm">
           {filter === "all"
-            ? "No activity yet. Create a card, send a chat message, or complete identity verification — the timeline starts then."
+            ? "No activity yet. Create a card, send a chat message, or complete identity verification - the timeline starts then."
             : `No ${filter} events yet.`}
         </div>
       ) : (

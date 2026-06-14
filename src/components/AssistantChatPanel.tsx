@@ -279,7 +279,7 @@ export function AssistantChatPanel({ onClose }: AssistantChatPanelProps) {
           return {
             ...m,
             status: "sent",
-            content: `Response (attempt ${attempt}): Thanks — here's what I can help with about “${originalText}”.`,
+            content: `Response (attempt ${attempt}): Thanks - here's what I can help with about “${originalText}”.`,
           };
         })
       );
@@ -683,14 +683,14 @@ export function AssistantChatPanel({ onClose }: AssistantChatPanelProps) {
                 className="relative h-10 w-10 rounded-[var(--radius-md)] active:scale-[0.98] overflow-hidden"
                 variant="default"
               >
-                {/* Send icon — fades out when streaming */}
+                {/* Send icon - fades out when streaming */}
                 <span
                   className="absolute inset-0 flex items-center justify-center transition-all duration-200"
                   style={{ opacity: isStreaming ? 0 : 1, transform: isStreaming ? 'scale(0.6)' : 'scale(1)' }}
                 >
                   <Send className="h-4 w-4 text-white" />
                 </span>
-                {/* Stop icon — fades in when streaming */}
+                {/* Stop icon - fades in when streaming */}
                 <span
                   className="absolute inset-0 flex items-center justify-center transition-all duration-200"
                   style={{ opacity: isStreaming ? 1 : 0, transform: isStreaming ? 'scale(1)' : 'scale(0.6)' }}

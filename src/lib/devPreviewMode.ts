@@ -6,7 +6,7 @@
 export const NURO_DEV_PREVIEW_POPULATED_KEY = "nuro_dev_preview_populated";
 export const NURO_DEV_PREVIEW_CHANGED_EVENT = "nuro-dev-preview-changed";
 
-/** Dev populated preview — sidebar QR, My Wallet connected shell, portfolio mocks. */
+/** Dev populated preview - sidebar QR, My Wallet connected shell, portfolio mocks. */
 export const DEV_MOCK_CONNECTED_WALLET_ADDRESS =
   "0x742d35Cc6634C0532925a3b844Bc9e7590f44e" as const;
 
@@ -48,6 +48,7 @@ export function readDevNewUserEmpty(): boolean {
 }
 
 /** Dev mock cards, balances, transactions, settings cards list, etc. */
-export function shouldUseDevPopulatedData(): boolean {
+export function shouldUseDevPopulatedData(isDemoDev = false): boolean {
+  if (!isDevPreviewAvailable() || !isDemoDev) return false;
   return readDevPopulatedPreview();
 }

@@ -4,7 +4,7 @@ const BACKEND = process.env.BACKEND_URL || "http://localhost:3000";
 
 /**
  * GET /api/users/me/vault
- * Proxies to backend GET /users/me/vault — returns the connected user's
+ * Proxies to backend GET /users/me/vault - returns the connected user's
  * Base vault address + live USDC/ETH balance + open market position count.
  */
 export async function GET(req: NextRequest) {

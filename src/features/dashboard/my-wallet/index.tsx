@@ -260,7 +260,7 @@ function ConfettiPiece({ p }: { p: ConfettiPieceConfig }) {
   );
 }
 
-/** Radial burst from center — single simultaneous pop, then subtle idle float. */
+/** Radial burst from center - single simultaneous pop, then subtle idle float. */
 function SuccessConfetti() {
   const particles = useMemo((): ConfettiPieceConfig[] => {
     const n = 20;
@@ -431,7 +431,7 @@ function openInNewTab(url?: string) {
   window.open(target, "_blank", "noopener,noreferrer");
 }
 
-/** In-place portfolio/activity refetch — never remount the wallet shell. */
+/** In-place portfolio/activity refetch - never remount the wallet shell. */
 function dispatchWalletPortfolioRefresh() {
   if (typeof window === "undefined") return;
   window.dispatchEvent(new CustomEvent("wallet-portfolio-refresh"));
@@ -693,8 +693,8 @@ function Wallet1ConnectedContent({
   showJustNowPill: boolean;
 }) {
  /**
- * `true` — dismiss the header tx bar when the send flow reaches success (mined/approved).
- * `false` (current) — QA: bar stays for the full 10s from `pending` so it’s visible; flip when shipping the “clear on success” behavior.
+ * `true` - dismiss the header tx bar when the send flow reaches success (mined/approved).
+ * `false` (current) - QA: bar stays for the full 10s from `pending` so it’s visible; flip when shipping the “clear on success” behavior.
  */
   const DISMISS_SEND_TX_PILL_ON_CHAIN_SUCCESS = false;
 

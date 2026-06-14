@@ -16,10 +16,11 @@ import {
 } from "@/components/chat/AssistantChatPanelNavRail";
 import { AnimatePresence, motion } from "framer-motion";
 import { DevPreviewModeProvider } from "@/providers/DevPreviewModeProvider";
+import { AccountOnboardingProvider } from "@/features/onboarding/context/AccountOnboardingContext";
 import { revealScrollbarWhileScrolling } from "@/lib/scrollbarReveal";
 import { cn } from "@/lib/utils";
 
-/** motion.aside `p-[10px]` — one inset per side; nav↔chat gap uses the same value. */
+/** motion.aside `p-[10px]` - one inset per side; nav↔chat gap uses the same value. */
 const ASSISTANT_CHAT_ASIDE_INSET_PX = 10;
 const ASSISTANT_CHAT_ASIDE_HORIZONTAL_PAD_PX = ASSISTANT_CHAT_ASIDE_INSET_PX * 2;
 /** Max width of the whole chat drawer (nav + gap + chat column + aside padding). */
@@ -215,7 +216,7 @@ export default function DashboardLayout({
     setMounted(true);
   }, []);
 
- /** sm (&lt;768): rail only — collapsed by default, expand blocked */
+ /** sm (&lt;768): rail only - collapsed by default, expand blocked */
   useEffect(() => {
     const mq = window.matchMedia(`(max-width: ${DASHBOARD_SM_MAX_PX}px)`);
     const sync = () => {
@@ -238,7 +239,7 @@ export default function DashboardLayout({
     [],
   );
 
- /** Scrollport loses width to the bar; header does not — expand page content to match wallet. */
+ /** Scrollport loses width to the bar; header does not - expand page content to match wallet. */
   useEffect(() => {
     const el = mainScrollRef.current;
     if (!el) return;
@@ -283,6 +284,7 @@ export default function DashboardLayout({
     <ProtectedRoute>
       <WelcomeOnboardingGate>
       <DevPreviewModeProvider>
+      <AccountOnboardingProvider>
       <div className="h-screen w-screen overflow-hidden bg-transparent relative">
         {/* Layer 0: Global Viewport Lock */}
         <style jsx global>{`
@@ -398,7 +400,7 @@ export default function DashboardLayout({
               "dashboard-main-scroll scroll-fade-mask scrollbar-autohide pointer-events-auto overflow-x-hidden overflow-y-auto scroll-smooth [overflow-anchor:none]",
             )}
           >
-            {/* 32px right pad on content — scrollport right edge = viewport (bar in that band) */}
+            {/* 32px right pad on content - scrollport right edge = viewport (bar in that band) */}
             <div
               className="dashboard-main-scroll-pad mt-[5.5rem] box-border space-y-8 pb-[var(--scroll-fade-bottom-content-pad)]"
               style={{
@@ -468,6 +470,7 @@ export default function DashboardLayout({
             document.body
           )}
       </div>
+      </AccountOnboardingProvider>
       </DevPreviewModeProvider>
       </WelcomeOnboardingGate>
     </ProtectedRoute>

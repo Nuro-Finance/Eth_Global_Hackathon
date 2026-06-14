@@ -55,7 +55,7 @@ async function writeToLog(report: ErrorReport, status: 'failed' | 'skipped'): Pr
 }
 
 /**
- * Report an error — something went wrong that needs attention.
+ * Report an error - something went wrong that needs attention.
  * Shows up in ops tools with status='failed'.
  */
 export async function reportError(
@@ -69,7 +69,7 @@ export async function reportError(
 }
 
 /**
- * Report a warning — something was skipped or degraded.
+ * Report a warning - something was skipped or degraded.
  * Shows up in ops tools with status='skipped'.
  */
 export async function reportWarning(
@@ -83,7 +83,7 @@ export async function reportWarning(
 }
 
 /**
- * Express error middleware — catches unhandled route errors.
+ * Express error middleware - catches unhandled route errors.
  * Wire into the Express app: app.use(expressErrorHandler)
  */
 export function expressErrorHandler(err: any, req: any, res: any, next: any): void {

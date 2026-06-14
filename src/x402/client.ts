@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// x402 CLIENT — agentic payment rails (S33 Phase 1)
+// x402 CLIENT - agentic payment rails (S33 Phase 1)
 //
 // Per Decision Journal 2026-04-26_001 DJ 1: x402 is the moat moment for
 // AFI's "agentic finance" thesis. Every other agent platform integrating
@@ -16,7 +16,7 @@
 // → recordPaymentTxHash() link the settlement tx into the ledger row
 // → return response
 //
-// Settlement chain: BASE (USDC native) — locked S33. Cross-chain initiation
+// Settlement chain: BASE (USDC native) - locked S33. Cross-chain initiation
 // is async pre-bridge before the call (Phase 1.5+); Phase 1 assumes agent
 // has USDC on Base.
 //
@@ -61,7 +61,7 @@ export interface X402FetchInput {
  /** Caller's agent attribution. 'Nuro / 'system' / userId. Drives both the
  * signing key derivation AND the budget/ledger attribution. */
   agentId: string
- /** Maximum USD amount this single call may pay. SDK enforces strictly —
+ /** Maximum USD amount this single call may pay. SDK enforces strictly -
  * if the resource demands more, the call fails before signing. Defaults
  * to $0.10. Operator passes higher caps when calling expensive APIs. */
   maxValueUsd?: number
@@ -101,7 +101,7 @@ export interface X402FetchResult {
  */
 function deriveAgentSigningKey(agentId: string): string {
   if (!CONFIG.PRIVATE_KEY) {
-    throw new Error('x402: CONFIG.PRIVATE_KEY missing — cannot derive agent signing key')
+    throw new Error('x402: CONFIG.PRIVATE_KEY missing - cannot derive agent signing key')
   }
   const seed = ethers.utils.id(CONFIG.PRIVATE_KEY + agentId)
   return ethers.utils.HDNode.fromSeed(seed).privateKey
@@ -122,16 +122,16 @@ export function getAgentX402Address(agentId: string): string {
  * Make an x402 payment-aware fetch on behalf of an agent.
  *
  * Pre-flight chain:
- * 1. enforceTxCap (tx-cap) — agent's budget cap + global tx cap
- * 2. huginn.counsel() — advisory verdict on the proposed payment
+ * 1. enforceTxCap (tx-cap) - agent's budget cap + global tx cap
+ * 2. huginn.counsel() - advisory verdict on the proposed payment
  * 3. (optional) abort if HUGINN_ENFORCE_DISSENTS=on AND verdict='block-recommend'
  *
  * Payment via x402-fetch SDK (Coinbase). EIP-3009 transferWithAuthorization
- * — agent signs, facilitator submits + pays gas. Agent only needs USDC on
+ * - agent signs, facilitator submits + pays gas. Agent only needs USDC on
  * Base, NOT ETH.
  *
  * Post-flight:
- * 4. recordSpend() — debit agent_budgets, fire agent-budget-low if crossing
+ * 4. recordSpend() - debit agent_budgets, fire agent-budget-low if crossing
  * 5. Insert detailed ledger row referencing the settlement tx hash
  *
  * Sandbox-aware: if called inside a sandbox scope, the SDK still signs +
@@ -209,7 +209,7 @@ export async function x402Fetch(
     }
   } catch (err: any) {
     if (err.code === 'HUGINN_DISSENT') throw err
- // Counsel failure is non-fatal in observe mode — log + proceed.
+ // Counsel failure is non-fatal in observe mode - log + proceed.
     console.warn(`[x402] counsel failed for ${agentId} → ${url}: ${err?.message?.slice(0, 120)}`)
   }
 
@@ -219,10 +219,10 @@ export async function x402Fetch(
   const hexPrivKey = privateKey.startsWith('0x') ? privateKey : `0x${privateKey}`
  // x402's createSigner returns Promise<Signer> (the EVM path is sync internally
  // but wrapped in Promise.resolve so the SVM path can be async). Awaiting here
- // is REQUIRED — passing a Promise to wrapFetchWithPayment fails the
+ // is REQUIRED - passing a Promise to wrapFetchWithPayment fails the
  // isEvmSignerWallet duck-type check ("chain"/"transport" not in Promise) and
  // throws "Invalid evm wallet client provided" only when a real 402 challenge
- // arrives (httpbin.org/200 path skipped this — discovered via Phase 2 loopback).
+ // arrives (httpbin.org/200 path skipped this - discovered via Phase 2 loopback).
   const signer = await createSigner(SETTLEMENT_NETWORK, hexPrivKey as `0x${string}`)
   const maxValueAtomic = BigInt(Math.floor(maxValueUsd * 10 ** USDC_DECIMALS))
   const fetchWithPay = wrapFetchWithPayment(globalThis.fetch, signer, maxValueAtomic)
@@ -264,7 +264,7 @@ export async function x402Fetch(
         chainId: SETTLEMENT_CHAIN_ID,
       })
     } catch (err: any) {
- // Recording failure shouldn't poison a successful payment — the
+ // Recording failure shouldn't poison a successful payment - the
  // payment HAPPENED on-chain. Operator reconciles via tx hash.
       console.error(
         `[x402] recordSpend FAILED for ${agentId} after successful payment ${payment.transactionHash}: ${err?.message?.slice(0, 200)}`,

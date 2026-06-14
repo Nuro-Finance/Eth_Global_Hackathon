@@ -30,7 +30,7 @@ export interface TransactionState {
   };
 }
 
-// Legacy — real transactions now come from useTransactionsState hook via /api/transactions
+// Legacy - real transactions now come from useTransactionsState hook via /api/transactions
 const demoTransactions: Transaction[] = [];
 
 // Async thunks

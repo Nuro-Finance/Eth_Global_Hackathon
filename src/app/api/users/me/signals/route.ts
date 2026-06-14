@@ -3,7 +3,7 @@
  *
  * Proxy to the backend .self_learn signal feed. Returns the user's recent
  * activity rows (card events, chat events, KYC milestones, persona swaps).
- * Per spec Q6, raw signals are browser-only — NOT MCP-exposed.
+ * Per spec Q6, raw signals are browser-only - NOT MCP-exposed.
  *
  * Schema: migration 052_self_learn_signals.sql
  * Backend: nuro-routes.ts GET /users/me/signals

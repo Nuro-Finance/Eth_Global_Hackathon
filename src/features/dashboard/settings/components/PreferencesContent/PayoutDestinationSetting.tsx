@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/select";
 
 /**
- * Sprint B — Payout destination selector.
+ * Sprint B - Payout destination selector.
  * Controls where market winnings are routed when a user wins a prediction market.
  * Backend: PATCH /api/users/payout-destination (prefix:args format supported).
  * Sprint B ships 'vault' (default) and 'card' (vault→Issuer auto-settle) as functional;
@@ -19,15 +19,15 @@ import {
  */
 
 const FUNCTIONAL_OPTIONS = [
-  { value: "vault", label: "Vault (default — keep on Base)" },
+  { value: "vault", label: "Vault (default - keep on Base)" },
   { value: "card", label: "Card (auto-settle winnings to Visa)" },
 ] as const;
 
-// Future-destination placeholders — user can see the roadmap but selecting them
+// Future-destination placeholders - user can see the roadmap but selecting them
 // returns a "not yet functional" notice. Backend saves the value for forward compat.
 const PLACEHOLDER_OPTIONS = [
-  { value: "agent:primary", label: "Agent — fund primary agent (coming soon)" },
-  { value: "reinvest:latest", label: "Reinvest — auto-place next bet (coming soon)" },
+  { value: "agent:primary", label: "Agent - fund primary agent (coming soon)" },
+  { value: "reinvest:latest", label: "Reinvest - auto-place next bet (coming soon)" },
 ] as const;
 
 export default function PayoutDestinationSetting() {

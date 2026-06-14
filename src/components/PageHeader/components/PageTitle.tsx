@@ -8,7 +8,7 @@ interface PageTitleProps {
 }
 
 /**
- * PageTitle — same typography + stack rhythm as overview `Greeting`
+ * PageTitle - same typography + stack rhythm as overview `Greeting`
  * (h2 + muted line, gap-1, leading-tight) so every dashboard page aligns to one header spec.
  */
 export function PageTitle({ title, subtitle }: PageTitleProps) {

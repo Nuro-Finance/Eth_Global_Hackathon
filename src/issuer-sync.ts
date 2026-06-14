@@ -26,7 +26,7 @@ export interface SyncSkipDiagnostic {
     | 'no_issuer_card_id'
     | 'card_not_linked'
     | 'no_issuer_transaction_id'
- /** Truncated raw Issuer item (first 1KB JSON) — enough to diagnose, not enough to bloat. */
+ /** Truncated raw Issuer item (first 1KB JSON) - enough to diagnose, not enough to bloat. */
   raw?: any
  /** Extra context, e.g. the cardId that wasn't found. */
   detail?: string
@@ -41,7 +41,7 @@ export interface SyncResult {
   error?: string
  /**
  * Per-item skip diagnostics. Populated only when `withDiagnostics: true` is
- * passed to syncIssuerTransactions — the cron path leaves it undefined to
+ * passed to syncIssuerTransactions - the cron path leaves it undefined to
  * keep memory bounded under load. Admin/debug endpoints opt in to surface
  * which Issuer items were rejected and why.
  */
@@ -49,7 +49,7 @@ export interface SyncResult {
 }
 
 const PAGE_SIZE = 100
-const MAX_PAGES = 20  // safety cap — 2000 events per sync run is plenty
+const MAX_PAGES = 20  // safety cap - 2000 events per sync run is plenty
 
 /**
  * Pull new Visa transactions for a user from Issuer and upsert into card_transactions.
@@ -110,7 +110,7 @@ export async function syncIssuerTransactions(
  //
  // The fix: re-fetch the last 24h on every sync. Existing transactions are
  // upserted into card_transactions via the unique index on
- // issuer_transaction_id (migration 046 v2) — duplicates are no-ops.
+ // issuer_transaction_id (migration 046 v2) - duplicates are no-ops.
  // Cost: ~100 extra Issuer API calls per active user per day. Accuracy:
  // catches any transaction that retroactively appears within 24h of its
  // Issuer-claimed postedAt timestamp.
@@ -160,13 +160,13 @@ export async function syncIssuerTransactions(
           || extracted.data?.cardId
 
  // Day-4 fix: Issuer `payment`-type events (USDC-bridge top-ups credited
- // to the user's card) are user-scoped, not card-scoped — their
+ // to the user's card) are user-scoped, not card-scoped - their
  // payload has `payment.userId` but no `payment.cardId`. Skipping
  // them stranded all card-funding income forever ( overview
  // chart read $0 income because every top-up was being silently
  // dropped). For these we fall back to the user's primary
  // issuer-linked card. Spend / fee / cardId-bearing events keep the
- // strict cardId match — only the no-cardId-payment case relaxes.
+ // strict cardId match - only the no-cardId-payment case relaxes.
         let dbCardId: string | undefined
         if (issuerCardId) {
           const cardRes = await db.query(
@@ -186,7 +186,7 @@ export async function syncIssuerTransactions(
           }
           dbCardId = cardRes.rows[0].id
         } else if (issuerTxType === 'payment') {
- // No cardId in payload — fall back to the user's primary
+ // No cardId in payload - fall back to the user's primary
  // issuer-linked card. ORDER BY created_at picks the first one if
  // the user has multiple (rare). Phantom rows excluded by the
  // issuer_card_id filter so credits don't accidentally land on
@@ -245,7 +245,7 @@ export async function syncIssuerTransactions(
  */
 function extractEventDataFromBareSpend(tx: any): { resource: string; action: string; data: any; eventId: string | null } | null {
   if (!tx || typeof tx !== 'object') return null
- // Heuristic — a bare transaction has a type field matching our known set
+ // Heuristic - a bare transaction has a type field matching our known set
   const type = (tx.type || '').toLowerCase()
   if (!['spend', 'fee', 'payment', 'collateral'].includes(type)) return null
   return {
@@ -260,7 +260,7 @@ type UpsertOutcome = 'inserted' | 'updated' | 'skipped'
 
 /**
  * Idempotent upsert keyed on issuer_transaction_id. Shared by webhook handler
- * and sync pull — when both see the same event, source_verified flips true.
+ * and sync pull - when both see the same event, source_verified flips true.
  *
  * Detailed on-conflict diff is logged to execution_log only when meaningful
  * fields changed (status or amount); zero-diff updates are silent.
@@ -287,7 +287,7 @@ export async function upsertCardTransaction(
       return 'skipped'
     }
 
- // Detailed conflict logging — captures the delta
+ // Detailed conflict logging - captures the delta
     if (statusChanged || amountChanged) {
       try {
         await db.query(
@@ -333,11 +333,11 @@ export async function upsertCardTransaction(
  // S35 M11 incident hardening: explicit `WHERE issuer_transaction_id IS NOT NULL`
  // on the ON CONFLICT predicate. This makes the upsert work against EITHER a
  // partial unique index (migration 016 shape: `... WHERE issuer_transaction_id
- // IS NOT NULL`) OR a non-partial one (migration 046 shape) — Postgres arbiter
+ // IS NOT NULL`) OR a non-partial one (migration 046 shape) - Postgres arbiter
  // inference accepts a non-partial index as a superset of any predicate.
  // Without this, a fresh DB that ran only migration 016 fails every upsert
  // with "no unique or exclusion constraint matching the ON CONFLICT
- // specification" — the exact incident that bit us on Day-2.
+ // specification" - the exact incident that bit us on Day-2.
  //
  // We deliberately do NOT coerce empty-string issuer_transaction_id to NULL
  // here: that would create an asymmetry with the existing-row SELECT above
@@ -370,11 +370,11 @@ export async function upsertCardTransaction(
  // Day-5 fix: spend-threshold alert on the production sync path. The direct
  // POST /card-transactions handler in nuro-routes.ts:1540 already fires this
  // alert, but real transactions arrive via Issuer webhook + sync, both of which
- // route through THIS function — and previously skipped the check entirely.
+ // route through THIS function - and previously skipped the check entirely.
  // So the user's "Spend Threshold Alert" setting persisted but never
  // produced an alert on a real charge. Best-effort; never blocks the upsert.
  //
- // Debits only — incoming top-ups (USDC bridge, payment events) shouldn't
+ // Debits only - incoming top-ups (USDC bridge, payment events) shouldn't
  // trigger spend alerts. row.amount is signed (negative for purchase/fee),
  // so we compare against the absolute value.
   if (!row.isIncoming) {
@@ -399,7 +399,7 @@ export async function upsertCardTransaction(
            VALUES (gen_random_uuid(), $1, $2, 'high_value', $3, $4)`,
           [
             row.cardId, row.userId, absAmount,
-            `High-value transaction: $${absAmount.toFixed(2)} at ${merchant} — category=${row.category || 'other'}`,
+            `High-value transaction: $${absAmount.toFixed(2)} at ${merchant} - category=${row.category || 'other'}`,
           ]
         )
 

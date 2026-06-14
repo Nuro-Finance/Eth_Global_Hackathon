@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * BackendUserSync — reconciles Redux auth.user with the backend's
+ * BackendUserSync - reconciles Redux auth.user with the backend's
  * authoritative users.name / users.email / users.first_name /
  * users.last_name fields.
  *
@@ -85,10 +85,10 @@ export default function BackendUserSync() {
           const merged = { ...(cached ? JSON.parse(cached) : {}), ...patch };
           window.localStorage.setItem("user", JSON.stringify(merged));
         } catch {
- /* private mode / quota — silent */
+ /* private mode / quota - silent */
         }
       } catch {
- /* fail silent — sidebar will keep whatever Redux has */
+ /* fail silent - sidebar will keep whatever Redux has */
       }
     })();
 

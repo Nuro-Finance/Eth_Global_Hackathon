@@ -70,7 +70,7 @@ const fragment = `
 export type AsciiBackgroundProps = {
  /**
  * When true: fill the nearest positioned ancestor, same shader as login; canvas sits behind `children`.
- * No extra chrome — only absolute canvas + blend on the canvas.
+ * No extra chrome - only absolute canvas + blend on the canvas.
  */
   embedded?: boolean;
   className?: string;

@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// x402 SERVER — agentic-payment endpoints (S33 Phase 2)
+// x402 SERVER - agentic-payment endpoints (S33 Phase 2)
 //
 // Mirror of src/x402/client.ts. While client.ts wraps fetch to PAY for x402
 // resources, this module GATES our own Express handlers behind x402 USDC
@@ -26,7 +26,7 @@
 // facilitator.x402.org. Phase 3 (idea X5) swaps in our own at
 // facilitator.nuro.finance.
 // - Settlement vault: HD-derived from CONFIG.PRIVATE_KEY + 'nuro-revenue'.
-// Separate from agent SPEND vaults so the on-chain ledger is clean —
+// Separate from agent SPEND vaults so the on-chain ledger is clean -
 // Nuro vault funds calls; revenue vault collects them.
 // - Logs: every successful settlement appends to execution_log
 // (entity_type='x402_server') for the revenue trail.
@@ -39,10 +39,10 @@
 import type { Request, Response, NextFunction } from 'express'
 import type { Pool } from 'pg'
 import { ethers } from 'ethers'
-// `useFacilitator` lives in `x402/verify` at runtime — the package's
+// `useFacilitator` lives in `x402/verify` at runtime - the package's
 // `x402/facilitator` subpath only re-exports the bare verify+settle
 // primitives (which require a chain client). The .d.ts on
-// `x402/facilitator` lists useFacilitator but the runtime JS does not —
+// `x402/facilitator` lists useFacilitator but the runtime JS does not -
 // confirmed via Object.keys() on the deployed module. Importing from
 // `x402/verify` matches what the JS actually exports.
 import { useFacilitator } from 'x402/verify'
@@ -63,7 +63,7 @@ const USDC_DECIMALS = 6
 /** x402 protocol version we speak. v1 is what the npm packages ship. */
 const X402_VERSION = 1
 
-/** Per-network configuration. The EIP-712 domain values matter — facilitator
+/** Per-network configuration. The EIP-712 domain values matter - facilitator
  * re-derives the typed-data hash against the actual on-chain contract and
  * rejects mismatches. Values verified against the deployed USDC contracts.
  *
@@ -87,7 +87,7 @@ const NETWORK_CONFIG: Record<
   },
 }
 
-/** Settlement network — defaults to Base mainnet per S33 directive
+/** Settlement network - defaults to Base mainnet per S33 directive
  * ("WE SETTLE EVERYTHING ON BASE"). Override to base-sepolia via
  * X402_SETTLEMENT_NETWORK env when testing the protocol mechanics
  * without real USDC. */
@@ -97,7 +97,7 @@ function getNetworkConfig() {
   const cfg = NETWORK_CONFIG[SETTLEMENT_NETWORK]
   if (!cfg) {
     throw new Error(
-      `[x402:server] unsupported X402_SETTLEMENT_NETWORK="${SETTLEMENT_NETWORK}" — ` +
+      `[x402:server] unsupported X402_SETTLEMENT_NETWORK="${SETTLEMENT_NETWORK}" - ` +
         `must be one of: ${Object.keys(NETWORK_CONFIG).join(', ')}`,
     )
   }
@@ -110,7 +110,7 @@ function getNetworkConfig() {
  *
  * - Mainnet (`base`) requires Coinbase's authenticated facilitator
  * (CDP_API_KEY_ID + CDP_API_KEY_SECRET in env). The public
- * x402.org facilitator only supports testnets for v1 — confirmed
+ * x402.org facilitator only supports testnets for v1 - confirmed
  * via its /supported endpoint. We grab `@coinbase/x402`'s pre-built
  * facilitator object which is shaped {url, createAuthHeaders} and
  * reads CDP credentials from the env automatically.
@@ -118,7 +118,7 @@ function getNetworkConfig() {
  * - Testnets (`base-sepolia`) work against the public
  * https://x402.org/facilitator without auth.
  *
- * - X402_FACILITATOR_URL env override wins over both — Phase 3 will
+ * - X402_FACILITATOR_URL env override wins over both - Phase 3 will
  * point this at facilitator.nuro.finance once we host our own. */
 let _facilitator: ReturnType<typeof useFacilitator> | null = null
 function getFacilitator(): ReturnType<typeof useFacilitator> {
@@ -159,7 +159,7 @@ function getFacilitator(): ReturnType<typeof useFacilitator> {
  * Returns the deterministic Base address that receives x402 payments to this
  * deployment. HD-derived from CONFIG.PRIVATE_KEY + 'nuro-revenue'. Operator
  * monitors USDC balance on basescan.org/address/<addr> to see revenue
- * accumulate. Address is stable across restarts — same key, same address.
+ * accumulate. Address is stable across restarts - same key, same address.
  *
  * Note: the Issuer issuer + bridge stack already use HD derivation from the
  * same root key with different agentIds; mirroring that pattern keeps the
@@ -217,7 +217,7 @@ export function x402Route<T = unknown>(
 ) {
   return async (req: Request, res: Response, _next?: NextFunction) => {
  // Resolve the canonical public URL. Behind nginx (the prod posture)
- // req.protocol reads 'http' even though the client hit 'https' — we'd
+ // req.protocol reads 'http' even though the client hit 'https' - we'd
  // emit a misleading resource string. Honor X-Forwarded-Proto when set
  // by the upstream proxy. Take only the FIRST value if a proxy chain
  // appended ('https,http' → 'https'). Same idea for host.
@@ -243,7 +243,7 @@ export function x402Route<T = unknown>(
       payTo: opts.payTo ?? getNuroRevenueAddress(),
       maxTimeoutSeconds: opts.maxTimeoutSeconds ?? 60,
       asset: netCfg.usdcContract,
- // EIP-712 domain — facilitator re-derives the typed-data hash against
+ // EIP-712 domain - facilitator re-derives the typed-data hash against
  // the actual on-chain contract and rejects mismatches. Values from
  // NETWORK_CONFIG match the deployed USDC's domain separator on each
  // chain (Mainnet name="USD Coin", Sepolia name="USDC").
@@ -280,7 +280,7 @@ export function x402Route<T = unknown>(
     }
 
  // ── Step 3: verify cryptographic signature + nonce + balance ──────────
- // Pre-flight only — no on-chain action. If invalid, 402 + retry hint.
+ // Pre-flight only - no on-chain action. If invalid, 402 + retry hint.
     const facilitator = getFacilitator()
     let verifyRes: VerifyResponse
     try {
@@ -304,7 +304,7 @@ export function x402Route<T = unknown>(
     }
 
  // ── Step 4: run the handler ───────────────────────────────────────────
- // If it throws, NO settlement happens — the client's EIP-3009
+ // If it throws, NO settlement happens - the client's EIP-3009
  // authorization is signed but unused (cryptographically a no-op).
     let body: T
     try {
@@ -358,7 +358,7 @@ export function x402Route<T = unknown>(
     res.setHeader('Access-Control-Expose-Headers', 'X-PAYMENT-RESPONSE')
 
  // ── Step 7: revenue trail in execution_log ────────────────────────────
- // Best-effort — log failure must not block the paid response since
+ // Best-effort - log failure must not block the paid response since
  // settlement already happened and the client expects a 200.
     try {
       await opts.db.query(
@@ -381,7 +381,7 @@ export function x402Route<T = unknown>(
             txHash,
             network: SETTLEMENT_NETWORK,
             chainId: netCfg.chainId,
- // Tag the facilitator that settled — useful when we run our own
+ // Tag the facilitator that settled - useful when we run our own
  // alongside Coinbase's during the Phase 3 transition.
             facilitator: process.env.X402_FACILITATOR_URL
               ? 'override'

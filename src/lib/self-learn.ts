@@ -10,7 +10,7 @@
  * withdraw completed, plan upgraded, balance shift, etc.) we emit explicitly
  * via emitSignal() at the relevant code path.
  *
- * Signal types are stable strings. Adding new ones is just convention — the
+ * Signal types are stable strings. Adding new ones is just convention - the
  * DB has no enum, so new code can start writing a new signal_type without a
  * migration. Document the new type in this file's SIGNAL_TYPES block so
  * future code can find it.
@@ -96,7 +96,7 @@ export function voidSafe(promise: Promise<unknown>): void {
 
 /**
  * Single signal row as returned to consumers. Note we never expose the raw
- * `payload` JSONB to MCP/clients — payload can carry transaction amounts,
+ * `payload` JSONB to MCP/clients - payload can carry transaction amounts,
  * merchant names, etc. that are user-private. Internal callers (chat
  * system-prompt builder, report generator) get the full row.
  */
@@ -110,7 +110,7 @@ export interface UserSignal {
 }
 
 /**
- * Load the most recent N signals for a user. Default 30 — enough to give the
+ * Load the most recent N signals for a user. Default 30 - enough to give the
  * chat agent context about recent behavior without bloating the prompt.
  * Reverse-chronological (newest first); callers can re-sort.
  */

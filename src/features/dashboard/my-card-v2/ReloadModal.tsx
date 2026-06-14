@@ -78,7 +78,7 @@ function ChainIcon({ chain, size = "h-5 w-5" }: { chain: Chain; size?: string })
   );
 }
 
-// Session 23 Thread D — token catalog now has 3 categories (stables,
+// Session 23 Thread D - token catalog now has 3 categories (stables,
 // natives, memecoins). Stables are direct deposits (no swap). Natives +
 // memecoins auto-swap to USDC via 0x. Memecoin list comes from the live
 // /api/supported-tokens feed (driven by the DB-backed erc20_allowlist
@@ -98,7 +98,7 @@ const STABLE_TOKENS: TokenOption[] = [
   { symbol: "DAI",    name: "DAI",    icon: "https://assets.coingecko.com/coins/images/9956/small/Badge_Dai.png", category: "stables" },
 ];
 
-// Native tokens — ETH spans 8 chains (user re-picks chain separately).
+// Native tokens - ETH spans 8 chains (user re-picks chain separately).
 // Others auto-set their home chain on selection.
 const NATIVE_TOKENS_CATALOG: TokenOption[] = [
   { symbol: "ETH",   name: "Ethereum", icon: "https://assets.coingecko.com/coins/images/279/small/ethereum.png",              category: "natives" },
@@ -109,11 +109,11 @@ const NATIVE_TOKENS_CATALOG: TokenOption[] = [
   { symbol: "HYPE",  name: "HyperEVM", icon: "https://assets.coingecko.com/coins/images/50882/small/hyperliquid.jpg",         category: "natives", autoChainName: "HyperEVM" },
 ];
 
-// Back-compat alias — some older code expects the USDC/USDT/DAI shape
+// Back-compat alias - some older code expects the USDC/USDT/DAI shape
 const TOKENS = STABLE_TOKENS;
 const STABLE_SYMBOLS = new Set(["USDC", "USDT", "DAI"]);
 
-// Live-quote preview. S30 Phase 2: consolidated to /api/quote/best — a
+// Live-quote preview. S30 Phase 2: consolidated to /api/quote/best - a
 // provider-agnostic aggregator endpoint that fans out to 0x (EVM) +
 // Jupiter (Solana) in parallel and returns the winner plus alternatives.
 // FE no longer needs to route-select per chain. Debounced, returns null
@@ -171,7 +171,7 @@ export default function ReloadModal({ open, onClose }: Props) {
   const [copied, setCopied]           = useState(false);
   const [search, setSearch]           = useState("");
 
- // Session 23 Thread D — fetch live allowlist from backend. Drives the
+ // Session 23 Thread D - fetch live allowlist from backend. Drives the
  // memecoin tab in the token picker + lets us know whether memecoinEnabled.
   const [supportedTokens, setSupportedTokens] = useState<{
     memecoins: Array<{ symbol: string; name: string; chainName: string; chainId: number; comingSoon?: boolean }>;
@@ -193,7 +193,7 @@ export default function ReloadModal({ open, onClose }: Props) {
   const amountNum  = parseFloat(amount) || 0;
   const fee        = isStable ? amountNum * FEE_PCT : 0;
  // Stables: classic fee math. Swaps: live quote USDC output. 0x quote already
- // factors spread + slippage — no additional Nuro fee on top.
+ // factors spread + slippage - no additional Nuro fee on top.
   const youReceive = isStable ? (amountNum - fee) : (liveQuote?.buyAmountUsd ?? 0);
 
  // Token catalog pulled together for the category picker dropdown
@@ -219,7 +219,7 @@ export default function ReloadModal({ open, onClose }: Props) {
 
   const currentAddress = addresses?.[selectedChain.depositKey] ?? null;
 
- // Phase 3b — Solana sign-and-swap executor. Active when chain=Solana
+ // Phase 3b - Solana sign-and-swap executor. Active when chain=Solana
  // AND the user picked a non-stable token. Stables on Solana still use
  // the QR/CCTP direct-deposit path (no swap needed).
   const isSolanaSwap = selectedChain.depositKey === "solana" && !isStable;
@@ -227,7 +227,7 @@ export default function ReloadModal({ open, onClose }: Props) {
 
  // Privy-driven wallet connect. When the user lacks a Solana wallet (no
  // signer, no pubkey), clicking the CTA needs to trigger Privy's connect
- // flow — embedded-wallet create for users-without-wallets, external
+ // flow - embedded-wallet create for users-without-wallets, external
  // wallet link (Phantom etc.) for users-with-wallets. Pattern mirrors
  // features/dashboard/wallet-1/index.tsx handleConnectWallet.
   const privy = usePrivy();
@@ -245,7 +245,7 @@ export default function ReloadModal({ open, onClose }: Props) {
  // createOnLogin config landed). If that throws (already has one),
  // fall back to the linkWallet flow.
       try {
- // @ts-expect-error — createWallet Solana variant is available in
+ // @ts-expect-error - createWallet Solana variant is available in
  // Privy v3 Solana-extras but the shared type def sometimes lags.
         await createWallet({ chainType: "solana" });
       } catch {
@@ -266,11 +266,11 @@ export default function ReloadModal({ open, onClose }: Props) {
     await swapExec.execute({
       sellToken: selectedToken,
       amount,
- // destinationTokenAccount: <Phase 3c — Nuro deposit USDC ATA>
+ // destinationTokenAccount: <Phase 3c - Nuro deposit USDC ATA>
     });
   };
  // Reset executor state whenever the modal opens or the user changes
- // token/amount/chain — stale "confirmed" pills shouldn't follow the
+ // token/amount/chain - stale "confirmed" pills shouldn't follow the
  // user across separate swap attempts.
   useEffect(() => {
     swapExec.reset();
@@ -310,7 +310,7 @@ export default function ReloadModal({ open, onClose }: Props) {
     setTimeout(() => setCopied(false), 2000);
   };
 
- // Session 23 — dynamic chain filter based on selected token. Stables
+ // Session 23 - dynamic chain filter based on selected token. Stables
  // work on every chain (bridge path), but natives/bluechips/memecoins
  // only work where we have an allowlist entry. Without this filter, a
  // user could pick PEPE + Avalanche and get a silent "Quote unavailable".
@@ -336,7 +336,7 @@ export default function ReloadModal({ open, onClose }: Props) {
       c.name.toLowerCase().includes(search.toLowerCase()) ||
       c.symbol.toLowerCase().includes(search.toLowerCase());
     if (!matchesSearch) return false;
- // Token-compatibility filter — stables accept any chain, otherwise
+ // Token-compatibility filter - stables accept any chain, otherwise
  // restrict to the set derived from /supported-tokens
     if (allowedChainsForToken === null) return true;
     return allowedChainsForToken.has(c.name);
@@ -345,7 +345,7 @@ export default function ReloadModal({ open, onClose }: Props) {
  // Keep selected chain valid: if user switches to a token that doesn't
  // support the current chain, auto-switch to the first allowed one.
   useEffect(() => {
-    if (allowedChainsForToken === null) return; // stables — any chain is fine
+    if (allowedChainsForToken === null) return; // stables - any chain is fine
     if (allowedChainsForToken.has(selectedChain.name)) return; // current is OK
     const firstAllowed = CHAINS.find(c => allowedChainsForToken.has(c.name));
     if (firstAllowed) setSelectedChain(firstAllowed);
@@ -406,17 +406,17 @@ export default function ReloadModal({ open, onClose }: Props) {
 
                   {!loading && !error && (
                     <>
-                      {/* KYC hint — surfaces when depositRoutingActive=false
+                      {/* KYC hint - surfaces when depositRoutingActive=false
                           (user has no KYC). Renders nothing when KYC is
                           approved/active so happy-path users aren't nagged. */}
                       <div className="mb-4">
                         <KycReloadHint />
                       </div>
 
-                      {/* Pay With — 3-category token picker */}
+                      {/* Pay With - 3-category token picker */}
                       <p className="text-[12px] text-[var(--color-text-muted)] mb-2 font-medium">Pay With</p>
                       <div className="flex gap-2 mb-4">
-                        {/* Token picker pill — opens category dropdown */}
+                        {/* Token picker pill - opens category dropdown */}
                         <div className="relative">
                           <button
                             onClick={() => setShowTokenPicker(p => !p)}
@@ -449,7 +449,7 @@ export default function ReloadModal({ open, onClose }: Props) {
                               <div className="max-h-[240px] overflow-y-auto">
                                 {pickerCategory === "memecoins" && !memecoinEnabled ? (
                                   <p className="text-[11px] text-[var(--color-text-muted)] p-3 text-center leading-relaxed">
-                                    Coming soon — curated allowlist. SHIB / PEPE / PENGU / ANDY under audit.
+                                    Coming soon - curated allowlist. SHIB / PEPE / PENGU / ANDY under audit.
                                   </p>
                                 ) : currentCategoryTokens.length === 0 ? (
                                   <p className="text-[11px] text-[var(--color-text-muted)] p-3 text-center">
@@ -516,7 +516,7 @@ export default function ReloadModal({ open, onClose }: Props) {
                         </div>
                       </div>
 
-                      {/* Fee / Receive — stables show Nuro fee; swaps show live 0x quote */}
+                      {/* Fee / Receive - stables show Nuro fee; swaps show live 0x quote */}
                       <div className="flex items-start justify-between mb-6 px-0.5">
                         <div className="flex-1">
                           <p className="text-[13px] font-semibold text-[var(--color-text-primary)]">You'll Receive:</p>
@@ -550,15 +550,15 @@ export default function ReloadModal({ open, onClose }: Props) {
                               )}
                               {!liveQuote.meetsThreshold && (
                                 <p className="text-[10px] text-[#f5a623] font-semibold mt-0.5">
-                                  ⚠ Below ${liveQuote.minSwapUsd} min — add more {selectedToken}
+                                  ⚠ Below ${liveQuote.minSwapUsd} min - add more {selectedToken}
                                 </p>
                               )}
                             </>
                           ) : amountNum > 0 ? (
                             <p className="text-[10px] text-[var(--color-text-muted)]/70 mt-0.5">
                               {selectedChain.depositKey === "solana"
-                                ? "No Jupiter route — try a smaller amount or different token"
-                                : "Quote unavailable — try a different chain"}
+                                ? "No Jupiter route - try a smaller amount or different token"
+                                : "Quote unavailable - try a different chain"}
                             </p>
                           ) : null}
                         </div>
@@ -567,7 +567,7 @@ export default function ReloadModal({ open, onClose }: Props) {
                         </p>
                       </div>
 
-                      {/* Phase 3b — Solana inline progress pill. Surfaces
+                      {/* Phase 3b - Solana inline progress pill. Surfaces
                           executor state without swapping screens; gives
                           users a tight feedback loop on a flow that has
                           5 sub-steps. */}
@@ -599,7 +599,7 @@ export default function ReloadModal({ open, onClose }: Props) {
                           )}
                           {swapExec.status === "confirmed" && (
                             <>
-                              ✓ Swap confirmed —
+                              ✓ Swap confirmed -
                               {swapExec.depositRoutingActive
                                 ? " USDC routed to card, bridging now"
                                 : " USDC in your Solana wallet"}
@@ -630,14 +630,14 @@ export default function ReloadModal({ open, onClose }: Props) {
                         </div>
                       )}
 
-                      {/* CTA — 3-way branch: Solana swap → executor;
+                      {/* CTA - 3-way branch: Solana swap → executor;
                           Solana without wallet → connect-wallet flow;
                           everything else → existing QR/deposit flow. */}
                       <button
                         onClick={() => {
                           if (isSolanaSwap) {
                             if (!swapExec.canExecute) {
- // User lacks a connected Solana wallet — open
+ // User lacks a connected Solana wallet - open
  // Privy connect/create flow instead of being
  // a dead button (S30 UX bug flagged).
                               void handleConnectSolana();
@@ -690,7 +690,7 @@ export default function ReloadModal({ open, onClose }: Props) {
                       type="text"
                       placeholder={allowedChainsForToken === null
                         ? "Search 23 chains…"
-                        : `${allowedChainsForToken.size} chain${allowedChainsForToken.size === 1 ? '' : 's'} support ${selectedToken} — search…`}
+                        : `${allowedChainsForToken.size} chain${allowedChainsForToken.size === 1 ? '' : 's'} support ${selectedToken} - search…`}
                       value={search}
                       onChange={e => setSearch(e.target.value)}
                       className="w-full px-3 py-2.5 rounded-[10px] bg-[var(--color-bg-glass-strong)] border border-[var(--color-border-primary)] text-[13px] text-[var(--color-text-primary)] outline-none placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-primary)]/60 transition-colors"

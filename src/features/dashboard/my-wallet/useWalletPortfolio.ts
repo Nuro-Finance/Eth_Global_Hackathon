@@ -1,13 +1,13 @@
 "use client";
 
 /**
- * useWalletPortfolio — Session 25 Phase 3
+ * useWalletPortfolio - Session 25 Phase 3
  *
  * Calls the backend /api/wallet-portfolio proxy (which hits Alchemy +
  * CoinGecko server-side). Returns:
  * - totalUsd, delta24h (USD-weighted across all tokens)
  * - chains[] summary (chainId, name, totalUsd, tokenCount)
- * - tokens[] — every non-zero holding across all chains, sorted by USD desc
+ * - tokens[] - every non-zero holding across all chains, sorted by USD desc
  *
  * Refreshes when the connected address changes, or when the consumer bumps
  * the optional refreshKey. Server-side cache is 30s per address, so

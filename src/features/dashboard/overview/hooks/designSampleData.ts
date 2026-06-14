@@ -7,12 +7,13 @@ import {
   readDevNewUserEmpty,
   readDevPopulatedPreview,
 } from "@/lib/devPreviewMode";
+import { useDevPreviewMode } from "@/providers/DevPreviewModeProvider";
 import { FIRST_DEPOSIT_SUCCESS_EVENT } from "@/lib/dashboardInFlightOperation";
 
 export const DEPOSIT_COMPLETE_STORAGE_KEY = "nuro_onboarding_deposit_complete";
 export const DEMO_SAMPLE_CLEARED_STORAGE_KEY = "nuro_demo_sample_cleared";
 export const DEMO_EXPLORING_STORAGE_KEY = "nuro_demo_exploring";
-/** @deprecated Use NURO_DEV_PREVIEW_POPULATED_KEY — kept for imports during migration */
+/** @deprecated Use NURO_DEV_PREVIEW_POPULATED_KEY - kept for imports during migration */
 export const DEV_NEW_USER_PREVIEW_STORAGE_KEY = "dev_preview_new_user";
 export const DEV_NEW_USER_PREVIEW_EVENT = "nuro-dev-preview-changed";
 export const ONBOARDING_DEPOSIT_COMPLETE_EVENT = "nuro-onboarding-deposit-complete";
@@ -58,16 +59,38 @@ export function readDemoExploring(): boolean {
 
 /**
  * Overview/widgets sample data (matches Nuro Front End 5.4.26).
- * Populated preview: always on. New-user empty preview: on unless cleared via demo overlay.
+ * Demo populated: always on. Real new accounts in dev: on until cleared via overlay.
  */
-export function shouldUseDesignSampleData(): boolean {
+export function shouldUseDesignSampleDataForMode(opts: {
+  isDevAvailable: boolean;
+  populated: boolean;
+  newUserEmpty: boolean;
+}): boolean {
+  if (!opts.isDevAvailable) return false;
+  if (opts.populated) return true;
+  if (opts.newUserEmpty) return !readDesignSampleCleared();
+  return false;
+}
+
+/** @deprecated Prefer shouldUseDesignSampleDataForMode with DevPreviewMode context. */
+export function shouldUseDesignSampleData(isDemoDev = false): boolean {
   if (!isDevPreviewAvailable()) return false;
-  if (readDevPopulatedPreview()) return true;
+  if (isDemoDev && readDevPopulatedPreview()) return true;
   if (readDevNewUserEmpty()) return !readDesignSampleCleared();
   return false;
 }
 
-/** Header “Sample data” tag — new-user preview only, not populated / real-user dev mode. */
+/** Header “Sample data” tag - new-user preview only, not populated / real-user dev mode. */
+export function shouldShowSampleDataLabelForMode(opts: {
+  isDevAvailable: boolean;
+  populated: boolean;
+  newUserEmpty: boolean;
+}): boolean {
+  if (!opts.isDevAvailable || opts.populated || !opts.newUserEmpty) return false;
+  return !readDesignSampleCleared();
+}
+
+/** @deprecated Prefer shouldShowSampleDataLabelForMode with DevPreviewMode context. */
 export function shouldShowSampleDataLabel(): boolean {
   if (!isDevPreviewAvailable()) return false;
   if (readDevPopulatedPreview()) return false;
@@ -144,11 +167,21 @@ function useDesignSampleSync(
 }
 
 export function useDesignSampleDataActive(): boolean {
-  return useDesignSampleSync(shouldUseDesignSampleData);
+  const { isDevAvailable, populated, newUserEmpty } = useDevPreviewMode();
+  const read = useCallback(
+    () => shouldUseDesignSampleDataForMode({ isDevAvailable, populated, newUserEmpty }),
+    [isDevAvailable, populated, newUserEmpty],
+  );
+  return useDesignSampleSync(read);
 }
 
 export function useSampleDataLabelVisible(): boolean {
-  return useDesignSampleSync(shouldShowSampleDataLabel);
+  const { isDevAvailable, populated, newUserEmpty } = useDevPreviewMode();
+  const read = useCallback(
+    () => shouldShowSampleDataLabelForMode({ isDevAvailable, populated, newUserEmpty }),
+    [isDevAvailable, populated, newUserEmpty],
+  );
+  return useDesignSampleSync(read);
 }
 
 export function useDemoSurfaceState() {

@@ -84,7 +84,7 @@ export function ReloadSwapFunds({ amount, onSuccess }: ReloadSwapFundsProps) {
             Swap <span className="text-[var(--color-nuro-brand)]">{amount || "0"} ETH</span> on Base
           </p>
           <p className="m-0 text-[13px] font-medium text-[var(--color-text-muted)]">
-            Verified reload — wallet signs via Privy
+            Verified reload - wallet signs via Privy
           </p>
         </div>
 
@@ -92,7 +92,7 @@ export function ReloadSwapFunds({ amount, onSuccess }: ReloadSwapFundsProps) {
           <div className="flex justify-between text-sm">
             <span className="text-[var(--color-text-muted)]">You receive (est.)</span>
             <span className="font-semibold text-[var(--color-text-primary)]">
-              {quoteLoading ? "…" : quote ? `$${quote.buyAmountUsd.toFixed(2)} USDC` : "—"}
+              {quoteLoading ? "…" : quote ? `$${quote.buyAmountUsd.toFixed(2)} USDC` : "-"}
             </span>
           </div>
           <div className="mt-2 flex justify-between text-xs text-[var(--color-text-muted)]">

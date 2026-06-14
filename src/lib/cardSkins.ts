@@ -1,13 +1,13 @@
-/** Noir card face — CTA blob uses primary→accent lavender, not this literal gradient */
+/** Noir card face - CTA blob uses primary→accent lavender, not this literal gradient */
 export const MY_CARD_NOIR_GRADIENT =
   "linear-gradient(135deg, #1a1a1a 0%, #333333 100%)";
 
-/** White / pearl swatch — must match Card Settings */
+/** White / pearl swatch - must match Card Settings */
 export const MY_CARD_WHITE_SKIN_GRADIENT =
   "linear-gradient(135deg, #ffffff 0%, #e8eef5 100%)";
 
 /**
- * CTA panel corner blob when white skin is selected — cool lavender (same family as default
+ * CTA panel corner blob when white skin is selected - cool lavender (same family as default
  * blob), not the card’s white gradient, so the glow never flashes bright white.
  */
 export const MY_CARD_WHITE_BLOB_GRADIENT =

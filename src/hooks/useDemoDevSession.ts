@@ -14,6 +14,8 @@ export function useDemoDevSession(): boolean {
 
   if (!isDevPreviewAvailable()) return false;
 
+  if (status === "loading") return false;
+
   if (DESIGN_MODE && status === "unauthenticated") return true;
 
   const sessionUser = session?.user as { email?: string; id?: string } | undefined;

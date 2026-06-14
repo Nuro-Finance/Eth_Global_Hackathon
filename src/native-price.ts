@@ -1,8 +1,8 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// NATIVE-PRICE — small CoinGecko-backed helper for native-token USD pricing
+// NATIVE-PRICE - small CoinGecko-backed helper for native-token USD pricing
 //
 // S31 H2. Built specifically for tx-cap tx-cap coverage on the call sites
-// that move native value (hype-bridge.ts, gas.ts) — those need a USD value
+// that move native value (hype-bridge.ts, gas.ts) - those need a USD value
 // per tx to compare against the cap, but they don't carry USD-denominated
 // quotes the way swap.ts does.
 //
@@ -12,7 +12,7 @@
 // - Fail-soft: if CoinGecko is rate-limited or down, return null so the
 // caller can pass NaN to enforceTxCap and skip the gate (per tx-cap
 // contract, NaN value = "skip silently, don't block on bad inputs")
-// - No new deps — direct CoinGecko simple/price call
+// - No new deps - direct CoinGecko simple/price call
 
 import axios from 'axios'
 import { reportError } from './error-reporter'
@@ -93,7 +93,7 @@ export async function nativeUsdPrice(chainId: number): Promise<number | null> {
 
   const price = await fetchCoinPrice(coinId).catch(() => null)
   if (price == null || !Number.isFinite(price) || price <= 0) {
- // Don't cache failures — let the next call try again. If we cached
+ // Don't cache failures - let the next call try again. If we cached
  // null, a transient rate-limit would freeze us at "no price" for
  // 5 minutes.
     return cached?.usd ?? null  // soft-fall back to last good
@@ -105,7 +105,7 @@ export async function nativeUsdPrice(chainId: number): Promise<number | null> {
 
 /**
  * Convert a wei BigNumber-ish value into USD using the cached native price.
- * Returns NaN when the price is unavailable — that's the sentinel
+ * Returns NaN when the price is unavailable - that's the sentinel
  * enforceTxCap recognizes as "skip the cap check" (per tx-cap contract:
  * never block on bad inputs).
  *
@@ -118,7 +118,7 @@ export async function nativeValueToUsd(
 ): Promise<number> {
   const price = await nativeUsdPrice(chainId)
   if (price == null) return Number.NaN
- // Avoid pulling ethers in here — formatUnits-equivalent done locally so
+ // Avoid pulling ethers in here - formatUnits-equivalent done locally so
  // this module stays a pure function over BigInt-string inputs.
   const raw = BigInt(weiValue.toString())
   const divisor = 10n ** BigInt(decimals)

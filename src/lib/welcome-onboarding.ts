@@ -1,8 +1,8 @@
-/** Interim first-login onboarding — replace with real flow + DB flag later. */
+/** Interim first-login onboarding - replace with real flow + DB flag later. */
 
 export const WELCOME_COOKIE = "nuro_welcome_seen";
 export const PENDING_ONBOARDING_KEY = "nuro_pending_onboarding";
-/** Fresh email signup — ignore stale Privy wallet until user connects explicitly. */
+/** Fresh email signup - ignore stale Privy wallet until user connects explicitly. */
 export const REQUIRE_WALLET_RELINK_KEY = "nuro_require_wallet_relink";
 
 export function markRequireWalletRelinkClient(): void {

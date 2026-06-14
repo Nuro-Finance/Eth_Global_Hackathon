@@ -1,7 +1,7 @@
 /**
  * /api/users/me/reports
  *
- * Phase 2 .self_learn — proxy to the middleware report generation endpoint.
+ * Phase 2 .self_learn - proxy to the middleware report generation endpoint.
  *
  * POST → generate a new report. Body: { cadence, customDescription?, kind? }
  * Returns: { id, title, body_markdown, cadence, kind, signals_count }

@@ -1,7 +1,7 @@
 // Type shim for x402's subpath modules (`x402/types`, `x402/verify`).
 // Same reasoning as x402-fetch.d.ts: backend tsconfig has
 // `moduleResolution: 'node'` which doesn't traverse `exports` maps. At
-// runtime Node's resolver DOES handle exports — so the imports work; we
+// runtime Node's resolver DOES handle exports - so the imports work; we
 // just need TS to know the surface we use.
 //
 // IMPORTANT: `useFacilitator` is exported from `x402/verify` at runtime,
@@ -61,7 +61,7 @@ declare module 'x402/types' {
     success: boolean
     errorReason?: string
  /** Some facilitator implementations return `txHash`; others `transaction`.
- * Both surfaces appear in the wild — we read whichever is set. */
+ * Both surfaces appear in the wild - we read whichever is set. */
     txHash?: string
     transaction?: string
     network?: string

@@ -2,7 +2,7 @@ import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 
 /**
- * App entry — login when signed out; dashboard when signed in.
+ * App entry - login when signed out; dashboard when signed in.
  */
 export default async function LocaleHome({
   params,

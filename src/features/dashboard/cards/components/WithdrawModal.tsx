@@ -20,12 +20,12 @@ interface WithdrawModalProps {
 
 const HEADER_SHIFT_X = 40;
 const headerCaretTransition = { duration: 0.4, ease: [0.33, 1, 0.68, 1] as const };
-/** Fixed outer shell — body swaps per step; height never follows step content. */
+/** Fixed outer shell - body swaps per step; height never follows step content. */
 const SHELL_HEIGHT_CLASS =
   "h-[min(540px,85vh)] min-h-[min(540px,85vh)] max-h-[min(540px,85vh)]";
 
 /**
- * Withdraw — same shell as `ReloadModal` (header, X, dots) + `WithdrawFlow` (`variant="modal"`).
+ * Withdraw - same shell as `ReloadModal` (header, X, dots) + `WithdrawFlow` (`variant="modal"`).
  */
 export function WithdrawModal({ open, onOpenChange }: WithdrawModalProps) {
   const withdrawFlowRef = useRef<WithdrawFlowHandle>(null);

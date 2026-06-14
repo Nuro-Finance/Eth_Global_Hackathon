@@ -16,7 +16,7 @@ export function useTransferSubmit(options?: UseTransferSubmitOptions) {
         try {
  // Convert the form's Date object to ISO timestamp the backend expects.
  // Backend compares scheduledAt to Date.now()+60s to decide scheduled vs
- // immediate — so passing today's date (<60s in future) = immediate, future
+ // immediate - so passing today's date (<60s in future) = immediate, future
  // date = scheduled intent.
             const scheduledAt = data.transferDate
                 ? new Date(data.transferDate).toISOString()

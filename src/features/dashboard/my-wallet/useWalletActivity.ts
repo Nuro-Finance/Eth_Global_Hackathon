@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * useWalletActivity — Session 25 Phase 3
+ * useWalletActivity - Session 25 Phase 3
  *
  * Real recent-activity feed for the connected wallet. Calls the backend
  * /api/wallet-activity proxy which aggregates Alchemy getAssetTransfers

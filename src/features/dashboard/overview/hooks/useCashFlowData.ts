@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * useCashFlowData — aggregates real card_transactions into 11-bucket arrays
+ * useCashFlowData - aggregates real card_transactions into 11-bucket arrays
  * for the HeroCashFlowPanel chart. Replaces Chris's hardcoded CHART_DATA_INCOME
  * / CHART_DATA_EXPENSE constants with real data driven by the existing
  * useTransactionsState hook (which fetches /api/transactions with auth).

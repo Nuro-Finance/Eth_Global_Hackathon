@@ -14,6 +14,6 @@ export function useAppLogout() {
 
   return useCallback(async () => {
     await completeAppLogout(dispatch, { logoutPrivy: logoutPrivy ?? undefined });
-    router.push("/login");
+    router.replace("/login");
   }, [dispatch, router, logoutPrivy]);
 }

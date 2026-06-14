@@ -41,7 +41,7 @@ type ChartMode = "bar" | "area";
 /**
  * Default axis + scale (mock-data scale). Used when sample explorer is active.
  * Real-data mode (sample cleared + useCashFlowData returning real values) uses
- * `computeYAxisFromData()` below to scale labels to the actual data range —
+ * `computeYAxisFromData()` below to scale labels to the actual data range -
  * was hardcoded to $0–$6K which made $200 real bars overflow the $2 tick line.
  */
 function formatAxisTick(v: number): string {
@@ -112,11 +112,11 @@ const BAR_VALUES_BY_TAB = {
   expense: BAR_VALUES_EXPENSE,
 } as const;
 
-/** Index of today / current period — last datum before trailing empty column. */
+/** Index of today / current period - last datum before trailing empty column. */
 const DEFAULT_SELECTED_BAR_IDX = BAR_VALUES_INCOME.length - 2;
 
 /**
- * Gray bar **fills** (`BAR_BG_GRAY` + hatch) — unchanged here. Heel dissolve is **`mask-image` alpha only** below.
+ * Gray bar **fills** (`BAR_BG_GRAY` + hatch) - unchanged here. Heel dissolve is **`mask-image` alpha only** below.
  */
 const BAR_BG_GRAY =
   "linear-gradient(180deg, color-mix(in oklab, white 16%, var(--color-bg-card)) 0%, color-mix(in oklab, white 9.5%, var(--color-bg-card)) 3.35%, color-mix(in oklab, white 7.15%, var(--color-bg-card)) 6.75%, color-mix(in oklab, white 6.25%, var(--color-bg-card)) 11%, color-mix(in oklab, white 2.25%, var(--color-bg-card)) 42%, color-mix(in oklab, black 3%, var(--color-bg-card)) 72%, color-mix(in oklab, black 7.5%, var(--color-bg-card)) 100%)";
@@ -172,10 +172,10 @@ const BAR_BG_PRIMARY =
 const BAR_ACTIVE_SHADOW =
   "0 -10px 18px color-mix(in oklab, var(--color-primary) 38%, transparent)";
 
-/** Income — product blue lane (explicit for consistency across themes). */
+/** Income - product blue lane (explicit for consistency across themes). */
 const INCOME_BLUE = "#0D90FF";
 
-/** Expense stroke/fill — token mix you already had (no unsolicited hex swaps). SVG-safe via color-mix. */
+/** Expense stroke/fill - token mix you already had (no unsolicited hex swaps). SVG-safe via color-mix. */
 const EXPENSE_SOFT_GRAY_BLUE =
   "color-mix(in oklab, var(--color-primary, #0D90FF) 55%, #ffffff 45%)";
 
@@ -190,7 +190,7 @@ const AREA_WOBBLE_OF_BRIDGE = 0.075;
 /** Extra crest/trough articulation on the blue trace only. */
 const INCOME_RIPPLE_FACTOR = 1.52;
 
-/** Tooltip series marker: small square (≈8px) with softened corners — not a circle. */
+/** Tooltip series marker: small square (≈8px) with softened corners - not a circle. */
 const SERIES_SWATCH_CLASS =
   "h-2 w-2 shrink-0 rounded-[3px] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.12)]";
 
@@ -259,7 +259,7 @@ function smoother01(tRaw: number) {
 // Phase 3 surgical wire (2026-05-25): incomeData / expenseData now passed in
 // from the component. Callers pick mock CHART_DATA_INCOME/EXPENSE (sample
 // explorer mode) vs real useCashFlowData() output (sample cleared / real user
-// view). The helper stays pure — only consumes whatever arrays it's handed.
+// view). The helper stays pure - only consumes whatever arrays it's handed.
 function buildCashFlowWeeklyAnchors(
   range: "Daily" | "Weekly" | "Monthly",
   incomeData: readonly number[],
@@ -916,7 +916,7 @@ export function HeroCashFlowPanel() {
                         }}
                         content={(props) => <CashFlowAreaTooltipContent {...props} />}
                       />
-                      {/* Income wash underneath; expense series on top — unchanged stacking. */}
+                      {/* Income wash underneath; expense series on top - unchanged stacking. */}
                       <Area
                         type="monotone"
                         dataKey="income"

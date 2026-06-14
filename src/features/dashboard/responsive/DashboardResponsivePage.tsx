@@ -37,7 +37,7 @@ function useDashboardLayoutTier(): DashboardLayoutTier | null {
 }
 
 /**
- * Five-tier page wrapper — mounts exactly one slot (sm / md1 / md2 / md3 / xl).
+ * Five-tier page wrapper - mounts exactly one slot (sm / md1 / md2 / md3 / xl).
  */
 export function DashboardResponsivePage({
   xl,

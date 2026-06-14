@@ -42,7 +42,7 @@ function formatShortDate(iso: string) {
   try {
     return format(new Date(iso), "d MMM");
   } catch {
-    return "—";
+    return "-";
   }
 }
 

@@ -14,16 +14,16 @@ const STEP_PX = SEGMENT_COLUMN_PX + SEGMENT_GAP_PX;
 const SEGMENT_MIN_COUNT = 12;
 const SEGMENT_MAX_COUNT = 180;
 
-/** Card share band — primary token @ 75% */
+/** Card share band - primary token @ 75% */
 const SEGMENT_DUAL_CARD = "color-mix(in srgb, var(--color-primary) 75%, transparent)";
-/** Unfilled track — neutral (not primary-tinted). */
+/** Unfilled track - neutral (not primary-tinted). */
 const SEGMENT_TRACK = "rgba(255,255,255,0.08)";
 
 /** My Wallet chips: accent + neutral track. `dualPrimary`: filled band + gray remainder. `gradientPrimary`: filled pillars blend primary → white. */
 export type SegmentedBarVariant = "accent" | "dualPrimary" | "gradientPrimary";
 
 /**
- * Segmented strip used by My Wallet `TopAssetCard` — fixed pillar footprint (3×1 step); pillar height defaults to 10px (`pillarHeightPx`).
+ * Segmented strip used by My Wallet `TopAssetCard` - fixed pillar footprint (3×1 step); pillar height defaults to 10px (`pillarHeightPx`).
  * pillar count scales with measured width (`ResizeObserver`) so wide cards get more pillars, not wider pillars.
  */
 export function SegmentedBarSparkline({

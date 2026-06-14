@@ -1,9 +1,9 @@
 /**
- * AGENT_TOOL_REGISTRY — canonical list of capabilities the per-card agent
+ * AGENT_TOOL_REGISTRY - canonical list of capabilities the per-card agent
  * chat can invoke via Anthropic function-calling.
  *
  * Marathon 12 Day 1 (2026-05-30). Triggered by bug 2026-05-29:
- * "I asked my card if it could freeze itself — it lied and said yes —
+ * "I asked my card if it could freeze itself - it lied and said yes -
  * then it did nothing."
  *
  * The mechanism:
@@ -22,7 +22,7 @@
  * - Agent reply must describe WHAT ACTUALLY HAPPENED, not aspirational
  * "I'll freeze that" without a tool_use. System prompt enforces this.
  * - Every state-mutating tool MUST return a `stateChange` patch. Without
- * it the tool is half-done — backend updated, UI lies.
+ * it the tool is half-done - backend updated, UI lies.
  * - Confirms-on-execute is liability armor: every click is a legal record
  * of explicit user authorization, logged with timestamps. Destroys
  * "I didn't authorize that" claims.
@@ -30,7 +30,7 @@
  * Day 1 ships `freeze_card` only. Day 2 adds the read-only tools
  * (get_balance, get_daily_limit, get_recent_transactions) and the
  * confirms-on-execute tools (request_withdrawal, request_limit_increase).
- * Full v1 set documented in Marathon 12 — Trust + Execution Sprint.md.
+ * Full v1 set documented in Marathon 12 - Trust + Execution Sprint.md.
  */
 
 import type { Pool } from 'pg';
@@ -81,7 +81,7 @@ export const AGENT_TOOL_REGISTRY: AgentToolDefinition[] = [
   {
     name: 'freeze_card',
     description:
-      "Freeze this card immediately. INVOKE ONLY when the user explicitly asks for the card to be frozen, locked, paused, suspended, or 'turned off' for transactions. Trigger phrases: 'freeze it', 'freeze my card', 'pause my card', 'lock it', 'lock my card', 'turn it off', 'suspend it', 'block transactions'. DO NOT INVOKE for unrelated requests: changing color is NOT a freeze request, renaming is NOT a freeze request, checking balance is NOT a freeze request. If the user says 'make my card blue', that is a color request only — call change_card_color, NOT freeze_card. When invoked, blocks all new transactions until unfrozen by unfreeze_card. The DB update + Issuer sync only happen when this tool fires. Saying 'I froze it' in text without calling this tool is a Rule 0 violation. The card is THIS card — do not ask which card.",
+      "Freeze this card immediately. INVOKE ONLY when the user explicitly asks for the card to be frozen, locked, paused, suspended, or 'turned off' for transactions. Trigger phrases: 'freeze it', 'freeze my card', 'pause my card', 'lock it', 'lock my card', 'turn it off', 'suspend it', 'block transactions'. DO NOT INVOKE for unrelated requests: changing color is NOT a freeze request, renaming is NOT a freeze request, checking balance is NOT a freeze request. If the user says 'make my card blue', that is a color request only - call change_card_color, NOT freeze_card. When invoked, blocks all new transactions until unfrozen by unfreeze_card. The DB update + Issuer sync only happen when this tool fires. Saying 'I froze it' in text without calling this tool is a Rule 0 violation. The card is THIS card - do not ask which card.",
     input_schema: {
       type: 'object',
       properties: {},
@@ -91,11 +91,11 @@ export const AGENT_TOOL_REGISTRY: AgentToolDefinition[] = [
       try {
  // Update DB. Mirrors the PATCH /cards/:id handler at line 1060 of
  // nuro-routes.ts, scoped narrowly to is_locked. We DO NOT update
- // any other field — defense in depth against the model emitting
+ // any other field - defense in depth against the model emitting
  // surprise arguments we'd otherwise have to validate.
         const result = await ctx.db.query(
  // NOTE: cards table doesn't have an updated_at column on this
- // schema (confirmed by walk 2026-05-30 — initial agent_tool
+ // schema (confirmed by walk 2026-05-30 - initial agent_tool
  // commit assumed it did and errored). Match the shape of the
  // existing PATCH /cards/:id handler at nuro-routes.ts:1060.
           `UPDATE cards SET is_locked = true
@@ -163,7 +163,7 @@ export const AGENT_TOOL_REGISTRY: AgentToolDefinition[] = [
   {
     name: 'unfreeze_card',
     description:
-      "Unfreeze this card. INVOKE THIS TOOL — do not just say you unfroze it. Saying 'Done, I'm back online' or 'card is now unfrozen' in text without calling this tool is a LIE that Agent Smith will log as a drift violation. The DB update + Issuer sync only happen when this tool fires. Resumes the card so it can authorize transactions again. Symmetric to freeze_card. Use this when the user says 'unfreeze it', 'turn it back on', 'resume', 'unlock my card', or any similar phrasing. INVOKE NOW, then describe what happened.",
+      "Unfreeze this card. INVOKE THIS TOOL - do not just say you unfroze it. Saying 'Done, I'm back online' or 'card is now unfrozen' in text without calling this tool is a LIE that Agent Smith will log as a drift violation. The DB update + Issuer sync only happen when this tool fires. Resumes the card so it can authorize transactions again. Symmetric to freeze_card. Use this when the user says 'unfreeze it', 'turn it back on', 'resume', 'unlock my card', or any similar phrasing. INVOKE NOW, then describe what happened.",
     input_schema: {
       type: 'object',
       properties: {},
@@ -172,7 +172,7 @@ export const AGENT_TOOL_REGISTRY: AgentToolDefinition[] = [
     execute: async (_args, ctx) => {
       try {
         const result = await ctx.db.query(
- // NOTE: cards.updated_at doesn't exist on this schema — matches
+ // NOTE: cards.updated_at doesn't exist on this schema - matches
  // existing PATCH /cards/:id handler shape (nuro-routes.ts:1060).
           `UPDATE cards SET is_locked = false
             WHERE id = $1 AND user_id = $2
@@ -228,7 +228,7 @@ export const AGENT_TOOL_REGISTRY: AgentToolDefinition[] = [
   {
     name: 'get_balance',
     description:
-      "Look up the current balance on this card. Returns the dollar amount available to spend. Use this when the user asks 'what's my balance', 'how much do I have', 'show balance', or any similar question. Do NOT fabricate a balance — always call this tool.",
+      "Look up the current balance on this card. Returns the dollar amount available to spend. Use this when the user asks 'what's my balance', 'how much do I have', 'show balance', or any similar question. Do NOT fabricate a balance - always call this tool.",
     input_schema: {
       type: 'object',
       properties: {},
@@ -264,7 +264,7 @@ export const AGENT_TOOL_REGISTRY: AgentToolDefinition[] = [
   {
     name: 'get_recent_transactions',
     description:
-      "Look up the user's most recent transactions on this card. Use this when the user asks 'what did I spend on', 'show recent transactions', 'last 5 charges', or similar. Returns up to 10 most recent transactions with merchant, amount, status, and date. Do NOT fabricate transactions — always call this tool.",
+      "Look up the user's most recent transactions on this card. Use this when the user asks 'what did I spend on', 'show recent transactions', 'last 5 charges', or similar. Returns up to 10 most recent transactions with merchant, amount, status, and date. Do NOT fabricate transactions - always call this tool.",
     input_schema: {
       type: 'object',
       properties: {
@@ -314,7 +314,7 @@ export const AGENT_TOOL_REGISTRY: AgentToolDefinition[] = [
   {
     name: 'get_card_details',
     description:
-      "Look up everything about THIS card: name, last four digits, expiry, type, frozen state, balance, color theme. Read-only — no state change. Use when the user asks 'what's my card info', 'tell me about this card', 'what kind of card is this', or any open-ended 'about me' question.",
+      "Look up everything about THIS card: name, last four digits, expiry, type, frozen state, balance, color theme. Read-only - no state change. Use when the user asks 'what's my card info', 'tell me about this card', 'what kind of card is this', or any open-ended 'about me' question.",
     input_schema: {
       type: 'object',
       properties: {},
@@ -355,7 +355,7 @@ export const AGENT_TOOL_REGISTRY: AgentToolDefinition[] = [
   {
     name: 'rename_card',
     description:
-      "Rename this card. INVOKE THIS TOOL — do not just say you renamed it. Saying 'Done, I'm now called X' in text without calling this tool is a LIE that Agent Smith will log as a drift violation. Updates the card_name field which appears in the chat header, card list, and dashboard. Use when the user says 'rename me to X', 'call me X', 'change my name to X', or any naming request. The new name must be 1-80 characters. INVOKE NOW, then describe what happened.",
+      "Rename this card. INVOKE THIS TOOL - do not just say you renamed it. Saying 'Done, I'm now called X' in text without calling this tool is a LIE that Agent Smith will log as a drift violation. Updates the card_name field which appears in the chat header, card list, and dashboard. Use when the user says 'rename me to X', 'call me X', 'change my name to X', or any naming request. The new name must be 1-80 characters. INVOKE NOW, then describe what happened.",
     input_schema: {
       type: 'object',
       properties: {
@@ -406,7 +406,7 @@ export const AGENT_TOOL_REGISTRY: AgentToolDefinition[] = [
   {
     name: 'change_card_color',
     description:
-      "Change the visual color theme of THIS card. INVOKE THIS TOOL — do not just say you changed it. Saying 'Done, I'm now blue' in text without calling this tool is a LIE that Agent Smith will log as a drift violation. Cards have 5 color variants: black (noir), blue, green, purple, white. Use when the user says 'change to purple', 'make me green', 'switch to black', 'go blue', or any color-change request. The dashboard card face updates with the new theme. INVOKE NOW, then describe what happened.",
+      "Change the visual color theme of THIS card. INVOKE THIS TOOL - do not just say you changed it. Saying 'Done, I'm now blue' in text without calling this tool is a LIE that Agent Smith will log as a drift violation. Cards have 5 color variants: black (noir), blue, green, purple, white. Use when the user says 'change to purple', 'make me green', 'switch to black', 'go blue', or any color-change request. The dashboard card face updates with the new theme. INVOKE NOW, then describe what happened.",
     input_schema: {
       type: 'object',
       properties: {
@@ -504,7 +504,7 @@ export const AGENT_TOOL_REGISTRY: AgentToolDefinition[] = [
     },
   },
  // ─────────────────────────────────────────────────────────────────────
- // M12 Day 2 batch B (2026-05-30) — 4 read-only spend-analytics tools
+ // M12 Day 2 batch B (2026-05-30) - 4 read-only spend-analytics tools
  // Ride the trust-contract win. No new migrations, no state mutation,
  // no Issuer dependency. Pure read-only queries against card_transactions
  // expose richer spend insight without architectural risk.
@@ -512,7 +512,7 @@ export const AGENT_TOOL_REGISTRY: AgentToolDefinition[] = [
   {
     name: 'search_transactions',
     description:
-      "Search this card's transactions by merchant name or keyword. Use this when the user asks 'did I shop at amazon', 'find my coffee charges', 'show me all uber rides', 'what did I spend at starbucks', or any merchant/keyword search. Returns up to 20 matches with merchant, amount, status, and date. Case-insensitive substring match. Do NOT fabricate transactions — always call this tool.",
+      "Search this card's transactions by merchant name or keyword. Use this when the user asks 'did I shop at amazon', 'find my coffee charges', 'show me all uber rides', 'what did I spend at starbucks', or any merchant/keyword search. Returns up to 20 matches with merchant, amount, status, and date. Case-insensitive substring match. Do NOT fabricate transactions - always call this tool.",
     input_schema: {
       type: 'object',
       properties: {
@@ -637,7 +637,7 @@ export const AGENT_TOOL_REGISTRY: AgentToolDefinition[] = [
   {
     name: 'get_spending_by_period',
     description:
-      "Total spending on THIS card for a given time window (week/month/quarter/year). Use when the user asks 'how much have I spent this week', 'this month total', 'year to date', 'last 30 days', or any period-aggregation question. Returns total sum + transaction count for the chosen window. More general than get_spending_today — that one is always-today; this one takes a period.",
+      "Total spending on THIS card for a given time window (week/month/quarter/year). Use when the user asks 'how much have I spent this week', 'this month total', 'year to date', 'last 30 days', or any period-aggregation question. Returns total sum + transaction count for the chosen window. More general than get_spending_today - that one is always-today; this one takes a period.",
     input_schema: {
       type: 'object',
       properties: {
@@ -760,7 +760,7 @@ export const AGENT_TOOL_REGISTRY: AgentToolDefinition[] = [
       }
     },
   },
- // Day 2 GATED + Day 3 additions (see Marathon 12 — Build Plan Day 1.md):
+ // Day 2 GATED + Day 3 additions (see Marathon 12 - Build Plan Day 1.md):
  // - get_daily_limit (read-only, GATED on Issuer enforcement check Mon AM)
  // - get_remaining_today (read-only, derived from card_transactions + limit)
  // - request_withdrawal (confirms-on-execute, asks destination first)
@@ -776,7 +776,7 @@ export function getToolByName(name: string): AgentToolDefinition | undefined {
   return AGENT_TOOL_REGISTRY.find((t) => t.name === name);
 }
 
-/** Anthropic Messages API `tools` array shape — name + description + schema only. */
+/** Anthropic Messages API `tools` array shape - name + description + schema only. */
 export function toolsForAnthropic() {
   return AGENT_TOOL_REGISTRY.map(({ name, description, input_schema }) => ({
     name,
@@ -814,7 +814,7 @@ export function toolsForSystemPrompt(): string {
 /**
  * Short past-tense label for a tool that fired. Shown as a tiny pill under
  * the corresponding assistant chat message so the user gets CONCRETE proof
- * of what actually happened — "Froze the card" is more trust-building than
+ * of what actually happened - "Froze the card" is more trust-building than
  * an opaque tool name like "freeze_card". Reinforces the trust contract:
  * agent's words match tool's action.
  */

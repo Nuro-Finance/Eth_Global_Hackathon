@@ -97,7 +97,7 @@ function DraggableCardListItem({
       {...attributes}
       className="relative"
     >
-      {/* Drag handle — disabled while chat is expanded so the user can
+      {/* Drag handle - disabled while chat is expanded so the user can
           freely interact with the console without accidentally dragging. */}
       {!chatExpanded && (
         <div

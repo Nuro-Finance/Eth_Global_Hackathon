@@ -1,5 +1,5 @@
 /**
- * KYC status normalization — shared between backend routes (Express) and
+ * KYC status normalization - shared between backend routes (Express) and
  * frontend components (Next.js client).
  *
  * Context: Issuer sends KYC status under different labels depending on lifecycle

@@ -60,7 +60,7 @@ export function CardQuickActions({ card }: CardQuickActionsProps) {
         <Button variant="outline" size="sm" className="w-full flex items-center justify-center gap-2" onClick={handleRequestNewCard} disabled={loading === "newCard"}>
           <Download className="w-4 h-4" />
           <span className="text-[13px] sm:text-[14px]">
-            {loading === "newCard" ? "Requesting..." : success === "newCard" ? "Coming Soon — One Card Per Account" : t("requestNewCard")}
+            {loading === "newCard" ? "Requesting..." : success === "newCard" ? "Coming Soon - One Card Per Account" : t("requestNewCard")}
           </span>
         </Button>
       </div>

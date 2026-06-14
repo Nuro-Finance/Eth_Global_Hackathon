@@ -1,4 +1,4 @@
-/** General Nuro Intelligence copilot — default selection in panel nav. */
+/** General Nuro Intelligence copilot - default selection in panel nav. */
 export const ASSISTANT_CHAT_GENERAL_ID = "general";
 
 export function cardChatDestinationId(cardId: string): string {

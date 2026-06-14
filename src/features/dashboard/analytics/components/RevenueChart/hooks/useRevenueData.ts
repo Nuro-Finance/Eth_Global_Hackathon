@@ -22,7 +22,7 @@ interface UseRevenueDataReturn {
 }
 
 /**
- * Hook to manage revenue chart data — fetches from API, falls back to generated mock
+ * Hook to manage revenue chart data - fetches from API, falls back to generated mock
  */
 export function useRevenueData({ activeTab, translate }: UseRevenueDataOptions): UseRevenueDataReturn {
     const { data: session } = useAppSession();

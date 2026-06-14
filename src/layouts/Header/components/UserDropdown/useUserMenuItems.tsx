@@ -24,7 +24,7 @@ export function useUserMenuItems() {
     await completeAppLogout(dispatch, {
       logoutPrivy: privyEnabled ? () => logout() : undefined,
     });
-    router.push("/login");
+    router.replace("/login");
   };
 
   const userMenuItems = [

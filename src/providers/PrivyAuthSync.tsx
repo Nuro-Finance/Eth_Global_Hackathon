@@ -40,13 +40,13 @@ export default function PrivyAuthSync() {
 
     const nuroEmail = session?.user?.email?.trim().toLowerCase();
     if (sessionStatus === "authenticated" && nuroEmail) {
-      // Email/password or OAuth Nuro session owns identity — Privy is wallet-only.
+      // Email/password or OAuth Nuro session owns identity - Privy is wallet-only.
       return;
     }
 
     if (lastSyncedPrivyId.current === user.id) {
  // Day-5 fix: previously re-fired hydrateFromPrivyUser on every Privy
- // re-render, which fully REPLACED the Redux user — clobbering the
+ // re-render, which fully REPLACED the Redux user - clobbering the
  // backend overrides written by BackendUserSync (firstName/lastName/
  // name from /api/users/me). That race meant the sidebar would flicker
  // back to "Nuro User <digits>" any time Privy re-emitted. The Privy

@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * SendModal — Session 25 Phase 3.5
+ * SendModal - Session 25 Phase 3.5
  *
  * Multi-token, multi-chain send driven by the real portfolio data.
  *
@@ -81,14 +81,14 @@ export function SendModal({
   open: boolean;
   onOpenChange: (next: boolean) => void;
   tokens?: WalletToken[];
- /** Dev populated preview — UI + demo send without wagmi connect. */
+ /** Dev populated preview - UI + demo send without wagmi connect. */
   previewMode?: boolean;
 }) {
   const { chain, isConnected } = useAccount();
   const effectivelyConnected = isConnected || previewMode;
   const { switchChainAsync, isPending: isSwitching } = useSwitchChain();
 
- // Pool of sendable tokens — non-scam, non-zero balance. Sorted USD desc.
+ // Pool of sendable tokens - non-scam, non-zero balance. Sorted USD desc.
   const sendable = useMemo<WalletToken[]>(() => {
     if (!tokens || tokens.length === 0) return [];
     return tokens
@@ -111,11 +111,11 @@ export function SendModal({
     if (!open) setPreviewTxHash(null);
   }, [open]);
 
- // Session 30 — Chris's Send destination picker, now wired to real data.
+ // Session 30 - Chris's Send destination picker, now wired to real data.
  // S30 batch: Last Used tab pulls from GET /api/address-book/recent which
  // aggregates distinct destination_address from the withdrawals table for
  // the current user. Address Book (saved favorites) still needs a CRUD
- // backend + migration — deferred to Session 31.
+ // backend + migration - deferred to Session 31.
   type AddressSource = "lastUsed" | "addressBook";
   type DestinationRow = {
     label: string;
@@ -162,7 +162,7 @@ export function SendModal({
     return () => { cancelled = true; };
   }, [open]);
 
- // Saved Address Book — DB-backed via migration 031. CRUD on the
+ // Saved Address Book - DB-backed via migration 031. CRUD on the
  // backend at /address-book. Fetched when modal opens + refreshed
  // after any add/delete for snappy UX.
   type SavedContact = { id: string; address: string; label: string; chain?: string; favorite?: boolean };
@@ -191,7 +191,7 @@ export function SendModal({
     void loadSavedContacts();
   }, [open]);
 
- // S31 H2 — toggle favorite on a saved contact. Optimistically updates
+ // S31 H2 - toggle favorite on a saved contact. Optimistically updates
  // local state, then PATCHes /api/address-book/:id; reverts on error.
   const toggleFavorite = async (contactId: string, currentFav: boolean) => {
  // Optimistic update
@@ -326,7 +326,7 @@ export function SendModal({
     return sendable.find((t) => tokenKey(t) === selectedKey) ?? null;
   }, [selectedKey, sendable]);
 
- // Wagmi tx hooks — we run both and read the active one based on path.
+ // Wagmi tx hooks - we run both and read the active one based on path.
   const {
     sendTransaction,
     data: nativeHash,
@@ -363,7 +363,7 @@ export function SendModal({
     }
   }, [open, resetNative, resetErc20]);
 
- // Phase 5 polish — tell the dashboard to refresh portfolio + activity
+ // Phase 5 polish - tell the dashboard to refresh portfolio + activity
  // a few seconds after confirmation so the send shows up without waiting
  // for the 60s poll cycle.
   useEffect(() => {
@@ -608,7 +608,7 @@ export function SendModal({
                 )}
               </div>
 
-              {/* Recipient — Session 30 cosmetic port of Chris's Send destination picker */}
+              {/* Recipient - Session 30 cosmetic port of Chris's Send destination picker */}
               <div className="mb-4 rounded-[12px] border border-white/10 bg-white/[0.02] p-3">
                 <p className="mb-2 px-1 text-sm font-semibold text-[var(--color-text-primary)]">Send to</p>
 
@@ -650,7 +650,7 @@ export function SendModal({
                     onClick={async () => {
                       const value = recipient.trim();
                       if (value) {
- // "Use" path — if ENS name, resolve to 0x. Otherwise
+ // "Use" path - if ENS name, resolve to 0x. Otherwise
  // the address is already committed via onChange.
                         if (value.toLowerCase().endsWith(".eth")) {
                           const resolved = await resolveEns(value);
@@ -662,7 +662,7 @@ export function SendModal({
                         const text = await navigator.clipboard.readText();
                         if (text) setRecipient(text.trim());
                       } catch {
- // clipboard denied — ignore
+ // clipboard denied - ignore
                       }
                     }}
                     disabled={isSigning || isConfirming || isSwitching || ensResolving}
@@ -862,7 +862,7 @@ export function SendModal({
                   className="w-full rounded-[10px] border border-white/10 bg-white/[0.04] px-4 py-3 pr-16 font-mono text-sm text-[var(--color-text-primary)] placeholder:text-white/25 focus:border-[var(--color-primary)]/40 focus:outline-none disabled:opacity-50"
                 />
                 <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-semibold text-[var(--color-text-muted)]">
-                  {selectedToken?.symbol ?? "—"}
+                  {selectedToken?.symbol ?? "-"}
                 </span>
               </div>
 

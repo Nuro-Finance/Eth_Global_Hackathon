@@ -2,7 +2,7 @@
 
 import * as React from "react";
 
-/** Same base slate as the fixed viewport layer — use inside chat “plates” with a mask (never mask the scroller). */
+/** Same base slate as the fixed viewport layer - use inside chat “plates” with a mask (never mask the scroller). */
 export const globalBackgroundMirroredClassName =
   "pointer-events-none bg-[var(--color-bg-primary)]";
 

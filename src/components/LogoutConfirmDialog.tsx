@@ -49,7 +49,7 @@ export function useLogoutWithConfirm(): {
     setPending(true);
     try {
       await completeAppLogout(dispatch, { logoutPrivy: logoutPrivy ?? undefined });
-      router.push("/login");
+      router.replace("/login");
     } finally {
  // Don't reset `pending` -- by the time we get here the route is
  // changing, and toggling state on an unmounting component yields

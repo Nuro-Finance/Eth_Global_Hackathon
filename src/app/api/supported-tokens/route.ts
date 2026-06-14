@@ -2,9 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 
 const BACKEND = process.env.BACKEND_URL || "http://localhost:3000";
 
-// GET /api/supported-tokens?chainId=X — proxies to backend /supported-tokens.
+// GET /api/supported-tokens?chainId=X - proxies to backend /supported-tokens.
 // Populates the Reload Card 3-category token picker (Session 23 Thread D).
-// No auth required — the list itself is not sensitive. Cached 60s by the
+// No auth required - the list itself is not sensitive. Cached 60s by the
 // edge since it changes only when ERC20_ALLOWLIST is edited.
 export async function GET(req: NextRequest) {
     const chainId = req.nextUrl.searchParams.get("chainId") || "";

@@ -22,7 +22,7 @@ function GlobalErrorInstaller({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-/** Dev preview — also honors ?previewErrorBoundary=1 on routes that keep the query string (e.g. /en/login). */
+/** Dev preview - also honors ?previewErrorBoundary=1 on routes that keep the query string (e.g. /en/login). */
 function ErrorBoundaryPreviewTrigger() {
   if (
     typeof window !== "undefined" &&

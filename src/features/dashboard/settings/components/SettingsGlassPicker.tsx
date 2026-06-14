@@ -30,7 +30,7 @@ interface SettingsGlassPickerProps {
 }
 
 /**
- * Settings row picker — wallet glass dropdown (sort/filter menu pattern).
+ * Settings row picker - wallet glass dropdown (sort/filter menu pattern).
  * Do not use Radix Select here; its default panel styles fight WALLET_GLASS_MENU_CONTENT.
  */
 export function SettingsGlassPicker({

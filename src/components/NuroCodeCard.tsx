@@ -130,7 +130,7 @@ export function NuroCodeCard({
           }}
         />
 
-        {/* Text Content — fills the space above the footer, never overlaps it */}
+        {/* Text Content - fills the space above the footer, never overlaps it */}
         {!hideDetails && (
           <div
             className="absolute z-10 flex flex-col justify-between overflow-hidden"
@@ -189,7 +189,7 @@ export function NuroCodeCard({
                   {sensitiveRevealed ? panMasked : "•••• •••• •••• " + panMasked.slice(-4)}
                 </span>
 
-                {/* Eye toggle — always rendered to preserve layout, hidden when not interactive */}
+                {/* Eye toggle - always rendered to preserve layout, hidden when not interactive */}
                 <button
                   type="button"
                   onClick={(e) => {

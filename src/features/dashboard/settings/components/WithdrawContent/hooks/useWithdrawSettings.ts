@@ -81,6 +81,30 @@ export const WITHDRAW_SETTINGS_DEFAULTS: WithdrawSettings = {
   },
 };
 
+function isValidEthAddress(addr: string): boolean {
+  return (
+    addr.startsWith("0x") &&
+    addr.length === 42 &&
+    /^0x[a-fA-F0-9]{40}$/.test(addr)
+  );
+}
+
+/** Address the user explicitly saved in Settings > Withdraw (not hook defaults). */
+export function getPersistedWithdrawAddress(): string {
+  if (typeof window === "undefined") return "";
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return "";
+    const parsed = JSON.parse(raw) as Partial<WithdrawSettings>;
+    const addr = typeof parsed.address === "string" ? parsed.address.trim() : "";
+    if (!isValidEthAddress(addr)) return "";
+    if (addr.toLowerCase() === DEFAULT_WITHDRAW_ADDRESS.toLowerCase()) return "";
+    return addr;
+  } catch {
+    return "";
+  }
+}
+
 export function useWithdrawSettings() {
   const { walletType, chainId } = usePrivyWalletAddress();
   const signupDefaultProtocol = useMemo(

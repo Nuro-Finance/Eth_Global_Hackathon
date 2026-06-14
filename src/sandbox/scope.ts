@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// SANDBOX SCOPE — AsyncLocalStorage routing for per-request DB + RPC + clock + prices (S32, M4)
+// SANDBOX SCOPE - AsyncLocalStorage routing for per-request DB + RPC + clock + prices (S32, M4)
 //
 // The wedge that lets existing app code run inside a sandbox without
 // touching every call site.
@@ -17,7 +17,7 @@
 //
 // Migration: existing code paths NOT yet using `sandboxAware*` helpers
 // will read/write production resources even inside an exec-call. That's
-// fine — sandbox scope is opt-in for now. The smoke test (M7) shows
+// fine - sandbox scope is opt-in for now. The smoke test (M7) shows
 // the integration pattern on hl-routes.ts; full migration of every code
 // path is a follow-on effort.
 //
@@ -37,7 +37,7 @@ export interface SandboxContext {
   sessionId: string
  /** Schema name in Postgres (sandbox_<hex>). */
   schemaName: string
- /** Forked Anvil RPC URL — http://127.0.0.1:<port>. Replaces RPC_URLS lookup
+ /** Forked Anvil RPC URL - http://127.0.0.1:<port>. Replaces RPC_URLS lookup
  * for this session's chainId only. */
   rpcUrl: string
  /** Chain id the fork mirrors. Other chains fall through to production. */
@@ -62,7 +62,7 @@ const _als = new AsyncLocalStorage<SandboxContext>()
 
 /**
  * Run `callback` inside a sandbox scope. All AsyncLocalStorage-aware
- * helpers below pick up the context for the duration. Nesting throws —
+ * helpers below pick up the context for the duration. Nesting throws -
  * sandboxes within sandboxes would be a footgun (which DB? which RPC?
  * which clock?). Use a flat scope.
  */
@@ -89,7 +89,7 @@ export function getSandboxContext(): SandboxContext | undefined {
  * import { sandboxAwareNow } from './sandbox/scope'
  * const now = sandboxAwareNow()
  *
- * Most code paths can leave Date.now() alone — only paths whose tests
+ * Most code paths can leave Date.now() alone - only paths whose tests
  * depend on time advancement (CCTP attestation polling, epoch-locked
  * withdrawals, "X minutes ago" labels) need to migrate.
  */
@@ -181,7 +181,7 @@ export async function sandboxAwareQuery<T extends import('pg').QueryResultRow = 
 ): Promise<import('pg').QueryResult<T>> {
   const client = getSandboxClient()
   if (client) {
- // Cast — PoolClient.query signature is functionally the same as
+ // Cast - PoolClient.query signature is functionally the same as
  // Pool.query for our usage (text, params).
     return params == null
       ? (client.query(text) as Promise<import('pg').QueryResult<T>>)

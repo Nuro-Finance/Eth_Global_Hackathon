@@ -91,7 +91,7 @@ export default function CardStack({
     return {
       balance: mockOverlay?.balance ?? accountCard?.balance ?? accountBalance,
       panMasked: panDisplay,
-      expiry: sensitive?.expiry ?? frontCard.expiryDate ?? "—/—",
+      expiry: sensitive?.expiry ?? frontCard.expiryDate ?? "-/-",
       cvv: sensitive?.cvv ?? "•••",
       cardHolderName: frontCard.cardHolder,
       cardName:

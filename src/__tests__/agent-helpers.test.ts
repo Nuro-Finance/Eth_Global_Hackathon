@@ -145,7 +145,7 @@ describe('shouldEnqueueCardSettlement (A5)', () => {
 })
 
 // ── A6 ──────────────────────────────────────────────────────────────────────
-// P&L reconciliation — drives the drift alert that catches silent money loss.
+// P&L reconciliation - drives the drift alert that catches silent money loss.
 
 describe('computeExpectedAgentBalance (A6)', () => {
   it('funded - invested + payouts - swept', () => {

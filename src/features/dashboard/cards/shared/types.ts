@@ -15,6 +15,6 @@ export interface Card {
     isActive: boolean;
     isLocked: boolean;
     dailyLimit?: number;
- /** Only when returned by issuer / mock — never log or persist */
+ /** Only when returned by issuer / mock - never log or persist */
     cvv?: string | null;
 }

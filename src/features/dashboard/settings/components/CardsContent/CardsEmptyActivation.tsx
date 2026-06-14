@@ -46,7 +46,7 @@ export function CardsEmptyActivation() {
         <div className="flex w-fit max-w-full flex-col items-stretch gap-4">
           <h2 className="m-0 text-[13px] font-medium leading-snug text-[var(--color-text-muted)]">
             {isPending
-              ? "Verification in progress — continue where you left off."
+              ? "Verification in progress - continue where you left off."
               : "Verify your identity to continue."}
           </h2>
           <button

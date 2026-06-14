@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-// S30 Phase 2.5 closeout — saved address book CRUD proxy. Hits backend
+// S30 Phase 2.5 closeout - saved address book CRUD proxy. Hits backend
 // /address-book (user-curated contacts, migration 031). Paired with
 // /api/address-book/recent (inferred from withdrawals, the S30 batch).
 const BACKEND = process.env.BACKEND_URL || "http://localhost:3000";

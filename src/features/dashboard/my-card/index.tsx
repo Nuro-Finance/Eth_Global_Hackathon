@@ -16,7 +16,7 @@ import Image from "next/image";
 import { useRef, useCallback } from "react";
 
 export function MyCardDashboard() {
- // — 3D tilt state for the hero card —
+ // - 3D tilt state for the hero card -
     const cardRef = useRef<HTMLDivElement>(null);
     const rawX = useMotionValue(0);
     const rawY = useMotionValue(0);
@@ -142,11 +142,11 @@ export function MyCardDashboard() {
                                 style={{ perspective: "800px" }}
                                 className="relative group w-full max-w-[340px] sm:max-w-[400px] md:max-w-[440px] lg:w-[370px] lg:max-w-[370px] xl:w-[370px] xl:max-w-[370px] mt-4 md:mt-0 shrink-0"
                             >
-                                {/* Blur glow — right flush to avoid hard edge clip */}
+                                {/* Blur glow - right flush to avoid hard edge clip */}
                                 <div className="absolute -top-2 -bottom-2 -left-2 right-0 sm:-top-4 sm:-bottom-4 sm:-left-4 sm:right-0 bg-[var(--color-primary)]/20 blur-[16px] sm:blur-[40px] rounded-full transition-all duration-700 group-hover:bg-[var(--color-primary)]/30" />
                                 <div className="absolute inset-0 bg-[var(--color-primary)]/10 blur-[24px] sm:blur-[60px] rounded-full" />
 
-                                {/* 3D tilt layer — wraps comet border + card together */}
+                                {/* 3D tilt layer - wraps comet border + card together */}
                                 <motion.div
                                     style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
                                     className="relative"
@@ -156,7 +156,7 @@ export function MyCardDashboard() {
                                         className="relative overflow-hidden shadow-2xl"
                                         style={{ borderRadius: "25.4px", padding: "1.4px" }}
                                     >
-                                        {/* Rotating comet orbit — 200% square centered, conic gradient sweeps a bright tip */}
+                                        {/* Rotating comet orbit - 200% square centered, conic gradient sweeps a bright tip */}
                                         <motion.div
                                             animate={{ rotate: 360 }}
                                             transition={{ duration: 6, repeat: Infinity, ease: "linear" }}
@@ -171,7 +171,7 @@ export function MyCardDashboard() {
                                             }}
                                         />
 
-                                        {/* Card image — fills the inner area, covering the conic gradient center */}
+                                        {/* Card image - fills the inner area, covering the conic gradient center */}
                                         <div className="relative overflow-hidden" style={{ borderRadius: "24px" }}>
                                             <img
                                                 src="/cards/nuro-card-black.png"

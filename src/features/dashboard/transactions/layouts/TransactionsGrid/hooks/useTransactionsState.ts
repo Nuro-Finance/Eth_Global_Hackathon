@@ -12,7 +12,7 @@ import {
     DEMO_SAMPLE_CLEARED_EVENT,
     DEMO_SAMPLE_RESTORED_EVENT,
     ONBOARDING_DEPOSIT_COMPLETE_EVENT,
-    shouldUseDesignSampleData,
+    useDesignSampleDataActive,
 } from "@/features/dashboard/overview/hooks/designSampleData";
 import {
     isDevPreviewAvailable,
@@ -63,18 +63,15 @@ function mapBackendTransaction(tx: BackendTransaction): Transaction {
 }
 
 /**
- * Hook for managing transactions state — fetches real data from backend, falls back to mock.
+ * Hook for managing transactions state - fetches real data from backend, falls back to mock.
  */
 export function useTransactionsState({ t, externalDateRange }: UseTransactionsStateOptions) {
     const { online } = useOnlineStatus();
     const { data: session } = useSession();
+    const designSampleActive = useDesignSampleDataActive();
 
-    const useDesignSample = shouldUseDesignSampleData();
-
- // Initialize with mock data only when dev preview and design sample flag are on
-    const [transactions, setTransactions] = useState<Transaction[]>(
-        isDevPreviewAvailable() && shouldUseDesignSampleData() ? MOCK_TRANSACTIONS.map(mapBackendTransaction) : [],
-    );
+ // Initialize empty; dev sample data loads only for demo dev sessions.
+    const [transactions, setTransactions] = useState<Transaction[]>([]);
     const [isLoading, setIsLoading] = useState(!isDevPreviewAvailable());
 
     const [lastUpdatedAt, setLastUpdatedAt] = useState<number>(() => Date.now());
@@ -100,7 +97,7 @@ export function useTransactionsState({ t, externalDateRange }: UseTransactionsSt
 
         try {
             if (isDevPreviewAvailable()) {
-                if (shouldUseDesignSampleData()) {
+                if (designSampleActive) {
                     setTransactions(MOCK_TRANSACTIONS.map(mapBackendTransaction));
                     setUsedMock(true);
                 } else {
@@ -138,7 +135,7 @@ export function useTransactionsState({ t, externalDateRange }: UseTransactionsSt
             if (!isRefresh) setIsLoading(false);
             setLastUpdatedAt(Date.now());
         }
-    }, [session?.accessToken, buildFilterQuery]);
+    }, [session?.accessToken, buildFilterQuery, designSampleActive]);
 
     useEffect(() => {
         fetchTransactions();

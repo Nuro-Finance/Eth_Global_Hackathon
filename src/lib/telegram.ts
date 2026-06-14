@@ -9,7 +9,7 @@ export async function sendTelegramMessage(
   parseMode: string = 'HTML',
 ): Promise<boolean> {
   if (!BOT_TOKEN) {
-    console.log('[telegram] No bot token — message queued')
+    console.log('[telegram] No bot token - message queued')
     return false
   }
   try {

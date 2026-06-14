@@ -3,14 +3,14 @@
 import { useMemo } from "react";
 
 /**
- * useSolanaAddress — resolve the connected user's Solana wallet address.
+ * useSolanaAddress - resolve the connected user's Solana wallet address.
  *
- * Session 27 — bridges Privy's `useSolanaWallets()` into our app.
+ * Session 27 - bridges Privy's `useSolanaWallets()` into our app.
  *
  * Privy v2 exposes Solana wallets via `@privy-io/react-auth/solana`.
  * We defensively import + call it so that:
  * 1. If Privy is not configured (no NEXT_PUBLIC_PRIVY_APP_ID), the hook
- * returns null without crashing — same defensive pattern as
+ * returns null without crashing - same defensive pattern as
  * usePrivyWalletAddress. Session 20 Privy outage is the precedent.
  * 2. If Privy is configured but Solana wallet hasn't been created yet
  * (embeddedWallets.solana.createOnLogin kicks in on login), hook
@@ -44,7 +44,7 @@ export function useSolanaAddress(): SolanaAddressState {
       ready = result?.ready ?? true;
     }
   } catch {
- // Privy Solana module not installed or Privy itself disabled — silent.
+ // Privy Solana module not installed or Privy itself disabled - silent.
     wallets = null;
   }
 

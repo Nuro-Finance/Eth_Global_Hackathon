@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * DarkBackground — solid foundation for dark-theme surfaces (login, marketing parity).
+ * DarkBackground - solid foundation for dark-theme surfaces (login, marketing parity).
  * Uses --color-bg-primary from theme.dark.css.
  */
 export function DarkBackground({

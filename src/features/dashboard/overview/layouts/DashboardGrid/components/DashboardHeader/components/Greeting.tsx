@@ -23,7 +23,7 @@ export default function Greeting() {
     setGreeting(getGreeting());
   }, [t]);
 
- // Prefer NextAuth session name, fall back to Redux — extract first name
+ // Prefer NextAuth session name, fall back to Redux - extract first name
   const displayName = resolveDisplayFirstName({
     name: identity.name,
     email: identity.email,

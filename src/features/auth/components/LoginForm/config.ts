@@ -9,7 +9,7 @@ export const loginSchema = z.object({
     rememberMe: z.boolean(),
 });
 
-/** Empty by default — demo prefill only via DemoCredentialsCard when shown. */
+/** Empty by default - demo prefill only via DemoCredentialsCard when shown. */
 export const DEFAULT_CREDENTIALS = {
     email: "",
     password: "",

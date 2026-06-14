@@ -31,7 +31,7 @@ export function SearchAndFilters({
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   const t = useTranslations("Transactions");
 
- // Quick filter options — match actual DB transaction types
+ // Quick filter options - match actual DB transaction types
   const quickFilters: QuickFilter[] = [
     { label: "Income", key: "income", transactionType: "deposit" },
     { label: "Debits", key: "debits", transactionType: "purchase" },

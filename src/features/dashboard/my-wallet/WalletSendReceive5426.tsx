@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Send / receive UI from Nuro Front End 5.4.26 — inline swap-panel shell (not standalone modals).
+ * Send / receive UI from Nuro Front End 5.4.26 - inline swap-panel shell (not standalone modals).
  */
 
 import {
@@ -248,7 +248,7 @@ function formatSendEthDisplay(raw: string): string {
   return fixed || "0";
 }
 
-/** Base+ETH is a non-circular composite; `rounded-full` on the <img> clips the chain mark — same h/w, no scaling. */
+/** Base+ETH is a non-circular composite; `rounded-full` on the <img> clips the chain mark - same h/w, no scaling. */
 function isBaseEthCompositeIconSrc(src?: string): boolean {
   if (!src) return false;
   return src.includes("Base%20Eth.svg") || src.includes("Base Eth.svg");
@@ -288,7 +288,7 @@ const sendReceiveCascadeItem = {
   },
 };
 
-/** “You’re sending” review — top→down cascade (matches send/receive shell ease). */
+/** “You’re sending” review - top→down cascade (matches send/receive shell ease). */
 const SEND_REVIEW_CASCADE: Record<"hidden" | "show", object> = {
   hidden: {},
   show: { transition: { staggerChildren: 0.055, delayChildren: 0.1 } },
@@ -303,9 +303,9 @@ const SEND_REVIEW_CASCADE_ITEM = {
 };
 
 /**
- * Send form ↔ “You’re sending” — same x-slide rhythm as `walletSwapShellMotion` + my-card-1 step panes.
- * `custom` 1: forward (Continue) — new from the right, old exits left.
- * `custom` -1: back — new from the left, old exits right.
+ * Send form ↔ “You’re sending” - same x-slide rhythm as `walletSwapShellMotion` + my-card-1 step panes.
+ * `custom` 1: forward (Continue) - new from the right, old exits left.
+ * `custom` -1: back - new from the left, old exits right.
  */
 const SEND_STEP_SLIDE_EASE: [number, number, number, number] = [0.4, 0, 0.2, 1];
 const SEND_STEP_SLIDE_PX = 20;
@@ -362,7 +362,7 @@ function NotEnoughBalanceInfoOverlay({
   onClose: () => void;
  /** Swap: not-enough sheet with CTA (send keeps existing “max balance” explainer). */
   variant?: "send" | "swap";
- /** Sell-side token when `variant="swap"` — drives title, body, and icon. */
+ /** Sell-side token when `variant="swap"` - drives title, body, and icon. */
   swapSellAsset?: { symbol: string; iconSrc?: string; fallbackBg: string };
   onBuyWithCard?: () => void;
 }) {
@@ -509,7 +509,7 @@ const receiveShellBackButtonClass = cn(
   "transition-colors hover:bg-transparent hover:text-white focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]/30"
 );
 
-/** First-pass receive body — fits the fixed swap shell content band (no inner scroll). */
+/** First-pass receive body - fits the fixed swap shell content band (no inner scroll). */
 function ReceiveCryptoFirstPassBody({
   fullAddress,
   shortAddress,
@@ -667,7 +667,7 @@ const sendDestinationRowButtonClass = cn(
   "hover:bg-white/2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]/25"
 );
 
-/** Receive: “From an account” — not interactive; `group-hover` shows inline pill. */
+/** Receive: “From an account” - not interactive; `group-hover` shows inline pill. */
 const receiveFromAccountRowClass = cn(
   "group flex h-[56px] w-full max-w-full shrink-0 items-center justify-between gap-2 rounded-[var(--radius-lg)] border border-white/[0.1] bg-transparent px-2.5 py-0",
   "cursor-default select-none transition-colors",
@@ -684,7 +684,7 @@ const receiveComingSoonPillClass = cn(
   "group-hover:opacity-100"
 );
 
-/** First-pass send body — same vertical rhythm as receive (wallet row height = amount row). */
+/** First-pass send body - same vertical rhythm as receive (wallet row height = amount row). */
 function SendCryptoFirstPassBody({
   amount,
   amountUsd,
@@ -741,7 +741,7 @@ function SendCryptoFirstPassBody({
   const sendAddressScrollerRef = useRef<HTMLDivElement | null>(null);
   const sendCardScrollerRef = useRef<HTMLDivElement | null>(null);
   const [rowCopied, setRowCopied] = useState(false);
- /** True only for the render when switching Last Used / Address Book — skip per-row entrance stagger (load-in still cascades on open). */
+ /** True only for the render when switching Last Used / Address Book - skip per-row entrance stagger (load-in still cascades on open). */
   const suppressAddressRowCascadeRef = useRef(false);
   const [sendDestAnimNonce, setSendDestAnimNonce] = useState(0);
  /** Top mask only after scroll; at rest = bottom edge only (same rules for address + card lists). */
@@ -868,7 +868,7 @@ function SendCryptoFirstPassBody({
       return truncateAddressMiddle(selectedDestination.address);
     }
     if (selectedCard) return selectedCard.label;
-    return "—";
+    return "-";
   }, [destinationKind, selectedDestination, selectedCard]);
 
  /** Second line under “To” when the headline is a name/ENS and the wallet address should still show. */
@@ -1115,7 +1115,7 @@ function SendCryptoFirstPassBody({
                           onScroll={updateSendAddressFade}
                           className={cn(
  // No transform on the scrollport: it breaks mask compositing in WebKit.
- // Top+feather is relative to the viewport, not the document — fixes hard clip while scrolling.
+ // Top+feather is relative to the viewport, not the document - fixes hard clip while scrolling.
  // 16px switch→search: mt-4 on scroll parent. No top mask until user scrolls (see sendAddressFade).
                             "relative z-0 min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-2 pt-0 scrollbar-autohide scroll-gutter-stable",
                             sendAddressFade === "top" &&
@@ -1654,14 +1654,14 @@ function SendCryptoFirstPassBody({
                         ? selectedDestination.label
                         : selectedCard
                           ? selectedCard.label
-                          : "—"}
+                          : "-"}
                     </p>
                     <p className="mt-1.5 font-mono text-[11px] text-[var(--color-text-muted)]">
                       {destinationKind === "address" && selectedDestination
                         ? truncateAddressMiddle(selectedDestination.address)
                         : selectedCard
                           ? truncateAddressMiddle(selectedCard.depositAddress)
-                          : "—"}
+                          : "-"}
                     </p>
                   </div>
                   {destinationKind === "address" && selectedDestination ? (

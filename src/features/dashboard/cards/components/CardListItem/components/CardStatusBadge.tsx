@@ -9,7 +9,7 @@ interface CardStatusBadgeProps {
 }
 
 /**
- * CardStatusBadge — neutral pill + status dot (matches Agent Cards table + 5.4.26).
+ * CardStatusBadge - neutral pill + status dot (matches Agent Cards table + 5.4.26).
  */
 export function CardStatusBadge({ card }: CardStatusBadgeProps) {
   const t = useTranslations("Cards");

@@ -210,7 +210,7 @@ function Variant2Inner() {
   );
 }
 
-/** Inbound credit vs scheduled outgoing — no debit arrow; scheduled uses clock. */
+/** Inbound credit vs scheduled outgoing - no debit arrow; scheduled uses clock. */
 function UpcomingEventKindBadge({ tone }: { tone: "in" | "out" }) {
   const shell = "flex h-9 w-9 shrink-0 items-center justify-center rounded-[12px] bg-white/[0.04]";
   if (tone === "in") {

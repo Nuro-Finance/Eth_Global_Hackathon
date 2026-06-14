@@ -281,7 +281,7 @@ function AgentCard({ agent, token, onRefresh, userCards }: { agent: Agent; token
 
         <button onClick={loadBets} className="w-full flex items-center justify-center gap-1 py-2 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-colors">
           {expanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-          {totalBets} bet{totalBets !== 1 ? "s" : ""} — {expanded ? "Hide" : "Show"} history
+          {totalBets} bet{totalBets !== 1 ? "s" : ""} - {expanded ? "Hide" : "Show"} history
         </button>
 
         {expanded && (

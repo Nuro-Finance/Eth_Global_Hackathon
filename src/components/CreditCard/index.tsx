@@ -125,7 +125,7 @@ export default function CreditCard({
   const [isHovered, setIsHovered] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
 
- // — 3D tilt state for parallax —
+ // - 3D tilt state for parallax -
   const rawX = useMotionValue(0);
   const rawY = useMotionValue(0);
   const glareX = useMotionValue(50);

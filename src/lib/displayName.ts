@@ -1,6 +1,6 @@
 import { DEMO_USER_FULL_NAME, DEMO_USER_SHORT_NAME } from "@/config/demo-user";
 
-/** First name for greetings — never show demo placeholder for real accounts. */
+/** First name for greetings - never show demo placeholder for real accounts. */
 export function resolveDisplayFirstName(input: {
   name?: string | null;
   email?: string | null;

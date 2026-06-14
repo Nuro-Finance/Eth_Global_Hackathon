@@ -4,21 +4,21 @@
  * Before this existed, pollChain and processDeposit both ran nearly-identical
  * DB queries with different downstream logic. When the Session 22 cascade
  * required time-bounding the dedup window, TWO separate commits were needed
- * (2c3f213 + 8289573) — the same conceptual fix applied twice. This helper
+ * (2c3f213 + 8289573) - the same conceptual fix applied twice. This helper
  * collapses both call sites into one, so future window/status changes are a
  * single edit.
  *
  * Semantics:
- * 'skip' — there's a matching row; caller should log via
+ * 'skip' - there's a matching row; caller should log via
  * logMonitorSkip() + bail out (don't touch balance).
- * 'proceed' — no matching row; caller should continue to INSERT/bridge.
- * 'stale-retry' — a matching row exists BUT it's old enough (>1h failed,
+ * 'proceed' - no matching row; caller should continue to INSERT/bridge.
+ * 'stale-retry' - a matching row exists BUT it's old enough (>1h failed,
  * >30min pending) that we should retry. For pending rows,
  * caller must first UPDATE status='failed' before
- * re-inserting — otherwise the old pending row lingers.
+ * re-inserting - otherwise the old pending row lingers.
  *
  * The in-memory inflight lock (nonce-manager's isDepositProcessing) is
- * intentionally NOT checked here — it's a PER-PROCESS race guard that must
+ * intentionally NOT checked here - it's a PER-PROCESS race guard that must
  * fire before this helper's DB round-trip. Keep them orthogonal.
  */
 import { pool } from "../db";
@@ -40,7 +40,7 @@ export interface DedupParams {
  * hour, and decide whether to skip, proceed, or treat as stale-retry.
  *
  * Amount match uses ±$0.001 tolerance to avoid float precision issues.
- * Window is 60 min — long enough to handle monitor crash-restarts, short
+ * Window is 60 min - long enough to handle monitor crash-restarts, short
  * enough that a user depositing the same amount again 2h later isn't blocked.
  */
 export async function checkDepositDedup(params: DedupParams): Promise<DedupDecision> {
@@ -93,7 +93,7 @@ export async function checkDepositDedup(params: DedupParams): Promise<DedupDecis
         return { action: "stale-retry", staleTxId: row.id, staleStatus: "pending" };
     }
 
- // Session 25 Phase 6 — rows marked failed_restart by the SIGTERM
+ // Session 25 Phase 6 - rows marked failed_restart by the SIGTERM
  // graceful-shutdown handler are ALWAYS retry-eligible AND should be
  // resumed IN-PLACE (reuse the same row) rather than spawning a
  // duplicate. We preserve the staleStatus here so monitor.ts can
@@ -105,19 +105,19 @@ export async function checkDepositDedup(params: DedupParams): Promise<DedupDecis
         return { action: "stale-retry", staleTxId: row.id, staleStatus: "failed_restart" };
     }
 
- // Session 26 — 'stranded' marks deposits the user cannot bridge
- // because they have no Issuer Base address. NEVER auto-retry —
+ // Session 26 - 'stranded' marks deposits the user cannot bridge
+ // because they have no Issuer Base address. NEVER auto-retry -
  // funds sit on source chain until admin triages. This breaks the
  // retry cascade that was generating 20+ failed rows per user.
     if (row.status === "stranded") {
         return {
             action: "skip",
             reason: "dedup:stranded-no-issuer",
-            detail: `${amountStr} matches stranded tx ${row.id} — user has no Issuer address, funds at source awaiting manual triage`,
+            detail: `${amountStr} matches stranded tx ${row.id} - user has no Issuer address, funds at source awaiting manual triage`,
         };
     }
 
- // Unknown status — treat as skip to be safe. Should never happen with current schema.
+ // Unknown status - treat as skip to be safe. Should never happen with current schema.
     return {
         action: "skip",
         reason: `dedup:unknown-status:${row.status}`,

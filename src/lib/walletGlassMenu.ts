@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 
 /**
- * My-wallet / cards overflow dropdown panel — single source of truth.
+ * My-wallet / cards overflow dropdown panel - single source of truth.
  * @see ConnectedWalletDashboard sort filter menus, WalletAssetsModal, WalletRecentActivityModal.
  */
 export const WALLET_GLASS_MENU_CONTENT = cn(

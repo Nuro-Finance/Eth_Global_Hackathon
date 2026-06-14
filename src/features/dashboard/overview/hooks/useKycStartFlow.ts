@@ -60,7 +60,7 @@ export function useKycStartFlow() {
         window.open(data.kycUrl, "_blank");
       }
     } catch {
- // silent — dashboard stays usable
+ // silent - dashboard stays usable
     } finally {
       setStarting(false);
     }

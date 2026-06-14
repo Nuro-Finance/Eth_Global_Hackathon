@@ -5,7 +5,7 @@ const BACKEND_URL =
 
 /**
  * GET /api/transactions
- * Proxies to Express backend GET /card-transactions — returns transaction history.
+ * Proxies to Express backend GET /card-transactions - returns transaction history.
  * Supports ?cardId=<id> query param for filtering.
  */
 export async function GET(request: NextRequest) {

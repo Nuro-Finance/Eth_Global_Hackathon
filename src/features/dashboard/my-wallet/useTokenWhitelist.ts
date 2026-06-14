@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * useTokenWhitelist — Session 26
+ * useTokenWhitelist - Session 26
  *
  * Positive signal for the scam filter. Fetches the `/api/supported-tokens`
  * allowlist (maintained in the `erc20_allowlist` DB table, refreshed
@@ -15,7 +15,7 @@
  * of price-feed coverage). Cross-referencing against the allowlist
  * gives us a definitive "this is legit" override.
  *
- * Not an exhaustive whitelist of safe tokens — only covers tokens we've
+ * Not an exhaustive whitelist of safe tokens - only covers tokens we've
  * deliberately vetted for our swap pipeline. Tokens not on the list
  * aren't automatically bad, they just don't get the "trusted" override.
  *
@@ -44,7 +44,7 @@ export type TokenWhitelist = {
   ready: boolean;
  /** Fast lookup by "chainId-contract.toLowerCase()". Natives skipped (always trusted elsewhere). */
   byAddress: Set<string>;
- /** Fast lookup by lowercased symbol. Looser — catches symbol matches across chains. */
+ /** Fast lookup by lowercased symbol. Looser - catches symbol matches across chains. */
   bySymbol: Set<string>;
 };
 
@@ -68,7 +68,7 @@ async function fetchWhitelist(): Promise<TokenWhitelist> {
   const data: SupportedTokensResponse = await res.json();
   const byAddress = new Set<string>();
   const bySymbol = new Set<string>();
-  const groups = [data.stablecoins, data.bluechips, data.memecoins]; // natives excluded — no contract
+  const groups = [data.stablecoins, data.bluechips, data.memecoins]; // natives excluded - no contract
   for (const g of groups) {
     if (!g) continue;
     for (const t of g) {
@@ -89,7 +89,7 @@ export function useTokenWhitelist(): TokenWhitelist {
   useEffect(() => {
     let cancelled = false;
     const now = Date.now();
- // Fresh cache — nothing to do
+ // Fresh cache - nothing to do
     if (moduleCache && moduleCache.expiresAt > now && state.ready) return;
     (async () => {
       try {
@@ -98,7 +98,7 @@ export function useTokenWhitelist(): TokenWhitelist {
         moduleCache = { value: fresh, expiresAt: Date.now() + TTL_MS };
         setState(fresh);
       } catch (err) {
- // Silent fail — whitelist is an enhancement, not critical
+ // Silent fail - whitelist is an enhancement, not critical
         if (process.env.NODE_ENV === "development") {
           console.warn("[useTokenWhitelist] fetch failed:", err);
         }
@@ -113,7 +113,7 @@ export function useTokenWhitelist(): TokenWhitelist {
 }
 
 /**
- * isWhitelistedToken — convenience matcher. Prefers exact
+ * isWhitelistedToken - convenience matcher. Prefers exact
  * (chainId, contract) match, falls back to symbol-only match when
  * the caller doesn't have a contract address (e.g. for Alchemy activity
  * entries which only carry the asset symbol).

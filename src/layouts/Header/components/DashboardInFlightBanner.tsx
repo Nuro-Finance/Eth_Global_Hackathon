@@ -16,7 +16,7 @@ const DISPLAY_MS = 10_000;
 
 /**
  * Dashboard row status (QuickActions row): same height and corner radius as the
- * ⋯ / refresh / date controls — not the top wallet toolbar.
+ * ⋯ / refresh / date controls - not the top wallet toolbar.
  */
 export function DashboardInFlightBanner() {
   const [visible, setVisible] = useState(false);

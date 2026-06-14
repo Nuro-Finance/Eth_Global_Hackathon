@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// AGENT BUDGETS — read + write API for the budget dashboard
+// AGENT BUDGETS - read + write API for the budget dashboard
 //
 // S31 H2. Per Nuro "what does an agent want" + expansion:
 // surface budgets to the agent (so it can pace itself) AND to humans
@@ -164,7 +164,7 @@ export async function getBudgetSnapshot(
 
   const snapshot: BudgetSnapshot = { agentId, budgets, gasBalances, recentLedger }
 
- // Best-effort cache write. 60s TTL — long enough to absorb burst dashboard
+ // Best-effort cache write. 60s TTL - long enough to absorb burst dashboard
  // refreshes, short enough that even without write-side invalidation users
  // see fresh data within a minute.
   void cache.set(cacheKey, snapshot, 60).catch(() => undefined)
@@ -176,7 +176,7 @@ export async function getBudgetSnapshot(
 
 export interface RecordSpendInput {
   agentId: string
-  deltaUsd: number  // POSITIVE — caller passes amount spent. We negate internally.
+  deltaUsd: number  // POSITIVE - caller passes amount spent. We negate internally.
   description: string
   txHash?: string | null
   chainId?: number | null
@@ -213,7 +213,7 @@ export async function recordSpend(db: Pool, input: RecordSpendInput): Promise<{
   )
 
  // Pre-snapshot for threshold-crossing detection. Single-statement read +
- // update isn't worth a CTE — slight non-atomicity here just means a rare
+ // update isn't worth a CTE - slight non-atomicity here just means a rare
  // duplicate alert under heavy concurrent spend, which is acceptable.
   const pre = await db.query(
     `SELECT usd_remaining::text, usd_authority::text
@@ -223,7 +223,7 @@ export async function recordSpend(db: Pool, input: RecordSpendInput): Promise<{
   )
 
  // Update the cache. If no active budget exists for this period, return
- // null — the spend is still recorded in the ledger, just not gating.
+ // null - the spend is still recorded in the ledger, just not gating.
   const upd = await db.query(
     `UPDATE agent_budgets
      SET usd_remaining = GREATEST(usd_remaining - $1, 0)
@@ -235,7 +235,7 @@ export async function recordSpend(db: Pool, input: RecordSpendInput): Promise<{
   const newRemaining = upd.rows[0] ? Number(upd.rows[0].usd_remaining) : null
 
  // Threshold-crossing alert. Fires only on the spend that *crosses* the
- // 20% / 5% line (oldPct above, newPct at or below). Best-effort —
+ // 20% / 5% line (oldPct above, newPct at or below). Best-effort -
  // bus failure must never poison the spend ledger.
   if (pre.rows[0] && newRemaining !== null) {
     const oldRem = Number(pre.rows[0].usd_remaining)
@@ -281,7 +281,7 @@ async function publishBudgetLow(
     pct: number
   },
 ): Promise<void> {
- // agent-bus removed from hackathon submission — budget-low events are ledger-only now.
+ // agent-bus removed from hackathon submission - budget-low events are ledger-only now.
 }
 
 export interface RecordRefillInput {
@@ -390,7 +390,7 @@ export async function runBudgetRolloverCycle(db: Pool): Promise<{
   budgetsScanned: number
   ledgerRowsInserted: number
 }> {
- // Step 1: select+update — bump last_reset_at on every eligible budget,
+ // Step 1: select+update - bump last_reset_at on every eligible budget,
  // raise usd_remaining to authority where remaining < authority.
   const upd = await db.query(
     `WITH eligible AS (
@@ -415,7 +415,7 @@ export async function runBudgetRolloverCycle(db: Pool): Promise<{
   )
 
  // Step 2: ledger inserts for the budgets that actually got refilled.
- // Tiny loop — at most ~N rows per cycle where N = active agents whose
+ // Tiny loop - at most ~N rows per cycle where N = active agents whose
  // period rolled this run.
   let ledgerRowsInserted = 0
   const touchedAgents = new Set<string>()
@@ -452,7 +452,7 @@ export async function runBudgetRolloverCycle(db: Pool): Promise<{
 
 /**
  * Returns the effective USD cap for tx-cap to use for a given agent.
- * If no active budget exists, returns null — caller falls back to the
+ * If no active budget exists, returns null - caller falls back to the
  * env default. If a budget exists, returns min(env_default, remaining).
  *
  * tx-cap calls this BEFORE evaluating its own cap, then takes the min.
@@ -480,7 +480,7 @@ export async function getEffectiveUsdCap(
       budgetRemaining: remaining,
     }
   } catch {
- // DB hiccup — fall through to env default. Don't fail the tx-cap path.
+ // DB hiccup - fall through to env default. Don't fail the tx-cap path.
     return { capUsd: envDefaultUsd, source: 'env', budgetRemaining: null }
   }
 }

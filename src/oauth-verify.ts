@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// OAuth id_token verification — trust-boundary hardening for /auth/social-login.
+// OAuth id_token verification - trust-boundary hardening for /auth/social-login.
 //
 // Why this file exists:
 // The original /auth/social-login accepted {email, name} from the FE and
@@ -13,13 +13,13 @@
 // accepting the claims inside.
 //
 // What a valid Google id_token proves to us:
-// - `email` — the user controls this email address (Google confirmed it)
-// - `email_verified === true` — ditto, Google's stronger assertion
-// - `aud === GOOGLE_CLIENT_ID` — this token was issued FOR OUR APP, not
+// - `email` - the user controls this email address (Google confirmed it)
+// - `email_verified === true` - ditto, Google's stronger assertion
+// - `aud === GOOGLE_CLIENT_ID` - this token was issued FOR OUR APP, not
 // another app's token being replayed against us
-// - `iss === accounts.google.com` — token came from Google, not an impostor
-// - `exp > now` — token not expired
-// - `sub` — stable unique Google user ID (for future external_id storage)
+// - `iss === accounts.google.com` - token came from Google, not an impostor
+// - `exp > now` - token not expired
+// - `sub` - stable unique Google user ID (for future external_id storage)
 //
 // Provider-agnostic: the verifier is keyed on provider name. Adding Apple /
 // Microsoft / GitHub later = one more entry in PROVIDER_CONFIG + one more
@@ -74,7 +74,7 @@ export interface VerifiedIdToken {
   email: string
   emailVerified: boolean
   name: string
-  externalId: string // `sub` — provider's stable user ID
+  externalId: string // `sub` - provider's stable user ID
   picture?: string
 }
 
@@ -106,10 +106,10 @@ export async function verifyIdToken(
 
   const audience = process.env[cfg.audienceEnvVar]
   if (!audience) {
- // Fail closed — missing env means we cannot enforce audience → anyone's
+ // Fail closed - missing env means we cannot enforce audience → anyone's
  // Google token would pass. This must be a 500, not a 401.
     throw new OAuthVerifyError(
-      `Missing ${cfg.audienceEnvVar} env var — cannot verify audience`,
+      `Missing ${cfg.audienceEnvVar} env var - cannot verify audience`,
       'server_misconfigured'
     )
   }
@@ -158,7 +158,7 @@ export async function verifyIdToken(
     throw new OAuthVerifyError('id_token missing email claim', 'missing_email')
   }
   if (payload.email_verified !== true) {
- // Google sets this false when the user's email isn't confirmed. Refuse —
+ // Google sets this false when the user's email isn't confirmed. Refuse -
  // we'd otherwise let someone claim an email they don't control.
     throw new OAuthVerifyError('Email not verified by provider', 'email_not_verified')
   }

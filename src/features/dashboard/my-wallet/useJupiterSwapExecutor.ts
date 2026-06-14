@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * useJupiterSwapExecutor — S30 Phase 3b
+ * useJupiterSwapExecutor - S30 Phase 3b
  *
  * Drives the user-signs-once Solana swap flow end-to-end:
  *
@@ -19,7 +19,7 @@
  * lastValidBlockHeight).
  *
  * Why a hook (not just a service): we need React state for the progress
- * UX pill, plus retries that re-fetch a fresh firm quote — we can't
+ * UX pill, plus retries that re-fetch a fresh firm quote - we can't
  * cache an expired blockhash and try again.
  *
  * Why Privy's signTransaction (not signAndSendTransaction): some Privy
@@ -84,7 +84,7 @@ export interface ExecuteArgs {
   destinationTokenAccount?: string;
 }
 
-// Public Solana mainnet RPC. Heavy rate limits — for Phase 3b smoke tests
+// Public Solana mainnet RPC. Heavy rate limits - for Phase 3b smoke tests
 // only. NEXT_PUBLIC_SOLANA_RPC_URL takes precedence so a paid RPC
 // (Helius / Quicknode) can be configured without code changes.
 const SOLANA_RPC_URL =
@@ -142,7 +142,7 @@ export function useJupiterSwapExecutor() {
   const execute = useCallback(
     async (args: ExecuteArgs) => {
       if (inflightRef.current) {
- // Refuse double-fire — protects against double-tap on the CTA
+ // Refuse double-fire - protects against double-tap on the CTA
  // before status has progressed past 'awaiting-signature'.
         return;
       }
@@ -154,7 +154,7 @@ export function useJupiterSwapExecutor() {
         setState({
           ...INITIAL_STATE,
           status: "error",
-          error: "Solana wallet not connected — refresh and re-sign in",
+          error: "Solana wallet not connected - refresh and re-sign in",
         });
         return;
       }
@@ -162,7 +162,7 @@ export function useJupiterSwapExecutor() {
         setState({
           ...INITIAL_STATE,
           status: "error",
-          error: "Solana signer unavailable — Privy may be loading",
+          error: "Solana signer unavailable - Privy may be loading",
         });
         return;
       }
@@ -258,7 +258,7 @@ export function useJupiterSwapExecutor() {
         setState({
           ...INITIAL_STATE,
           status: "error",
-          error: stale ? "Quote expired — refresh and try again" : msg,
+          error: stale ? "Quote expired - refresh and try again" : msg,
         });
         return;
       }
@@ -290,7 +290,7 @@ export function useJupiterSwapExecutor() {
         setState((s) => ({
           ...s,
           status: "error",
-          error: err?.message || "Confirmation timed out — check tx on Solscan",
+          error: err?.message || "Confirmation timed out - check tx on Solscan",
         }));
         return;
       }

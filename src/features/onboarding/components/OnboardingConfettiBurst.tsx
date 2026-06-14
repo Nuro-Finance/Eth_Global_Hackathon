@@ -35,7 +35,7 @@ function createBurst(width: number, height: number): Particle[] {
   });
 }
 
-/** Fires once on mount — parent must be `position: relative` with real dimensions. */
+/** Fires once on mount - parent must be `position: relative` with real dimensions. */
 export function OnboardingConfettiBurst() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const frameRef = useRef<number | null>(null);

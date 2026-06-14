@@ -57,9 +57,9 @@ describe("checkDepositDedup", () => {
 
     it("stale-retries a failed row >1h old", async () => {
  // Note: the 60-min DEDUP_WINDOW in the SQL filter means only rows within
- // 60 min of NOW are returned — so a "stale failed" row for retry must be
+ // 60 min of NOW are returned - so a "stale failed" row for retry must be
  // exactly at the window boundary. We simulate the row being 59 min old
- // but the retry threshold being 60 min — a realistic mid-window case
+ // but the retry threshold being 60 min - a realistic mid-window case
  // where the retry branch fires inline. In practice, a truly stale row
  // (>60 min) won't be returned by the query at all → no match → proceed.
         queryMock.mockResolvedValueOnce({

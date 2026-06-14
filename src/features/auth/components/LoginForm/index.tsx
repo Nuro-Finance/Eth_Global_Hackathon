@@ -80,7 +80,7 @@ export default function LoginForm({
     watch,
   } = useLoginForm({ startInForgotMode });
 
- /** Safari autofill fills DOM without firing RHF onChange — sync so isValid updates. */
+ /** Safari autofill fills DOM without firing RHF onChange - sync so isValid updates. */
   React.useEffect(() => {
     if (!isSignUp) return;
     const syncAutofill = () => {
@@ -114,7 +114,7 @@ export default function LoginForm({
     password: watchedPassword,
   });
 
- /** After a failed sign-in, manual INVALID errors block isValid and disable the CTA — clear when the user edits. */
+ /** After a failed sign-in, manual INVALID errors block isValid and disable the CTA - clear when the user edits. */
   React.useEffect(() => {
     const prev = prevCredentialsRef.current;
     const credentialsChanged =
@@ -229,7 +229,7 @@ export default function LoginForm({
     },
     exit: {
       opacity: 0,
- /** Instant — Safari Keychain popover otherwise lingers over a fading layer */
+ /** Instant - Safari Keychain popover otherwise lingers over a fading layer */
       transition: { duration: 0 },
     },
   };

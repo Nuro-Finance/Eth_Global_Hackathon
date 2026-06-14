@@ -49,7 +49,7 @@ export async function fundDepositAddress(
 
     const feeWallet = new ethers.Wallet(CONFIG.PRIVATE_KEY, provider)
 
- // Helm tx-cap — gas top-ups should be small ($1-$10). Anomalously
+ // Helm tx-cap - gas top-ups should be small ($1-$10). Anomalously
  // large top-ups suggest either a config bug or a compromised fee wallet
  // tipping out funds via a benign-looking call. Native → USD via
  // CoinGecko (5-min cached). NaN price → gate skips silently.

@@ -1,4 +1,4 @@
-/** Model IDs for BYOK chat — sidebar `/api/chat` and per-card agent chat. */
+/** Model IDs for BYOK chat - sidebar `/api/chat` and per-card agent chat. */
 
 export type ChatModelTier = "fast" | "smart";
 

@@ -1,4 +1,4 @@
-// Public-release no-op stubs — internal Helm security plane removed from OSS tree.
+// Public-release no-op stubs - internal Helm security plane removed from OSS tree.
 
 import type { AxiosInstance } from 'axios'
 import type { Pool } from 'pg'

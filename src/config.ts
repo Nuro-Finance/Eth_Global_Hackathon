@@ -48,7 +48,7 @@ export const CONFIG = {
     CREATOR_STAKE_USD: Number(process.env.CREATOR_STAKE_USD) || 5.0,
     CREATOR_REWARD_PCT: Number(process.env.CREATOR_REWARD_PCT) || 0.5,
 
- // Sprint 2.3 — bot execution
+ // Sprint 2.3 - bot execution
     POLYGON_CHAIN_ID: 137,
     AGENT_MIN_SWEEP_USD: Number(process.env.AGENT_MIN_SWEEP_USD) || 2.0,
     AGENT_PNL_DRIFT_ALERT_USD: Number(process.env.AGENT_PNL_DRIFT_ALERT_USD) || 0.5,
@@ -59,25 +59,25 @@ export const CONFIG = {
  // Monitor polling interval (ms). Default 86400000 = 24h = paused.
  // Set POLL_INTERVAL_MS=60000 in .env to actively poll every 60s.
  // Replaces the prior VPS sed-edit workflow which broke on every git pull (Session 22).
- // Minimum enforced: 15000ms (15s) — anything lower risks rate-limiting.
+ // Minimum enforced: 15000ms (15s) - anything lower risks rate-limiting.
     POLL_INTERVAL_MS: Math.max(15000, Number(process.env.POLL_INTERVAL_MS) || 86400000),
 
- // Session 23 Marathon 7 — Native/memecoin → USDC auto-swap on deposit.
+ // Session 23 Marathon 7 - Native/memecoin → USDC auto-swap on deposit.
  // 0x Aggregator v2 API key. Sign up at dashboard.0x.org (free: 1M req/mo).
- // Without this set, swap path is disabled — monitor still works for USDC.
+ // Without this set, swap path is disabled - monitor still works for USDC.
     ZEROX_API_KEY: process.env.ZEROX_API_KEY || '',
- // Slippage in basis points. 300 = 3% — MVP default (Session 23).
+ // Slippage in basis points. 300 = 3% - MVP default (Session 23).
     ZEROX_SLIPPAGE_BPS: Number(process.env.ZEROX_SLIPPAGE_BPS) || 300,
- // Minimum USD value to auto-swap. Below this, dust accumulates — don't spend
+ // Minimum USD value to auto-swap. Below this, dust accumulates - don't spend
  // gas on a $2 swap. MVP default: $5.
     SWAP_MIN_USD: Number(process.env.SWAP_MIN_USD) || 5,
  // Enables the new native-token polling cycle in monitor.ts. Off by default
  // until 0x API key is set; flip to 'true' in VPS .env when ready.
     NATIVE_SWAP_ENABLED: process.env.NATIVE_SWAP_ENABLED === 'true',
- // Session 23 Thread D — ERC-20 allowlist swap polling. When true, monitor
+ // Session 23 Thread D - ERC-20 allowlist swap polling. When true, monitor
  // iterates ERC20_ALLOWLIST entries per chain and triggers swap-to-USDC.
  // Applies to `bluechip`-category tokens (LINK, UNI, WBTC, WETH, cbBTC).
- // Off by default — flip after verifying quote previews look sane.
+ // Off by default - flip after verifying quote previews look sane.
     ERC20_SWAP_ENABLED: process.env.ERC20_SWAP_ENABLED === 'true',
  // Additional gate for `memecoin`-category tokens. Requires:
  // (1) ERC20_SWAP_ENABLED=true AND
@@ -87,7 +87,7 @@ export const CONFIG = {
  // to ERC20_ALLOWLIST without the policy check is a gate-check violation.
     ERC20_MEMECOIN_ENABLED: process.env.ERC20_MEMECOIN_ENABLED === 'true',
 
- // Session 28 — In-House Ramp Phase 8 flags. BUY_1 = card balance → crypto wallet.
+ // Session 28 - In-House Ramp Phase 8 flags. BUY_1 = card balance → crypto wallet.
  // BUY_2 = bank → crypto wallet (via Plaid + Dwolla). Both default false until
  // partner confirmations land (Issuer ops for Issuer card-debit API; Dwolla+Plaid sandbox
  // validation + production approval).
@@ -103,9 +103,9 @@ export const CONFIG = {
  // exhaustion. Default $100 = conservative MVP. Scale up with volume.
     FEE_VAULT_MIN_RESERVE_USD: Number(process.env.FEE_VAULT_MIN_RESERVE_USD) || 100,
 
- // Session 28 — Plaid + Dwolla scaffolds (Buy 2: bank → crypto wallet).
+ // Session 28 - Plaid + Dwolla scaffolds (Buy 2: bank → crypto wallet).
  // All values blank in prod until sandbox validation + approval. Sandbox
- // env is the default — flip PLAID_ENV=production / DWOLLA_ENV=production
+ // env is the default - flip PLAID_ENV=production / DWOLLA_ENV=production
  // when ready. Keeping scaffolds operational in sandbox lets us smoke-test
  // the full flow end-to-end before BUY_2_ENABLED flips.
     PLAID_CLIENT_ID: process.env.PLAID_CLIENT_ID || '',
@@ -113,7 +113,7 @@ export const CONFIG = {
  // Plaid env: sandbox | development | production. Maps to different base URLs.
     PLAID_ENV: (process.env.PLAID_ENV || 'sandbox') as 'sandbox' | 'development' | 'production',
  // Products requested at Link-token creation. "auth" → routing/account for
- // ACH; "identity" → name match vs Dwolla customer KYC. Keep minimal —
+ // ACH; "identity" → name match vs Dwolla customer KYC. Keep minimal -
  // every added product increases Plaid dashboard cost.
     PLAID_PRODUCTS: (process.env.PLAID_PRODUCTS || 'auth,identity').split(','),
     PLAID_COUNTRY_CODES: (process.env.PLAID_COUNTRY_CODES || 'US').split(','),
@@ -126,11 +126,11 @@ export const CONFIG = {
  // Buy 2 transfers terminate here before Nuro sweeps to on-chain Fee Vault.
     DWOLLA_MASTER_FUNDING_SOURCE_URL: process.env.DWOLLA_MASTER_FUNDING_SOURCE_URL || '',
 
- // Session 28 Kelp-hardening — emergency kill-switch for the LayerZero
+ // Session 28 Kelp-hardening - emergency kill-switch for the LayerZero
  // OFT bridge path. When false (default), the TypeScript bridge layer
  // REFUSES to initiate any LZ send via bridge.ts, ops tools action,
  // or scheduled sweep. Independent of the on-chain contract's own
- // setPaused() — belt-and-suspenders.
+ // setPaused() - belt-and-suspenders.
  //
  // Context: the Kelp DAO exploit (2026-04-18, $292M) drained a vanilla
  // OFTAdapter via forged DVN attestation. Nuro's pre-hardening config

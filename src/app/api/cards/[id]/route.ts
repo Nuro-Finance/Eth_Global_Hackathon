@@ -10,8 +10,8 @@ const BACKEND_URL =
  * proxies it to the Nuro API backend PATCH /cards/:id.
  *
  * Examples:
- * { card_name: "Travel Card" } — rename card
- * { is_locked: true } — freeze card (also handled by /freeze sub-route)
+ * { card_name: "Travel Card" } - rename card
+ * { is_locked: true } - freeze card (also handled by /freeze sub-route)
  */
 export async function PATCH(
   request: NextRequest,

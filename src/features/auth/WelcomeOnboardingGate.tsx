@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Legacy welcome redirect removed — onboarding is AccountOnboardingModal on dashboard.
+ * Legacy welcome redirect removed - onboarding is AccountOnboardingModal on dashboard.
  */
 export default function WelcomeOnboardingGate({
   children,

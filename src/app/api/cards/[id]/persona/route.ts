@@ -1,6 +1,6 @@
 /**
- * GET /api/cards/[id]/persona — read persona config + available personas
- * PATCH /api/cards/[id]/persona — swap persona / toggle memory / custom name
+ * GET /api/cards/[id]/persona - read persona config + available personas
+ * PATCH /api/cards/[id]/persona - swap persona / toggle memory / custom name
  *
  * Proxies to the Express backend.
  */

@@ -133,7 +133,7 @@ export function TransactionDetailModal({
 
   const isMarketBet = tx.name?.startsWith("Market Bet:");
   const marketQuestion = isMarketBet
-    ? tx.name.replace("Market Bet: YES — ", "").replace("Market Bet: NO — ", "")
+    ? tx.name.replace("Market Bet: YES - ", "").replace("Market Bet: NO - ", "")
     : null;
   const betSide = tx.name?.includes("YES")
     ? "YES"

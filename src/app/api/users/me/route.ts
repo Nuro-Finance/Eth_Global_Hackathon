@@ -13,3 +13,18 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Could not reach backend" }, { status: 502 });
   }
 }
+
+export async function DELETE(req: NextRequest) {
+  const auth = req.headers.get("authorization") || "";
+  try {
+    const res = await fetch(`${BACKEND}/users/me`, {
+      method: "DELETE",
+      headers: { Authorization: auth, "Content-Type": "application/json" },
+    });
+    const data = await res.json().catch(() => ({}));
+    return NextResponse.json(data, { status: res.status });
+  } catch (err) {
+    console.error("[users/me DELETE] backend unreachable:", err);
+    return NextResponse.json({ error: "Could not reach backend" }, { status: 502 });
+  }
+}

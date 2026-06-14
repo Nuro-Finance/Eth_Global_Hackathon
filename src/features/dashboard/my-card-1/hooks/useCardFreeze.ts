@@ -17,7 +17,7 @@ interface UseCardFreezeResult {
 }
 
 /**
- * useCardFreeze — manages card freeze state and syncs it with the backend.
+ * useCardFreeze - manages card freeze state and syncs it with the backend.
  *
  * Flow:
  * toggle clicked → optimistic UI update → PATCH /api/cards/[id]/freeze
@@ -45,7 +45,7 @@ export function useCardFreeze({
 
  // If no cardId yet (auth/data not loaded), stay local-only
     if (!cardId) {
-      console.warn("[useCardFreeze] cardId not available — freeze is local only");
+      console.warn("[useCardFreeze] cardId not available - freeze is local only");
       return;
     }
 

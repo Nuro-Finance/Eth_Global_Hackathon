@@ -107,7 +107,7 @@ const authSlice = createSlice({
       if (state.user) {
         state.user = { ...state.user, ...action.payload };
       } else if (action.payload.name || action.payload.email || action.payload.id) {
- // Build a minimal User from the patch — fields not provided default
+ // Build a minimal User from the patch - fields not provided default
  // to safe placeholders. role defaults to 'user' since BackendUserSync
  // doesn't currently return role.
         state.user = {

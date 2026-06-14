@@ -147,7 +147,7 @@ function recentActivityEventVisual(
   return "sent";
 }
 
-/** Circle + icon — same pattern as {@link useTableColumns} transaction description cell (modal). */
+/** Circle + icon - same pattern as {@link useTableColumns} transaction description cell (modal). */
 function RecentActivityEventKindBadge({
   kind,
   amount,
@@ -255,7 +255,7 @@ function truncateTxid(hash: string) {
   return `${h.slice(0, 8)}…${h.slice(-4)}`;
 }
 
-/** Ellipsis overflow control — same trigger + cell padding as {@link WalletAssetsModal} asset rows. */
+/** Ellipsis overflow control - same trigger + cell padding as {@link WalletAssetsModal} asset rows. */
 function RecentActivityRowOverflowMenu({ row }: { row: WalletRecentActivityModalRow }) {
   return (
     <div className="flex w-full items-center justify-center">
@@ -366,7 +366,7 @@ function HeaderActionTooltip({
 
 /**
  * Modal title row only (globe / refresh / wallet / x).
- * Toolbar Date, Search, Clear, and filter pills stay on their own styles — do not reuse this here.
+ * Toolbar Date, Search, Clear, and filter pills stay on their own styles - do not reuse this here.
  */
 function RecentActivityModalHeaderActions({
   walletAddress,
@@ -499,7 +499,7 @@ export interface WalletRecentActivityModalProps {
 }
 
 /**
- * Full-screen recent activity list — same glass dialog shell, motion, toolbar, bordered table,
+ * Full-screen recent activity list - same glass dialog shell, motion, toolbar, bordered table,
  * and pagination patterns as {@link WalletAssetsModal}.
  */
 export function WalletRecentActivityModal({

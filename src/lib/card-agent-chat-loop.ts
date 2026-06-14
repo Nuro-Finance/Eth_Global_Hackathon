@@ -1,5 +1,5 @@
 /**
- * Per-card agent chat — multi-provider BYOK tool loop (OpenAI / Anthropic / Gemini).
+ * Per-card agent chat - multi-provider BYOK tool loop (OpenAI / Anthropic / Gemini).
  * Extracted from nuro-routes.ts; tool registry + execution unchanged.
  */
 

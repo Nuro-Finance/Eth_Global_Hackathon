@@ -1,10 +1,10 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// x402 FACILITATOR SERVER — S33 Phase 1 (routing) + S34 Phase 2 (in-house verify)
+// x402 FACILITATOR SERVER - S33 Phase 1 (routing) + S34 Phase 2 (in-house verify)
 //
 // Stands up `/facilitator/verify`, `/facilitator/settle`, `/facilitator/supported`
 // at api.nuro.finance, conformant to the x402 facilitator spec.
 //
-// - Internal payers (HD-derived agent vaults — Nuro, Huginn, system,
+// - Internal payers (HD-derived agent vaults - Nuro, Huginn, system,
 // nuro-revenue): both verify AND settle are handled IN-HOUSE.
 //
 // /verify → validates EIP-3009 authorization shape, expiry, recipient,
@@ -21,7 +21,7 @@
 // X402_UPSTREAM_FACILITATOR_URL.
 //
 // Phase 2 brought verify in-house for internal payers (S34, this commit).
-// Phase 3 — running mainnet on-chain settle for external payers — is the
+// Phase 3 - running mainnet on-chain settle for external payers - is the
 // multi-week lift that earns us facilitator-rails revenue from third-party
 // agents; deferred until traffic justifies the operational lift.
 //
@@ -55,8 +55,8 @@ const SUPPORTED_NETWORKS_MAINNET = [
 // against etherscan if a new chain is added.
 //
 // USDC contracts:
-// Base mainnet 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913 — "USD Coin" v2
-// Base sepolia 0x036CbD53842c5426634e7929541eC2318f3dCF7e — "USDC" v2
+// Base mainnet 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913 - "USD Coin" v2
+// Base sepolia 0x036CbD53842c5426634e7929541eC2318f3dCF7e - "USDC" v2
 const USDC_DOMAINS: Record<
   string,
   { name: string; version: string; chainId: number; verifyingContract: string }
@@ -120,7 +120,7 @@ type VerifyResult =
  *
  * Nonce dedup: scans `execution_log` for a previously verified or settled
  * authorization with the same `authNonce` in `detail`. The dedup is best-effort
- * — if execution_log is wiped or the column shape drifts, dedup degrades to
+ * - if execution_log is wiped or the column shape drifts, dedup degrades to
  * pass-through (a malicious agent would still need a valid signature, and
  * each settle decrements the budget). True replay-protection lives in the
  * USDC contract on-chain; we mirror it here for the off-chain ledger path.
@@ -138,7 +138,7 @@ export async function verifyInternalAuthorization(
     return { isValid: false, invalidReason: `unsupported network "${network}"` }
   }
 
- // Asset must be the USDC contract for the network — refuse mistargeted
+ // Asset must be the USDC contract for the network - refuse mistargeted
  // authorizations (e.g. a sandbox-only token mistakenly hitting prod).
   const expectedAsset = domain.verifyingContract.toLowerCase()
   const providedAsset = (paymentRequirements.asset || '').toLowerCase()
@@ -149,7 +149,7 @@ export async function verifyInternalAuthorization(
     }
   }
 
- // Expiry — EIP-3009 expresses validAfter/validBefore as unix-seconds strings.
+ // Expiry - EIP-3009 expresses validAfter/validBefore as unix-seconds strings.
   const now = Math.floor(Date.now() / 1000)
   const validAfter = Number(authorization.validAfter)
   const validBefore = Number(authorization.validBefore)
@@ -163,7 +163,7 @@ export async function verifyInternalAuthorization(
     return { isValid: false, invalidReason: `authorization expired (${validBefore} <= ${now})` }
   }
 
- // Recipient must match payTo. Refuse "right signer, wrong recipient" —
+ // Recipient must match payTo. Refuse "right signer, wrong recipient" -
  // an attacker's signed authorization for a DIFFERENT payee can't be
  // redirected to ours.
   const claimedPayTo = (paymentRequirements.payTo || '').toLowerCase()
@@ -205,7 +205,7 @@ export async function verifyInternalAuthorization(
       return { isValid: false, invalidReason: 'authorization nonce already used' }
     }
   } catch (err) {
- // dedup query failure is non-fatal — log and proceed. The signature
+ // dedup query failure is non-fatal - log and proceed. The signature
  // check below still gates malicious replay; budget cap gates
  // accidental replay.
     console.warn(
@@ -213,7 +213,7 @@ export async function verifyInternalAuthorization(
     )
   }
 
- // EIP-712 signature recovery — the signer of the typed data MUST be the
+ // EIP-712 signature recovery - the signer of the typed data MUST be the
  // claimed `from` address. ethers.utils.verifyTypedData performs the
  // domain-separator + struct-hash + ecrecover dance internally.
   let recovered: string
@@ -252,7 +252,7 @@ export async function verifyInternalAuthorization(
     }
   }
 
- // Budget gate — the off-chain settle path will debit agent_budgets, so
+ // Budget gate - the off-chain settle path will debit agent_budgets, so
  // require sufficient remaining BEFORE we tell the caller we'll settle.
  // Use MAX(usd_remaining) across active budgets to support multi-period
  // budgets where any period can fund the spend.
@@ -273,7 +273,7 @@ export async function verifyInternalAuthorization(
       }
     }
   } catch (err) {
- // Budget table read failure — fail closed for safety. A genuine outage
+ // Budget table read failure - fail closed for safety. A genuine outage
  // means we can't validate the spend; better to refuse than to settle
  // off-chain against an unknown budget state.
     return {
@@ -306,7 +306,7 @@ function getUpstreamFacilitator(): { url: string; authHeaders: () => Promise<Rec
       url: facilitator.url,
       authHeaders: async () => {
         const all = await facilitator.createAuthHeaders()
- // The combined headers — verify uses .verify, settle uses .settle.
+ // The combined headers - verify uses .verify, settle uses .settle.
  // For the combined-route forward we union everything; upstream
  // ignores keys it doesn't need.
         return { ...all.verify, ...all.settle }
@@ -320,7 +320,7 @@ function getUpstreamFacilitator(): { url: string; authHeaders: () => Promise<Rec
 /**
  * Returns true if the given EVM address is one of our HD-derived agent
  * vaults. Pre-S33-X5 had only 'Nuro / 'system' / 'nuro-revenue';
- * future agents register here. Conservative — false negative just means
+ * future agents register here. Conservative - false negative just means
  * the call gets forwarded upstream, no harm done.
  */
 function isInternalAgentAddress(addr: string): { isInternal: boolean; agentId: string | null } {
@@ -377,13 +377,13 @@ async function forwardToUpstream(
 // ── Route handlers ───────────────────────────────────────────────────────
 
 /**
- * Mounts /facilitator/* routes on the given router. Public — no admin
+ * Mounts /facilitator/* routes on the given router. Public - no admin
  * key required (a facilitator's whole purpose is to be reachable by
  * external payment clients). Each request is metered + logged so
  * operators can tell internal-vs-forwarded ratios.
  */
 export function mountFacilitatorRoutes(router: Router, db: Pool): void {
- // GET /facilitator/supported — what schemes/networks we accept.
+ // GET /facilitator/supported - what schemes/networks we accept.
  // Returns the union of testnet + mainnet so callers see the full
  // surface; mainnet entries only actually settle when CDP creds are set
  // upstream. Defensive: if upstream is unreachable the operator still
@@ -404,7 +404,7 @@ export function mountFacilitatorRoutes(router: Router, db: Pool): void {
     })
   })
 
- // POST /facilitator/verify — pre-flight signature + balance + nonce check.
+ // POST /facilitator/verify - pre-flight signature + balance + nonce check.
  // - Internal payer: in-house EIP-3009 sig recovery + budget gate (Phase 2).
  // - External payer: forward to upstream.
   router.post('/facilitator/verify', async (req: Request, res: Response) => {
@@ -460,7 +460,7 @@ export function mountFacilitatorRoutes(router: Router, db: Pool): void {
       }
     }
 
- // External payer or malformed payload — forward to upstream.
+ // External payer or malformed payload - forward to upstream.
     const fwd = await forwardToUpstream('/verify', payload, 'POST')
     void db
       .query(
@@ -482,7 +482,7 @@ export function mountFacilitatorRoutes(router: Router, db: Pool): void {
     res.status(fwd.status).json(fwd.body)
   })
 
- // POST /facilitator/settle — execute the EIP-3009 transferWithAuthorization.
+ // POST /facilitator/settle - execute the EIP-3009 transferWithAuthorization.
  // Phase 1 routing:
  // - If payer is an internal agent (HD-derived vault we control): take
  // the off-chain fast path. Recipient credit + sender debit happen as
@@ -502,7 +502,7 @@ export function mountFacilitatorRoutes(router: Router, db: Pool): void {
     if (payer) {
       const { isInternal, agentId } = isInternalAgentAddress(payer)
       if (isInternal && agentId && amountUsd != null && amountUsd > 0) {
- // Off-chain fast path — record spend on sender, refill on recipient.
+ // Off-chain fast path - record spend on sender, refill on recipient.
         try {
  // eslint-disable-next-line @typescript-eslint/no-require-imports
           const { recordSpend, recordRefill } = require('../budgets') as typeof import('../budgets')
@@ -512,7 +512,7 @@ export function mountFacilitatorRoutes(router: Router, db: Pool): void {
             deltaUsd: amountUsd,
             description: `x402-settle off-chain → ${payee || 'unknown'} (recipient=${recipientId})`,
           })
- // Synthetic tx hash — distinguishable from real tx hashes by
+ // Synthetic tx hash - distinguishable from real tx hashes by
  // the prefix. Operator queries can filter on this when
  // computing on-chain volume.
           const fakeTxHash = `offchain:${spend.ledgerId}`

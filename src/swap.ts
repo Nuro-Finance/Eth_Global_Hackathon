@@ -9,17 +9,17 @@
  *
  * Architecture decisions:
  * - 0x Aggregator v2, AllowanceHolder flavor (simpler than permit2 for
- * native-token swaps — no signature, no permit, just a plain tx).
+ * native-token swaps - no signature, no permit, just a plain tx).
  * - One chain at a time: chainId selected by caller, 0x routes via that
  * chain's liquidity (Uniswap V3, Sushi, PancakeSwap on BSC, etc).
  * - Slippage: 300 bps (3%) per MVP call. Configurable via
  * ZEROX_SLIPPAGE_BPS env var.
  * - Min swap: $5 USD-equivalent of USDC output. Below that, we decline
- * the swap and log — user's native token stays put, they can top up.
+ * the swap and log - user's native token stays put, they can top up.
  * - Revert-safe: failures log to execution_log with reason, native balance
  * is untouched. No side effects on failure.
  * - ALLOWLIST: only tokens in NATIVE_TOKENS below get swapped. Memecoin
- * support is explicitly deferred — verifiable liquidity + anti-scam
+ * support is explicitly deferred - verifiable liquidity + anti-scam
  * audit required before adding any ERC-20 ( call).
  */
 import { ethers } from 'ethers'
@@ -92,7 +92,7 @@ export const NATIVE_TOKENS: Record<number, NativeTokenInfo> = {
         usdcAddress: '0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d',
         usdcDecimals: 18,
     },
- // Session 23 late-add — 7 more chains 0x confirmed supports for native-swap.
+ // Session 23 late-add - 7 more chains 0x confirmed supports for native-swap.
  // Verified via live /price call 2026-04-18. If a chain stops working, remove
  // it here; the monitor-skips telemetry will surface failures.
     43114: {
@@ -171,7 +171,7 @@ const ZEROX_API_BASE = 'https://api.0x.org'
 // Memecoin additions go behind ERC20_MEMECOIN_ENABLED flag (off by default).
 
 export interface Erc20TokenInfo {
-    symbol: string            // 'LINK', 'UNI', 'DOGE' etc — how user sees it in FE
+    symbol: string            // 'LINK', 'UNI', 'DOGE' etc - how user sees it in FE
     name: string              // 'Chainlink'
     address: string           // contract address (checksummed)
     decimals: number          // typically 18, USDT is 6
@@ -220,7 +220,7 @@ async function refreshAllowlistSnapshot(): Promise<void> {
         allowlistSnapshot = next
         allowlistLastRefresh = Date.now()
     } catch (err: any) {
- // Keep previous snapshot on error — safer than wiping the allowlist
+ // Keep previous snapshot on error - safer than wiping the allowlist
  // (which would disable every ERC-20 swap silently). Log so audit trails
  // pick it up.
         console.warn(`[swap] allowlist refresh failed: ${err.message?.slice(0, 80)}`)
@@ -248,7 +248,7 @@ export async function forceRefreshAllowlist(): Promise<void> {
 }
 
 /**
- * Returns the whole allowlist snapshot (all chains). Synchronous — reads
+ * Returns the whole allowlist snapshot (all chains). Synchronous - reads
  * from the in-memory cache. Await `ensureAllowlistFresh()` first if you
  * need fresh data.
  */
@@ -265,7 +265,7 @@ export function getErc20AllowlistForChain(chainId: number): Erc20TokenInfo[] {
 
 /**
  * Lookup an allowlisted ERC-20 by (chainId, symbol). Returns null if the
- * token isn't on our allowlist for that chain — NEVER fall back to "try
+ * token isn't on our allowlist for that chain - NEVER fall back to "try
  * anyway", that's how you get rugged.
  *
  * SYNC. Reads from the in-memory snapshot. Callers that need freshness
@@ -279,7 +279,7 @@ export function findErc20(chainId: number, symbol: string): Erc20TokenInfo | nul
 
 /**
  * Back-compat alias for call sites that still import `ERC20_ALLOWLIST`.
- * Deprecated — new code should use `getErc20Allowlist()` or
+ * Deprecated - new code should use `getErc20Allowlist()` or
  * `getErc20AllowlistForChain(chainId)`. Exported as a getter so the
  * returned object tracks snapshot refreshes.
  *
@@ -328,7 +328,7 @@ export interface SwapResult {
 }
 
 /**
- * Core quote fetcher — used by both native and ERC-20 paths. Hits the 0x
+ * Core quote fetcher - used by both native and ERC-20 paths. Hits the 0x
  * allowance-holder v2 endpoint with a specific sellToken (either the
  * native sentinel or an ERC-20 contract address).
  */
@@ -339,7 +339,7 @@ export interface BuyTokenOverride {
     decimals: number
  /** USD price-per-unit if known. Used for buyAmountUsd calc. NaN/undefined
  * → buyAmountUsd reported as NaN and meetsThreshold falls back to true
- * (caller doesn't get the SWAP_MIN_USD floor — fine for user-initiated
+ * (caller doesn't get the SWAP_MIN_USD floor - fine for user-initiated
  * trades where the user picked the destination). */
     usdPricePerUnit?: number
 }
@@ -418,7 +418,7 @@ async function fetchZeroExQuote(
 
 /**
  * Fetch a swap quote for NATIVE → USDC (default) or NATIVE → buyOverride.
- * Pure read — no on-chain action.
+ * Pure read - no on-chain action.
  */
 export async function getNativeSwapQuote(
     chainId: number,
@@ -431,7 +431,7 @@ export async function getNativeSwapQuote(
 
 /**
  * Fetch a swap quote for ERC-20 → USDC (default) or ERC-20 → buyOverride.
- * Token must be on the allowlist. Throws if not — caller is responsible
+ * Token must be on the allowlist. Throws if not - caller is responsible
  * for findErc20() before calling.
  */
 export async function getErc20SwapQuote(
@@ -445,7 +445,7 @@ export async function getErc20SwapQuote(
 }
 
 /**
- * Quote-preview variant for FE use. No taker address available yet — uses
+ * Quote-preview variant for FE use. No taker address available yet - uses
  * 0x's `/price` endpoint which is purpose-built for indicative pricing
  * without committing to a signer. Returns the buy amount in token units +
  * (when available) USD value. Returns `null` on any failure so the FE
@@ -567,7 +567,7 @@ export async function executeNativeToUsdcSwap(
             }
         }
 
- // Step 2: estimate gas cost vs swap value — avoid swaps where gas > 30% of output
+ // Step 2: estimate gas cost vs swap value - avoid swaps where gas > 30% of output
         const feeData = await provider.getFeeData()
         const gasPrice = feeData.gasPrice || ethers.BigNumber.from(0)
         const estimatedGas = quote.gas ? ethers.BigNumber.from(quote.gas) : ethers.BigNumber.from(200_000)
@@ -583,7 +583,7 @@ export async function executeNativeToUsdcSwap(
             }
         }
 
- // Helm tx-cap — value cap on native→USDC swap. quote.buyAmountUsd
+ // Helm tx-cap - value cap on native→USDC swap. quote.buyAmountUsd
  // is the USDC output value (≈ USD). Observe-only by default.
         await enforceTxCap({
             source: `swap-${NATIVE_TOKENS[chainId].nativeSymbol}-usdc`,
@@ -612,7 +612,7 @@ export async function executeNativeToUsdcSwap(
             }
         }
 
-        console.log(`[swap] success: tx=${tx.hash} — USDC will be detected by next monitor cycle`)
+        console.log(`[swap] success: tx=${tx.hash} - USDC will be detected by next monitor cycle`)
         return {
             success: true,
             txHash: tx.hash,
@@ -631,7 +631,7 @@ export async function executeNativeToUsdcSwap(
 /**
  * Execute an ERC-20 → USDC swap. The deposit address must hold the ERC-20
  * and enough native for gas. Two steps:
- * 1. Approve: ERC-20.approve(AllowanceHolder, sellAmount) — required
+ * 1. Approve: ERC-20.approve(AllowanceHolder, sellAmount) - required
  * once per (token, AllowanceHolder) pair. We approve fresh each swap
  * for safety (small extra gas cost, no stale allowance attack).
  * 2. Swap: plain tx to AllowanceHolder with quote.data payload.
@@ -661,7 +661,7 @@ export async function executeErc20ToUsdcSwap(
             }
         }
 
- // Step 2: gas check — need native for BOTH approval + swap
+ // Step 2: gas check - need native for BOTH approval + swap
         const feeData = await provider.getFeeData()
         const gasPrice = feeData.gasPrice || ethers.BigNumber.from(0)
  // Approval tx is ~50k gas; swap tx varies. Budget for both.
@@ -676,7 +676,7 @@ export async function executeErc20ToUsdcSwap(
             }
         }
 
- // Helm tx-cap — value cap on ERC-20→USDC swap. Check BEFORE
+ // Helm tx-cap - value cap on ERC-20→USDC swap. Check BEFORE
  // approval so an over-cap swap (in enforce mode) doesn't burn gas
  // setting an unused allowance. quote.buyAmountUsd is USD value out.
         await enforceTxCap({
@@ -722,7 +722,7 @@ export async function executeErc20ToUsdcSwap(
             }
         }
 
-        console.log(`[swap] success: tx=${swapTx.hash} — USDC will be detected by next monitor cycle`)
+        console.log(`[swap] success: tx=${swapTx.hash} - USDC will be detected by next monitor cycle`)
         return {
             success: true,
             txHash: swapTx.hash,
@@ -739,7 +739,7 @@ export async function executeErc20ToUsdcSwap(
 
 /**
  * Log a swap attempt (success or failure) to execution_log for admin visibility.
- * Mirrors logMonitorSkip pattern from Sprint 6.1 — structured reason codes.
+ * Mirrors logMonitorSkip pattern from Sprint 6.1 - structured reason codes.
  */
 export async function logSwapAttempt(
     db: Pool,

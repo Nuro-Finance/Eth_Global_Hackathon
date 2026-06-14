@@ -7,6 +7,7 @@ import {
   NURO_DEV_PREVIEW_CHANGED_EVENT,
   shouldUseDevPopulatedData,
 } from "@/lib/devPreviewMode";
+import { useDesignSampleDataActive } from "@/features/dashboard/overview/hooks/designSampleData";
 import { NURO_DASHBOARD_REFRESH_EVENT } from "@/features/dashboard/overview/layouts/DashboardGrid/context/DashboardRefreshContext";
 
 /** Sensitive fields from the primary (first/active) card for on-card overlays */
@@ -47,7 +48,7 @@ function mapRawCardToSensitive(raw: Record<string, unknown> | undefined | null):
   const panRevealed = digits.length >= 13 ? formatGroupedPan(digits) : null;
 
   const exp = String(raw.expiryDate ?? raw.expiry_date ?? "").trim();
-  const expiry = exp || "—/—";
+  const expiry = exp || "-/-";
 
   const cvRaw = raw.cvv ?? raw.CVV ?? raw.security_code;
   const cvv =
@@ -106,7 +107,7 @@ export function getDesignMockCardFrontOverlay(cardId: string): {
   };
 }
 
-/** Minimal card row shape the deck stack consumes — id is required for keys + per-card mock lookups. */
+/** Minimal card row shape the deck stack consumes - id is required for keys + per-card mock lookups. */
 export interface CardRow {
   id: string;
   balance: number;
@@ -158,7 +159,7 @@ function readAccountSnapshot(): AccountSnapshot | null {
     if (!raw) return null;
     const parsed = JSON.parse(raw) as AccountSnapshot;
     if (!parsed || typeof parsed !== "object") return null;
- // Defensive shape check — cache lives across deploys so a future
+ // Defensive shape check - cache lives across deploys so a future
  // version of this hook with a different shape mustn't crash on load.
     if (typeof parsed.balance !== "number" || !Array.isArray(parsed.cards)) return null;
     return parsed;
@@ -172,7 +173,7 @@ function writeAccountSnapshot(snap: AccountSnapshot) {
   try {
     window.localStorage.setItem(ACCOUNT_SNAPSHOT_KEY, JSON.stringify(snap));
   } catch {
- /* private mode / quota — silent */
+ /* private mode / quota - silent */
   }
 }
 
@@ -188,17 +189,18 @@ function writeAccountSnapshot(snap: AccountSnapshot) {
  * Minimum on-screen hold for the candy overlay loader, in ms. Even if
  * /api/cards resolves in 80ms (warm cache + fast network), the loader
  * stays visible long enough for the user to register the animation.
- * This is the brand: "candy loaders everywhere data is fetched" — they
+ * This is the brand: "candy loaders everywhere data is fetched" - they
  * must be visible to do their job. Tuned at 600ms by spec
- * (Nuro ticket #11 — heartbeat scope conversation, 2026-05-25).
+ * (Nuro ticket #11 - heartbeat scope conversation, 2026-05-25).
  */
 const OVERLAY_LOADER_MIN_HOLD_MS = 600;
 
 export function useAccountBalance() {
   const { data: session } = useAppSession();
+  const designSampleActive = useDesignSampleDataActive();
   const cachedSnapshot = typeof window !== "undefined" ? readAccountSnapshot() : null;
   const [balance, setBalance] = useState(cachedSnapshot?.balance ?? 0);
- // isLoading flips false immediately if we have a cached snapshot — the
+ // isLoading flips false immediately if we have a cached snapshot - the
  // deck consumer interprets `isLoading=false` as "render real values".
  // The background refetch may still update state when it lands, but the
  // initial paint is never a "loading" placeholder for returning users.
@@ -216,7 +218,7 @@ export function useAccountBalance() {
  * Why a separate signal: the Day-6 stale-while-revalidate cache means
  * `isLoading` initializes to false for any returning visitor, which
  * suppressed the BalanceLoader entirely (the bug 414585f shipped).
- * This signal is cache-independent — candy renders on every visit.
+ * This signal is cache-independent - candy renders on every visit.
  */
   const [isOverlayLoading, setIsOverlayLoading] = useState(true);
   const [primarySensitive, setPrimarySensitive] = useState<PrimaryCardSensitiveFields | null>(
@@ -257,7 +259,7 @@ export function useAccountBalance() {
       }
     };
 
-    if (shouldUseDevPopulatedData()) {
+    if (designSampleActive) {
       const total = MOCK_CARDS.reduce((sum, c) => sum + (c.balance || 0), 0);
       setBalance(total);
       const rawPrimary = MOCK_CARDS[0] as unknown as Record<string, unknown>;
@@ -279,7 +281,7 @@ export function useAccountBalance() {
 
     if (
       process.env.NODE_ENV === "development" &&
-      !shouldUseDevPopulatedData()
+      !designSampleActive
     ) {
       setBalance(0);
       setPrimarySensitive(null);
@@ -345,7 +347,7 @@ export function useAccountBalance() {
       } catch (error) {
         console.error("Failed to fetch balance:", error);
  // Day-6: don't blow away the cached values on a transient fetch
- // error — leaving stale-but-rendered is better UX than the page
+ // error - leaving stale-but-rendered is better UX than the page
  // suddenly going blank. Only clear if we had nothing to begin with.
         if (cachedSnapshot === null && !cancelled) {
           setBalance(0);
@@ -359,8 +361,7 @@ export function useAccountBalance() {
     };
     void fetchBalance();
     return () => { cancelled = true; };
- // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session, previewRevision, userRefreshGeneration]);
+  }, [session, previewRevision, userRefreshGeneration, designSampleActive]);
 
   return { balance, isLoading, isOverlayLoading, primarySensitive, cards };
 }

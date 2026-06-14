@@ -50,7 +50,7 @@ function ConnectWalletUnconfigured() {
   return (
     <button
       type="button"
-      title="Wallet connection unavailable — set NEXT_PUBLIC_PRIVY_APP_ID"
+      title="Wallet connection unavailable - set NEXT_PUBLIC_PRIVY_APP_ID"
       onClick={() => {
         if (process.env.NODE_ENV === "development") {
           console.warn(
@@ -197,7 +197,7 @@ function ConnectWalletPrivy({
       return;
     }
 
- // Email/Google users are already authenticated — linkWallet opens the modal.
+ // Email/Google users are already authenticated - linkWallet opens the modal.
     linkWallet({
       description: "Connect a wallet to use with your Nuro account.",
       walletList,

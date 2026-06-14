@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 const BACKEND = process.env.BACKEND_URL || "http://localhost:3000";
 
 /**
- * DELETE /api/withdrawals/[id] — Cancel a pending withdrawal
+ * DELETE /api/withdrawals/[id] - Cancel a pending withdrawal
  */
 export async function DELETE(
   req: NextRequest,

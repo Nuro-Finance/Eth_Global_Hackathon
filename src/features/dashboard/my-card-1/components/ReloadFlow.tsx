@@ -25,13 +25,13 @@ const FLOW_SUCCESS_ILLUSTRATION_SRC = "/Success_Square.svg";
 /** Official USDC mark (matches `assets/USDC Icon.svg`) */
 const USDC_ICON_SRC = "/assets/images/icons/usdc.svg";
 
-/** Tether (USDT) mark — `Tether Logo.svg` */
+/** Tether (USDT) mark - `Tether Logo.svg` */
 const TETHER_ICON_SRC = "/assets/images/icons/tether.svg";
 
 /** Stored `selectedToken` value when user picks Tether */
 const TETHER_TOKEN = "Tether";
 
-/** Dai stablecoin mark — `Dai Logo.svg` */
+/** Dai stablecoin mark - `Dai Logo.svg` */
 const DAI_ICON_SRC = "/assets/images/icons/dai.svg";
 
 /** Stored `selectedToken` value when user picks Dai */
@@ -46,7 +46,7 @@ const CHAIN_CIRCLE_MARK_SRC = "/assets/images/icons/chain-circle-mark.svg";
 
 const selectedChainUsesCircleMark = (name: string) => name === "BASE" || name === "Base";
 
-/** Reload card widget + home modal — Base, Ethereum, Solana active; rest below Coming Soon pill. */
+/** Reload card widget + home modal - Base, Ethereum, Solana active; rest below Coming Soon pill. */
 const RELOAD_ACTIVE_CHAINS = ["Base", "Solana", "Ethereum"] as const;
 const isReloadActiveChain = (name: string) =>
   (RELOAD_ACTIVE_CHAINS as readonly string[]).includes(name);
@@ -282,7 +282,7 @@ const SendFunds = ({
   };
 
   const addressLoading = !depositAddressesReady;
-  const displayAddressText = addressLoading ? "Loading…" : depositAddress || "—";
+  const displayAddressText = addressLoading ? "Loading…" : depositAddress || "-";
   const {
     addressRowRef,
     addressTextCellRef,
@@ -440,17 +440,17 @@ export const reloadFlowHeroStyles = `
 
 function tokenAccentForSelected(selectedToken: string) {
   if (selectedToken === "USDC") return { glow: "#2775CA", ring: "rgba(39, 117, 202, 0.65)" };
- /* Tether logo fill #24A17B — rings/glow match USDT green */
+ /* Tether logo fill #24A17B - rings/glow match USDT green */
   if (selectedToken === TETHER_TOKEN) return { glow: "#24A17B", ring: "rgba(36, 161, 123, 0.82)" };
- /* Dai logo fill #F5AC37 — warm gold rings */
+ /* Dai logo fill #F5AC37 - warm gold rings */
   if (selectedToken === DAI_TOKEN) return { glow: "#F5AC37", ring: "rgba(245, 172, 55, 0.88)" };
   return { glow: "#52525b", ring: "rgba(161, 161, 170, 0.5)" };
 }
 
-/** Failed withdraw/reload — red halo behind token hero (matches `--color-error`). */
+/** Failed withdraw/reload - red halo behind token hero (matches `--color-error`). */
 const ERROR_HERO_ACCENT = { glow: "#DE5555", ring: "rgba(222, 85, 85, 0.65)" };
 
-/** Send-funds QR halo + amount line — only the three picker tokens; extend when adding coins. */
+/** Send-funds QR halo + amount line - only the three picker tokens; extend when adding coins. */
 function sendFundsVisualForToken(selectedToken: string): { glow: string } | null {
   if (selectedToken === "USDC" || selectedToken === TETHER_TOKEN || selectedToken === DAI_TOKEN) {
     return { glow: tokenAccentForSelected(selectedToken).glow };
@@ -525,7 +525,7 @@ export function ReloadFlowTokenHero({
   );
 }
 
-/** Step 3 — verifying; no auto timer; user dismisses with Close */
+/** Step 3 - verifying; no auto timer; user dismisses with Close */
 const ReloadProgressScreen = ({ onClose, onBack, selectedToken, isError }: { onClose: () => void, onBack: () => void, selectedToken: string, isError: boolean }) => (
   <div className="flex flex-col gap-6 h-full relative">
     <style>{reloadFlowHeroStyles}</style>
@@ -580,7 +580,7 @@ const ReloadProgressScreen = ({ onClose, onBack, selectedToken, isError }: { onC
   </div>
 );
 
-/** Step 4 — success only; auto-close countdown. Illustration: `public/Success_Square.svg` (wallet send success). */
+/** Step 4 - success only; auto-close countdown. Illustration: `public/Success_Square.svg` (wallet send success). */
 const ReloadSuccessScreen = ({
   onClose,
   selectedToken: _selectedToken,
@@ -729,7 +729,7 @@ export const ReloadFlow = forwardRef<ReloadFlowHandle, ReloadFlowProps>(function
   const pickerScrollBodyRef = useRef<HTMLDivElement>(null);
   const pickerPanelRef = useRef<HTMLDivElement>(null);
   const pickerTriggersRef = useRef<HTMLDivElement>(null);
- /** `+1` forward (next), `-1` back — modal step transitions read this in variant callbacks. */
+ /** `+1` forward (next), `-1` back - modal step transitions read this in variant callbacks. */
   const stepSlideDirRef = useRef(1);
  /** Step 3 entered at this time; used to match new `deposit` rows from `/api/card-transactions`. */
   const reloadDepositNotifyBaselineMsRef = useRef<number | null>(null);
@@ -969,7 +969,7 @@ export const ReloadFlow = forwardRef<ReloadFlowHandle, ReloadFlowProps>(function
 
   const isPanePicker = variant === "default";
   const isHomeReloadModalChainPicker = variant === "modal" && hideProgressDots;
- /** My Card sidebar widget + home reload modal — not legacy full-grid modal pickers. */
+ /** My Card sidebar widget + home reload modal - not legacy full-grid modal pickers. */
   const isSplitChainPicker = isHomeReloadModalChainPicker || (isPanePicker && isChainOpen);
   const splitChainPickerGap = isPanePicker && !isHomeReloadModalChainPicker ? "gap-3" : "gap-[16px]";
   const splitChainTileSize: "pane" | "homeModal" = isPanePicker ? "pane" : "homeModal";

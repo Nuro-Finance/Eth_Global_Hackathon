@@ -169,7 +169,7 @@ export function WalletSendReceivePanel({
         amount: formatSendEthDisplay(sendPanelAmount),
         symbol: sendPanelAsset.symbol,
         usd: sendPanelAmountUsd,
-        toLabel: sendDestToLabel || "—",
+        toLabel: sendDestToLabel || "-",
         iconSrc: sendPanelAsset.iconSrc,
       });
     } else if (sendFlowStep === "success" && prev !== "success") {

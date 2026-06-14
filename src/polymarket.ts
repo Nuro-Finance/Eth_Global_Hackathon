@@ -50,7 +50,7 @@ export async function placePolymarketTrade(
   tickSize: string = '0.01',
 ): Promise<TradeResult> {
   try {
-    // Dynamic import — fails gracefully if package not installed
+    // Dynamic import - fails gracefully if package not installed
     let ClobClient: any, Side: any, OrderType: any;
     try {
       const clob = await import('@polymarket/clob-client');

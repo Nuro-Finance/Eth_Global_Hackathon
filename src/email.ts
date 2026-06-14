@@ -3,7 +3,7 @@
  *
  * Day-5 (Marathon 11): we ship the wiring but the actual send is gated on
  * the presence of `RESEND_API_KEY`. Without the key, every send becomes a
- * structured log line — the surrounding flow (alert insert, audit log,
+ * structured log line - the surrounding flow (alert insert, audit log,
  * notification fan-out) keeps working and only the literal SMTP delivery
  * is skipped. To activate:
  *
@@ -12,7 +12,7 @@
  * 3. Add `RESEND_API_KEY=re_...` and `EMAIL_FROM=alerts@<your-domain>`
  * to the VPS env. PM2 reload picks them up on next restart.
  *
- * No new deps — uses axios which is already a transitive dep.
+ * No new deps - uses axios which is already a transitive dep.
  */
 
 import axios from 'axios'
@@ -37,7 +37,7 @@ export async function sendEmail({ to, subject, text }: SendEmailInput): Promise<
   const from = process.env.EMAIL_FROM || 'alerts@nuro.finance'
 
   if (!key) {
-    console.log(`[email] RESEND_API_KEY not set — skipping send to=${to.slice(0, 60)} subject="${subject}"`)
+    console.log(`[email] RESEND_API_KEY not set - skipping send to=${to.slice(0, 60)} subject="${subject}"`)
     return { ok: false, detail: 'no_api_key' }
   }
   if (!to || !to.includes('@')) {
@@ -71,7 +71,7 @@ export async function sendEmail({ to, subject, text }: SendEmailInput): Promise<
 }
 
 /**
- * Domain-specific helper — formats the "high-value transaction" body and
+ * Domain-specific helper - formats the "high-value transaction" body and
  * pulls the user's email at the call site. Returns ok/no-key so the
  * caller can audit-log appropriately.
  */
@@ -110,13 +110,13 @@ export async function sendThresholdAlertEmail(ctx: ThresholdAlertContext): Promi
     ``,
     `Your alert threshold is set to $${threshold.toFixed(2)}. If this`,
     `transaction looks unfamiliar, freeze the card from the Nuro`,
-    `dashboard or report it as lost/stolen — both actions sync to your`,
+    `dashboard or report it as lost/stolen - both actions sync to your`,
     `issuer immediately.`,
     ``,
     `If this was you, no action is needed. You can update your alert`,
     `threshold under Card Settings → Notifications → Spend Threshold.`,
     ``,
-    `— Nuro Card Alerts`,
+    `- Nuro Card Alerts`,
   ].join('\n')
 
   return sendEmail({ to: email, subject, text })

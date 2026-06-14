@@ -1,6 +1,6 @@
 /**
- * GET /api/cards/[id]/messages — load conversation history
- * DELETE /api/cards/[id]/messages — clear conversation (per spec Q3 reset)
+ * GET /api/cards/[id]/messages - load conversation history
+ * DELETE /api/cards/[id]/messages - clear conversation (per spec Q3 reset)
  *
  * Proxies to the Express backend.
  */

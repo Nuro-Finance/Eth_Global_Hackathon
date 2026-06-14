@@ -1,5 +1,5 @@
 /**
- * Nonce Manager — Prevents Race Conditions in Bridge Operations
+ * Nonce Manager - Prevents Race Conditions in Bridge Operations
  * ──────────────────────────────────────────────────────────────
  *
  * Problems this solves:
@@ -21,7 +21,7 @@ import { ethers } from 'ethers'
 
 const PUBLIC_RPCS: Record<number, string> = {
   1:     'https://ethereum-rpc.publicnode.com',
- // Base uses 'base-rpc' — NOT 'base-mainnet-rpc'. Different from Ethereum's
+ // Base uses 'base-rpc' - NOT 'base-mainnet-rpc'. Different from Ethereum's
  // mainnet/testnet split. Wrong URL causes ethers "could not detect network"
  // on every Base-route bridge. Fixed 2026-04-17 live during investor prep.
   8453:  'https://base-rpc.publicnode.com',
@@ -142,7 +142,7 @@ export function createFreshWallet(privateKey: string, chainId: number): ethers.W
 
 // ── Bridge Lock (Deposit-Level) ──────────────────────────────────────────────
 // Prevents the same deposit from being processed multiple times.
-// RESILIENCE: Also checks DB for pending transactions on boot — survives PM2 restart.
+// RESILIENCE: Also checks DB for pending transactions on boot - survives PM2 restart.
 
 const processingDeposits = new Map<string, number>() // key → timestamp
 
@@ -156,7 +156,7 @@ export function isDepositProcessing(chainId: number, address: string): boolean {
   const startedAt = processingDeposits.get(key)
   if (!startedAt) return false
 
- // Auto-clear stale locks (> 30 min) — prevents infinite stuck deposits
+ // Auto-clear stale locks (> 30 min) - prevents infinite stuck deposits
   const STALE_THRESHOLD_MS = 30 * 60 * 1000
   if (Date.now() - startedAt > STALE_THRESHOLD_MS) {
     console.warn(`[nonce-manager] Clearing stale deposit lock: ${key} (started ${Math.round((Date.now() - startedAt) / 60000)}min ago)`)
@@ -181,7 +181,7 @@ export function markDepositDone(chainId: number, address: string): void {
 }
 
 /**
- * Restore processing locks from DB on boot — prevents double-spend after restart.
+ * Restore processing locks from DB on boot - prevents double-spend after restart.
  * Any transaction still 'pending' means a bridge was in-flight when the server died.
  * Mark those addresses as "processing" so the next poll skips them.
  */
@@ -233,13 +233,13 @@ export async function safeExecute(
     const wallet = createFreshWallet(privateKey, chainId)
     let nonce = await getFreshNonce(chainId, wallet.address)
 
-    console.log(`[nonce-manager] ${description} — chain ${chainId}, nonce ${nonce}`)
+    console.log(`[nonce-manager] ${description} - chain ${chainId}, nonce ${nonce}`)
 
     try {
       const tx = await execute(wallet, nonce)
       const receipt = await tx.wait()
       recordNonceUsed(chainId, nonce)
-      console.log(`[nonce-manager] ${description} — confirmed: ${receipt.transactionHash}`)
+      console.log(`[nonce-manager] ${description} - confirmed: ${receipt.transactionHash}`)
       return receipt
     } catch (err: any) {
  // Retry once with fresh nonce on NONCE_EXPIRED
@@ -249,7 +249,7 @@ export async function safeExecute(
         const retryTx = await execute(wallet, freshNonce)
         const receipt = await retryTx.wait()
         recordNonceUsed(chainId, freshNonce)
-        console.log(`[nonce-manager] ${description} — confirmed on retry: ${receipt.transactionHash}`)
+        console.log(`[nonce-manager] ${description} - confirmed on retry: ${receipt.transactionHash}`)
         return receipt
       }
       throw err

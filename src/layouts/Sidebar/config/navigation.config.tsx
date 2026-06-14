@@ -124,7 +124,7 @@ export const settingsItemConfig = {
 };
 
 // Sectioned nav: MAIN, CARDS, WALLET, DEMOS
-// YIELD section intentionally HIDDEN since Marathon 11 demo prep — yield-agents,
+// YIELD section intentionally HIDDEN since Marathon 11 demo prep - yield-agents,
 // arena, markets ROUTES still exist (Chris drop 5.23.26 Phase 1 added pages) but
 // must not appear in the sidebar until product is ready to surface them.
 // Re-enable by putting "yield" back into SIDEBAR_SECTIONS + sidebarSectionsConfig.
@@ -153,7 +153,7 @@ export const sidebarSectionsConfig: Record<
   },
 };
 
-// HIDDEN section config — preserved for easy re-enable. Spread back into
+// HIDDEN section config - preserved for easy re-enable. Spread back into
 // sidebarSectionsConfig + add "yield" into SIDEBAR_SECTIONS above to restore.
 export const _hiddenYieldSection = {
   label: "YIELD",

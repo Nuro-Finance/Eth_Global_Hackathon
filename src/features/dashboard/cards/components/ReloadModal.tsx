@@ -23,11 +23,11 @@ interface ReloadModalProps {
 const HEADER_SHIFT_X = 40;
 const headerCaretTransition = { duration: 0.4, ease: [0.33, 1, 0.68, 1] as const };
 
-/** Fixed outer shell — body content is rebuilt per step without changing this height (~540px cap). */
+/** Fixed outer shell - body content is rebuilt per step without changing this height (~540px cap). */
 const SHELL_HEIGHT_CLASS = "h-[min(540px,85vh)]";
 
 /**
- * Reload Card — shell (header, X, dots) + `ReloadFlow` body (`variant="modal"`).
+ * Reload Card - shell (header, X, dots) + `ReloadFlow` body (`variant="modal"`).
  * Legacy snapshot: `ReloadModal.legacy.archive.txt`
  */
 export function ReloadModal({ open, onOpenChange }: ReloadModalProps) {
@@ -87,7 +87,7 @@ export function ReloadModal({ open, onOpenChange }: ReloadModalProps) {
             borderStyle: "solid",
           }}
         >
-          {/* Header — caret + H1 share one translate; caret sits left of H1 (no layout slot on page 1). */}
+          {/* Header - caret + H1 share one translate; caret sits left of H1 (no layout slot on page 1). */}
           {/* z-20 above body (z-0): step 2/3 glows + motion layers sit later in DOM and otherwise steal hover from the close control. */}
           <div className="relative z-20 shrink-0 overflow-visible px-5 pb-3 pt-5 sm:px-6 sm:pb-3.5 sm:pt-6">
             <div className="flex items-start justify-between gap-4">

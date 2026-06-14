@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// HUGINN — wise-advisor sub-agent (proto-Huginn)
+// HUGINN - wise-advisor sub-agent (proto-Huginn)
 //
 // S31 H2. Per Nuro "should I?" gate + Marathon 8 / Corvus dissent
 // archetype. Provides counsel before high-stakes actions; observe-only
@@ -86,7 +86,7 @@ interface RuleContext {
 
 type Rule = (ctx: RuleContext) => Promise<CounselSignal | null>
 
-// Rule 1: budget proximity — does the proposer have authority for this action?
+// Rule 1: budget proximity - does the proposer have authority for this action?
 const ruleBudgetProximity: Rule = async ({ db, input }) => {
   if (!input.valueUsd || input.valueUsd <= 0) return null
   try {
@@ -139,7 +139,7 @@ const ruleBudgetProximity: Rule = async ({ db, input }) => {
   }
 }
 
-// Rule 2: reputation tier — proposer's current standing.
+// Rule 2: reputation tier - proposer's current standing.
 const ruleReputationTier: Rule = async ({ db, input }) => {
   try {
     const r = await db.query(
@@ -213,7 +213,7 @@ const ruleAgentStateGate: Rule = async ({ db, input }) => {
   }
 }
 
-// Rule 4: tx-cap proximity — action value vs. effective tx-cap cap.
+// Rule 4: tx-cap proximity - action value vs. effective tx-cap cap.
 const ruleCapProximity: Rule = async ({ db, input }) => {
   if (!input.valueUsd || input.valueUsd <= 0) return null
   try {
@@ -272,7 +272,7 @@ const ruleRecentFailures: Rule = async ({ db, input }) => {
   }
 }
 
-// Rule 6: doc-drift relevance — recent breaking changes in upstream docs
+// Rule 6: doc-drift relevance - recent breaking changes in upstream docs
 // that touch this action's domain. e.g. on-chain bridge actions are
 // relevant to LZ doc-drift.
 const ruleDocDriftRelevance: Rule = async ({ db, input }) => {
@@ -398,7 +398,7 @@ export async function counsel(db: Pool, input: CounselInput): Promise<CounselRes
   const alt = recommendedAlternative(verdict, signals)
 
  // Record the counsel as a Huginn prediction. Predict the action's
- // outcome based on the verdict — endorse → expects success; dissent
+ // outcome based on the verdict - endorse → expects success; dissent
  // → expects failure (or that the proposer holds off). The scorer
  // grades us on whether reality matched.
   let predictionId: string | null = null
@@ -443,8 +443,8 @@ export async function counsel(db: Pool, input: CounselInput): Promise<CounselRes
  * Bootstrap Huginn's push-mode subscriptions. Called once at boot from
  * src/index.ts. Subscribes to topics where Huginn should auto-publish
  * counsel:
- * - external-doc-drift:breaking — proposes pausing ops until reviewed
- * - (future) agent-state-gate-transition — proposes operational responses
+ * - external-doc-drift:breaking - proposes pausing ops until reviewed
+ * - (future) agent-state-gate-transition - proposes operational responses
  *
  * The subscriber writes a counsel message back to the bus on the
  * `huginn-counsel` topic. Subscribers to THAT topic (Nuro, admin UI)
@@ -550,14 +550,14 @@ async function notifyAdminBudgetLow(ev: {
     const icon = ev.severity === 'near-zero' ? '🔴' : '🟡'
     const headline = ev.severity === 'near-zero' ? 'BUDGET CRITICAL' : 'BUDGET LOW'
     const text = [
-      `${icon} <b>${headline}</b> — ${ev.agentId}`,
+      `${icon} <b>${headline}</b> - ${ev.agentId}`,
       ``,
       `Period: ${ev.period}`,
       `Remaining: $${ev.remainingUsd.toFixed(2)} / $${ev.authorityUsd.toFixed(2)} (${ev.remainingPct.toFixed(1)}%)`,
       ``,
       ev.severity === 'near-zero'
-        ? `≤5% — Huginn will dissent on every high-value proposal until refilled.`
-        : `≤20% — next large action will score caution on cap-proximity.`,
+        ? `≤5% - Huginn will dissent on every high-value proposal until refilled.`
+        : `≤20% - next large action will score caution on cap-proximity.`,
       ``,
       `<i>Refill: POST /api/agents/${ev.agentId}/budget/refill</i>`,
     ].join('\n')

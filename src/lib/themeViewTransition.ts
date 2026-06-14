@@ -31,7 +31,7 @@ export function runThemeCrossfade(applyDom: () => void): void {
     inset: "0",
     zIndex: "2147483646",
     pointerEvents: "none",
- /* Neutral curtain — readable in light and dark before/after swap */
+ /* Neutral curtain - readable in light and dark before/after swap */
     background: "rgba(0, 0, 0, 0.55)",
     opacity: "0",
     transition: `opacity ${fadeIn}ms ${EASING}`,

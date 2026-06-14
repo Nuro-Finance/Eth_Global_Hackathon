@@ -49,7 +49,7 @@ export async function hypeBridgeAndForward(
     const feeAmount = amountHypeWei.mul(CONFIG.FEE_PERCENT).div(100)
     const swapAmount = amountHypeWei.sub(feeAmount)
 
- // Helm tx-cap — value cap on the FULL bridge cycle (amountHype).
+ // Helm tx-cap - value cap on the FULL bridge cycle (amountHype).
  // We cap the outer move once rather than once-per-internal-tx so the
  // cap reflects user-perceived value at risk. HYPE → USD via CoinGecko
  // (5-min cached); on price-feed failure valueUsd is NaN and the gate

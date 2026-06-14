@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { CCTP_DOMAINS, resolveCCTPDomains, getCCTPDestRpc } from '../bridge'
 
-// ── CCTP domain resolution (pure helpers — no RPC, no env surprises) ────────
+// ── CCTP domain resolution (pure helpers - no RPC, no env surprises) ────────
 // Tests the routing logic that determines:
 // (a) which CCTP domain id to pass to depositForBurn on the source chain
 // (b) which RPC URL to use for receiveMessage on the destination chain
@@ -56,7 +56,7 @@ describe('resolveCCTPDomains (A7)', () => {
   })
 
   it('throws with informative message naming the chain', () => {
- // Error message quality matters — drift here in prod = on-call fighting a bad error
+ // Error message quality matters - drift here in prod = on-call fighting a bad error
     try {
       resolveCCTPDomains(8453, 42)
       expect.fail('expected throw')

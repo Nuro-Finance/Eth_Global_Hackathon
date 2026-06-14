@@ -2,7 +2,7 @@
  * Centralized chain-icon rendering (Session 23 Thread B).
  *
  * Previously we hand-wrote 23 SVGs into public/assets/images/chains/, and one
- * of them (Arbitrum) was visibly wrong — brand inaccuracy. Rather than keep
+ * of them (Arbitrum) was visibly wrong - brand inaccuracy. Rather than keep
  * hand-writing compact-but-fragile SVGs, we use @web3icons/react, which
  * covers all 23 of our supported chains with real brand-kit SVGs.
  *
@@ -89,7 +89,7 @@ export const CHAIN_ID_TO_NAME: Record<number, string> = {
 };
 
 export interface ChainIconProps {
- /** Display name (e.g. "Arbitrum") — preferred. */
+ /** Display name (e.g. "Arbitrum") - preferred. */
     name?: string;
  /** EVM chain id (e.g. 42161). Used if `name` omitted. */
     chainId?: number;
@@ -97,7 +97,7 @@ export interface ChainIconProps {
     size?: number;
  /** Optional wrapper classes (for rounded bg, ring, etc). */
     className?: string;
- /** Variant — "branded" (color), "mono" (single-color), or "background" */
+ /** Variant - "branded" (color), "mono" (single-color), or "background" */
     variant?: "branded" | "mono" | "background";
 }
 
@@ -110,7 +110,7 @@ export function ChainIcon({ name, chainId, size = 40, className, variant = "bran
     const iconId = resolvedName ? CHAIN_NAME_TO_WEB3ICONS_ID[resolvedName] : undefined;
 
     if (!iconId) {
- // Fallback — colored circle with first letter
+ // Fallback - colored circle with first letter
         const letter = (resolvedName || "?").charAt(0).toUpperCase();
         return (
             <div

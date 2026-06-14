@@ -12,10 +12,10 @@ import {
 /** Inferred from app sidebar density (~240px shell, ~200px content column). */
 export const ASSISTANT_CHAT_NAV_RAIL_WIDTH_PX = 200;
 
-/** Must match motion.aside `p-[10px]` — gap between nav shell and chat shell. */
+/** Must match motion.aside `p-[10px]` - gap between nav shell and chat shell. */
 export const ASSISTANT_CHAT_NAV_CHROME_GAP_PX = 10;
 
-/** Aside outer radius (34px) minus aside padding (10px) — single shell for nav + chat. */
+/** Aside outer radius (34px) minus aside padding (10px) - single shell for nav + chat. */
 export const ASSISTANT_CHAT_SHELL_RADIUS_CLASS = "rounded-[24px]";
 
 export const ASSISTANT_CHAT_SHELL_CLASS = cn(

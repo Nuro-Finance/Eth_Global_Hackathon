@@ -9,7 +9,7 @@ import {
   type ReactNode,
 } from "react";
 
-/** Dispatched on header reload — hooks refetch without importing this context. */
+/** Dispatched on header reload - hooks refetch without importing this context. */
 export const NURO_DASHBOARD_REFRESH_EVENT = "nuro:dashboard-refresh";
 
 const REFRESH_MIN_MS = 400;

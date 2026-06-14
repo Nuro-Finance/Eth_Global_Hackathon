@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * InlineCardChat — per-card agent chat (Variant B: Card Flips to Console).
+ * InlineCardChat - per-card agent chat (Variant B: Card Flips to Console).
  *
  * 2026-05-25 v2: Rebuilt from design Council output.
  * - Stitch's Nuro Granite tokens (#0d90ff primary, white/8% glass, white/10% borders)
@@ -55,7 +55,7 @@ const CONSOLE_SPRING = { type: "spring" as const, stiffness: 260, damping: 30 };
 const FADE_IN = { duration: 0.18, ease: [0.22, 1, 0.36, 1] as const };
 
 /**
- * M12 trust-signal pill labels — short past-tense for each tool that fires.
+ * M12 trust-signal pill labels - short past-tense for each tool that fires.
  * Mirrors getToolFriendlyLabel in src/lib/agent-tools.ts but inlined here
  * because that file pulls backend-only imports (pg, issuers). Keep in sync
  * with the backend when new tools land.
@@ -112,13 +112,13 @@ interface InlineCardChatProps {
  /** Controlled open state (e.g. Agent Cards Chat CTA). */
   expanded?: boolean;
  /**
- * When true, hide the collapsed composer until expanded — opened via an
+ * When true, hide the collapsed composer until expanded - opened via an
  * external Chat button on the card row instead.
  */
   externalTrigger?: boolean;
 }
 
-// Persona dot color — used as a status indicator on the pill. Subtle, not loud.
+// Persona dot color - used as a status indicator on the pill. Subtle, not loud.
 const PERSONA_DOT: Record<PersonaKey, string> = {
   banker: "bg-sky-400 shadow-[0_0_8px_rgba(56,189,248,0.6)]",
   concierge: "bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]",
@@ -370,7 +370,7 @@ export default function InlineCardChat({
         }
  // M12 Day 1 UI-state-sync ( lock 2026-05-29): if the
  // agent fired any tools that mutated state (e.g. freeze_card),
- // the response includes `stateChanges` — an array of
+ // the response includes `stateChanges` - an array of
  // { entity, id, patch }. Dispatch each as a window CustomEvent
  // so any hook holding card/agent/vault state can listen and
  // patch its local copy IN THE SAME ANIMATION FRAME as the
@@ -548,7 +548,7 @@ export default function InlineCardChat({
   return (
     <div
       ref={containerRef}
- // Merges with the parent card surface. No own bg/border — the
+ // Merges with the parent card surface. No own bg/border - the
  // CardListItem owns the visual envelope. Thin top divider + tight
  // top padding so it reads as ONE living div.
       className="mt-5 pt-4 border-t border-white/[0.06] w-full"
@@ -566,7 +566,7 @@ export default function InlineCardChat({
             : "border-white/[0.08]",
         )}
       >
-        {/* Persona pill — tappable to open settings popover.
+        {/* Persona pill - tappable to open settings popover.
             Dot indicator + label. Stitch style: tight, monochrome chip. */}
         {persona && (
           <button
@@ -615,7 +615,7 @@ export default function InlineCardChat({
           />
         </div>
 
-        {/* Collapse chevron — only visible when expanded */}
+        {/* Collapse chevron - only visible when expanded */}
         <AnimatePresence>
           {expanded && (
             <motion.button
@@ -744,7 +744,7 @@ export default function InlineCardChat({
             transition={CONSOLE_SPRING}
             className="overflow-hidden"
           >
-            {/* Quick chips — Sparkles glyph + horizontal scroll-safe wrap.
+            {/* Quick chips - Sparkles glyph + horizontal scroll-safe wrap.
                 Stitch density: pill chips with subtle borders, tighter type. */}
             <div className="mt-3 flex flex-wrap items-center gap-1.5">
               <Sparkles className="size-3 text-white/30 shrink-0" />
@@ -765,7 +765,7 @@ export default function InlineCardChat({
                   {qa.label}
                 </button>
               ))}
-              {/* Phase 2 .self_learn: "Want a report?" chip — distinct accent
+              {/* Phase 2 .self_learn: "Want a report?" chip - distinct accent
                   color so it reads as a different kind of action. Toggles the
                   cadence picker below the chip row. */}
               <button
@@ -786,7 +786,7 @@ export default function InlineCardChat({
               </button>
             </div>
 
-            {/* Phase 2 .self_learn: cadence picker — drops in when chip toggled.
+            {/* Phase 2 .self_learn: cadence picker - drops in when chip toggled.
                 Three preset cadences + Other (custom free-text). Pressing a
                 preset fires generation immediately. Pressing Other expands
                 the text input; Enter or the inline Send button fires it. */}
@@ -866,7 +866,7 @@ export default function InlineCardChat({
 
             {/* Conversation scroll area. Bubbles ride on the parent card surface
                 so they share the glass envelope but read as distinct messages.
-                v15.4: `chat-scroll` utility — hidden native scrollbars + smooth
+                v15.4: `chat-scroll` utility - hidden native scrollbars + smooth
                 scroll behavior + overscroll-contain so wheel events don't chain
                 to the page when conversation maxes out. */}
             <div
@@ -903,7 +903,7 @@ export default function InlineCardChat({
                             invoked tool_use blocks that ACTUALLY executed, render a
                             small chip per tool with a friendly past-tense label.
                             Concrete proof that the agent's words match a real
-                            backend action — not a hallucinated promise.
+                            backend action - not a hallucinated promise.
                             Only renders for assistant messages with toolsFired. */}
                         {m.role === "assistant" && m.toolsFired && m.toolsFired.length > 0 && (
                           <div className="flex flex-wrap gap-1.5 max-w-[90%]">

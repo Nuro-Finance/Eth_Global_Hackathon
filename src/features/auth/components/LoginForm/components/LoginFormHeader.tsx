@@ -13,7 +13,7 @@ export function LoginFormHeader({
   isForgotPassword?: boolean;
   isSent?: boolean;
   isVerifyEmail?: boolean;
- /** Replaces subtitle copy in the h2 slot only — h1 and header spacing unchanged. */
+ /** Replaces subtitle copy in the h2 slot only - h1 and header spacing unchanged. */
   bannerError?: string | null;
 }) {
   const defaultSubtitle = isVerifyEmail

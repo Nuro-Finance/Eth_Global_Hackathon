@@ -13,7 +13,7 @@ const iconButtonVariants = cva(
           "bg-[var(--color-bg-secondary)] dark:bg-[var(--color-bg-input)] hover:bg-[var(--color-bg-hover)] dark:hover:bg-[var(--color-bg-input-hover)] text-[var(--color-text-muted)] dark:backdrop-blur-[var(--glass-blur)]",
         ghost:
           "bg-white/[0.03] hover:bg-white/[0.05] text-[var(--color-text-primary)] transition-all duration-200",
- /** Header / page toolbar only — sits on `--color-bg-primary`, matches nav shell. */
+ /** Header / page toolbar only - sits on `--color-bg-primary`, matches nav shell. */
         canvas:
           "bg-white/[0.04] hover:bg-[var(--color-bg-hover)] text-[var(--color-text-primary)] transition-all duration-200",
         outline:

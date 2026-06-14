@@ -1,5 +1,5 @@
 // Test the in-memory cache backend. Upstash backend is exercised in
-// integration only — unit tests would just be re-verifying our HTTP mock.
+// integration only - unit tests would just be re-verifying our HTTP mock.
 //
 // Coverage:
 // - get / set / del round-trip

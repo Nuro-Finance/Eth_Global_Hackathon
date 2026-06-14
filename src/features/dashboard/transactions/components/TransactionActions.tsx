@@ -48,15 +48,15 @@ export default function TransactionActions({
     onAddTransaction,
   });
 
- // Day-7 demo polish: replace the "May 01 — May 14, 2026" range picker
+ // Day-7 demo polish: replace the "May 01 - May 14, 2026" range picker
  // with a simple "Today, <date>" pill. Two reasons:
  // 1. Investors don't need a range picker on a freshly-signed-up demo
- // account that has no historical data — the default range was
+ // account that has no historical data - the default range was
  // confusing visual noise.
  // 2. Stating "Today, <date>" anchors the demo in real time without
  // requiring user interaction.
  // The list itself still renders ALL transactions (no client-side date
- // filter applied) — we just don't show the picker. Post-pitch we can
+ // filter applied) - we just don't show the picker. Post-pitch we can
  // bring the picker back as an OPTIONAL control behind a Filter button.
   const todayLabel = new Date().toLocaleDateString("en-US", {
     month: "short",

@@ -46,7 +46,7 @@ interface CardSectionProps {
   cardColor?: string;
   onReloadClick?: () => void;
   onWithdrawClick?: () => void;
- /** Set by page tier slot — not viewport JS. */
+ /** Set by page tier slot - not viewport JS. */
   layout?: CardSectionLayout;
  /** Responsive home: SVG NuroCodeCard face instead of CreditCard. */
   useNuroCodeCard?: boolean;

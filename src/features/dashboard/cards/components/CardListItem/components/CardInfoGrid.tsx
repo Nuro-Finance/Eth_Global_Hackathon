@@ -24,7 +24,7 @@ interface CardInfoGridProps {
   secretsLoading?: boolean;
   secrets?: { pan: string | null; cvv: string | null; expiry: string | null } | null;
   onToggleSecrets?: () => void;
- /** User refresh — pulse overlay on numeric fields without layout shift. */
+ /** User refresh - pulse overlay on numeric fields without layout shift. */
   isRefreshing?: boolean;
 }
 

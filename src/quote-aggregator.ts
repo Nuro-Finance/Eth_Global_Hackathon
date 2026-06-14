@@ -1,6 +1,6 @@
 // ─── QUOTE AGGREGATOR ───────────────────────────────────────────────────────
 //
-// Session 30 Phase 2 — unified entry point for swap-quote previews. Before
+// Session 30 Phase 2 - unified entry point for swap-quote previews. Before
 // this, FE components had to know which backend endpoint to call based on
 // chain:
 // - Ethereum/Base/Arbitrum/… → /quote/swap (0x)
@@ -13,11 +13,11 @@
 // (b) surface "routed via Jupiter · 2.1% better than 0x" badges.
 //
 // Today's sources:
-// - zerox — our existing previewSwapQuote() in swap.ts
-// - jupiter — getJupiterQuoteCached() in jupiter-client.ts
+// - zerox - our existing previewSwapQuote() in swap.ts
+// - jupiter - getJupiterQuoteCached() in jupiter-client.ts
 //
 // Same-chain parallel fan-out (0x + 1inch + Uniswap-direct for EVM, for
-// example) is the natural next expansion — this module's shape is ready
+// example) is the natural next expansion - this module's shape is ready
 // for it: just add a new QuoteProbe entry.
 //
 // Failure model: any source that errors or times out is logged and
@@ -61,7 +61,7 @@ export interface UnifiedQuote {
   slippageBps: number
   priceImpactBps?: number    // only Jupiter today; 0x doesn't return this directly
   routeCount?: number        // only Jupiter
-  routeLabels?: string[]     // only Jupiter — "Raydium", "Orca", etc.
+  routeLabels?: string[]     // only Jupiter - "Raydium", "Orca", etc.
   minSwapUsd: number
   fetchedAtMs: number
 }
@@ -72,7 +72,7 @@ export interface AggregatedQuote extends UnifiedQuote {
   alternatives: UnifiedQuote[]
  /** Sources that were probed but failed or timed out. For debug + UX hints. */
   failedSources: Array<{ source: QuoteSource; reason: string }>
- /** Fan-out latency — useful for server-side SLA tracking. */
+ /** Fan-out latency - useful for server-side SLA tracking. */
   elapsedMs: number
 }
 
@@ -126,7 +126,7 @@ async function probeZeroX(req: QuoteRequest): Promise<UnifiedQuote | null> {
 async function probeJupiter(req: QuoteRequest): Promise<UnifiedQuote | null> {
   if (req.chainId !== -1) return null // Jupiter is Solana-only
 
- // Phase 2.5 — refresh the DB-backed allowlist before lookups so admin
+ // Phase 2.5 - refresh the DB-backed allowlist before lookups so admin
  // enable/disable propagates without restart.
   await ensureSolanaAllowlistFresh()
 
@@ -218,7 +218,7 @@ async function probeOneInch(req: QuoteRequest): Promise<UnifiedQuote | null> {
 
 // Declarative probe registry. Add Uniswap-direct / Kyber here when they
 // land; aggregator iterates this list in parallel. 1inch is inert when
-// ONEINCH_API_KEY is not set in the env — the probe returns null silently.
+// ONEINCH_API_KEY is not set in the env - the probe returns null silently.
 const PROBES: Array<{ source: QuoteSource; run: (r: QuoteRequest) => Promise<UnifiedQuote | null> }> = [
   { source: 'zerox',   run: probeZeroX   },
   { source: 'jupiter', run: probeJupiter },
@@ -243,7 +243,7 @@ function withTimeout<T>(p: Promise<T>, ms: number): Promise<T> {
  * null or threw.
  *
  * Probes that return null (not applicable to this chain) are silently
- * omitted — only actual failures show in failedSources.
+ * omitted - only actual failures show in failedSources.
  */
 export async function getBestQuote(req: QuoteRequest): Promise<AggregatedQuote | null> {
   const started = Date.now()

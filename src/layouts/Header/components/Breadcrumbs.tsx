@@ -60,7 +60,7 @@ export function Breadcrumbs({ scrolled = false }: { scrolled?: boolean }) {
  // Skip the "dashboard" segment if it's the first one, as "Home" covers it
     if (segment.toLowerCase() === "dashboard" && index === 0) return;
 
- // /dashboard/home-responsive lab URL — Home crumb already points at /dashboard
+ // /dashboard/home-responsive lab URL - Home crumb already points at /dashboard
     if (segment === "home-responsive") return;
 
     if (breadcrumbTrail.some((crumb) => crumb.href === currentPath)) return;

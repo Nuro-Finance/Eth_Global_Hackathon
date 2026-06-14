@@ -7,7 +7,7 @@ const BACKEND_URL =
  * GET /api/cards/[id]/secrets
  *
  * Fetches real card secrets (PAN, CVV, expiry) from the Issuer API.
- * This is the ONLY way to get real card details — never store CVV locally.
+ * This is the ONLY way to get real card details - never store CVV locally.
  */
 export async function GET(
   request: NextRequest,

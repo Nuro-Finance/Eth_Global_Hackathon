@@ -8,7 +8,7 @@ interface CardContentProps {
 }
 
 /**
- * Card content overlay — the PNG card face already contains card number,
+ * Card content overlay - the PNG card face already contains card number,
  * crypto icons, and VISA logo. Cardholder name is displayed next to the
  * card in the parent layout. No overlay needed.
  */

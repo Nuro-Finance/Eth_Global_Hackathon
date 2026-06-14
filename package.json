@@ -16,6 +16,7 @@
     "dev:fe": "doppler run -- next dev -p 2800 --turbopack",
     "lint:fe": "next lint",
     "seed:demo": "tsx scripts/seed-demo-account.ts",
+    "wipe:dev-user": "tsx scripts/wipe-dev-user.ts",
     "seed:extra-cards": "tsx scripts/seed-extra-cards.ts",
     "lint": "$npm_execpath run lint:js",
     "lint:fix": "eslint --fix '**/*.{js,ts,json}' && prettier --write .",

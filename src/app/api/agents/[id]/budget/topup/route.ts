@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-// Proxy to Express BE /api/agents/:id/budget/topup — user-facing
+// Proxy to Express BE /api/agents/:id/budget/topup - user-facing
 // budget top-up (S34 Marathon 9 / A1). Pairs with the BudgetTopupForm
 // on the agent-wallet Detail panel's Budget tab.
 const BACKEND_URL =

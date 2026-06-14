@@ -45,20 +45,20 @@ const formatTime = (timestamp?: number) => {
   const date = new Date(timestamp);
   return date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true }).toLowerCase();
 };
-/** Icon row: no `opacity-*` / `transition-opacity` on buttons — Chromium + blur stacks often “stick” :hover on opacity layers. Use color alpha + hover:text only; hover gated to real hover devices. */
+/** Icon row: no `opacity-*` / `transition-opacity` on buttons - Chromium + blur stacks often “stick” :hover on opacity layers. Use color alpha + hover:text only; hover gated to real hover devices. */
 const messageActionBtn =
   "p-1 rounded touch-manipulation outline-none transition-[color] duration-150 [-webkit-tap-highlight-color:transparent] " +
   "text-[color-mix(in_srgb,var(--color-text-muted)_45%,transparent)] " +
   "[@media(hover:hover)]:hover:text-[var(--color-text-primary)] " +
   "focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]/40 focus-visible:ring-offset-0";
 
-/** Timestamp + actions: hidden until hover (fine pointer) or tap-to-toggle (`openMessageMetaId`). Visibility on wrapper only — no opacity transitions (avoids blur-stack glitches). */
+/** Timestamp + actions: hidden until hover (fine pointer) or tap-to-toggle (`openMessageMetaId`). Visibility on wrapper only - no opacity transitions (avoids blur-stack glitches). */
 const messageMetaRevealBase =
   "flex items-center gap-2 invisible pointer-events-none " +
   "[@media(hover:hover)]:group-hover/msg:visible [@media(hover:hover)]:group-hover/msg:pointer-events-auto " +
   "focus-within:visible focus-within:pointer-events-auto";
 
-/** Same timing as header live dot — keeps thread label indicator in phase with subtitle pulse. */
+/** Same timing as header live dot - keeps thread label indicator in phase with subtitle pulse. */
 const NURO_ASSISTANT_DOT_LIVE =
   "h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--color-success)] [animation:var(--animate-live-breathe)]";
 const NURO_ASSISTANT_DOT_DEMO =
@@ -170,7 +170,7 @@ function byokVendorLabel(provider: ByokProvider): string {
   return "Gemini";
 }
 
-/** Runs before first paint when BYOK intro should show — same rules as post-hydration gate. */
+/** Runs before first paint when BYOK intro should show - same rules as post-hydration gate. */
 function sanitizeByokLocalStorage() {
   if (typeof window === "undefined") return;
   const oa = window.localStorage.getItem("nuro.chat.key.openai")?.trim() ?? "";
@@ -218,11 +218,11 @@ function readInitialByokIntroMount(): { keysModalOpen: boolean; byokEntryCascade
   return { keysModalOpen: false, byokEntryCascadeKey: 0 };
 }
 
-/** Shared easing — BYOK overlay scrim */
+/** Shared easing - BYOK overlay scrim */
 const BYOK_MODAL_EASE = [0.33, 1, 0.68, 1] as const;
 
 /**
- * Shell max-width/height — CSS only when stepping entry → keys (no Framer `layout` on card).
+ * Shell max-width/height - CSS only when stepping entry → keys (no Framer `layout` on card).
  */
 const BYOK_CARD_LAYOUT_TWEEN = {
   type: "tween" as const,
@@ -237,7 +237,7 @@ const BYOK_OVERLAY_OPEN_DURATION = 0.38;
 /** Keys sheet: ~1.25s total; intro/success reuse same stagger + row duration (fewer rows = shorter total). */
 const BYOK_CASCADE_TOTAL_S = 1.25;
 const BYOK_CASCADE_ROW_DURATION = 0.3;
-/** Title, subtitle, three provider blocks (icon+row+field each), Continue — one stagger slot per block. */
+/** Title, subtitle, three provider blocks (icon+row+field each), Continue - one stagger slot per block. */
 const BYOK_CASCADE_KEYS_ROW_COUNT = 6;
 const BYOK_CASCADE_STAGGER =
   (BYOK_CASCADE_TOTAL_S - BYOK_CASCADE_ROW_DURATION) / (BYOK_CASCADE_KEYS_ROW_COUNT - 1);
@@ -273,7 +273,7 @@ const BYOK_MODAL_CASCADE_VARIANTS = {
   },
 };
 
-/** Blur must not sit under an opacity tween — Chromium composites backdrop-filter late. */
+/** Blur must not sit under an opacity tween - Chromium composites backdrop-filter late. */
 const BYOK_GLASS_SURFACE_STYLE: CSSProperties = {
   WebkitBackdropFilter: "blur(var(--glass-blur-modal))",
   backdropFilter: "blur(var(--glass-blur-modal))",
@@ -439,7 +439,7 @@ const BYOK_ICON_CLAUDE = "/Claude%20App%20Icon.svg";
 /** Official Gemini icon asset (Wikimedia Commons: Google Gemini icon 2025), wrapped to 34×34 tile to match other BYOK icons. */
 const BYOK_ICON_GEMINI = "/Gemini%20App%20Icon.svg";
 
-/** Left of Test: “Verifying…”, then valid / invalid — never duplicates the Test control. */
+/** Left of Test: “Verifying…”, then valid / invalid - never duplicates the Test control. */
 function ByokVerifyStatusSlot({
   provider,
   verifyBusy,
@@ -566,7 +566,7 @@ function ChatPanelConfirmDialog({
 }
 
 /**
- * Chat panel v2 — scroll region has NO CSS mask (avoids Chromium mask+hover glitches).
+ * Chat panel v2 - scroll region has NO CSS mask (avoids Chromium mask+hover glitches).
  * Top/bottom fade uses gradient plates (pointer-events none). Composer is clipped with overflow-hidden.
  */
 export function AssistantChatPanelV2({ onClose }: AssistantChatPanelProps) {
@@ -646,7 +646,7 @@ export function AssistantChatPanelV2({ onClose }: AssistantChatPanelProps) {
     }
   }, [keysModalOpen]);
 
- /** When true, `setKeysPage("entry")` / success reset wait until BYOK overlay exit finishes — keeps scrim + card one surface while fading. */
+ /** When true, `setKeysPage("entry")` / success reset wait until BYOK overlay exit finishes - keeps scrim + card one surface while fading. */
   const byokOverlayClosePendingRef = useRef(false);
   const [disconnectAllConfirmOpen, setDisconnectAllConfirmOpen] = useState(false);
  /** Turning off the active live tier switch → demo; confirm before `setModel("demo")`. */
@@ -764,7 +764,7 @@ export function AssistantChatPanelV2({ onClose }: AssistantChatPanelProps) {
       }
     }
   };
- /** Key material in LS; `byokCommitSaved` is set only on Save/Continue — Test never sets it. */
+ /** Key material in LS; `byokCommitSaved` is set only on Save/Continue - Test never sets it. */
   const lsByokKey = (storageKey: string) =>
     typeof window !== "undefined" ? window.localStorage.getItem(storageKey)?.trim() ?? "" : "";
 
@@ -789,11 +789,11 @@ export function AssistantChatPanelV2({ onClose }: AssistantChatPanelProps) {
 
   const hasConnectedProvider = hasPersistedOpenAi || hasPersistedAnthropic || hasPersistedGemini;
 
- /** BYOK keys sheet — same rule as hasPersisted*: LS key match + commit flag. */
+ /** BYOK keys sheet - same rule as hasPersisted*: LS key match + commit flag. */
   const lsPersistedOpenAiKey = lsByokKey("nuro.chat.key.openai");
   const lsPersistedAnthropicKey = lsByokKey("nuro.chat.key.anthropic");
   const lsPersistedGeminiKey = lsByokKey("nuro.chat.key.gemini");
- /** Committed LS key matches this row’s input — show Clear (removes persisted key + drops live model to demo when it was active). */
+ /** Committed LS key matches this row’s input - show Clear (removes persisted key + drops live model to demo when it was active). */
   const showByokModalClearOpenAi =
     lsPersistedOpenAiKey.length > 0 &&
     openAi.key.trim() === lsPersistedOpenAiKey &&
@@ -806,9 +806,9 @@ export function AssistantChatPanelV2({ onClose }: AssistantChatPanelProps) {
     lsPersistedGeminiKey.length > 0 &&
     gemini.key.trim() === lsPersistedGeminiKey &&
     byokCommitSaved("gemini");
- /** Persisted keys + user picked a live provider — drives tier menu, header “Live”, etc. Demo mode always uses the demo shell even if keys remain in storage. */
+ /** Persisted keys + user picked a live provider - drives tier menu, header “Live”, etc. Demo mode always uses the demo shell even if keys remain in storage. */
   const isLiveByokMode = hasConnectedProvider && model !== "demo";
- /** Single stored BYOK key — which vendor is connected (persisted). */
+ /** Single stored BYOK key - which vendor is connected (persisted). */
   const connectedByokVendor: ByokProvider | null = hasPersistedOpenAi
     ? "openai"
     : hasPersistedAnthropic
@@ -876,7 +876,7 @@ export function AssistantChatPanelV2({ onClose }: AssistantChatPanelProps) {
         savedMode === "demo" &&
         (savedOpenAi || savedAnthropic || savedGemini)
       ) {
- /** Mode left on demo after BYOK commit — align with committed vendor so live UI shows. */
+ /** Mode left on demo after BYOK commit - align with committed vendor so live UI shows. */
         const oaC = !!savedOpenAi && window.localStorage.getItem("nuro.chat.byok.commit.openai") === "1";
         const antC = !!savedAnthropic && window.localStorage.getItem("nuro.chat.byok.commit.anthropic") === "1";
         const gemC = !!savedGemini && window.localStorage.getItem("nuro.chat.byok.commit.gemini") === "1";
@@ -1047,7 +1047,7 @@ export function AssistantChatPanelV2({ onClose }: AssistantChatPanelProps) {
   };
 
  /**
- * Full demo scroll thread — use only when explicitly requested (e.g. dev reset).
+ * Full demo scroll thread - use only when explicitly requested (e.g. dev reset).
  * Never run on disconnect: users keep their real chat after connecting once.
  */
   const restoreDemoChatTranscript = () => {
@@ -1101,7 +1101,7 @@ export function AssistantChatPanelV2({ onClose }: AssistantChatPanelProps) {
  * when `fallbackToDemo` is on.
  *
  * `priorMessages` is the conversation history INCLUDING the just-added user
- * turn but EXCLUDING the pending assistant placeholder — caller computes it
+ * turn but EXCLUDING the pending assistant placeholder - caller computes it
  * before calling setMessages, since reading state from inside the callback
  * is racy.
  */
@@ -1113,7 +1113,7 @@ export function AssistantChatPanelV2({ onClose }: AssistantChatPanelProps) {
     liveDisplayLabel: string,
     priorMessages: ChatMessage[] = []
   ) => {
- // === Demo path — unchanged from Chris's original ===
+ // === Demo path - unchanged from Chris's original ===
     if (providerForTurn === "demo") {
       const timeoutId = window.setTimeout(() => {
         setMessages((prev) =>
@@ -1132,7 +1132,7 @@ export function AssistantChatPanelV2({ onClose }: AssistantChatPanelProps) {
       return;
     }
 
- // === Live path — real LLM streaming via /api/chat ===
+ // === Live path - real LLM streaming via /api/chat ===
     const apiKey =
       typeof window !== "undefined"
         ? window.localStorage.getItem(`nuro.chat.key.${providerForTurn}`)?.trim() ?? ""
@@ -1145,7 +1145,7 @@ export function AssistantChatPanelV2({ onClose }: AssistantChatPanelProps) {
           : geminiModelTier;
 
     if (!apiKey) {
- // Key disappeared between turn-start and now — fallback to demo if allowed.
+ // Key disappeared between turn-start and now - fallback to demo if allowed.
       const fallbackContent = fallbackToDemo
         ? `Demo fallback: ${liveDisplayLabel} key is no longer connected. Continuing in Demo Mode for this reply.`
         : "Live provider not connected. Add an API key in the keys panel.";
@@ -1257,7 +1257,7 @@ export function AssistantChatPanelV2({ onClose }: AssistantChatPanelProps) {
                 status: "sent",
                 content:
                   m.content && m.content.length > 0
-                    ? m.content // partial response received — keep what we have
+                    ? m.content // partial response received - keep what we have
                     : `Demo fallback: live provider error (${errMsg.slice(0, 80)}). Try again, or check your key.`,
               };
             }
@@ -1303,7 +1303,7 @@ export function AssistantChatPanelV2({ onClose }: AssistantChatPanelProps) {
     }
 
  // Build conversation history up to (but excluding) the assistant being
- // retried — i.e. all messages with id !== assistantId, in their current
+ // retried - i.e. all messages with id !== assistantId, in their current
  // order. Filter to those with content so we don't poison the thread with
  // pending placeholders.
     const priorMessagesForApi = messages.filter(
@@ -1411,7 +1411,7 @@ export function AssistantChatPanelV2({ onClose }: AssistantChatPanelProps) {
     };
 
  // Build the conversation history WITH the new user turn but WITHOUT the
- // pending assistant placeholder — that's what /api/chat needs as context.
+ // pending assistant placeholder - that's what /api/chat needs as context.
     const priorMessagesForApi = [...messages, userMsg];
 
     setMessages((prev) => [...prev, userMsg, assistantMsg]);
@@ -1486,7 +1486,7 @@ export function AssistantChatPanelV2({ onClose }: AssistantChatPanelProps) {
     if (!committed("gemini")) window.localStorage.removeItem("nuro.chat.key.gemini");
   };
 
- /** Discard draft key text when the sheet closes — inputs reflect only Save/Continue–committed LS keys. */
+ /** Discard draft key text when the sheet closes - inputs reflect only Save/Continue–committed LS keys. */
   const syncByokKeyInputsFromPersistence = () => {
     if (typeof window === "undefined") return;
     const oa = window.localStorage.getItem("nuro.chat.key.openai")?.trim() ?? "";
@@ -1549,7 +1549,7 @@ export function AssistantChatPanelV2({ onClose }: AssistantChatPanelProps) {
     }
   };
 
- /** Every time the BYOK sheet opens, drop orphan LS keys and align inputs — survives missed dismiss handlers while panel stays mounted. */
+ /** Every time the BYOK sheet opens, drop orphan LS keys and align inputs - survives missed dismiss handlers while panel stays mounted. */
   useEffect(() => {
     if (!keysModalOpen || typeof window === "undefined") return;
     byokVerifySessionRef.current += 1;
@@ -1588,7 +1588,7 @@ export function AssistantChatPanelV2({ onClose }: AssistantChatPanelProps) {
     const verifyToken = byokVerifySessionRef.current;
     setVerifyBusy(provider);
     try {
- /** Dev bypass for recordings (`1234`). Route mirrors this — client skips the round trip. */
+ /** Dev bypass for recordings (`1234`). Route mirrors this - client skips the round trip. */
       let ok = false;
       let errText: string | undefined;
       if (provider === "openai" && trimmed === "1234") {
@@ -1637,7 +1637,7 @@ export function AssistantChatPanelV2({ onClose }: AssistantChatPanelProps) {
       }
     } catch {
       if (verifyToken !== byokVerifySessionRef.current) return;
-      const msg = "Network error — could not reach verification";
+      const msg = "Network error - could not reach verification";
       if (provider === "openai") setOpenAi((prev) => ({ ...prev, health: "invalid", verifyMessage: msg }));
       else if (provider === "anthropic")
         setAnthropic((prev) => ({ ...prev, health: "invalid", verifyMessage: msg }));
@@ -2010,7 +2010,7 @@ export function AssistantChatPanelV2({ onClose }: AssistantChatPanelProps) {
         <ChatThreadAtmospherePlates />
       </div>
 
-      {/* Footer card — do NOT overflow-hidden the whole card (clips toolbar + bottom radius); clip only the textarea strip */}
+      {/* Footer card - do NOT overflow-hidden the whole card (clips toolbar + bottom radius); clip only the textarea strip */}
       <div
         ref={composerRef}
         className="absolute bottom-3 left-3 right-3 z-[60] rounded-[var(--radius-xl)] border border-white/5 bg-[var(--color-bg-secondary)] dark:bg-[var(--color-bg-glass)] glass-card-inner px-3 py-3 flex flex-col gap-2"
@@ -2295,14 +2295,14 @@ export function AssistantChatPanelV2({ onClose }: AssistantChatPanelProps) {
                 className="relative h-10 w-10 rounded-[var(--radius-md)] overflow-hidden"
                 variant="default"
               >
-                {/* Send icon — fades out when streaming */}
+                {/* Send icon - fades out when streaming */}
                 <span
                   className="absolute inset-0 flex items-center justify-center transition-all duration-200"
                   style={{ opacity: isStreaming ? 0 : 1, transform: isStreaming ? 'scale(0.6)' : 'scale(1)' }}
                 >
                   <Send className="h-4 w-4 text-white" />
                 </span>
-                {/* Stop icon — fades in when streaming */}
+                {/* Stop icon - fades in when streaming */}
                 <span
                   className="absolute inset-0 flex items-center justify-center transition-all duration-200"
                   style={{ opacity: isStreaming ? 1 : 0, transform: isStreaming ? 'scale(1)' : 'scale(0.6)' }}

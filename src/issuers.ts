@@ -4,12 +4,12 @@ import { CONFIG } from './config'
 import { IssuerContract } from './types'
 
 /**
- * Issuer's published RSA public key for card-secret reveals (production — only
+ * Issuer's published RSA public key for card-secret reveals (production - only
  * environment that exists). 1024-bit RSA, used with RSA-OAEP / SHA-1 padding.
  *
  * Sourced from card issuer integration docs. Full integration spec
  * lives in internal issuer-card-secrets skill docs. Do NOT change padding
- * or hash — SHA-256 returns 400 "Failed to Decrypt Session ID".
+ * or hash - SHA-256 returns 400 "Failed to Decrypt Session ID".
  */
 const ISSUER_PUBLIC_KEY_PEM = `-----BEGIN PUBLIC KEY-----
 MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCeZ9uCoxi2XvOw1VmvVLo88TLk
@@ -37,13 +37,13 @@ const issuingClient = axios.create({
     headers: { 'x-api-key': CONFIG.ISSUER_API_KEY },
 })
 
-// Helm egress-observe — observe outbound traffic to issuer API hosts.
+// Helm egress-observe - observe outbound traffic to issuer API hosts.
 try {
  // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { instrumentAxios } = require('./helm')
     instrumentAxios(onboardClient, 'issuers-onboarding')
     instrumentAxios(issuingClient, 'issuers-issuing')
-} catch { /* heimdall not initialized — skip */ }
+} catch { /* heimdall not initialized - skip */ }
 
 export async function onboardUser(
     firstName: string,
@@ -73,7 +73,7 @@ export interface IssuerCardDetails {
 
 // ─── LIST ISSUER CARDS ───────────────────────────────────────────────────────
 // Fetch all cards that exist for an Issuer user. Use this BEFORE createCard
-// to check if a card already exists — Issuer limits 1 card per user.
+// to check if a card already exists - Issuer limits 1 card per user.
 
 export async function listIssuerCards(issuerUserId: string): Promise<IssuerCardDetails[]> {
   try {
@@ -97,7 +97,7 @@ export async function getCardDetails(issuerCardId: string): Promise<IssuerCardDe
 export async function freezeCard(cardId: string, freeze: boolean): Promise<void> {
  // 2026-05-30: Issuer status enum is { 'active' | 'locked' } (discovered
  // via scripts/probe-issuer-freeze.ts). The 5/25 memory note saying
- // 'frozen' works was a false positive — only the unfreeze direction
+ // 'frozen' works was a false positive - only the unfreeze direction
  // had been walked. Real values:
  // freeze → PATCH /cards/{id} { status: 'locked' } ✓
  // unfreeze → PATCH /cards/{id} { status: 'active' } ✓
@@ -105,19 +105,19 @@ export async function freezeCard(cardId: string, freeze: boolean): Promise<void>
  // Other status values rejected with explicit message:
  // "body/status must be equal to one of the allowed values"
  // Don't try 'frozen', 'paused', 'suspended', 'inactive', 'blocked',
- // 'disabled', 'closed', 'terminated' — all hard-rejected.
+ // 'disabled', 'closed', 'terminated' - all hard-rejected.
  //
  // Other PATCH field shapes (isLocked, enabled:false, frozen:true, etc.)
  // returned 200 OK BUT the API silently accepts unknown fields and
- // ignores them — those "successes" don't actually freeze the card.
+ // ignores them - those "successes" don't actually freeze the card.
  // Only the status enum field has real validation + real effect.
   await issuingClient.patch(`/cards/${cardId}`, {
     status: freeze ? 'locked' : 'active',
   })
 }
 
-// ─── Issuer CARD DEBIT / CREDIT (Buy 1 — Session 28) ────────────────────────────
-// Conventional REST endpoints; actual Issuer path may differ — Issuer ops conversation
+// ─── Issuer CARD DEBIT / CREDIT (Buy 1 - Session 28) ────────────────────────────
+// Conventional REST endpoints; actual Issuer path may differ - Issuer ops conversation
 // pending. The helper calls the most likely path; if Issuer uses a different
 // shape (e.g. POST /transactions with type='debit'), swap this implementation
 // without changing the call sites.
@@ -151,7 +151,7 @@ export async function debitCard(
  // Idempotency key prevents double-debit if we retry due to timeout.
  // Issuer should recognize this key and return the original response on retry.
       idempotencyKey,
-      description: 'Nuro Buy 1 — card balance → crypto wallet',
+      description: 'Nuro Buy 1 - card balance → crypto wallet',
     }
   )
   return response.data
@@ -160,7 +160,7 @@ export async function debitCard(
 /**
  * Credit an amount BACK to the user's card (reverse of debitCard).
  * Used for reconciliation when Buy 1 mid-flight fails (Issuer debit succeeded
- * but on-chain transfer failed) — refund the user's card balance so they're
+ * but on-chain transfer failed) - refund the user's card balance so they're
  * not out the money. Operator-triggered, not user-facing.
  */
 export async function creditCard(
@@ -201,16 +201,16 @@ export async function getUserBaseDepositAddress(userId: string): Promise<string 
  // Returns null when the user's Issuer state is irrecoverable (404 = not
  // found, 403 = revoked access / stale issuer_user_id). Caller (monitor.ts)
  // maps null to transactions.status='stranded' to BREAK the 1h auto-retry
- // loop — otherwise a bad user_id cascades to a forever-retry cascade.
+ // loop - otherwise a bad user_id cascades to a forever-retry cascade.
  //
- // Session 28 fix — user 49418fc8-23ab-49c3-96c9-9a64b4583c11 was in this
+ // Session 28 fix - user 49418fc8-23ab-49c3-96c9-9a64b4583c11 was in this
  // state, burning Issuer quota every hour on a 403 that would never resolve.
     try {
         const response = await issuingClient.get<IssuerContract[]>(`/users/${userId}/contracts`)
         const contracts = response.data
         const baseContract = contracts.find(c => c.chainId === CONFIG.BASE_CHAIN_ID)
         if (!baseContract) {
- // User exists at Issuer but has no Base contract — same semantic as
+ // User exists at Issuer but has no Base contract - same semantic as
  // "no address to deliver to", return null to strand.
             console.warn(`[issuer] user=${userId} has no Base contract in Issuer contracts list`)
             return null
@@ -222,7 +222,7 @@ export async function getUserBaseDepositAddress(userId: string): Promise<string 
             console.warn(`[issuer] getUserBaseDepositAddress user=${userId} → Issuer returned ${status}. Marking stranded. Likely causes: invalid issuer_user_id, KYC revoked, or user deleted on Issuer side.`)
             return null
         }
- // 5xx or network error — propagate so caller retries later
+ // 5xx or network error - propagate so caller retries later
         throw err
     }
 }
@@ -287,7 +287,7 @@ export async function getIssuerTransactionsPage(
 }
 
 /**
- * Legacy shape — returns items only. Kept for callers that don't need pagination.
+ * Legacy shape - returns items only. Kept for callers that don't need pagination.
  * New call sites should prefer getIssuerTransactionsPage().
  */
 export async function getIssuerTransactions(issuerUserId: string, limit: number = 50): Promise<any[]> {
@@ -305,14 +305,14 @@ export async function getIssuerCardNumber(issuerCardId: string): Promise<{ cardN
         const data = response.data ?? {}
 
  // Issuer's metadata endpoint (`GET /cards/:id`) deliberately does NOT return
- // the full PAN or CVV — that's PCI-by-design, secrets only flow via the
+ // the full PAN or CVV - that's PCI-by-design, secrets only flow via the
  // RSA-OAEP / AES-128-GCM session-encrypted reveal endpoint. What it
  // DOES return is `last4`, `expirationMonth`, `expirationYear`. Earlier
  // this function was reading non-existent `cardNumber` / `expiryDate` /
  // `cvv` fields and returning all-nulls, leaving the FE to render
  // m-dashes for everything. Now we surface what the metadata endpoint
- // actually has — masked PAN with the real last4 and a properly
- // formatted MM/YY expiry — and leave CVV null until the reveal flow
+ // actually has - masked PAN with the real last4 and a properly
+ // formatted MM/YY expiry - and leave CVV null until the reveal flow
  // ships (Issuer ops's RSA + AES-GCM protocol).
         const last4 = data.last4 ? String(data.last4) : null
         const expiry = (data.expirationMonth && data.expirationYear)
@@ -336,9 +336,9 @@ export async function getIssuerCardNumber(issuerCardId: string): Promise<{ cardN
  * Generate a fresh SessionId for Issuer's RSA-OAEP-gated reveal endpoints
  * (`/cards/:id/secrets`, `/cards/:id/pin`).
  *
- * Protocol (per Issuer docs — see `.claude/skills/issuer-card-secrets/SKILL.md`):
+ * Protocol (per Issuer docs - see `.claude/skills/issuer-card-secrets/SKILL.md`):
  * 1. Random 16 bytes → 32-char hex
- * 2. Base64-encode the hex *string* (UTF-8) — yes, base64 of a hex string,
+ * 2. Base64-encode the hex *string* (UTF-8) - yes, base64 of a hex string,
  * not base64 of the raw 16 bytes. Counterintuitive but required.
  * 3. RSA-OAEP / SHA-1 encrypt those base64 bytes with Issuer's public key
  * 4. Base64 the ciphertext → that's the SessionId header value
@@ -378,10 +378,10 @@ export interface IssuerCardSecrets {
  * Wire format (per Issuer ops, verified against live API 2026-05-08):
  * { "iv": "<base64>", "data": "<base64>" }
  * - iv: base64-encoded 16-byte IV
- * - data: base64-encoded (ciphertext || authTag) — auth tag is the LAST
+ * - data: base64-encoded (ciphertext || authTag) - auth tag is the LAST
  * 16 bytes; everything before is the ciphertext
  *
- * AES key derivation: hex-decode the 32-char `secretKey` to 16 bytes — NOT
+ * AES key derivation: hex-decode the 32-char `secretKey` to 16 bytes - NOT
  * the UTF-8 bytes of the hex string (that would be 32 bytes / wrong size for
  * AES-128). The same `secretKey` we put inside the SessionId encrypts the
  * response.
@@ -405,7 +405,7 @@ function decryptCardSecret(secretKeyHex: string, payload: { iv: string; data: st
 interface SecretsApiResponse {
     encryptedPan?: { iv: string; data: string }
     encryptedCvc?: { iv: string; data: string }
- // Plaintext fallback shape some Issuer docs reference — we accept either
+ // Plaintext fallback shape some Issuer docs reference - we accept either
  // and prefer encrypted when both shapes appear.
     pan?: string
     cvv?: string
@@ -420,7 +420,7 @@ interface SecretsApiResponse {
  * Note: the secrets endpoint does NOT return expiry. Pair this with
  * `getIssuerCardNumber()` for `expMonth/expYear` from the metadata endpoint.
  *
- * Returns null on 404 or unparseable response. Throws on transport errors —
+ * Returns null on 404 or unparseable response. Throws on transport errors -
  * caller treats as "reveal unavailable" and falls back to the metadata-only
  * render.
  *
@@ -441,7 +441,7 @@ export async function getIssuerCardSecrets(issuerCardId: string): Promise<Issuer
         if (data.encryptedPan && data.encryptedCvc) {
             const pan = decryptCardSecret(secretKey, data.encryptedPan)
             const cvv = decryptCardSecret(secretKey, data.encryptedCvc)
- // Expiry NOT in this response — caller fetches separately.
+ // Expiry NOT in this response - caller fetches separately.
             return { pan, cvv, expMonth: '', expYear: '' }
         }
 
@@ -455,7 +455,7 @@ export async function getIssuerCardSecrets(issuerCardId: string): Promise<Issuer
             }
         }
 
- // Neither shape — treat as failure
+ // Neither shape - treat as failure
         return null
     } catch (err: any) {
         if (err.response?.status === 404) return null

@@ -17,7 +17,7 @@ export const TABLE_CELL_STYLES = {
 };
 
 /**
- * Default card shape — used for type reference only.
+ * Default card shape - used for type reference only.
  * Real data comes from /api/cards.
  */
 export const MOCK_CARD_DATA = {

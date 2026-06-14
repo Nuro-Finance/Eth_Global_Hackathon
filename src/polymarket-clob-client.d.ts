@@ -1,4 +1,4 @@
-/** Optional runtime dep — dynamic import fails gracefully when not installed. */
+/** Optional runtime dep - dynamic import fails gracefully when not installed. */
 declare module '@polymarket/clob-client' {
   export class ClobClient {
     constructor(...args: unknown[])

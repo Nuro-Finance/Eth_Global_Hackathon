@@ -19,7 +19,7 @@ const FROZEN_WIDGET_GLOW = [
   "inset 0 0 56px 0 rgba(255, 82, 82, 0.1)",
 ].join(", ");
 
-/** Left-anchored idle wash — low-opacity radial only; frozen state uses error tokens + glow. */
+/** Left-anchored idle wash - low-opacity radial only; frozen state uses error tokens + glow. */
 const FREEZE_WIDGET_IDLE_RADIAL_BURST =
   "radial-gradient(ellipse 190% 100% at 0% 50%, rgba(255, 82, 82, 0.03) 0%, transparent 78%)";
 

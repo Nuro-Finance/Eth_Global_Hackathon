@@ -65,7 +65,7 @@ const AGENT_FIRST_TIME_PLACEHOLDER_CARD: CardType = {
 
 /**
  * Agent Cards first-time user (empty) experience.
- * Edit this file only — existing page stays frozen in AgentCardsExistingPage.
+ * Edit this file only - existing page stays frozen in AgentCardsExistingPage.
  */
 export default function AgentCardsFirstTimeUserPage() {
   const t = useTranslations("Cards");

@@ -62,13 +62,13 @@ interface CardListItemProps {
  */
   footerSlot?: React.ReactNode;
  /**
- * 2026-05-25 v2 (Council Variant B — Card Flips to Console):
+ * 2026-05-25 v2 (Council Variant B - Card Flips to Console):
  * When true, the hero (credit card visual + meta + info grid) collapses
  * to a thin horizontal strip and the chat console takes center stage.
  * Driven by InlineCardChat's onExpandedChange callback via CardsList.
  */
   isChatExpanded?: boolean;
- /** Header refresh — skeleton numeric fields in the info grid. */
+ /** Header refresh - skeleton numeric fields in the info grid. */
   isRefreshing?: boolean;
 }
 
@@ -86,14 +86,14 @@ const ACTION_ICONS: Record<CardActionType, typeof ArrowRightLeft> = {
   settings: ArrowRightLeft,
 };
 
-// V0 Council spring — stiffness 240 / damping 28 = brisk-but-soft animation.
+// V0 Council spring - stiffness 240 / damping 28 = brisk-but-soft animation.
 // 2026-05-25 v6 revert per : v4 felt right, v5 specialist changes
 // over-tuned. Back to symmetric spring + single-ref measurement + popLayout.
 const HERO_SPRING = { type: "spring" as const, stiffness: 240, damping: 28 };
 const FADE = { duration: 0.18, ease: [0.22, 1, 0.36, 1] as const };
 
 /**
- * useCardSecretsReveal — eye-icon-driven PAN/CVV/expiry reveal flow.
+ * useCardSecretsReveal - eye-icon-driven PAN/CVV/expiry reveal flow.
  *
  * 2026-05-26 per : port the existing overviewHero reveal pattern to
  * the per-card chat UI. User taps eye → fetch /api/cards/:id/secrets → swap
@@ -115,7 +115,7 @@ function useCardSecretsReveal(cardId: string) {
   const [secrets, setSecrets] = useState<{ pan: string | null; cvv: string | null; expiry: string | null } | null>(null);
   const [loading, setLoading] = useState(false);
 
- // Reset on card change — never bleed across cards.
+ // Reset on card change - never bleed across cards.
   useEffect(() => {
     setRevealed(false);
     setSecrets(null);
@@ -129,7 +129,7 @@ function useCardSecretsReveal(cardId: string) {
       setRevealed(false);
       return;
     }
- // Already fetched — just re-show.
+ // Already fetched - just re-show.
     if (secrets) {
       setRevealed(true);
       return;
@@ -141,7 +141,7 @@ function useCardSecretsReveal(cardId: string) {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
       if (!res.ok) {
- // 429 (rate limit) / 500 — sentinel keeps loading false + reveal false
+ // 429 (rate limit) / 500 - sentinel keeps loading false + reveal false
  // so the slots fall back to masked values. Future taps can retry.
         const body = await res.json().catch(() => ({}));
         console.warn(`[useCardSecretsReveal] secrets fetch returned ${res.status}`, body?.error || "");
@@ -167,7 +167,7 @@ function useCardSecretsReveal(cardId: string) {
 }
 
 /**
- * useMeasuredHeight — observes a DOM node's height via ResizeObserver.
+ * useMeasuredHeight - observes a DOM node's height via ResizeObserver.
  * v4 pattern: single ref on the inner wrapper containing both variants
  * via AnimatePresence. Driving real height (not layout-prop FLIP) avoids
  * the scale-inheritance text-stretch issue.
@@ -199,7 +199,7 @@ function useMeasuredHeight() {
  * COMPRESSED: thin strip (card thumbnail + name + last4 + status + dropdown)
  *
  * Compressed mode triggers when the inline chat console expands. The card
- * "flips" out of the way so the conversation gets center stage — design
+ * "flips" out of the way so the conversation gets center stage - design
  * Council locked Variant B 2026-05-25.
  */
 function CardListItem({
@@ -271,7 +271,7 @@ function CardListItem({
     };
   });
 
- // Dropdown menu — shared between full + compressed hero variants.
+ // Dropdown menu - shared between full + compressed hero variants.
   const dropdownMenu = (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -346,7 +346,7 @@ function CardListItem({
       }
       onClick={() => onSelect(card)}
     >
-      {/* HERO — card layout v4.
+      {/* HERO - card layout v4.
           Outer motion.div animates REAL height via spring (no FLIP transform).
           Single inner div with ref measures whichever variant is currently
           mounted via AnimatePresence. Crossfade between full/compressed at
@@ -421,7 +421,7 @@ function CardListItem({
                 </div>
               </div>
 
-              {/* Dropdown — same actions as full mode */}
+              {/* Dropdown - same actions as full mode */}
               <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
                 {dropdownMenu}
               </div>
@@ -479,7 +479,7 @@ function CardListItem({
         </div>
       </motion.div>
 
-      {/* Inline chat slot — lives INSIDE the card container so chat + card
+      {/* Inline chat slot - lives INSIDE the card container so chat + card
           share one visual envelope. stopPropagation prevents clicks inside
           the chat from re-triggering the card's onSelect. */}
       {footerSlot && (

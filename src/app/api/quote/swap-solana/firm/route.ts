@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-// S30 Phase 3a — firm Solana swap proxy. Returns base64-encoded versioned
+// S30 Phase 3a - firm Solana swap proxy. Returns base64-encoded versioned
 // Solana tx for the user's wallet to sign. Auth is forwarded; the BE
 // route requires a Nuro JWT so we can attribute the swap_attempt to a
 // user_id in execution_log.

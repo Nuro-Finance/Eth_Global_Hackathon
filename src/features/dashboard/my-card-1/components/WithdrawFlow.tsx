@@ -25,13 +25,13 @@ const FLOW_SUCCESS_ILLUSTRATION_SRC = "/Success_Square.svg";
 
 type WithdrawStep1Token = "USDC" | typeof TETHER_TOKEN;
 
-/** Placeholder — replace with wallet from session / signup when wired. */
+/** Placeholder - replace with wallet from session / signup when wired. */
 const SIGNUP_WALLET_ADDRESS = "0x34e81c59BB1487E599B4857D7A32490F11C8";
 
 const XIcon = X;
 const ChevronIcon = ChevronLeft;
 
-/** Shared footer CTA — same placement on every withdraw step (above pagination). */
+/** Shared footer CTA - same placement on every withdraw step (above pagination). */
 const WITHDRAW_FOOTER_BUTTON_CLASS = cn(
   "inline-flex h-12 w-full items-center justify-center rounded-[14px] border-none text-sm font-bold transition-[color,background-color,opacity,box-shadow] duration-200 ease-out",
   "bg-[var(--color-reload-button-bg)] text-white hover:bg-[var(--color-reload-button-bg)]/90",
@@ -39,7 +39,7 @@ const WITHDRAW_FOOTER_BUTTON_CLASS = cn(
 );
 
 const WITHDRAW_PAGINATION_CLASS = "flex w-full shrink-0 justify-center gap-[6px] pt-3";
-/** 16px between step body (amount row on step 1) and shared footer CTA — all steps. */
+/** 16px between step body (amount row on step 1) and shared footer CTA - all steps. */
 const WITHDRAW_FOOTER_TOP_GAP = "mt-4";
 
 /** Caret + H1 move as one unit; caret sits left of H1 (no layout slot on page 1). Same as `ReloadModal`. */
@@ -51,7 +51,7 @@ function withdrawTokenCTALabel(selectedToken: string) {
   return selectedToken;
 }
 
-/** Selected USDC/USDT — 1px rim + inset glow geometry matches header ConnectWallet (tight spread). */
+/** Selected USDC/USDT - 1px rim + inset glow geometry matches header ConnectWallet (tight spread). */
 const TOKEN_SELECTED_INSET_HALO =
   "shadow-[inset_0_0_10px_1px_rgba(255,255,255,0.32)]";
 
@@ -134,7 +134,7 @@ function WithdrawStep1({
     addressTextRef,
     addressFontPx,
     addressRowGridStyle,
-  } = useFitMonospaceAddressRow(displayAddress || "—");
+  } = useFitMonospaceAddressRow(displayAddress || "-");
 
   const addressRow = (
     <div className="h-14 w-full shrink-0 box-border">
@@ -335,10 +335,10 @@ function WithdrawStep1({
   );
 }
 
-/** Reserved space for the pinned footer CTA (h-12) — matches `ReloadProgressScreen` `bottom-[88px]`. */
+/** Reserved space for the pinned footer CTA (h-12) - matches `ReloadProgressScreen` `bottom-[88px]`. */
 const WITHDRAW_STATUS_FOOTER_RESERVE_PX = 88;
 
-/** Step 2 — token hero + copy; footer CTA pinned like `ReloadProgressScreen`. */
+/** Step 2 - token hero + copy; footer CTA pinned like `ReloadProgressScreen`. */
 const WithdrawProgressScreen = ({
   selectedToken,
   isError,
@@ -397,7 +397,7 @@ const WithdrawProgressScreen = ({
   </div>
 );
 
-/** Step 3 — success; same column + footer slot as other steps. */
+/** Step 3 - success; same column + footer slot as other steps. */
 const WithdrawSuccessScreen = ({ footerAction }: { footerAction?: React.ReactNode }) => (
   <div className="flex h-full min-h-0 w-full flex-col">
     <div className="flex min-h-0 flex-1 items-center justify-center">

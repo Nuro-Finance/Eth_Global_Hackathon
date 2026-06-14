@@ -17,7 +17,7 @@ interface DepositAddresses {
 }
 
 const CHAINS = [
-  { key: "base",   label: "Base",           sub: "Direct — USDC lands on card instantly",     addrKey: "base"   },
+  { key: "base",   label: "Base",           sub: "Direct - USDC lands on card instantly",     addrKey: "base"   },
   { key: "evm",    label: "Any EVM Chain",  sub: "ETH · ARB · OP · MATIC · AVAX + 15 more",  addrKey: "evm"    },
   { key: "solana", label: "Solana",         sub: "USDC via Circle CCTP",                       addrKey: "solana" },
 ] as const;
@@ -81,7 +81,7 @@ export default function DepositModal({ open, onClose }: Props) {
               <div className="flex items-center justify-between mb-5">
                 <div>
                   <p className="text-[15px] font-semibold text-[var(--color-text-primary)]">Deposit USDC</p>
-                  <p className="text-[12px] text-[var(--color-text-muted)] mt-0.5">Send to your address — funds load to card automatically</p>
+                  <p className="text-[12px] text-[var(--color-text-muted)] mt-0.5">Send to your address - funds load to card automatically</p>
                 </div>
                 <button onClick={onClose} className="h-8 w-8 flex items-center justify-center rounded-full hover:bg-[var(--color-bg-glass-strong)] transition-colors">
                   <X className="h-4 w-4 text-[var(--color-text-muted)]" />
@@ -146,7 +146,7 @@ export default function DepositModal({ open, onClose }: Props) {
                   )}
                   {tab === "base" && (
                     <p className="text-[11px] text-[var(--color-text-muted)] mt-3 text-center">
-                      Send USDC on Base network only — minimum $1
+                      Send USDC on Base network only - minimum $1
                     </p>
                   )}
                 </>

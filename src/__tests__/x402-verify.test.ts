@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// x402 X5 Phase 2 — in-house EIP-3009 verify unit tests
+// x402 X5 Phase 2 - in-house EIP-3009 verify unit tests
 //
 // Covers each branch of verifyInternalAuthorization that the upstream
 // facilitator would cover:
