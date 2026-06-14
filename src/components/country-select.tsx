@@ -3,8 +3,14 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 import { Check, ChevronDown, Search } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Input, inputVariants } from "@/components/ui/Input";
+import {
+  COMPACT_GLASS_SHELL_INNER_CLASS,
+  COMPACT_GLASS_SHELL_INNER_STYLE,
+  COMPACT_GLASS_SHELL_OUTER_CLASS,
+  COMPACT_GLASS_SHELL_OUTER_STYLE,
+} from "@/components/ui/modalPresets";
+import { SETTINGS_INPUT_CLASS } from "@/features/dashboard/settings/settingsStyles";
 import {
   Popover,
   PopoverContent,
@@ -19,11 +25,39 @@ interface CountrySelectProps {
   placeholder?: string;
   disabled?: boolean;
   className?: string;
+  popoverContentClassName?: string;
+  popoverSide?: "top" | "bottom";
   label?: string;
   errorMessage?: string;
   helperText?: string;
   countries?: Country[];
 }
+
+const countryPickerInnerStyle = {
+  ...COMPACT_GLASS_SHELL_INNER_STYLE,
+  backgroundColor: "rgba(255, 255, 255, 0.03)",
+};
+
+const COUNTRY_PICKER_LIST_HEIGHT_PX = 220;
+
+/** Strip Radix popover chrome — glass shell is the only visible panel (same as notifications dropdown). */
+const COUNTRY_PICKER_POPOVER_RESET = cn(
+  "z-[120] w-[var(--radix-popover-trigger-width)] !max-w-[var(--radix-popover-trigger-width)]",
+  "!rounded-none !border-0 !bg-transparent !p-0 !shadow-none !backdrop-blur-none",
+  "dark:!border-transparent overflow-visible",
+);
+
+const countryPickerOuterClassName = cn(
+  "w-full",
+  COMPACT_GLASS_SHELL_OUTER_CLASS,
+  "!backdrop-blur-[var(--glass-blur-modal)] backdrop-saturate-[1.35]",
+);
+
+const COUNTRY_PICKER_SEARCH_CLASS = cn(
+  SETTINGS_INPUT_CLASS,
+  "!h-9 !border-transparent focus:!border-white/20 focus-visible:!border-white/20",
+  "focus:ring-0 focus-visible:ring-0",
+);
 
 const CountrySelect = React.forwardRef<HTMLDivElement, CountrySelectProps>(
   (
@@ -33,6 +67,8 @@ const CountrySelect = React.forwardRef<HTMLDivElement, CountrySelectProps>(
       placeholder = "Select country",
       disabled = false,
       className,
+      popoverContentClassName,
+      popoverSide = "top",
       label,
       errorMessage,
       helperText,
@@ -107,7 +143,7 @@ const CountrySelect = React.forwardRef<HTMLDivElement, CountrySelectProps>(
           </label>
         )}
 
-        <Popover open={isOpen} onOpenChange={setIsOpen}>
+        <Popover open={isOpen} onOpenChange={setIsOpen} modal={false}>
           <PopoverTrigger asChild>
             <button
               type="button"
@@ -134,54 +170,72 @@ const CountrySelect = React.forwardRef<HTMLDivElement, CountrySelectProps>(
               <ChevronDown className="w-4 h-4 opacity-50" />
             </button>
           </PopoverTrigger>
-          <PopoverContent className="w-80 p-1 rounded-[16px] border-[var(--color-border-glass-strong)] dark:bg-[var(--color-bg-glass)]" align="start">
-            {/* Search Input - Refined to match Example 2 spacing */}
-            <div className="p-2 mb-8">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-[var(--color-text-muted)] z-10" />
-                <Input
-                  type="text"
-                  variant="search"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search countries..."
-                  size="sm"
-                  className="pl-10 relative"
-                />
-              </div>
-            </div>
-
-            {/* Countries List - Padded for Example 2 feel */}
-            <div className="max-h-[202px] overflow-y-auto px-1 pb-1">
-              {filteredCountries.length > 0 ? (
-                filteredCountries.map((country) => (
-                  <button
-                    key={country}
-                    type="button"
-                    onClick={() => handleCountrySelect(country)}
-                    className={cn(
-                      "w-full flex items-center gap-3 px-3 py-2 text-left rounded-[10px] transition-all duration-200",
-                      selectedCountry === country 
-                        ? "bg-[var(--color-bg-hover)] text-[var(--color-text-primary)]" 
-                        : "hover:bg-[var(--color-bg-hover)]/40 text-[var(--color-text-primary)]/80 hover:text-[var(--color-text-primary)]"
-                    )}
-                  >
-                    {getCountryFlag(country)}
-                    <div className="flex-1 min-w-0">
-                      <div className="text-[13px] font-medium truncate">
-                        {getCountryName(country)}
-                      </div>
-                    </div>
-                    {selectedCountry === country && (
-                      <Check className="w-4 h-4 text-[var(--color-primary)] ml-auto" />
-                    )}
-                  </button>
-                ))
-              ) : (
-                <div className="px-4 py-3 text-sm text-[var(--color-text-muted)] text-center">
-                  No countries found
+          <PopoverContent
+            align="start"
+            side={popoverSide}
+            sideOffset={8}
+            avoidCollisions={false}
+            className={cn(COUNTRY_PICKER_POPOVER_RESET, popoverContentClassName)}
+            style={{ background: "transparent", border: "none", boxShadow: "none", padding: 0 }}
+            onOpenAutoFocus={(event) => event.preventDefault()}
+          >
+            <div className={countryPickerOuterClassName} style={COMPACT_GLASS_SHELL_OUTER_STYLE}>
+              <div
+                className={COMPACT_GLASS_SHELL_INNER_CLASS}
+                style={countryPickerInnerStyle}
+              >
+                <div className="px-4 pt-4 pb-3">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-[var(--color-text-muted)]" />
+                    <Input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Search countries..."
+                      className={cn(COUNTRY_PICKER_SEARCH_CLASS, "pl-10")}
+                    />
+                  </div>
                 </div>
-              )}
+
+                <div
+                  className="overflow-y-auto overscroll-contain px-2 pb-3 scrollbar-autohide"
+                  style={{
+                    height: COUNTRY_PICKER_LIST_HEIGHT_PX,
+                    minHeight: COUNTRY_PICKER_LIST_HEIGHT_PX,
+                    maxHeight: COUNTRY_PICKER_LIST_HEIGHT_PX,
+                  }}
+                >
+                  {filteredCountries.length > 0 ? (
+                    filteredCountries.map((country) => (
+                      <button
+                        key={country}
+                        type="button"
+                        onClick={() => handleCountrySelect(country)}
+                        className={cn(
+                          "flex w-full items-center gap-3 rounded-[10px] px-3 py-2 text-left transition-all duration-200",
+                          selectedCountry === country
+                            ? "bg-[var(--color-bg-hover)] text-[var(--color-text-primary)]"
+                            : "text-[var(--color-text-primary)]/80 hover:bg-[var(--color-bg-hover)]/40 hover:text-[var(--color-text-primary)]",
+                        )}
+                      >
+                        {getCountryFlag(country)}
+                        <div className="min-w-0 flex-1">
+                          <div className="truncate text-[13px] font-medium">
+                            {getCountryName(country)}
+                          </div>
+                        </div>
+                        {selectedCountry === country ? (
+                          <Check className="ml-auto h-4 w-4 text-[var(--color-primary)]" />
+                        ) : null}
+                      </button>
+                    ))
+                  ) : (
+                    <div className="px-4 py-3 text-center text-sm text-[var(--color-text-muted)]">
+                      No countries found
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           </PopoverContent>
         </Popover>

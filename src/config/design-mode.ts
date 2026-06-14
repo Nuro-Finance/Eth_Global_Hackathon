@@ -31,5 +31,8 @@ export function isDevDesignLoginBypass(): boolean {
   return process.env.NODE_ENV === "development";
 }
 
+/** Dev onboarding: type 1234 to preview ENS "already taken" error state. Design mode only. */
+export const ENS_DESIGN_PREVIEW_TAKEN_SLUG = "1234";
+
 /** Withdraw flow UI design: skip live API (does not enable dashboard demo data). Set false for production API testing. */
 export const DESIGN_MOCK_WITHDRAW = true;

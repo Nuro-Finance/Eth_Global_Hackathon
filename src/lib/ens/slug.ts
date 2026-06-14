@@ -1,4 +1,4 @@
-const SLUG_RE = /^[a-z0-9](?:[a-z0-9-]{1,30}[a-z0-9])?$/;
+const SLUG_RE = /^[a-z0-9](?:[a-z0-9-]{0,30}[a-z0-9])?$/;
 
 const RESERVED = new Set([
   "admin",
@@ -32,7 +32,7 @@ export function normalizeEnsSlug(raw: string): string {
 
 export function validateEnsSlug(slug: string): string | null {
   if (!slug) return "Name is required";
-  if (slug.length < 3) return "At least 3 characters";
+  if (slug.length < 2) return "At least 2 characters";
   if (slug.length > 32) return "Max 32 characters";
   if (!SLUG_RE.test(slug)) return "Use letters, numbers, and hyphens only";
   if (RESERVED.has(slug)) return "This name is reserved";

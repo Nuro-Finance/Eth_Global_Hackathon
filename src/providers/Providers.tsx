@@ -7,6 +7,8 @@ import { ThemeProvider } from "./ThemeContext";
 import ReduxProvider from "./ReduxProvider";
 import ProgressProviderWrapper from "./progressBarProvider";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { WagmiProvider } from "wagmi";
+import { wagmiConfig } from "@/lib/wagmi.config";
 import { PrivyRuntimeProvider } from "./index";
 import { ErrorBoundary, installGlobalErrorHandlers } from "@/components/ErrorBoundary";
 import { DESIGN_MODE } from "@/config/design-mode";
@@ -43,11 +45,13 @@ export function Providers({
 }) {
   const [queryClient] = useState(() => new QueryClient());
   const walletTree = DESIGN_MODE ? (
-    <QueryClientProvider client={queryClient}>
-      <PrivyRuntimeProvider value={{ privyEnabled: false, ready: true }}>
-        {children}
-      </PrivyRuntimeProvider>
-    </QueryClientProvider>
+    <WagmiProvider config={wagmiConfig}>
+      <QueryClientProvider client={queryClient}>
+        <PrivyRuntimeProvider value={{ privyEnabled: false, ready: true }}>
+          {children}
+        </PrivyRuntimeProvider>
+      </QueryClientProvider>
+    </WagmiProvider>
   ) : (
     <WalletProviders queryClient={queryClient}>{children}</WalletProviders>
   );
