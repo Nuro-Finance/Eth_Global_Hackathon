@@ -44,8 +44,6 @@ export function WalletProviders({
                   "metamask",
                   "coinbase_wallet",
                   "wallet_connect",
-                  "phantom",
-                  "rainbow",
                 ],
               },
               loginMethods: designModePrivyOnly ? ["wallet"] : ["wallet", "email", "google"],

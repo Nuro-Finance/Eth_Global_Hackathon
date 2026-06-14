@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useDispatch } from "react-redux";
 import { motion } from "framer-motion";
 import { usePrivy, useWallets } from "@privy-io/react-auth";
 import { Briefcase, Check, CircleHelp, Copy, LogOut, User, Wallet, X } from "lucide-react";
@@ -41,6 +42,16 @@ import Dropdown from "@/components/dropdown";
 import { useRouter } from "@/i18n/navigation";
 import { OnboardingConfettiBurst } from "./OnboardingConfettiBurst";
 import { clearRequireWalletRelinkClient } from "@/lib/welcome-onboarding";
+import {
+  createDefaultOnboardingProgress,
+  readOnboardingProgress,
+  writeOnboardingProgress,
+  type OnboardingCompletedStepKey,
+  type StoredOnboardingProgress,
+} from "@/lib/account-onboarding-progress";
+import { useAppSession } from "@/hooks/useAppSession";
+import { updateUser } from "@/store/slices/authSlice";
+import type { AppDispatch } from "@/store/store";
 
 const ONBOARDING_EXTERNAL_WALLET_LIST = [
   "detected_ethereum_wallets",
@@ -164,6 +175,8 @@ export function AccountOnboardingModal({
   onProgressChange,
 }: AccountOnboardingModalProps) {
   const router = useRouter();
+  const dispatch = useDispatch<AppDispatch>();
+  const { data: session, update: updateSession } = useAppSession();
   const [step, setStep] = useState<AccountOnboardingStep>("accountType");
   const [accountType, setAccountType] = useState<AccountType | null>(null);
   const [displayName, setDisplayName] = useState("");
@@ -242,21 +255,11 @@ export function AccountOnboardingModal({
     [onOpenChange, userId, step, buildDraftSnapshot, onProgressChange],
   );
 
-  const blockDismissWhilePrivyOpen = useCallback((event: Event) => {
-    const target = event.target;
-    if (target instanceof Node && document.getElementById("privy-dialog")?.contains(target)) {
-      return;
-    }
-    if (
-      privyModalOpenRef.current ||
-      document.getElementById("privy-dialog") ||
-      suppressOnboardingCloseRef.current
-    ) {
-      event.preventDefault();
-    }
+  const blockOnboardingOutsideDismiss = useCallback((event: Event) => {
+    event.preventDefault();
   }, []);
 
-  const allowFocusIntoPrivy = useCallback(
+  const handleFocusOutside = useCallback(
     (event: Event & { detail?: { originalEvent?: Event } }) => {
       const original = event.detail?.originalEvent;
       if (
@@ -266,9 +269,9 @@ export function AccountOnboardingModal({
       ) {
         return;
       }
-      blockDismissWhilePrivyOpen(event);
+      event.preventDefault();
     },
-    [blockDismissWhilePrivyOpen],
+    [],
   );
 
   const persistProgress = useCallback(
@@ -300,6 +303,45 @@ export function AccountOnboardingModal({
       });
     },
     [persistProgress, buildDraftSnapshot],
+  );
+
+  const persistDisplayName = useCallback(
+    async (name: string) => {
+      const trimmed = name.trim();
+      if (trimmed.length < 2) return;
+
+      const accessToken = (session as { accessToken?: string } | null)?.accessToken;
+      if (accessToken) {
+        try {
+          await fetch("/api/users/profile", {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${accessToken}`,
+            },
+            body: JSON.stringify({ name: trimmed }),
+          });
+        } catch {
+          /* backend may be down — still patch client state */
+        }
+      }
+
+      dispatch(updateUser({ name: trimmed }));
+      try {
+        const cached = window.localStorage.getItem("user");
+        const merged = { ...(cached ? JSON.parse(cached) : {}), name: trimmed };
+        window.localStorage.setItem("user", JSON.stringify(merged));
+      } catch {
+        /* private mode / quota */
+      }
+
+      try {
+        await updateSession?.({ name: trimmed });
+      } catch {
+        /* session update is best-effort */
+      }
+    },
+    [dispatch, session, updateSession],
   );
 
   useEffect(() => {
@@ -412,6 +454,7 @@ export function AccountOnboardingModal({
       return;
     }
     if (step === "welcome") {
+      void persistDisplayName(displayName);
       if (!ensSlug.trim()) {
         setEnsSlug(normalizeEnsSlug(displayName));
       }
@@ -484,10 +527,10 @@ export function AccountOnboardingModal({
         overlayClassName={ONBOARDING_MODAL_OVERLAY_CLASS}
         className={ONBOARDING_MODAL_SHELL_CLASS}
         style={COMPACT_GLASS_SHELL_OUTER_STYLE}
-        onEscapeKeyDown={blockDismissWhilePrivyOpen}
-        onPointerDownOutside={blockDismissWhilePrivyOpen}
-        onInteractOutside={blockDismissWhilePrivyOpen}
-        onFocusOutside={allowFocusIntoPrivy}
+        onEscapeKeyDown={blockOnboardingOutsideDismiss}
+        onPointerDownOutside={blockOnboardingOutsideDismiss}
+        onInteractOutside={blockOnboardingOutsideDismiss}
+        onFocusOutside={handleFocusOutside}
       >
         <div
           className={ONBOARDING_MODAL_INNER_CLASS}
@@ -622,7 +665,7 @@ export function AccountOnboardingModal({
               >
                 <motion.div variants={walletModalItemCascadeVariants}>
                   <DialogTitle className="mx-auto max-w-xl text-center text-[22px] font-normal leading-snug text-[var(--color-text-primary)] sm:text-[26px]">
-                    <span className="font-semibold text-[var(--color-primary)]">Welcome to Nuro.</span>{" "}
+                    <span className="font-semibold text-[var(--color-primary)]">Welcome to Nuro</span>{" "}
                     Tell us a bit about
                     <br />
                     {accountType === "business" ? "your business" : "yourself"} and we&apos;ll set things up
@@ -714,7 +757,7 @@ export function AccountOnboardingModal({
                 <motion.div variants={walletModalItemCascadeVariants}>
                   <DialogTitle className="mx-auto max-w-xl text-center text-[22px] font-normal leading-snug text-[var(--color-text-primary)] sm:text-[26px]">
                     <span className="inline font-semibold text-[var(--color-primary)]">
-                      Choose your ETH username.
+                      Choose your ETH username
                     </span>
                     <br />
                     <span className="inline font-normal text-[var(--color-text-primary)]">
@@ -761,7 +804,7 @@ export function AccountOnboardingModal({
                     ) : (
                       <>
                         <span className="inline font-semibold text-[var(--color-primary)]">
-                          Connect your wallet.
+                          Connect your wallet
                         </span>
                         <br />
                         <span className="inline font-normal text-[var(--color-text-primary)]">

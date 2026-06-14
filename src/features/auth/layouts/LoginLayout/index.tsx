@@ -80,7 +80,7 @@ export function LoginLayout({ initialSignUp = false }: { initialSignUp?: boolean
       <div className="relative w-full max-w-md z-10">
         {pendingVerification ? (
           <div className="relative flex flex-col overflow-hidden rounded-[28px] border border-[var(--color-border-secondary)] bg-[var(--color-bg-secondary)] shadow-none">
-            <form onSubmit={handleVerify} className="flex flex-col">
+            <form onSubmit={handleVerify} className="flex flex-col" autoComplete="off">
               <div className="px-10 pt-10">
                 <div className="relative mb-5 shrink-0">
                   <button

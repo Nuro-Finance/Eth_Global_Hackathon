@@ -85,7 +85,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
-    async jwt({ token, user, account }) {
+    async jwt({ token, user, account, trigger, session }) {
+      if (trigger === "update" && session?.name) {
+        token.name = session.name as string;
+      }
  // First sign-in: `user` and `account` are populated. Subsequent requests
  // arrive with only `token` so we persist everything we need on the token.
       if (user && account?.provider === "google") {

@@ -172,14 +172,23 @@ export function RegisterLayout() {
               <p className="text-[var(--color-text-muted)] text-sm mt-1">Signing you in…</p>
             </div>
           ) : step === "otp" ? (
-            <form onSubmit={onVerify} className="space-y-4">
+            <form onSubmit={onVerify} className="space-y-4" autoComplete="off">
               <div>
                 <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-1.5">6-digit code</label>
                 <input
-                  name="otp"
-                  type="text"
+                  name="otp-digit"
+                  type="tel"
                   inputMode="numeric"
                   autoComplete="one-time-code"
+                  autoCorrect="off"
+                  autoCapitalize="off"
+                  spellCheck={false}
+                  data-1p-ignore
+                  data-lpignore="true"
+                  readOnly
+                  onFocus={(e) => {
+                    e.target.removeAttribute("readonly");
+                  }}
                   maxLength={6}
                   required
                   value={otpCode}

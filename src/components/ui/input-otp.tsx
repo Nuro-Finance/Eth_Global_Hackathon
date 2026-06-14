@@ -63,11 +63,21 @@ export function InputOTP({
           ref={(el) => {
             inputRefs.current[i] = el;
           }}
-          type="text"
+          type="tel"
           inputMode="numeric"
           pattern="\d*"
           maxLength={1}
+          name={`otp-digit-${i}`}
           autoComplete={i === 0 ? "one-time-code" : "off"}
+          autoCorrect="off"
+          autoCapitalize="off"
+          spellCheck={false}
+          data-1p-ignore
+          data-lpignore="true"
+          readOnly
+          onFocus={(e) => {
+            e.target.removeAttribute("readonly");
+          }}
           value={value[i] || ""}
           onChange={(e) => handleChange(e, i)}
           onKeyDown={(e) => handleKeyDown(e, i)}
